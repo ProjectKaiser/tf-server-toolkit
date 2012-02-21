@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="src" path="investigation"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
+	<classpathentry kind="lib" path="lib/commons-pool.jar"/>
+	<classpathentry kind="lib" path="lib/jmock/jmock-2.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/jmock/hamcrest-core-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jmock/hamcrest-library-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jmock/jmock-junit3-2.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-dbcp.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="lib/log4j.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java.jar"/>
+	<classpathentry kind="lib" path="lib/derby.jar"/>
+	<classpathentry kind="lib" path="lib/junit.jar"/>
+	<classpathentry kind="lib" path="lib/jaybird-full.jar"/>
+	<classpathentry kind="lib" path="lib/jtds.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
