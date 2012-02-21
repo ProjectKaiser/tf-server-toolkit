@@ -13,7 +13,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.triniforce.db.ddl.TableDef;
 import com.triniforce.db.ddl.UpgradeRunner;
@@ -79,28 +78,21 @@ public class EntityJournal<T extends IEntity> extends TableDef {
         row.setField(ENTITY_NAME_FIELD, entity.getEntityName());        
     }
 
-	public List<T> exclude(Connection conn, String dbName, List<T> entities)
-			throws SQLException {
-		ArrayList<T> res = new ArrayList<T>();
-		Set<String> actual = getActual(conn, dbName);
-		for (T def : entities) {
-			if (!actual.contains(def.getEntityName()))
-				res.add(def);
-		}
-		return res;
-	}
-
-	public Set<String> getActual(Connection conn, String dbName) throws SQLException {
+    public List<T> exclude(Connection conn, String dbName, List<T> entities) throws SQLException{
         PreparedStatement ps = null;
         ResultSet rs = null;
+        ArrayList<T> res = new ArrayList<T>();
         try{
             ps = conn.prepareStatement(MessageFormat.format(GET_ENTITY_NAMES_CMD, dbName));
             rs = ps.executeQuery();
             HashSet<String> actual = new HashSet<String>();
             while(rs.next()){
                 actual.add(rs.getString(ENTITY_NAME_FIELD));
-            }     
-            return actual;
+            }            
+            for (T def : entities) {
+                if(!actual.contains(def.getEntityName()))
+                    res.add(def);
+            }
         }finally{
             if(ps!=null){
                 if(rs!=null)
@@ -108,7 +100,8 @@ public class EntityJournal<T extends IEntity> extends TableDef {
                 ps.close();
             }
         }        
-	}
+        return res;        
+    }
     
     
 }

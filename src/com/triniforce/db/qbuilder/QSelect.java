@@ -87,7 +87,6 @@ public class QSelect extends QStatementWithWhere{
     }    
     protected LinkedHashMap<String, JoinedTable> m_tables = new LinkedHashMap<String, JoinedTable>();    
     protected LinkedHashMap<String,Expr> m_getExprs = new LinkedHashMap<String,Expr>();
-	private GroupByClause m_group;
     
     public QSelect joinLast(IQTable qt) {
         return joinByPrefix(JoinType.INNER, null, new String[] { "id" }, //$NON-NLS-1$
@@ -277,7 +276,6 @@ public class QSelect extends QStatementWithWhere{
             where(new WhereClause());
         }
         appendClause(res, m_where);
-        appendClause(res, m_group);
         appendClause(res, m_order);
         
         return res.toString();
@@ -294,11 +292,5 @@ public class QSelect extends QStatementWithWhere{
 		expr.bindToContext(this);
 		m_getExprs.put(caption, expr);
 		return this;
-	}
-
-	public QSelect groupBy(GroupByClause groupByClause) {
-		m_group = groupByClause;
-		return this;
-		
 	}
 }

@@ -17,14 +17,10 @@ import org.apache.commons.logging.LogConfigurationException;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.PropertyConfigurator;
 
-import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
-import com.triniforce.server.plugins.kernel.IdDef;
 import com.triniforce.server.srvapi.IDatabaseInfo;
-import com.triniforce.server.srvapi.IIdDef;
 import com.triniforce.utils.Api;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
-import com.triniforce.utils.TFUtils;
 
 /**
  * Installs ILogger interface
@@ -71,7 +67,7 @@ public class TFTestCase extends TestCase {
 //		}
 //		
 		
-		public static class TestLog implements Log {
+		static class TestLog implements Log {
 
 			private TestLogFactory m_lf;
 			private Log m_log;
@@ -179,30 +175,6 @@ public class TFTestCase extends TestCase {
     public static String getTfTestFolder(){
     	return System.getenv(TFTestCase.TF_TEST_FOLDER);
     }
-    
-    public static File getTmpFolder(){
-        File res = new File(System.getenv(TFTestCase.TF_TEST_FOLDER), "tmp");
-        res.mkdirs();
-        return res;
-    }
-    
-    boolean tmpFolderCreated = false;
-    public static File getTmpFolder(TFTestCase test){
-        File tmp = new File(getTmpFolder(), test.getClass().getCanonicalName());
-        if(test.tmpFolderCreated){
-            return tmp;
-        }
-        TFUtils.delTree(tmp, false);
-        tmp.mkdirs();
-        test.tmpFolderCreated = true;
-        return tmp;
-    }
-    
-    public static File getTmpFolder(TFTestCase test, String subtest){
-        File tmp = new File(getTmpFolder(test), subtest);
-        tmp.mkdirs();
-        return tmp;
-    }
 
     public final static String DB_CONNECTION_FILE = "test.properties";
 
@@ -243,21 +215,16 @@ public class TFTestCase extends TestCase {
         PropertyConfigurator.configure(new File(System.getenv(TF_TEST_FOLDER),
                 LOG4J_FILE).toString());
     }
-    
-    protected int m_apiStackCnt;
-    
+
     @Override
     protected void setUp() throws Exception {
-        super.setUp();
-        m_apiStackCnt = ApiStack.getThreadApiContainer().getStack().size();
         Api api = new Api();
         m_testLF = new TestLogFactory();
         api.setIntfImplementor(LogFactory.class, m_testLF);
         api.setIntfImplementor(IDatabaseInfo.class, DBTestCase.getDbInfo());
-        api.setIntfImplementor(IIdDef.class, new IdDef(ColumnType.LONG));
         ApiStack.pushApi(api);
         m_expectedLogErrorCount = 0;
-        Thread.currentThread().setName(this.getClass().getSimpleName());        
+        super.setUp();
     }
 
     private int m_expectedLogErrorCount;
@@ -266,26 +233,10 @@ public class TFTestCase extends TestCase {
 		m_expectedLogErrorCount += value;
     }
     
-    boolean m_avoidTmpFolderDeletion = false;
-    
-    @Deprecated
-    public void avoidTmpFolderDeletion(){        
-        m_avoidTmpFolderDeletion = true;        
-    }
-    
-    protected void checkResources(){
-        assertEquals("ApiStack damaged", m_apiStackCnt, ApiStack.getThreadApiContainer().getStack()
-                .size());        
-        assertEquals("log errors in test", m_expectedLogErrorCount, m_testLF.getErrorCount());        
-    }
-    
     @Override
     protected void tearDown() throws Exception {
-        if(tmpFolderCreated && !m_avoidTmpFolderDeletion ){
-            TFUtils.delTree(getTmpFolder(this), true);
-        }
         ApiStack.popApi();
-        checkResources();
+        assertEquals("log errors in test", m_expectedLogErrorCount, m_testLF.getErrorCount());
         super.tearDown();        
     }
 
@@ -304,7 +255,7 @@ public class TFTestCase extends TestCase {
 		m_testLF.bCountErrors = bCount;
 	}
 	
-	public static final BasicDataSource getDataSource(){
+	protected static final BasicDataSource getDataSource(){
 		if(null == DATA_SOURCE){
 	        DATA_SOURCE = new BasicDataSource();
 	

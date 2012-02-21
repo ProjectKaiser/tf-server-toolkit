@@ -82,11 +82,6 @@ public class ApiStack implements IApi, IFinitable{
         m_SrvTL.get().m_stack.push(newSrvApi);
     }
     
-    public void pushApiIntoStack(IApi newSrvApi){
-        m_stack.push(newSrvApi);        
-    }
-    
-    
     public static void pushInterface(Class intf, Object implementor){
         Api api = new Api();
         api.setIntfImplementor(intf, implementor);

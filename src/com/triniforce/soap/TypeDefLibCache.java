@@ -8,10 +8,8 @@ package com.triniforce.soap;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -40,8 +38,7 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
                 Float.class, Float.TYPE, 
                 Double.class, Double.TYPE, 
                 String.class, Object.class,
-                Date.class, BigDecimal.class, 
-                byte[].class
+                Date.class
         };
         ScalarDefLib(){
             m_scalars = new HashMap<Class, ScalarDef>();
@@ -92,13 +89,6 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
 	                res = m_parser.parse(cls, m_parent, name);
 				}
                 m_cache.put(type, res);
-                
-                for (Class innerCls : cls.getDeclaredClasses()) {
-                	int modifiers = innerCls.getModifiers();
-                	if(Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers))
-                		m_parent.add(innerCls);
-        		}
-
             }
             return res;
         }
@@ -301,18 +291,6 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         }
     }
         
-    static class EnumDefLib implements IDefLibrary{
-
-		public TypeDef add(Type type) {
-			return null;
-		}
-
-		public TypeDef get(Type type) {
-			return null;
-		}
-    	
-    }
-    
     public static class PropDef extends SimpleName implements Serializable{
         private static final long serialVersionUID = -2146710337654704756L;
         private transient TypeDef m_type;

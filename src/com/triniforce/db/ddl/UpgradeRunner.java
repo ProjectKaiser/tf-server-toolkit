@@ -19,12 +19,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import com.triniforce.db.ddl.DBTables.DBOperation;
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
 import com.triniforce.db.ddl.TableDef.FieldDef;
 import com.triniforce.db.ddl.TableDef.IndexDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.ddl.TableDef.IndexDef.TYPE;
+import com.triniforce.db.ddl.DBTables.DBOperation;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.IProfilerStack.PSI;
 
@@ -150,7 +150,6 @@ public class UpgradeRunner {
         public String generateIndexName(String appName);
         public void addIndexName(String appName, String dbName);
         public String getIndexDbName(String appName);
-		public String queryIndexName(String dbTabName);
         public void deleteIndexName(String appName);
         
 //        public void loadState(HashMap<String, Integer> vers,
@@ -160,7 +159,6 @@ public class UpgradeRunner {
          * Flush changes generated previus actions in DB
          */
         void flush(Connection conn) throws SQLException ;
-
     }
 
     private IActualState m_actualState;
@@ -379,32 +377,11 @@ public class UpgradeRunner {
             			ApiAlgs.rethrowException(e);
             		}
             	}
-            } else if( DbType.MYSQL.equals(m_dbType) && 
-            		op instanceof DeleteIndexOperation &&
-            		IndexDef.TYPE.FOREIGN_KEY.equals(((DeleteIndexOperation)op).getType()) ){
-            	DeleteIndexOperation delCnstr = (DeleteIndexOperation)op;
-            	
-                String dbName = m_actualState.getDBName(dbOp.getDBOName());
-                String dbIndexName = m_actualState.getIndexDbName(getFullIndexName(dbName, delCnstr.getName(),
-                		delCnstr.getType()));
-            	
-                String sql = getOperationString(dbOp);
-                ApiAlgs.getLog(this).trace(sql);//$NON-NLS-1$                
-                m_connection.prepareStatement(sql).execute();
-                
-                try{
-	                sql = MessageFormat.format("DROP INDEX {0} ON {1}", dbIndexName, dbName);
-	                ApiAlgs.getLog(this).trace(sql);//$NON-NLS-1$                
-	                m_connection.createStatement().execute(sql);
-                } catch(SQLException e){}
-            }
-            else{
-            	
+            }else {
                 String sql = getOperationString(dbOp);
                 ApiAlgs.getLog(this).trace(sql);//$NON-NLS-1$                
                 m_connection.prepareStatement(sql).execute();
             }
-            
             int vInc = op.getVersionIncrease();
             if (op instanceof DropTableOperation && !bForward)
                 m_actualState.removeTable(dbOp.getDBOName());
@@ -452,7 +429,7 @@ public class UpgradeRunner {
                             .getOperation());
                     runOperation(new DBOperation(cl.get(i).getDBOName(), op),
                             false);
-                } catch (Exception eRollback) {
+                } catch (SQLException eRollback) {
                     eRollback.printStackTrace();
                 }
             }
@@ -500,8 +477,24 @@ public class UpgradeRunner {
                 AddIndexOperation addIdx = (AddIndexOperation) op
                         .getOperation();
                 String dbIndexName = getDbIndexName(dbName, addIdx, true);
-                sql = getCreateIndexOperationString(addIdx.getColumns(), dbName, 
-                		dbIndexName, addIdx.isUnique(), addIdx.isAscending());
+                ArrayList<String> colSpec = new ArrayList<String>();
+                for (String col : addIdx.getColumns()) {
+                    colSpec
+                            .add(MessageFormat
+                                    .format(
+                                            "{0} {1}", col, addIdx.isAscending() ? "ASC" : "DESC")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                }
+                if(addIdx.isUnique()){
+                	sql = MessageFormat
+                    .format(
+                            "ALTER TABLE {0} ADD CONSTRAINT {1} UNIQUE ({2})", //$NON-NLS-1$  
+                            dbName, dbIndexName, colList(addIdx.getColumns())); 
+                }
+                else{
+	                sql = MessageFormat
+	                        .format(
+	                                "CREATE {0} INDEX {1} ON {2} ({3})", addIdx.isUnique() ? "UNIQUE" : "", dbIndexName, dbName, colList(addIdx.getColumns())); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                }
             } else if (op.getOperation() instanceof DeleteColumnOperation) {
                 DeleteColumnOperation delCol = (DeleteColumnOperation) op
                         .getOperation();
@@ -516,7 +509,36 @@ public class UpgradeRunner {
                 String appIndexName = getFullIndexName(dbName, delIdx.getName(),
                         delIdx.getType()); 
                 String dbIndexName = m_actualState.getIndexDbName(appIndexName);
-                sql = getDeleteIndexOperationString(delIdx.getType(), dbName, dbIndexName, delIdx.isUniqueIndex());
+
+                if (delIdx.getType() == IndexDef.TYPE.INDEX) {
+                	if(m_dbType.equals(DbType.FIREBIRD)){
+                		if(delIdx.isUniqueIndex()){
+                			sql = MessageFormat.format(
+	                                "ALTER TABLE {0} DROP CONSTRAINT {1}", dbName,  dbIndexName); //$NON-NLS-1$
+                		}
+                		else{
+	                		sql = MessageFormat.format(
+	                                "DROP INDEX {0}", dbIndexName); //$NON-NLS-1$
+                		}
+                	}
+                	else{
+                		sql = MessageFormat.format(
+                            "DROP INDEX {0} ON {1}", dbIndexName, dbName); //$NON-NLS-1$
+                	}
+                } else {
+                    if (m_dbType.equals(DbType.MYSQL)) {
+                        if (delIdx.getType() == IndexDef.TYPE.PRIMARY_KEY)
+                            sql = MessageFormat.format(
+                                    "ALTER TABLE {0} DROP PRIMARY KEY", dbName); //$NON-NLS-1$
+                        else
+                            sql = MessageFormat
+                                    .format(
+                                            "ALTER TABLE {0} DROP FOREIGN KEY {1}", dbName, dbIndexName); //$NON-NLS-1$
+                    } else
+                        sql = MessageFormat
+                                .format(
+                                        "ALTER TABLE {0} DROP CONSTRAINT {1}", dbName, dbIndexName); //$NON-NLS-1$
+                }
                 m_actualState.deleteIndexName(appIndexName);
             } else if (op.getOperation() instanceof AlterColumnOperation) {
                 AlterColumnOperation alterCol = (AlterColumnOperation) op
@@ -549,81 +571,7 @@ public class UpgradeRunner {
         return sql;
     }
 
-    public String getCreateIndexOperationString(List<String> cols, String dbTabName, 
-    		String dbIndexName, boolean bUnique, boolean bAsc) {
-        ArrayList<String> colSpec = new ArrayList<String>();
-        for (String col : cols) {
-            colSpec
-                    .add(MessageFormat
-                            .format(
-                                    "{0} {1}", col, bAsc ? "ASC" : "DESC")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        }
-        String sql;
-        if(bUnique){
-        	sql = MessageFormat
-            .format(
-                    "ALTER TABLE {0} ADD CONSTRAINT {1} UNIQUE ({2})", //$NON-NLS-1$  
-                    dbTabName, dbIndexName, colList(cols)); 
-        }
-        else{
-            sql = MessageFormat
-                    .format(
-                            "CREATE {0} INDEX {1} ON {2} ({3})", 
-                            bUnique ? "UNIQUE" : "", dbIndexName, dbTabName, colList(cols)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        }
-		return sql;
-	}
-
-	public String getDeleteIndexOperationString(IndexDef.TYPE type, String dbTabName, String dbIndexName, boolean isUnique) {
-        String sql;
-		if (IndexDef.TYPE.INDEX.equals(type)) {
-//        	if(EnumSet.of(DbType.DERBY,DbType.FIREBIRD, DbType.H2).contains(m_dbType)){
-        		if(isUnique){
-        			if(DbType.MYSQL.equals(m_dbType)){
-	        			sql = MessageFormat.format(
-	                            "ALTER TABLE {0} DROP INDEX {1}", dbTabName,  dbIndexName); //$NON-NLS-1$        				
-        			}
-        			else{
-	        			sql = MessageFormat.format(
-	                            "ALTER TABLE {0} DROP CONSTRAINT {1}", dbTabName,  dbIndexName); //$NON-NLS-1$
-        			}
-        		}
-        		else{
-        			if(DbType.MSSQL.equals(m_dbType) || DbType.MYSQL.equals(m_dbType)){
-                		sql = MessageFormat.format(
-                                "DROP INDEX {0} ON {1}", dbIndexName, dbTabName); //$NON-NLS-1$        				
-        			}
-        			else
-	            		sql = MessageFormat.format(
-	                            "DROP INDEX {0}", dbIndexName); //$NON-NLS-1$
-        		}
-//        	}
-//        	else if(EnumSet.of(DbType.H2).contains(m_dbType)){
-//        		sql = MessageFormat.format(
-//                        "DROP INDEX {0}", dbIndexName); //$NON-NLS-1$                		
-//        	}
-//        	else{
-//        		sql = MessageFormat.format(
-//                    "DROP INDEX {0} ON {1}", dbIndexName, dbTabName); //$NON-NLS-1$
-//        	}
-        } else {
-            if (m_dbType.equals(DbType.MYSQL)) {
-                if (IndexDef.TYPE.PRIMARY_KEY.equals(type))
-                    sql = MessageFormat.format(
-                            "ALTER TABLE {0} DROP PRIMARY KEY", dbTabName); //$NON-NLS-1$
-                else
-                    sql = MessageFormat
-                            .format(
-                                    "ALTER TABLE {0} DROP FOREIGN KEY {1}", dbTabName, dbIndexName); //$NON-NLS-1$
-            } else
-                sql = MessageFormat
-                        .format(
-                                "ALTER TABLE {0} DROP CONSTRAINT {1}", dbTabName, dbIndexName); //$NON-NLS-1$
-        }
-		return sql;
-	}
-
-	/**
+    /**
      * @return actual state
      */
     public IActualState getActualState() {

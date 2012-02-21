@@ -11,7 +11,7 @@ import java.util.Iterator;
 
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.IFinitable;
-import com.triniforce.utils.TFUtils;
+import com.triniforce.utils.Utils;
 
 public class ResultSetWalker<T> implements Iterator<T>, IFinitable{
 	
@@ -61,7 +61,7 @@ public class ResultSetWalker<T> implements Iterator<T>, IFinitable{
 					nextObjKey = m_rs.getObject(m_key);
 				else
 					break;
-			} while(TFUtils.equals(m_objKey, nextObjKey));
+			} while(Utils.equals(m_objKey, nextObjKey));
 			if(bHasNext){
 				m_objKey = nextObjKey;
 				getNext();

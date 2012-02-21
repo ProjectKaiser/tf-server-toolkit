@@ -7,11 +7,7 @@ package com.triniforce.server.soap;
 
 import java.sql.Timestamp;
 import java.text.MessageFormat;
-import java.util.Date;
 
-import com.triniforce.soap.PropertiesSequence;
-
-@PropertiesSequence(sequence = {"mimeType", "value", "creatorId", "creatorNickName", "created"})
 public class CLOBValue {
     
     private String m_mimeType;
@@ -102,10 +98,10 @@ public class CLOBValue {
 
     @Override
     public String toString() {
-        return MessageFormat.format("<{0}>{1}<{2}><{3}><{4}>", getMimeType(), getValue(), m_created, getCreatorNickName(), getCreatorId()); //$NON-NLS-1$
+        return MessageFormat.format("<{0}>{1}<{2}><{3}><{4}>", getMimeType(), getValue(), getCreated(), getCreatorNickName(), getCreatorId()); //$NON-NLS-1$
     }
 
-    public Date getCreated() {
+    public Timestamp getCreated() {
         return m_created;
     }
 
@@ -125,8 +121,8 @@ public class CLOBValue {
         m_value = value;
     }
     
-    public void setCreated(Date created) {
-        m_created = (Timestamp) created;
+    public void setCreated(Timestamp created) {
+        m_created = created;
     }
 
     public void setCreatorNickName(String nickName) {

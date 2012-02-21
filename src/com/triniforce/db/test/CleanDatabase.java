@@ -10,7 +10,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.apache.commons.logging.Log;
 
@@ -48,8 +47,7 @@ public class CleanDatabase {
     public static void run(Connection conn, Log log) throws Exception {
     	
     	String schem = null;
-    	DbType dbType = DBTestCase.getDbType();
-        if (dbType.equals(DbType.MSSQL)){
+        if (DBTestCase.getDbType().equals(DbType.MSSQL)){
             conn.setAutoCommit(true);
             schem = "dbo";
         }
@@ -103,19 +101,6 @@ public class CleanDatabase {
             }
         }
         rs.close();
-        // if database is firebird
-        // drop all client generators
-        if(DbType.FIREBIRD.equals(dbType)){
-        	Statement st = conn.createStatement();
-        	rs = st.executeQuery("select RDB$GENERATOR_NAME from RDB$GENERATORS where RDB$SYSTEM_FLAG is null");
-        	while(rs.next()){
-        		Statement st2 = conn.createStatement();
-        		st2.execute("DROP GENERATOR "+rs.getString(1));
-        		st2.close();
-        	}
-        	rs.close();
-        	st.close();
-        }
         if (!conn.getAutoCommit())
             conn.commit();
     }

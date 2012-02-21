@@ -12,9 +12,9 @@ import com.triniforce.utils.test.JustAClass;
 public class ApiAlgsTest extends TFTestCase {
 	
 	public void testAssertTrue() {
-		TFUtils.assertTrue(true, "");
+		ApiAlgs.assertTrue(true, "");
 		try {
-			TFUtils.assertTrue(false, "mymsg");
+			ApiAlgs.assertTrue(false, "mymsg");
 			fail();
 		} catch (RuntimeException e) {
 			assertTrue( e.getMessage().contains("mymsg"));			
@@ -22,30 +22,30 @@ public class ApiAlgsTest extends TFTestCase {
 	}
 	
 	public void testAssertEquals() {
-		TFUtils.assertEquals(null, null);
-		TFUtils.assertEquals("1", "1");
-		TFUtils.assertEquals(2L, 2L);
+		ApiAlgs.assertEquals(null, null);
+		ApiAlgs.assertEquals("1", "1");
+		ApiAlgs.assertEquals(2L, 2L);
 		try {
-			TFUtils.assertEquals(null, "");
+			ApiAlgs.assertEquals(null, "");
 			fail();
 		} catch (EAssertEqualsFailed e) {
 		}		
 		try {
-			TFUtils.assertEquals("", null);
+			ApiAlgs.assertEquals("", null);
 			fail();
 		} catch (EAssertEqualsFailed e) {
 		}		
 		try {
-			TFUtils.assertEquals("1", "2");
+			ApiAlgs.assertEquals("1", "2");
 			fail();
 		} catch (EAssertEqualsFailed e){
 		}		
 	}
 	
 	public void testAssertNotNull() {
-		TFUtils.assertNotNull(1, "name");
+		ApiAlgs.assertNotNull(1, "name");
 		try {
-			TFUtils.assertNotNull(null, "null name");
+			ApiAlgs.assertNotNull(null, "null name");
 			fail();
 		} catch (RuntimeException e) {
 			assertTrue( e.getMessage().contains("null name"));
@@ -55,14 +55,14 @@ public class ApiAlgsTest extends TFTestCase {
 	
     public void testReadResource() {
         {// ok
-            String res = TFUtils
+            String res = ApiAlgs
                     .readResource(JustAClass.class, "script.bs");
             assertEquals("print(\"Hello\");", res);
         }
 
         {// EResourceNotFound
             try {
-                TFUtils.readResource(JustAClass.class,
+                ApiAlgs.readResource(JustAClass.class,
                         "script.bs1");
                 fail();
             } catch (EUtils.EResourceNotFound e) {

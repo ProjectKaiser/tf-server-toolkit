@@ -25,8 +25,6 @@ public class TableDefSerializer {
 			out.writeObject(td.getEntityName());
 			writeElements(out, td.getFields());
 			writeElements(out, td.getIndices());
-			out.writeBoolean(td.isSupportForeignKeys());
-			out.writeBoolean(td.isSupportNotNullableFields());
 		} catch (IOException e) {
 			ApiAlgs.rethrowException(e);
 		}
@@ -47,8 +45,6 @@ public class TableDefSerializer {
 			res = new TableDef(name);
 			readFields(in, res);
 			readIndexes(in, res);
-			res.setSupportForeignKeys(in.readBoolean());
-			res.setSupportNotNullableFields(in.readBoolean());
 		} catch(EOFException e){
 		} catch (Exception e) {
 			ApiAlgs.rethrowException(e);

@@ -32,17 +32,13 @@ public class RequestHandlerTest extends TFTestCase {
         	ApiAlgs.getLog(this).trace(in);
 			return ENM1.V1;
         }
-        
-        public Object method4(){
-        	return "String_006334".getBytes();
-        }
     }
 
     @Override
     public void test() throws Exception {
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
         InterfaceDescription desc = gen.parse(null, TestService.class);
-        RequestHandler handler = new RequestHandler(gen, desc, new RequestHandler.ReflectServiceInvoker(new TestService()));
+        RequestHandler handler = new RequestHandler(gen, desc, new TestService());
         
         String REQ1 = 
             "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
@@ -90,19 +86,6 @@ public class RequestHandlerTest extends TFTestCase {
             "</soap:Envelope>";
         
         handler.exec(new ByteArrayInputStream(REQ3.getBytes("utf-8")), System.out);
-        
-        String REQ4 = 
-            "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
-            "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-            "       xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
-            "       xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"+
-            "  <soap:Body>"+
-            "    <rsg:method4 xmlns:rsg=\"http://tempuri.org/\">" +
-            "    </rsg:method4>"+
-            "  </soap:Body>"+
-            "</soap:Envelope>";
-        
-        handler.exec(new ByteArrayInputStream(REQ4.getBytes("utf-8")), System.out);
     }
     
     static boolean bShutDown = false;
@@ -125,7 +108,7 @@ public class RequestHandlerTest extends TFTestCase {
         public void run() {
             try {
                 while(!bShutDown){
-                    RequestHandler h = new RequestHandler(m_gen, m_desc, new RequestHandler.ReflectServiceInvoker(m_svc));
+                    RequestHandler h = new RequestHandler(m_gen, m_desc, m_svc);
                     String REQ1 = 
                         "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
                         "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +

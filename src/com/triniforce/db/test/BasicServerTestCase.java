@@ -9,34 +9,20 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.dbcp.BasicDataSource;
 
 import com.triniforce.db.ddl.UpgradeRunner;
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
-import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
-import com.triniforce.extensions.IPKExtension;
-import com.triniforce.extensions.IPKExtensionBase;
-import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.server.plugins.kernel.BasicServer;
-import com.triniforce.server.plugins.kernel.IdDef;
 import com.triniforce.server.srvapi.DataPreparationProcedure;
-import com.triniforce.server.srvapi.IBasicServer;
-import com.triniforce.server.srvapi.IIdDef;
 import com.triniforce.server.srvapi.IPlugin;
 import com.triniforce.server.srvapi.IPooledConnection;
 import com.triniforce.server.srvapi.ISORegistration;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.utils.Api;
-import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
-import com.triniforce.utils.ITime;
-import com.triniforce.utils.TFUtils;
 
 public class BasicServerTestCase extends TFTestCase {
     
@@ -82,40 +68,23 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
 
         public void init() {
         }
-
-        public void doRegistration() {
-            // TODO Auto-generated method stub
-            
-        }
-
-        public void doExtensionPointsRegistration() {
-            // TODO Auto-generated method stub
-            
-        }
     }
 	
-    protected BasicServerApiEmu m_bemu = new BasicServerApiEmu(); 
-
     public static class Pool implements IPooledConnection {
-        
-        Map<Connection, StackTraceElement[]> m_conStack = new HashMap<Connection, StackTraceElement[]>();
 
         public BasicDataSource m_ds = null;
 
         public Pool(BasicDataSource ds ){
             m_ds = ds;
-            m_ds.setMaxActive(50);
         }
 
         public Connection getPooledConnection() throws SQLException {
             Connection con = m_ds.getConnection();
             con.setAutoCommit(false);
-            m_conStack.put(con, Thread.currentThread().getStackTrace());
             return con;
         }
 
         public void returnConnection(Connection con) throws SQLException {
-            m_conStack.remove(con);
             con.close();
         }
 
@@ -148,24 +117,23 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
         m_plugins = new ArrayList<IPlugin>();
     }
 
-    
-    protected boolean m_wasDbModificationNeeded = false; 
+    int m_apiStackCnt;
 
     protected void setUp() throws Exception {
+        m_apiStackCnt = ApiStack.getThreadApiContainer().getStack().size();
         super.setUp();
-        m_startNumActive = getPool().m_ds.getNumActive();        
 
         m_coreApi = new Api();
+//        m_coreApi.setIntfImplementor(ITime.class, m_emu);
+        m_coreApi.setIntfImplementor(IPooledConnection.class, getPool());
+//        m_coreApi.setIntfImplementor(IServerParameters.class, m_emu);
 
         setCoreApiInteraces(m_coreApi);
-        
+
         m_server = createServer(m_coreApi, getPlugins());
         m_server.doRegistration();
-        if(m_server.isDbModificationNeeded()){
-            m_wasDbModificationNeeded = true;
+        if(m_server.isDbModificationNeeded())
         	m_server.doDbModification();
-        }
-        m_server.init();
     }
 
     protected BasicServer createServer(Api api, List<IPlugin> plugins) throws Exception {
@@ -173,9 +141,6 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
 	}
 
 	protected void setCoreApiInteraces(Api api) {
-        m_coreApi.setIntfImplementor(IPooledConnection.class, getPool());
-		api.setIntfImplementor(IIdDef.class, new IdDef(ColumnType.LONG));
-		api.setIntfImplementor(ITime.class, m_bemu);
     }
 
     boolean tabExists(Connection conn, String tabName)
@@ -201,43 +166,16 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
         m_plugins.add(plugin);
     }
 
-    protected void checkResourcesConnections(){
-        if (m_startNumActive != m_pool.m_ds.getNumActive()) {
-            int m_newNumActive = m_pool.m_ds.getNumActive();
-            for (StackTraceElement[] trace : getPool().m_conStack.values()) {
-                String s = "";
-                for (StackTraceElement tr : trace) {
-                    s = s + tr.toString() + "\n";
-                }
-                ApiAlgs.getLog(this).error(s);
-            }
-            m_pool = null;
-            fail("Number of active connections changed from "
-                    + m_startNumActive + " to " + m_newNumActive);
-        }
-        
-    }
-    
-    @Override
-    protected void checkResources(){
-        super.checkResources();
-        checkResourcesConnections();        
-    }
-    
-    int m_startNumActive = 0;
-    
     protected void tearDown() throws Exception {
-        if( null != m_server){
-            m_server.finit();
-        }
+        super.tearDown();
+        assertEquals(m_apiStackCnt, ApiStack.getThreadApiContainer().getStack()
+                .size());
         m_server = null;
         m_coreApi = null;
         m_plugins = null;
-        m_bemu = null;
-        super.tearDown();
     }
 
-    public Pool getPool(){
+    public Pool getPool() throws Exception {
         if (m_pool == null)
             m_pool = new Pool(getDataSource());
         return m_pool;
@@ -254,42 +192,4 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
     public void logout(String name, String sID) throws Exception {
     }
 
-    public static void checkExtensionClass(IPKExtensionPoint ep, List<String> problems) {
-		Class ec = ep.getExtensionClass();
-		if (null == ec){
-			problems.add("Empty exception class for " + ep.getId());
-		}
-	}
-    
-    public static void checkWiki(IPKExtensionBase eb, String epId, List<String> problems) {
-		String wiki = eb.getWikiDescription();
-		if (null == wiki || "".equals(wiki)){
-			problems.add("Empty wiki description for " + (null != epId ? (epId + "/") : "")
-					+ eb.getId());
-		}
-	}
-    
-    protected static Set<Class> m_allowedEmptyWiki = new HashSet<Class>();
-    
-    public static void checkExtensions(IBasicServer srv){
-    	List<String> problems = new ArrayList<String>();
-    	
-   	
-    	for(IPKExtensionPoint ep: srv.getExtensionPoints().values()){
-    		checkWiki(ep, null, problems);
-    		checkExtensionClass(ep, problems);
-    		for(IPKExtension e: ep.getExtensions().values()){
-    		    if(m_allowedEmptyWiki.contains(e.getObjectClass())){
-    		        checkWiki(e, ep.getId(), problems);
-    		    }
-    		}
-    	}
-    	if(problems.size() > 0){
-    		StringBuffer strProblems = new StringBuffer();
-    		for(String strProblem: problems){
-    			strProblems.append(strProblem + TFUtils.lineSeparator());
-    		}
-    		fail("Problems with extensions: \n" + strProblems);
-    	}
-    }
 }

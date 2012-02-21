@@ -12,20 +12,9 @@ import java.util.Set;
 import java.util.Stack;
 
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
-import com.triniforce.extensions.IPKExtensionPoint;
-import com.triniforce.server.TFPlugin;
-import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
-import com.triniforce.server.plugins.kernel.ep.br.PKEPBackupRestore;
-import com.triniforce.server.plugins.kernel.ep.sp.PKEPServerProcedures;
-import com.triniforce.server.plugins.kernel.ep.srv_ev.PKEPServerEvents;
-import com.triniforce.server.plugins.kernel.ext.br.BackupRestoreDb;
-import com.triniforce.server.plugins.kernel.ext.br.BackupRestorePluginVersions;
 import com.triniforce.server.plugins.kernel.tables.EntityJournal;
 import com.triniforce.server.plugins.kernel.tables.NextId;
 import com.triniforce.server.plugins.kernel.tables.TNamedDbId;
-import com.triniforce.server.plugins.kernel.tables.TQueueId;
-import com.triniforce.server.plugins.kernel.upg_procedures.BreakIdGenerator;
-import com.triniforce.server.plugins.kernel.upg_procedures.ConvertForeignKeys;
 import com.triniforce.server.srvapi.DataPreparationProcedure;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IDbQueueFactory;
@@ -38,10 +27,7 @@ import com.triniforce.server.srvapi.ISOQuery;
 import com.triniforce.server.srvapi.ISORegistration;
 import com.triniforce.server.srvapi.IServerMode;
 import com.triniforce.server.srvapi.ISrvPrepSqlGetter;
-import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
-import com.triniforce.server.srvapi.ITimedLock2;
-import com.triniforce.server.srvapi.ITransactionWriteLock2;
 import com.triniforce.server.srvapi.UpgradeProcedure;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.ISrvSmartTranExtenders.IFiniter;
@@ -59,31 +45,19 @@ import com.triniforce.utils.IFinitableWithRollback;
 import com.triniforce.utils.IProfiler;
 import com.triniforce.utils.IProfilerStack;
 import com.triniforce.utils.ITime;
-import com.triniforce.utils.TFUtils;
 import com.triniforce.utils.Profiler.INanoTimer;
 import com.triniforce.utils.Profiler.ProfilerStack;
 
-public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
+public class BasicServerCorePlugin implements IPlugin{
 	
+	private Api m_coreApi;
+	private BasicServer m_basicSrv;
 	private Api m_runningApi;
 	private IdGenerator m_idGenerator;
-	private IdGenerator m_queueIdGenerator;
-	private TQueueId m_tQueueId;
 
-	private BasicServer getBasicServer(){
-	    return (BasicServer) getRootExtensionPoint();
-	}
-	
-	@Override
-	public String getVersion() {
-	    return "5.3";
-	}
-	
-	public BasicServerCorePlugin() {
-		m_tQueueId =  new TQueueId();
-        m_queueIdGenerator = new IdGenerator(
-        		IdGenerator.KEY_CACHE_SIZE,
-                m_tQueueId);
+	public BasicServerCorePlugin(Api coreApi, BasicServer basicSrv) {
+		m_coreApi = coreApi;
+		m_basicSrv = basicSrv;
 	}
 
 	public void doRegistration(ISORegistration reg) throws EDBObjectException {
@@ -91,18 +65,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         reg.registerTableDef(new EntityJournal<DataPreparationProcedure>(BasicServer.DPP_TABLE));
         reg.registerTableDef(new NextId());
         reg.registerTableDef(new TNamedDbId());
-        reg.registerTableDef(new com.triniforce.server.plugins.kernel.tables.TDbQueues());
-        reg.registerTableDef(m_tQueueId);
-        reg.registerUpgradeProcedure(new ConvertForeignKeys());
-        reg.registerUpgradeProcedure(new BreakIdGenerator(m_queueIdGenerator));
-        
-        getBasicServer().addPeriodicalTask(new TimedLockTicker());
-        
-	}
-	
-	public void doRegistration(){
-        putExtension(PKEPBackupRestore.class, BackupRestoreDb.class);
-        putExtension(PKEPBackupRestore.class, BackupRestorePluginVersions.class);
+        reg.registerTableDef(new com.triniforce.server.plugins.kernel.tables.TDbQueues());        
 	}
 
 	public String[] getDependencies() {
@@ -110,13 +73,18 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	}
 
 	public String getPluginName() {
-		return "Core Server Functionality";
+		return null;
 	}
+
+	public String getProviderName() {
+		return null;
+	}
+
 
 	public void prepareApi() {
         Api api = new Api();
-        api.setIntfImplementor(ISOQuery.class, getBasicServer());
-        api.setIntfImplementor(ISODbInfo.class, getBasicServer());
+        api.setIntfImplementor(ISOQuery.class, m_basicSrv);
+        api.setIntfImplementor(ISODbInfo.class, m_basicSrv);
 
         /*if (m_idGenerator == null) {
             createIdGenerators();
@@ -127,38 +95,33 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         api.setIntfImplementor(ISrvPrepSqlGetter.class,
                 new SrvPrepSqlGetter());
 
-        ISOQuery soQuery = ApiStack.getInterface(ISOQuery.class);
-        api.setIntfImplementor(IDbQueueFactory.class, new DbQueueFactory(m_queueIdGenerator));
+        api.setIntfImplementor(IDbQueueFactory.class, new DbQueueFactory());
 
         api.setIntfImplementor(ISrvSmartTranFactory.class,
                 m_tranFactory);
         
+        ISOQuery soQuery = ApiStack.getInterface(ISOQuery.class);
         m_idGenerator = new IdGenerator(
         		IdGenerator.KEY_CACHE_SIZE,
                 (NextId) soQuery.getEntity(NextId.class.getName()));
         api.setIntfImplementor(IIdGenerator.class, m_idGenerator);
         
-        api.setIntfImplementor(IBasicServer.class, getBasicServer());
-        api.setIntfImplementor(IPKExtensionPoint.class, getBasicServer());
+        api.setIntfImplementor(IBasicServer.class, m_basicSrv);
         
-        TNamedDbId namedIds = getBasicServer().getEntity(TNamedDbId.class.getName());
+        TNamedDbId namedIds = m_basicSrv.getEntity(TNamedDbId.class.getName());
         api.setIntfImplementor(INamedDbId.class, namedIds);
         
         m_runningApi = api;
-        m_runningApi.setIntfImplementor(ITimedLock2.class, new TimedLock2());
         
         m_tranFactory.registerOuterExtender(new RefCountMapTrnExtender());
         m_tranFactory.registerOuterExtender(new FiniterExtender());
-        m_tranFactory.registerOuterExtender(new LockerExtender());
-        m_tranFactory.registerInnerExtender(new TranInnerExtender());
-        m_tranFactory.registerOuterExtender(new TranOuterExtender());        
+        m_tranFactory.registerOuterExtender(new LockerExtender());        
         
 	}
 	
 	SrvSmartTranFactory m_tranFactory = new SrvSmartTranFactory();
 
 	public void pushApi(final Mode mode, ApiStack apiStack) {
-	    ApiStack coreApi = getBasicServer().getCoreApi();
         if (mode.equals(Mode.Running) && m_runningApi == null)
             throw new BasicServer.EInvalidServerState(mode);
 
@@ -177,7 +140,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
                 return m_stackSize;
             }
         });
-		IProfiler profiler = coreApi.getIntfImplementor(IProfiler.class);
+		IProfiler profiler = m_coreApi.getIntfImplementor(IProfiler.class);
         api.setIntfImplementor(IProfilerStack.class, new ProfilerStack(
                 profiler, new INanoTimer() {
                     public long get() {
@@ -187,40 +150,29 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         
         switch (mode) {
         case Registration:
-            api.setIntfImplementor(ISORegistration.class, getBasicServer());
-            api.setIntfImplementor(ISOQuery.class, getBasicServer());
-            api.setIntfImplementor(ITime.class, getBasicServer());
+            api.setIntfImplementor(ISORegistration.class, m_basicSrv);
+            api.setIntfImplementor(ISOQuery.class, m_basicSrv);
+            api.setIntfImplementor(ITime.class, m_basicSrv);
             api.setIntfImplementor(ISrvSmartTranFactory.class, m_tranFactory);
-            api.setIntfImplementor(IBasicServer.class, getBasicServer());
-            api.setIntfImplementor(IPKExtensionPoint.class, getBasicServer());
+            api.setIntfImplementor(IBasicServer.class, m_basicSrv);
             break;
         case Upgrade:
             api.setIntfImplementor(IIdGenerator.class, m_idGenerator);
-            api.setIntfImplementor(IPooledConnection.class, coreApi
+            api.setIntfImplementor(IPooledConnection.class, m_coreApi
                     .getIntfImplementor(IPooledConnection.class));
             //api.setIntfImplementor(IIdGenerator.class, m_idGenerator);
-            api.setIntfImplementor(ISOQuery.class, getBasicServer());
-            api.setIntfImplementor(ITime.class, getBasicServer());
+            api.setIntfImplementor(ISOQuery.class, m_basicSrv);
+            api.setIntfImplementor(ITime.class, m_basicSrv);
             api.setIntfImplementor(ISrvSmartTranFactory.class, m_tranFactory);
-            api.setIntfImplementor(IBasicServer.class, getBasicServer());
-            api.setIntfImplementor(IPKExtensionPoint.class, getBasicServer());
-            api.setIntfImplementor(ISODbInfo.class, getBasicServer());
-            TNamedDbId namedIds = getBasicServer().getEntity(TNamedDbId.class.getName());
-            api.setIntfImplementor(INamedDbId.class, namedIds);
-
-            api.setIntfImplementor(ISrvPrepSqlGetter.class,
-                    m_runningApi.getIntfImplementor(ISrvPrepSqlGetter.class));
-
-            api.setIntfImplementor(IDbQueueFactory.class, 
-            		m_runningApi.getIntfImplementor(IDbQueueFactory.class));
-
+            api.setIntfImplementor(IBasicServer.class, m_basicSrv);
+            api.setIntfImplementor(ISODbInfo.class, m_basicSrv);
             break;
         case Running:
             break;
         }
 
 		Stack<IApi> stk = apiStack.getStack();
-		stk.push(coreApi);
+		stk.push(m_coreApi);
 		if(mode.equals(Mode.Running)){
 			stk.push(m_runningApi);
 		}
@@ -245,7 +197,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 				synchronized(m_map){
 					if(getTransactionKeys().contains(key)){
 						res = m_map.get(key).getObject();
-						TFUtils.assertNotNull(res, "Keys corrupted");
+						ApiAlgs.assertNotNull(res, "Keys corrupted");
 					}
 					else{
 						RefCountMapTrnExtender.CountedObject countedObject = m_map.get(key); 
@@ -420,72 +372,6 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	public void init() {
 		
 	}
-	
-    static class TransactionWriteLock implements ITransactionWriteLock2, ITimedLock2.ITimedLockCB {
-
-        ISrvSmartTran m_tran;        
-        
-        public void lock() {
-            ITimedLock2 tl = ApiStack.queryInterface(ITimedLock2.class);
-
-            if(null == tl) return;//registration phase
-            m_tran = ApiStack.getInterface(ISrvSmartTran.class);;            
-            tl.acquireLock(this);
-        }
-        public void unlock() {
-            ITimedLock2 tl = ApiStack.queryInterface(ITimedLock2.class);
-            
-            if(null == tl) return;//registration phase            
-            
-            tl.releaseLock(this);
-        }        
-        public void unlocked() {
-            if( null != m_tran){
-                m_tran.doNotCommit();
-            }
-        }
-    }
-
-    static class TranOuterExtender implements ITranExtender {
-
-        public void pop(boolean arg0) {
-                ApiStack.popApi();
-        }
-        public void push() {
-            Api api = new Api();
-            api.setIntfImplementor(ITransactionWriteLock2.class,
-                    new TransactionWriteLock());           
-            ApiStack.pushApi(api);
-        }       
-    }
-    
-    public static class TimedLockTicker  extends BasicPeriodicalTask {
-        public TimedLockTicker() {
-            delay = 10000;
-        }
-        public void run() {
-            ITimedLock2 tl = ApiStack.getInterface(ITimedLock2.class);
-            tl.checkTimeout();
-        }
-    }    
-
-    static class TranInnerExtender implements ITranExtender {
-        public void push() {
-        }
-        public void pop(boolean bCommit) {
-            {
-                ITransactionWriteLock2 wl = ApiStack
-                        .getInterface(ITransactionWriteLock2.class);
-                wl.unlock();
-            }
-        }
-    }
-
-    public void doExtensionPointsRegistration() {
-        putExtensionPoint(new PKEPServerProcedures());
-        putExtensionPoint(new PKEPBackupRestore());
-        putExtensionPoint(new PKEPServerEvents());
-    }
 
 
 }

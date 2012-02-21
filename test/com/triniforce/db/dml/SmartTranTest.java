@@ -17,14 +17,7 @@ import com.triniforce.db.ddl.AddColumnOperation;
 import com.triniforce.db.ddl.TableDef;
 import com.triniforce.db.ddl.TableDef.FieldDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
-import com.triniforce.db.qbuilder.QSelect;
 import com.triniforce.db.test.DBTestCase;
-import com.triniforce.server.plugins.kernel.SrvTable;
-import com.triniforce.utils.ApiStack;
-import com.triniforce.utils.IName;
-import com.triniforce.utils.IProfilerStack;
-import com.triniforce.utils.Profiler;
-import com.triniforce.utils.Profiler.INanoTimer;
 
 /**
  *
@@ -165,84 +158,6 @@ public class SmartTranTest extends DBTestCase {
         Stmt st_check = tr2.getStatement();
         ResSet rs = st_check.executeQuery("select * from "+m_tabName+" where i=6352", "test");
         assertFalse(rs.next());
-    }
-    
-    public static class TestDef extends TableDef{
-    	public static  FieldDef f1 = FieldDef.createScalarField("f1", ColumnType.INT, true);
-    	public static  FieldDef f2 = FieldDef.createStringField("f2", ColumnType.NVARCHAR, 64, true, null);
-    	public static  FieldDef f3 = FieldDef.createScalarField("f3", ColumnType.INT, false);
-    	
-		public TestDef() {
-        	addField(1, f1);
-			addField(2, f2);
-			addField(3, f3);
-		}
-    }
-    
-    public void testSelect() throws Exception{
-    	createTableIfNeeded(new TestDef());
-    	
-        SmartTran tr2 = new SmartTran(getConnection());
-    	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{1,"v_1", 100});
-    	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{2,"v_2", 100});
-    	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{3,"v_3", 101});
-    	
-    	ResSet res = tr2.select(TestDef.class, new IName[]{TestDef.f2}, new IName[]{TestDef.f1}, new Object[]{2});
-    	assertTrue(res.next());
-    	assertEquals("v_2", res.getString(1));
-    	assertFalse(res.next());
-    	
-    	res = tr2.select(TestDef.class, new IName[]{TestDef.f2}, new IName[]{TestDef.f1}, new Object[]{new Object[]{1,3}});
-    	assertTrue(res.next());
-    	assertEquals("v_1", res.getString(1));
-    	assertTrue(res.next());
-    	assertEquals("v_3", res.getString(1));
-    	assertFalse(res.next());
-    	
-    	res = tr2.select(TestDef.class, new IName[]{TestDef.f2}, new IName[]{TestDef.f3, TestDef.f1}, new Object[]{100, new Object[]{1,3}});
-    	assertTrue(res.next());
-    	assertEquals("v_1", res.getString(1));
-    	assertFalse(res.next());
-    	
-    	res = tr2.select(TestDef.class, new IName[]{TestDef.f2}, new IName[]{TestDef.f3}, new Object[]{null});
-    	assertFalse(res.next());
-    	
-    	
-    	res = tr2.select(TestDef.class, new IName[]{TestDef.f1}, new IName[]{}, new Object[]{}, 
-    			new IName[]{new ISmartTran.DescName(TestDef.f1.getName())});
-    	assertTrue(res.next());
-    	assertEquals(3, res.getInt(1));
-    	assertTrue(res.next());
-    	assertEquals(2, res.getInt(1));
-    	assertTrue(res.next());
-    	assertEquals(1, res.getInt(1));
-    	assertFalse(res.next());
-    	
-    }
-    
-    public void testPrepareStatement() throws Exception{
-    	createTableIfNeeded(new TestDef());
-    	
-        SmartTran tr2 = new SmartTran(getConnection());
-    	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{1,"v_1", 100});
-    	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{2,"v_2", 100});
-    	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{3,"v_3", 101});
-    	
-    	PrepStmt ps = tr2.prepareStatement(new QSelect().joinLast(new SrvTable(TestDef.class).addCol(TestDef.f1)).toString(), "testPrepareStatement_profItem1");
-    	Profiler pr = new Profiler();
-    	ApiStack.pushInterface(IProfilerStack.class, new Profiler.ProfilerStack(pr, new INanoTimer() {
-            public long get() {
-                return System.nanoTime();
-            }
-        }));
-    	try{
-	    	ps.executeQuery();
-	    	String res = pr.toString();
-	    	assertTrue(res, res.contains("testPrepareStatement_profItem1"));
-    	} finally{
-    		ApiStack.popInterface(1);
-    	}
-    	
     }
 
 }

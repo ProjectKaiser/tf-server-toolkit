@@ -5,7 +5,6 @@
  */ 
 package com.triniforce.soap;
 
-import java.beans.IntrospectionException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,6 +27,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.triniforce.db.test.TFTestCase;
+import com.triniforce.soap.InterfaceDescription;
+import com.triniforce.soap.InterfaceDescriptionGenerator;
 import com.triniforce.soap.InterfaceDescription.Operation;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
 import com.triniforce.soap.InterfaceDescriptionGeneratorTest.Cls2.InnerObject;
@@ -154,9 +155,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
     
     @SoapInclude(extraClasses={Cls2.InnerObject.class})
     interface TestSrv3{
-        Cls2 run1(Cls1 req);
-        
-        Long run2();
+        Cls2 run1(Cls1 req);  
     }
     
     static Order DEFAULT_ORDER = null; 
@@ -460,186 +459,6 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
             throw new Exception("!!!my_text!!!");
         else
             getException(--i);
-    }
-    
-    public void testParseMethods(){
-//        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
-//        HashMap<String, Method> methods = new HashMap<String, Method>();
-//        gen.parse(null, methods);
-
-    }
-    
-    
-    interface I1{
-    	@PropertiesSequence(sequence = {})
-    	public static class C1{}
-    	public void fun(C1 c);
-    }
-    
-    interface I2{
-    	public static class C2{
-    		private int v;
-
-			public void setV(int v) {
-				this.v = v;
-			}
-
-			public int getV() {
-				return v;
-			}
-    		
-    	}
-    	public void fun(C2 c);
-    }
-    
-    interface I3{
-    	enum ENM{V1,V2};
-    	public static class C1{}
-    	public Map<String,String> fun(C1 c, ENM enm);
-    }
-    
-    interface I4{
-    	@PropertiesSequence(sequence={"c","b","v","a"})
-    	public static class C2{
-    		private int v,b,c,a;
-
-			public void setV(int v) {
-				this.v = v;
-			}
-
-			public int getV() {
-				return v;
-			}
-
-			public int getB() {
-				return b;
-			}
-
-			public void setB(int b) {
-				this.b = b;
-			}
-
-			public int getC() {
-				return c;
-			}
-
-			public void setC(int c) {
-				this.c = c;
-			}
-
-			public int getA() {
-				return a;
-			}
-
-			public void setA(int a) {
-				this.a = a;
-			}
-    		
-    	}
-    	public void fun(C2 c);
-    }
-    
-    interface I5{
-    	@PropertiesSequence(sequence={"c","v","a"})
-    	public static class C2{
-    		private int v,b,c,a;
-
-			public void setV(int v) {
-				this.v = v;
-			}
-
-			public int getV() {
-				return v;
-			}
-
-			public int getB() {
-				return b;
-			}
-
-			public void setB(int b) {
-				this.b = b;
-			}
-
-			public int getC() {
-				return c;
-			}
-
-			public void setC(int c) {
-				this.c = c;
-			}
-
-			public int getA() {
-				return a;
-			}
-
-			public void setA(int a) {
-				this.a = a;
-			}
-    		
-    	}
-    	public void fun(C2 c);
-    }
-    
-    interface I6{
-    	@PropertiesSequence(sequence={"c"})
-    	public static class C2_Outter{
-    		private int c;
-
-			public void setC(int c) {
-				this.c = c;
-			}
-
-			public int getC() {
-				return c;
-			}
-    	}
-    	
-    	@PropertiesSequence(sequence={"c","b","v","a"})
-    	public static class C2 extends C2_Outter{
-    		private int v,b,a;
-
-			public void setV(int v) {
-				this.v = v;
-			}
-
-			public int getV() {
-				return v;
-			}
-
-			public int getB() {
-				return b;
-			}
-
-			public void setB(int b) {
-				this.b = b;
-			}
-
-			public int getA() {
-				return a;
-			}
-
-			public void setA(int a) {
-				this.a = a;
-			}
-    		
-    	}
-    	public void fun(C2 c);
-    }
-    
-    public void testValidateInterface() throws IntrospectionException{
-        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
-        assertEquals(Collections.emptyList(), gen.validateInterface(I1.class));
-        assertEquals(Collections.emptyList(), gen.validateInterface(I3.class));
-
-        assertEquals(Arrays.asList(new InterfaceDescriptionGenerator.ValErrItem.EPropSeqNotFound("C2")), 
-        		 gen.validateInterface(I2.class));
-        
-        assertEquals(Collections.emptyList(), gen.validateInterface(I4.class));
-
-        assertEquals(Arrays.asList(new InterfaceDescriptionGenerator.ValErrItem.ENoPropInSequence("C2","b")), 
-       		 gen.validateInterface(I5.class));
-        assertEquals(Arrays.asList(new InterfaceDescriptionGenerator.ValErrItem.ENoPropDefForSequence("C2","c")), 
-          		 gen.validateInterface(I6.class));
     }
 
 }

@@ -17,26 +17,19 @@ public class EUtils {
         }
     }
     
-    public static class EAssertionFailed  extends RuntimeException{
-		private static final long serialVersionUID = 1L;
-		public EAssertionFailed(String msg) {
-			super(msg);
-		}
-    }
-    
-    public static class EAssertTrueFailed extends EAssertionFailed {
-		private static final long serialVersionUID = 1L;
-		public EAssertTrueFailed(String msg) {
+    public static class EAssertTrueFailed extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+        public EAssertTrueFailed(String msg) {
             super(msg);
         }
     }
-    public static class EAssertEqualsFailed extends EAssertionFailed {
+    public static class EAssertEqualsFailed extends RuntimeException {
         private static final long serialVersionUID = 1L;
         public EAssertEqualsFailed(Object expected, Object actual) {
             super(MessageFormat.format("Objects are not equals {0}, {1}", expected, actual)); //$NON-NLS-1$);
         }
     }
-    public static class EAssertNotNullFailed extends EAssertionFailed {
+    public static class EAssertNotNullFailed extends RuntimeException {
         private static final long serialVersionUID = 1L;
         public EAssertNotNullFailed(String msg) {
             super(msg);
@@ -58,5 +51,6 @@ public class EUtils {
             super(MessageFormat.format(Messages.getString("EUtils.0"), resourceName, cls)); //$NON-NLS-1$
         }
     }
+    
     
 }

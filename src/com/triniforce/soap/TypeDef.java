@@ -11,7 +11,6 @@ import java.beans.MethodDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,8 +30,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.TypeDefLibCache.MapDefLib.MapComponentDef;
 import com.triniforce.utils.ApiAlgs;
-import com.triniforce.utils.Base64;
-import com.triniforce.utils.TFUtils;
 import com.triniforce.utils.ApiAlgs.SimpleName;
 
 public class TypeDef extends SimpleName{
@@ -62,8 +59,6 @@ public class TypeDef extends SimpleName{
             SCALAR_NAMES.put(String.class.getName(), "string"); 
             SCALAR_NAMES.put(Object.class.getName(), "object");
             SCALAR_NAMES.put(Date.class.getName(), "dateTime");
-            SCALAR_NAMES.put(BigDecimal.class.getName(), "decimal");
-            SCALAR_NAMES.put(byte[].class.getName(), "base64Binary");
         }
         
         public ScalarDef(Class type) {
@@ -79,53 +74,39 @@ public class TypeDef extends SimpleName{
         
         @Override
         boolean isNullable() {
-            return !isBoxType();
-        }
-        
-        boolean isBoxType(){
-        	return BOXES.containsKey(getType());
+            return !BOXES.containsKey(getType());
         }
 
         public Object valueOf(String value) {
             Object res;
             String typeName = getName();
-            if(typeName.equals("string"))
-            	res = value;
-            else{
-	            value = value.trim();
-	            if(typeName.equals("int"))
-	                res = Integer.valueOf(value);
-	            else if(typeName.equals("short"))
-	                res = Short.valueOf(value);
-	            else if(typeName.equals("long"))
-	                res = Long.valueOf(value);
-	            else if(typeName.equals("float"))
-	                res = Float.valueOf(value);
-	            else if(typeName.equals("double"))
-	                res = Double.valueOf(value);
-	            else if(typeName.equals("boolean")){
-	                res = "1".equals(value) || "true".equals(value);
-	            }
-	            else if(typeName.equals("dateTime")){
-	            	DatatypeFactory tf;
-					try {
-						tf = DatatypeFactory.newInstance();
-		            	XMLGregorianCalendar gregCal = tf.newXMLGregorianCalendar(value);
-		            	return gregCal.toGregorianCalendar().getTime();
-					} catch (DatatypeConfigurationException e) {
-						ApiAlgs.rethrowException(e);
-						res = null;
-					}
-	            }
-	            else if(typeName.equals("decimal")){
-	            	res = new BigDecimal(value);
-	            }
-	            else if(typeName.equals("base64Binary")){
-	            	res = Base64.decode(value);
-	            }
-	            else
-	                res = value;
+            value = value.trim();
+            if(typeName.equals("int"))
+                res = Integer.valueOf(value);
+            else if(typeName.equals("short"))
+                res = Short.valueOf(value);
+            else if(typeName.equals("long"))
+                res = Long.valueOf(value);
+            else if(typeName.equals("float"))
+                res = Float.valueOf(value);
+            else if(typeName.equals("double"))
+                res = Double.valueOf(value);
+            else if(typeName.equals("boolean")){
+                res = "1".equals(value) || "true".equals(value);
             }
+            else if(typeName.equals("dateTime")){
+            	DatatypeFactory tf;
+				try {
+					tf = DatatypeFactory.newInstance();
+	            	XMLGregorianCalendar gregCal = tf.newXMLGregorianCalendar(value);
+	            	return gregCal.toGregorianCalendar().getTime();
+				} catch (DatatypeConfigurationException e) {
+					ApiAlgs.rethrowException(e);
+					res = null;
+				}
+            }
+            else
+                res = value;
             return res;
         }
         
@@ -142,9 +123,6 @@ public class TypeDef extends SimpleName{
 					ApiAlgs.rethrowException(e);
 					res = null;
 				}
-        	}
-        	else if(getName().equals("base64Binary")){
-        		res = Base64.encodeBytes((byte[]) v);
         	}
         	else
         		res = v.toString();
@@ -174,7 +152,7 @@ public class TypeDef extends SimpleName{
                         }
                     };
                 }
-                TFUtils.assertTrue(false, "");
+                ApiAlgs.assertTrue(false, "");
                 return null;
             }
             

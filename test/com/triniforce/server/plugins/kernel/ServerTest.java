@@ -47,17 +47,18 @@ public class ServerTest extends DBTestCase {
         }
 
 		public int getMaxIdle() {
-			fail();
+			// TODO Auto-generated method stub
 			return 0;
 		}
 
 		public int getNumIdle() {
-			fail();
+			// TODO Auto-generated method stub
 			return 0;
 		}
 
 		public void setMaxIdle(int maxIdle) {
-			fail();
+			// TODO Auto-generated method stub
+			
 		}        
     }
 
@@ -121,14 +122,6 @@ public class ServerTest extends DBTestCase {
 		public void init() {
 			
 		}
-
-        public void doRegistration() {
-        }
-
-        public void doExtensionPointsRegistration() {
-            // TODO Auto-generated method stub
-            
-        }
     }
     
     protected Api m_coreApi;

@@ -11,29 +11,54 @@ import java.util.Locale;
 public class Utils {    
 
     /**
-	 * @param language
-	 * @param country
-	 * @param variant
-	 * @return Locale.getDefault() if all parameters are null
-	 */
-	public static Locale constructLocale(Object language, Object country, Object variant){
-		return TFUtils.constructLocale(language, country, variant);
-	}
+     * @param language
+     * @param country
+     * @param variant
+     * @return Locale.getDefault() if all parameters are null
+     */
+    public static Locale constructLocale(Object language, Object country, Object variant){
+        if( language != null && country != null &&  variant != null){
+            return new Locale((String)language, (String)country, (String)variant);            
+        }
+        if( language != null && country != null){
+            return new Locale((String)language, (String)country);            
+        }
+        if( language != null){
+            return new Locale((String)language);            
+        }        
+        return Locale.getDefault();        
+    }
     
     
     public static boolean isEmptyString(String s) {
-		return TFUtils.isEmptyString(s);
-	}
+        if (null == s)
+            return true;
+        if (s.length() == 0)
+            return true;
+        return false;
+    }
 
     public static Short asShort(Object value){
-		return TFUtils.asShort(value);
-	}
+        if( null == value )return null;
+        if( value instanceof Integer){
+            return (short)(int)(Integer) value;
+        }
+        return (Short)value;
+    }
     
     public static Integer asInteger(Object value){
-		return TFUtils.asInteger(value);
-	}    
+        if( null == value )return null;
+        if( value instanceof Short){
+            return (int)(short)(Short) value;
+        }
+        return (Integer)value;
+    }    
     
     public static boolean equals(Object expected, Object actual) {
-		return TFUtils.equals(expected, actual);
-	}
+        if (expected == actual)
+            return true;
+        if (expected == null || actual == null)
+            return false;
+        return expected.equals(actual);
+    }
 }

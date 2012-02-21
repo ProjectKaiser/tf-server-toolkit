@@ -10,13 +10,10 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.triniforce.db.ddl.TableDef.EReferenceError;
-import com.triniforce.extensions.IPKRootExtensionPoint;
 import com.triniforce.server.plugins.kernel.BasicServer.ServerException;
 import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
-import com.triniforce.utils.Api;
-import com.triniforce.utils.ApiStack;
 
-public interface IBasicServer extends IPKRootExtensionPoint {
+public interface IBasicServer {
     void enterMode(final Mode mode);
     void leaveMode();
     
@@ -33,8 +30,6 @@ public interface IBasicServer extends IPKRootExtensionPoint {
     public enum Mode {
         None, Registration, Upgrade, Running
     }
-    
-    public void doPluginsRegistration();
     
     /**
      * Register server. Run doRegistration for all plugin. Calculate
@@ -53,7 +48,6 @@ public interface IBasicServer extends IPKRootExtensionPoint {
      *             something wrong in table referenes
      */
     public boolean isDbModificationNeeded() throws ServerException, EReferenceError;
-    public boolean isRegistered();
     
     /**
      * Run database modification first run table schemas modification
@@ -67,9 +61,6 @@ public interface IBasicServer extends IPKRootExtensionPoint {
      */
     public void doDbModification() throws Exception;
     
-    /**
-     * Invokes stopPeriodicalTasks() then Plugin.finit();
-     */
     void finit();
     
     List<IPlugin> getPlugins();
@@ -81,32 +72,15 @@ public interface IBasicServer extends IPKRootExtensionPoint {
     void stopPeriodicalTasks();
     
     /**
-     * executeBeanShell(script, true)
+     * Plays given file in BeanShell if it exists, catch all exceptions and writes them into log. Return false if any exception occurs.
      */
     boolean executeBeanShell(File script);
-
-    /**
-     * Plays given file in BeanShell if it exists, catch all exceptions and writes them into log. Return false if any exception occurs.
-     * <p>If executeBeanShell then script executes <tt>enterMode(Mode.Running)</tt>, otherwise IBasicServer is pushed into ApiStack.
-     */
-    boolean executeBeanShell(File script, boolean enterRunningMode);
     
     /**
      * Must be called after doDbModification() before startPeriodicalTasks();
      */
     void init();
-    
-    ApiStack getCoreApi();
-    
-    void setBaseApi(Api baseApi);
-    
-    void initAndStart();
-    /**
-     * Does NOT throw any exception
-     */
-    void stopAndFinit();
-    
-  
+   
 }
 
 

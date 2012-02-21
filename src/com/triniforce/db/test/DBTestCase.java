@@ -9,9 +9,7 @@ package com.triniforce.db.test;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.InvalidPropertiesFormatException;
-import java.util.Set;
 
 import com.triniforce.db.ddl.ActualStateBL;
 import com.triniforce.db.ddl.DBTables;
@@ -19,8 +17,6 @@ import com.triniforce.db.ddl.TableDef;
 import com.triniforce.db.ddl.UpgradeRunner;
 import com.triniforce.db.ddl.UpgradeRunner.DbType;
 import com.triniforce.server.srvapi.IDatabaseInfo;
-import com.triniforce.server.srvapi.ISODbInfo;
-import com.triniforce.server.srvapi.ISOQuery.EServerObjectNotFound;
 import com.triniforce.utils.Api;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
@@ -30,8 +26,6 @@ public class DBTestCase extends TFTestCase {
     public final static String UnicodeSample ="۞∑русскийڧüöäë";
     
     private Connection m_conn= null;
-
-	private ActualStateBL m_as;
     static boolean bCleanDB = true;
     
 
@@ -61,20 +55,17 @@ public class DBTestCase extends TFTestCase {
             
             conn.setAutoCommit(false);
             
-            m_conn = conn;
-            m_as = new ActualStateBL(m_conn); 
+            m_conn = conn;            
         }
-        
         if(bCleanDB){
             cleanDatabase(m_conn);
 
-            UpgradeRunner pl = new UpgradeRunner(m_conn, m_as);
+            UpgradeRunner pl = new UpgradeRunner(m_conn, new ActualStateBL(m_conn));
             pl.init();
             if(!m_conn.getAutoCommit())
             	m_conn.commit();        
         	
             bCleanDB = false;
-            m_as = new ActualStateBL(m_conn);
         }
         
         return m_conn;        
@@ -88,8 +79,7 @@ public class DBTestCase extends TFTestCase {
      * @throws Exception
      */
     public String createTableIfNeeded(TableDef tabDef) throws Exception{
-    	getConnection().setAutoCommit(false);
-    	return createTableIfNeeded(tabDef, m_as);
+    	return createTableIfNeeded(tabDef, new ActualStateBL(m_conn));
     }
     
     /**
@@ -139,40 +129,10 @@ public class DBTestCase extends TFTestCase {
     protected void setUp() throws Exception {
         Api api = new Api();
         api.setIntfImplementor(IDatabaseInfo.class, getDbInfo());
-        api.setIntfImplementor(ISODbInfo.class, new ISODbInfo() {
-			
-			public String getTableDbName(String entityName)
-					throws EServerObjectNotFound {
-				return m_as.getDBName(entityName);
-			}
-			
-			public String getTableAppName(String dbName) throws EServerObjectNotFound {
-				try {
-					return m_as.getAppName(dbName);
-				} catch (SQLException e) {
-					ApiAlgs.rethrowException(e);
-					return null;
-				}
-			}
-			
-			public Set<String> getDbTableNames() {
-				return m_as.getDbTableNames();
-			}
-
-			public Set<String> getCompletedDataPreparationProcedures() {
-				fail("unimplemented");
-				return null;
-			}
-
-			public Set<String> getCompletedUpgradeProcedures() {
-				fail("unimplemented");
-				return null;
-			}
-		});
         ApiStack.pushApi(api);
         
-//        Connection conn = getConnection();
-//        conn.setAutoCommit(false);
+        Connection conn = getConnection();
+        conn.setAutoCommit(false);
         super.setUp();
     }
     

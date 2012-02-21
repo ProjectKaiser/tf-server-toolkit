@@ -21,18 +21,15 @@ import com.triniforce.db.qbuilder.QSelect;
 import com.triniforce.db.qbuilder.QStatement;
 import com.triniforce.db.qbuilder.WhereClause;
 import com.triniforce.server.plugins.kernel.SrvTable;
-import com.triniforce.server.srvapi.IIdDef;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.utils.ApiAlgs;
 
 public class TDbQueues extends TableDef {
 	
-//    public static final FieldDef id = FieldDef.createScalarField(
-//            "id", FieldDef.ColumnType.LONG, true);  //$NON-NLS-1$
-    public static final FieldDef id = IIdDef.Helper.getFieldDef("id");
-    public static final FieldDef queueId = IIdDef.Helper.getFieldDef("queue_id");
-//    FieldDef.createScalarField(
-//            "queue_id", FieldDef.ColumnType.LONG, true);  //$NON-NLS-1$
+    public static final FieldDef id = FieldDef.createScalarField(
+            "id", FieldDef.ColumnType.LONG, true);  //$NON-NLS-1$
+    public static final FieldDef queueId = FieldDef.createScalarField(
+            "queue_id", FieldDef.ColumnType.LONG, true);  //$NON-NLS-1$
     public static final FieldDef data = FieldDef.createScalarField(
             "data", FieldDef.ColumnType.BLOB, true); //$NON-NLS-1$
 

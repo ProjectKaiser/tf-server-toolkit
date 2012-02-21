@@ -499,7 +499,6 @@ public class UpgradeRunnerTest extends DDLTestCase {
 		TableDef t1, t2, t3;
     	{	//t1 = (col1, col2, pk1)
     		t1 = new TableDef(t1Name);
-    		t1.setSupportForeignKeys(true);
     		desired.put(t1.getEntityName(), t1);
     		t1.addModification(1, new AddColumnOperation(FieldDef.createScalarField("col1", ColumnType.INT, true)));
     		t1.addModification(2, new AddColumnOperation(FieldDef.createScalarField("col2", ColumnType.SMALLINT, true)));
@@ -518,7 +517,6 @@ public class UpgradeRunnerTest extends DDLTestCase {
     	}
     	{	//t1 = (col1, col3, fk1);	t2 = (col1, pk1)
     		t2 = new TableDef(t2Name);
-    		t1.setSupportForeignKeys(true);
     		desired.put(t2.getEntityName(), t2);
     		
     		t2.addModification(1, new AddColumnOperation(FieldDef.createStringField("col1", ColumnType.CHAR, 24, true, "''")));
@@ -546,7 +544,6 @@ public class UpgradeRunnerTest extends DDLTestCase {
     	}
     	{	//t3 = (col1, pk)
     		t3 = new TableDef(t3Name);
-    		t1.setSupportForeignKeys(true);
     		desired.put(t3.getEntityName(), t3);
     		t3.addModification(1, new AddColumnOperation(FieldDef.createScalarField("col1", ColumnType.INT, true)));
     		t3.addModification(2, new AddColumnOperation(FieldDef.createScalarField("col2", ColumnType.SMALLINT, true)));
@@ -961,38 +958,6 @@ public class UpgradeRunnerTest extends DDLTestCase {
     		ps.close();
     	}
 
-	}
-	
-	public void testDropUniqueIndex() throws Exception{
-    	TableDef def1 = new TableDef("testDropUniqueIndex");
-    	def1.setDbName("testDropUniqueIndex");
-    	def1.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
-    	def1.addField(2, FieldDef.createScalarField("f2", ColumnType.INT, true));
-    	def1.addIndex(3, "unique_idx1",new String[]{"f1"}, true, true);
-    	def1.addIndex(4, "unique_idx2",new String[]{"f2"}, true, true);
-    	HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
-   		desired.put(def1.getEntityName(), def1);
-       	DBTables db = new DBTables(m_as, desired);
-    	m_player.run(db.getCommandList());
-    	
-    	def1.deleteIndex(5, "unique_idx1", true);
-    	m_player.run(db.getCommandList());
-    	
-    	Connection con = getConnection();
-    	Statement st = con.createStatement();
-    	st.execute("insert into testDropUniqueIndex (F1, F2) values (50, 50)");
-    	
-    	try{
-    		// unique index constraint works
-        	st.execute("insert into testDropUniqueIndex (F1, F2) values (51, 50)");
-    		fail();
-    	}catch(SQLException e){
-    	}
-    	
-    	// unique index constrain dropped
-    	st.execute("insert into testDropUniqueIndex (F1, F2) values (50, 51)");
-		
-    	
 	}
     
 }

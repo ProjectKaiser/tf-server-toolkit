@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import com.triniforce.db.dml.Table;
 import com.triniforce.db.dml.TableAdapter;
@@ -65,12 +64,6 @@ public class EntityJournalTest extends DBTestCase {
         m_def.add(getConnection(), m_dbName, res);
         assertEquals(Collections.emptyList(), m_def.exclude(getConnection(), m_dbName, Arrays.asList(new UpgradeProcedure[]{new TestProc2()})));
         
-    }
-    
-    public void testGetActual() throws SQLException, Exception{
-        m_def.add(getConnection(), m_dbName, Arrays.asList(new UpgradeProcedure[]{new TestProc2()}));
-        Set<String> actual = m_def.getActual(getConnection(), m_dbName);
-    	assertTrue(actual.contains(TestProc2.class.getName()));
     }
 
 }

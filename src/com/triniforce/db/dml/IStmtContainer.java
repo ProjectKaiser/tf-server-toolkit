@@ -46,7 +46,6 @@ public interface IStmtContainer {
     boolean isClosed();
     
     PrepStmt prepareStatement(String sql);
-    PrepStmt prepareStatement(String sql, String profItem);
 
     PrepStmt prepareStatement(Class prepSql);
 

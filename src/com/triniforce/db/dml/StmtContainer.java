@@ -107,16 +107,12 @@ public class StmtContainer implements IStmtContainer {
     public static final String PROF_PREPARE = "prepare";
     
     public PrepStmt prepareStatement(String sql) {
-    	return prepareStatement(sql, sql);
-    }
-    
-    public PrepStmt prepareStatement(String sql, String profItem) {
         PSI psi = ApiAlgs.getProfItem(PrepStmt.class.getName(), PROF_PREPARE);
         ApiAlgs.getLog(StmtContainer.class).trace(sql);
         try {
             checkClosed();
             PreparedStatement stmnt = m_conn.prepareStatement(sql);
-            PrepStmt stmt = new PrepStmt(this, stmnt, profItem);
+            PrepStmt stmt = new PrepStmt(this, stmnt, sql);
             m_statements.add(stmt);
             return stmt;
         } catch (Exception e) {

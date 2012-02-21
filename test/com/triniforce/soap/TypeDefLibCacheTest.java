@@ -6,7 +6,6 @@
 package com.triniforce.soap;
 
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,7 +32,6 @@ import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.TypeDefLibCache.ScalarDefLib;
 import com.triniforce.soap.TypeDefLibCacheTest.IA1.C1;
 import com.triniforce.utils.ApiAlgs;
-import com.triniforce.utils.Base64;
 
 public class TypeDefLibCacheTest extends TFTestCase {
 
@@ -68,23 +66,6 @@ public class TypeDefLibCacheTest extends TFTestCase {
 	        GregorianCalendar gc = new GregorianCalendar(2002, 9, 9, 19, 0, 0);
 	        gc.setTimeZone(TimeZone.getTimeZone("GMT"));
 	        assertEquals(res, gc.getTime());
-	        
-	        ScalarDef dec = scLib.get(BigDecimal.class);
-	        assertNotNull(dec);
-	        assertTrue(dec.isNullable());
-	        assertEquals("decimal", dec.getName());
-	        BigDecimal vdec = (BigDecimal) dec.valueOf("57874.324");
-	        assertEquals(BigDecimal.valueOf(57874.324), vdec);
-	        
-	        assertEquals("443.004543", dec.stringValue(BigDecimal.valueOf(443.004543)));
-	        assertEquals("443.12", dec.stringValue(BigDecimal.valueOf(443.12)));
-	        
-	        sd = scLib.get(byte[].class);
-	        assertNotNull(sd);
-	        assertEquals("base64Binary", sd.getName());
-	        byte[] bytes =  (byte[]) sd.valueOf("AQID");
-	        assertEquals(Arrays.asList((byte)1,(byte)2,(byte)3), Arrays.asList(bytes[0], bytes[1], bytes[2]));
-	        assertEquals("MyString_005624634", new String(Base64.decode(sd.stringValue("MyString_005624634".getBytes()))));
     	}
 
     }

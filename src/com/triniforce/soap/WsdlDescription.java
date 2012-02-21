@@ -39,29 +39,11 @@ public class WsdlDescription {
         private TypeDef m_td;
         private boolean m_bResident;
         private int m_maxOccur;
-        private int m_minOccur;
-        private boolean m_bNillable;
-        
-        static HashSet<String> PRIMITIVE_TIPES = new HashSet<String>();
-        static{
-        	PRIMITIVE_TIPES.addAll(ScalarDef.BOXES.keySet());
-        	PRIMITIVE_TIPES.addAll(ScalarDef.BOXES.values());
-        }
-        
         public WsdlTypeElement(String name, TypeDef td, boolean bResident, int maxOccur) {
             m_name = name;
             m_td  = td;
             m_bResident = bResident;
             m_maxOccur = maxOccur;
-            m_minOccur = PRIMITIVE_TIPES.contains(m_td.getType()) ? 1 : 0;
-            
-            if(maxOccur!=1){
-            	m_bNillable = m_td.isNullable();
-            }
-            else{
-            	m_bNillable = ScalarDef.BOXES.keySet().contains(td.getName());
-            }
-            
         }
         String  getName() {
             return m_name;
@@ -71,17 +53,13 @@ public class WsdlDescription {
         }
         
         int getMinOccur(){
-        	return m_minOccur;
+            return m_td.isNullable() ? 0 : 1;
         }
         int getMaxOccur(){
             return m_maxOccur;
         }
         boolean isResidentType(){
             return m_bResident;
-        }
-        
-        boolean isNillable(){
-        	return m_bNillable;
         }
     }
     

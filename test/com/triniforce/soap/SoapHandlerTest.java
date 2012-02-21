@@ -9,8 +9,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,9 +25,10 @@ import com.triniforce.soap.InterfaceDescriptionGenerator.SoapHandler.CurrentObje
 import com.triniforce.soap.SoapHandlerTest.IService.Cls2;
 import com.triniforce.soap.SoapHandlerTest.IService.Req1;
 import com.triniforce.soap.SoapHandlerTest.IService2.C1;
+import com.triniforce.soap.TypeDefLibCache.MapEntry;
+import com.triniforce.soap.TypeDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
-import com.triniforce.soap.TypeDefLibCache.MapEntry;
 
 public class SoapHandlerTest extends TFTestCase {
 
@@ -63,8 +62,6 @@ public class SoapHandlerTest extends TFTestCase {
         void methodWithObj(Object obj, List<Object> lObj);
         
         Map methodMap(Map<String, Integer> v);
-        
-        void decimalMethod(BigDecimal v);
     }
     
     String REQ1 = 
@@ -73,8 +70,7 @@ public class SoapHandlerTest extends TFTestCase {
     "       xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
     "       xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"+
     "  <soap:Body>"+
-    "    <method1 xmlns=\"http://tempuri.org/\">" +
-    "garbage"+
+    "    <method1 xmlns=\"http://tempuri.org/\">"+
     "      <arg1>  \t string parameter 1   \t\r\n</arg1>"+
     "      <arg0>  \t 1800   \t\r\n</arg0>"+
     "    </method1>"+
@@ -138,18 +134,6 @@ public class SoapHandlerTest extends TFTestCase {
         "  </soap:Body>"+
         "</soap:Envelope>";
     
-    String REQ4 = 
-        "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
-        "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-        "       xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
-        "       xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"+
-        "  <soap:Body>"+
-        "    <decimalMethod xmlns=\"http://tempuri.org/\">"+
-        "      <arg0>0.4567</arg0>"+
-        "    </decimalMethod>"+
-        "  </soap:Body>"+
-        "</soap:Envelope>";
-    
     @SuppressWarnings("unchecked")
     public void test() throws Exception {
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
@@ -159,7 +143,7 @@ public class SoapHandlerTest extends TFTestCase {
         assertEquals("method1", res.m_method);
         assertEquals(2, res.m_args.length);
         assertEquals(Integer.valueOf(1800), res.m_args[0]);
-        assertEquals("  \t string parameter 1   \t\n",  res.m_args[1]);
+        assertEquals("string parameter 1",  res.m_args[1]);
         assertEquals("http://schemas.xmlsoap.org/soap/envelope/", res.m_soap);
         assertEquals(true, res.m_bIn);
         
@@ -183,7 +167,7 @@ public class SoapHandlerTest extends TFTestCase {
         assertEquals(2, res.m_args.length);
         Req1 req =  (Req1) res.m_args[0];
         assertNotNull(req);
-        assertEquals("               Request value _0001           ", req.getValue1());
+        assertEquals("Request value _0001", req.getValue1());
         
         List<IService.Cls2> arg1 = (List<Cls2>) res.m_args[1];
         
@@ -193,7 +177,7 @@ public class SoapHandlerTest extends TFTestCase {
         
         res = gen.deserialize(desc, inSource(REQ3));
         Req1 req1 = (Req1) res.m_args[0];
-        assertEquals(" !!!Req1 value CONTENT!!!", req1.getValue1());
+        assertEquals("!!!Req1 value CONTENT!!!", req1.getValue1());
         
         res = gen.deserialize(desc, inSource("<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
                 "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
@@ -213,11 +197,7 @@ public class SoapHandlerTest extends TFTestCase {
                 "  </soap:Body>"+
                 "</soap:Envelope>"));
         req1 = (Req1) res.m_args[0];
-        assertEquals(" !!!Req1 value CONTENT!!!", req1.getValue1());
-        
-        res = gen.deserialize(desc, inSource(REQ4));
-        assertEquals(new BigDecimal(0.4567, new MathContext(4)), res.m_args[0]);
-
+        assertEquals("!!!Req1 value CONTENT!!!", req1.getValue1());
     }
     
     private InputStream inSource(String req) {
@@ -307,10 +287,6 @@ public class SoapHandlerTest extends TFTestCase {
         assertEquals("76yhfj\n\n\t\td;fjh", obj.toObject());
         obj = new CurrentObject(new ScalarDef(String.class));
         assertEquals("", obj.toObject());
-        
-        obj = new CurrentObject(new ScalarDef(BigDecimal.class));
-        obj.setStringValue("0.32");
-        assertEquals(new BigDecimal(0.32, new MathContext(2)), obj.toObject());
         
         try{
             obj = new CurrentObject(new ScalarDef(double.class), true);
@@ -840,77 +816,4 @@ public class SoapHandlerTest extends TFTestCase {
         }
     } 
     
-    
-    String REQ_SYMB = 
-        "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
-        "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-        "       xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
-        "       xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"+
-        "  <soap:Body>"+
-        "    <method1 xmlns=\"http://tempuri.org/\">"+
-        "      <arg1>s=\"a&gt;&lt;b\"</arg1>"+
-        "      <arg0></arg0>"+
-        "    </method1>"+
-        "  </soap:Body>"+
-        "</soap:Envelope>";
-    
-    String REQ_SYMB2 = 
-        "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
-        "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-        "       xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
-        "       xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"+
-        "  <soap:Body>"+
-        "    <method1 xmlns=\"http://tempuri.org/\">"+
-        "      <arg1>a\nb\nc</arg1>"+
-        "      <arg0></arg0>"+
-        "    </method1>"+
-        "  </soap:Body>"+
-        "</soap:Envelope>";
-    String REQ_SYMB3 = 
-        "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
-        "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-        "       xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
-        "       xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"+
-        "  <soap:Body>"+
-        "    <method1 xmlns=\"http://tempuri.org/\">"+
-        "      <arg1>a\n>\r\nb</arg1>"+
-        "      <arg0></arg0>"+
-        "    </method1>"+
-        "  </soap:Body>"+
-        "</soap:Envelope>";
-    
-    public void testHttpCodedSymbols() throws ParserConfigurationException, SAXException, IOException{
-        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
-        InterfaceDescription desc = gen.parse(null, IService.class);
-        
-        SOAPDocument res = gen.deserialize(desc, inSource(REQ_SYMB));
-        String str = (String) res.m_args[1];
-        assertEquals("s=\"a><b\"", str);
-        res = gen.deserialize(desc, inSource(REQ_SYMB2));
-        assertEquals("a\nb\nc", res.m_args[1]);
-        res = gen.deserialize(desc, inSource(REQ_SYMB3));
-        assertEquals("a\n>\nb", res.m_args[1]);
-        
-        assertEquals("         a        ", deserialize(gen, desc,"         a        "));
-
-    }
-
-	private String deserialize(InterfaceDescriptionGenerator gen,
-			InterfaceDescription desc, String string) throws ParserConfigurationException, SAXException, IOException {
-		
-		String req = String.format( 
-	        "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
-	        "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-	        "       xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
-	        "       xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"+
-	        "  <soap:Body>"+
-	        "    <method1 xmlns=\"http://tempuri.org/\">"+
-	        "      <arg1>%s</arg1>"+
-	        "      <arg0></arg0>"+
-	        "    </method1>"+
-	        "  </soap:Body>"+
-	        "</soap:Envelope>", string);
-        return (String) gen.deserialize(desc, inSource(req)).m_args[1];
-	}
-	
 }

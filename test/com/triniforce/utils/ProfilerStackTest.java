@@ -188,18 +188,20 @@ public class ProfilerStackTest extends TestCase implements IProfiler, INanoTimer
 
 
 	public String getSnapshot() {
-		fail();
+		// TODO Auto-generated method stub
 		return null;
 	}
 
 
 	public void removeActivityStatus(Object activityKey) {
-		fail();
+		// TODO Auto-generated method stub
+		
 	}
 
 
 	public void updateActivityStatus(Object activityKey, ActivityStatus status) {
-		fail();
+		// TODO Auto-generated method stub
+		
 	}
 
 }

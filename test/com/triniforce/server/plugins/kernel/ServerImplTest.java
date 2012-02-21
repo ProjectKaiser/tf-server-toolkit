@@ -85,12 +85,6 @@ public class ServerImplTest extends ServerTest {
 			public void init() {
 
 			}
-            public void doRegistration() {
-            }
-            public void doExtensionPointsRegistration() {
-                // TODO Auto-generated method stub
-                
-            }
         };      
         {
             BasicServer server = new BasicServer(m_coreApi, Arrays.asList(testPlugin));
@@ -588,8 +582,6 @@ public class ServerImplTest extends ServerTest {
             ApiStack.popApi();
             ApiStack.popApi();
             ApiStack.popApi();
-            ApiStack.popApi();
-            ApiStack.popApi();            
         }
     }
     

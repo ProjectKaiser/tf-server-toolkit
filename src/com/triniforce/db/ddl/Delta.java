@@ -37,7 +37,6 @@ import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.ddl.TableDef.IndexDef.TYPE;
 import com.triniforce.db.ddl.UpgradeRunner.DbType;
 import com.triniforce.utils.ApiAlgs;
-import com.triniforce.utils.TFUtils;
 
 public class Delta {
 	
@@ -69,21 +68,6 @@ public class Delta {
 
 		public DBMetadata(DatabaseMetaData md) {
 			m_md = md;
-		}
-		
-		public String getRealDbTableName(String aDbTableName){
-            String realDbTableName = aDbTableName;
-            try {
-                if (m_md.storesUpperCaseIdentifiers()) {
-                    realDbTableName = realDbTableName.toUpperCase();
-                }
-                if (m_md.storesLowerCaseIdentifiers()) {
-                    realDbTableName = realDbTableName.toLowerCase();
-                }
-            } catch (Exception e) {
-                ApiAlgs.rethrowException(e);
-            }      
-            return realDbTableName;
 		}
 		
 		Map<String, Collection<FieldDef>> getFields(Set<String> tabNames, IDBNames dbNames) throws SQLException{
@@ -153,7 +137,7 @@ public class Delta {
 							return null;
 					} 
 
-					String idxDbName = rs.getString(m_fname); 
+					String idxDbName = rs.getString(m_fname).toUpperCase(); 
 					String indexName = m_indexLocNames.getShortName(m_tabName, idxDbName);
 					IndexTemporary res = new IndexTemporary(indexName, m_type);
 					if (IndexDef.TYPE.INDEX.equals(m_type)) {
@@ -162,7 +146,7 @@ public class Delta {
 					} else if (IndexDef.TYPE.FOREIGN_KEY.equals(m_type)) {
 						String pkTabName = rs.getString("PKTABLE_NAME");
 						res.m_parentTab = m_dbNames.getAppName(pkTabName);
-						TFUtils.assertNotNull(res.m_parentTab, "tab:"+m_tabName+"; parent: "+ rs.getString("PKTABLE_NAME"));
+						ApiAlgs.assertNotNull(res.m_parentTab, "tab:"+m_tabName+"; parent: "+ rs.getString("PKTABLE_NAME"));
 						String parentIndexDbName = rs.getString("PK_NAME");
 						res.m_parentKey = null == parentIndexDbName ? null : m_indexLocNames.getShortName(pkTabName, parentIndexDbName);
 					}
@@ -182,17 +166,16 @@ public class Delta {
 			}
 		}
 		
-		public List<IndexDef> getIndices(String aDbTabName, 
+		public List<IndexDef> getIndices(String dbTabName, 
 				IDBNames dbNames, IIndexLocNames indexLocNames)
 				throws SQLException {
 			ArrayList<IndexDef> res = new ArrayList<IndexDef>();
 			Set<String> added = new HashSet<String>();
 			
 			ResultSet rs;
-			String realDbTableName = getRealDbTableName(aDbTabName);
-			rs = m_md.getPrimaryKeys(CATALOG, SCHEME, realDbTableName);
+			rs = m_md.getPrimaryKeys(CATALOG, SCHEME, dbTabName.toUpperCase());
 			ResultSetWalker<IndexTemporary> walker = new ResultSetWalker<IndexTemporary>(
-					new IndexObjectFactory(IndexDef.TYPE.PRIMARY_KEY, "PK_NAME", realDbTableName, "TABLE_NAME", dbNames, indexLocNames),
+					new IndexObjectFactory(IndexDef.TYPE.PRIMARY_KEY, "PK_NAME", dbTabName, "TABLE_NAME", dbNames, indexLocNames),
 					rs, "PK_NAME");			
 			
 			while (walker.hasNext()) {
@@ -203,9 +186,9 @@ public class Delta {
 		
 			rs.close();
 		
-			rs = m_md.getImportedKeys(CATALOG, SCHEME, realDbTableName.toUpperCase());
+			rs = m_md.getImportedKeys(CATALOG, SCHEME, dbTabName.toUpperCase());
 			walker = new ResultSetWalker<IndexTemporary>(
-					new IndexObjectFactory(IndexDef.TYPE.FOREIGN_KEY, "FK_NAME", realDbTableName, "FKTABLE_NAME", dbNames, indexLocNames),
+					new IndexObjectFactory(IndexDef.TYPE.FOREIGN_KEY, "FK_NAME", dbTabName, "FKTABLE_NAME", dbNames, indexLocNames),
 					rs, "FK_NAME");
 			while (walker.hasNext()) {
 				IndexDef index = walker.next().toIndexDef();
@@ -214,9 +197,9 @@ public class Delta {
 			}
 			rs.close();
 		
-			rs = m_md.getIndexInfo(CATALOG, SCHEME, realDbTableName.toUpperCase(), false, false);
+			rs = m_md.getIndexInfo(CATALOG, SCHEME, dbTabName.toUpperCase(), false, false);
 			walker = new ResultSetWalker<IndexTemporary>(
-					new IndexObjectFactory(IndexDef.TYPE.INDEX, "INDEX_NAME", realDbTableName, "TABLE_NAME", dbNames, indexLocNames),
+					new IndexObjectFactory(IndexDef.TYPE.INDEX, "INDEX_NAME", dbTabName, "TABLE_NAME", dbNames, indexLocNames),
 					rs, "INDEX_NAME");
 			while (walker.hasNext()) {
 				IndexDef index = walker.next().toIndexDef();
@@ -231,11 +214,10 @@ public class Delta {
 		}
 		
 		public List<IndexDef> getForeignKeys(IDBNames dbNames, 
-				IIndexLocNames indexLocNames, String aDbTabName) throws SQLException{
+				IIndexLocNames indexLocNames, String dbTabName) throws SQLException{
 			ArrayList<IndexDef> res = new ArrayList<IndexDef>();
 			
-			String dbTabName = getRealDbTableName(aDbTabName);
-			ResultSet rs = m_md.getImportedKeys(CATALOG, SCHEME, dbTabName);
+			ResultSet rs = m_md.getImportedKeys(CATALOG, SCHEME, dbTabName.toUpperCase());
 			ResultSetWalker<IndexTemporary> walker = new ResultSetWalker<IndexTemporary>(
 					new IndexObjectFactory(IndexDef.TYPE.FOREIGN_KEY, "FK_NAME", dbTabName, "FKTABLE_NAME", dbNames, indexLocNames),
 					rs, "FK_NAME");
@@ -245,20 +227,6 @@ public class Delta {
 			}
 			rs.close();
 			return res;
-		}
-		
-		public boolean isIndexExists(String aDbTabName, String idxName) throws SQLException{
-		    String dbTabName = getRealDbTableName(aDbTabName);
-			ResultSet rs = m_md.getIndexInfo(CATALOG, SCHEME, dbTabName, false, false);
-			try{
-				while(rs.next()){
-					if(idxName.equals(rs.getString("INDEX_NAME")))
-						return true;
-				}
-			} finally{
-				rs.close();
-			}
-			return false;
 		}
 		
 //		Map<String, Collection<IndexDef>> getIndexes() throws SQLException{
@@ -364,7 +332,7 @@ public class Delta {
 						.getInt("COLUMN_SIZE"), rs.getInt("DECIMAL_DIGITS"),
 						bNotNull, defVal);
 			} else {
-				TFUtils.assertTrue(false, "");
+				ApiAlgs.assertTrue(false, "");
 				return null;
 			}
 
@@ -386,7 +354,7 @@ public class Delta {
 		public static class OlapIndexLocNames implements IIndexLocNames{
 			
 			public String getShortName(String dbTabName, String dbFullName){
-				if(dbFullName.toUpperCase().startsWith(dbTabName.toUpperCase()+"_")){
+				if(dbFullName.startsWith(dbTabName.toUpperCase()+"_")){
 					return dbFullName.substring(dbTabName.length()+1);
 				}
 				return dbFullName;
@@ -744,7 +712,7 @@ public class Delta {
 						.getColumns(), element.getParentTable(), element
 						.getParentIndex());
 			else {
-				TFUtils.assertTrue(false, element.getType().toString());
+				ApiAlgs.assertTrue(false, element.getType().toString());
 				res = null;
 			}
 			
@@ -838,7 +806,7 @@ public class Delta {
 			
 			int getOpOrder(DBOperation dbOp){
 				Integer v = orderNo.get(dbOp.getOperation().getClass());
-				TFUtils.assertNotNull(v, dbOp.getOperation().getClass().getName());
+				ApiAlgs.assertNotNull(v, dbOp.getOperation().getClass().getName());
 				return v;
 			}
 		});

@@ -31,11 +31,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
-import com.triniforce.soap.PropertiesSequence;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.xml.tfserver._200701.serialization.DOMSerializer;
 
-@PropertiesSequence( sequence = {"type", "props"})
 public class VObject {
 
     @Retention(RetentionPolicy.RUNTIME)

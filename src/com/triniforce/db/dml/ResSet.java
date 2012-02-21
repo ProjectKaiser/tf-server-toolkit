@@ -65,24 +65,6 @@ public class ResSet implements IResSet {
         }
         return 0;
     }
-    
-    public boolean getBoolean(int columnIndex) {
-        try {
-            return m_resultSet.getBoolean(columnIndex);
-        } catch (Exception e) {
-            ApiAlgs.rethrowException(e);
-        }
-        return false;
-    }    
-    
-    public short getShort(int columnIndex) {
-        try {
-            return m_resultSet.getShort(columnIndex);
-        } catch (Exception e) {
-            ApiAlgs.rethrowException(e);
-        }
-        return 0;
-    }    
 
     public boolean wasNull() {
         try {

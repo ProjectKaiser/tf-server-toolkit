@@ -12,11 +12,9 @@ import java.text.MessageFormat;
 
 import com.triniforce.db.dml.SmartTran;
 import com.triniforce.server.plugins.kernel.tables.NextId;
-import com.triniforce.server.plugins.kernel.tables.NextId.NextIdBL;
 import com.triniforce.server.srvapi.IIdGenerator;
 import com.triniforce.server.srvapi.ISrvPrepSqlGetter;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
-import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 
 /**
@@ -87,12 +85,11 @@ public class IdGenerator implements IIdGenerator {
             long first;
             long last;
             try {
-            	NextIdBL bl = m_genDef.getBL(tr);
-            	Long current = bl.get();
+            	Long current = NextId.PQGet.exec(tr);
                 first = null == current ?  MIN_GENERATED_KEY: current;
                 last = first + cacheSize;
-            	bl.clear();
-            	bl.set(last);
+            	NextId.PQClear.exec(tr);
+            	NextId.PQSet.exec(tr, last);
                 tr.commit();
             } finally {
                 tr.close();
@@ -113,33 +110,5 @@ public class IdGenerator implements IIdGenerator {
             m_lastKey = m_currentKey + m_numCacheSize;
         }
         return m_currentKey++;
-    }
-    
-    public synchronized void setKey(long v){
-    	ApiAlgs.assertTrue(v>=MIN_GENERATED_KEY, ""+v);
-    	
-        synchronized (m_genDef) {
-            Connection conn = SrvApiAlgs2.getPooledConnection(ApiStack.getApi());
-            SmartTran tr = new SmartTran(conn, (ISrvPrepSqlGetter) ApiStack.getApi().queryIntfImplementor(ISrvPrepSqlGetter.class));
-
-            long first;
-            long last;
-            try {
-            	NextIdBL bl = m_genDef.getBL(tr);
-            	Long current = bl.get();
-            	if(null != current)
-            		ApiAlgs.assertTrue(v > current, ""+v);
-                first = v;
-                last = first + m_numCacheSize;
-            	bl.clear();
-            	bl.set(last);
-                tr.commit();
-            } finally {
-                tr.close();
-                SrvApiAlgs2.returnPooledConnection(ApiStack.getApi(), conn);
-            }
-        	m_currentKey = first;
-        	m_lastKey = last;
-        }
     }
 }

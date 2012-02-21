@@ -64,8 +64,6 @@ public class DBTables {
         public boolean equals(Object arg0) {
             DBOperation op = (DBOperation) arg0; 
             if(op == null) return false;
-            if(!op.getOperation().getClass().equals(getOperation().getClass()))
-            	return false;
             return getDBOName().equals(op.getDBOName()) && op.getOperation().getName().equals(getOperation().getName());
         }
     }
@@ -257,14 +255,6 @@ public class DBTables {
             	addColumnOperation(op.getDBOName(), addCol);
             	op = new DBOperation(op.getDBOName(), 
             			getRealAddColumnOperation(m_desiredTables.get(op.getDBOName()), addCol));
-            }
-            else if(op.getOperation() instanceof DeleteIndexOperation){
-            	DeleteIndexOperation delCnstr = (DeleteIndexOperation) op.getOperation();
-            	if(IndexDef.TYPE.FOREIGN_KEY.equals(delCnstr.getType()) &&
-            			!m_desiredTables.get(op.getDBOName()).isSupportForeignKeys()){
-            		// Delete index  how it store in DB
-            		op = new DBOperation(op.getDBOName(), new DeleteIndexOperation(delCnstr.getName(), IndexDef.TYPE.INDEX, delCnstr.isUniqueIndex()));
-            	}		
             }
             
             m_depStck.push(op);

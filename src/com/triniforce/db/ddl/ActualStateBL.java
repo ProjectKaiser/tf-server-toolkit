@@ -32,7 +32,6 @@ import com.triniforce.db.qbuilder.QSelect;
 import com.triniforce.db.qbuilder.QStatement;
 import com.triniforce.db.qbuilder.QTable;
 import com.triniforce.utils.ApiAlgs;
-import com.triniforce.utils.TFUtils;
 
 /**
  * Business logic of ACTUAL_TABLE_STATES table
@@ -215,8 +214,8 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
     			Row row = m_asIndexTable.getRow(i);
     			String appName = (String) row.getField(0);
     			String dbName = (String) row.getField(1);
-    			TFUtils.assertTrue(null == m_dbIndexNames.put(dbName, appName), dbName);
-    			TFUtils.assertTrue(null == m_appIndexNames.put(appName, dbName), appName);
+    			ApiAlgs.assertTrue(null == m_dbIndexNames.put(dbName, appName), dbName);
+    			ApiAlgs.assertTrue(null == m_appIndexNames.put(appName, dbName), appName);
     		}
 	        rs.close();
     	} finally{
@@ -374,8 +373,8 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
     }
 
 	public void addIndexName(String appName, String dbName) {
-		TFUtils.assertTrue(null == m_appIndexNames.put(appName, dbName), "");
-		TFUtils.assertTrue(null == m_dbIndexNames.put(dbName, appName), "");
+		ApiAlgs.assertTrue(null == m_appIndexNames.put(appName, dbName), "");
+		ApiAlgs.assertTrue(null == m_dbIndexNames.put(dbName, appName), "");
 		Row row = m_asIndexTable.newRow();
 		row.setField(0, appName);
 		row.setField(1, dbName);
@@ -418,8 +417,8 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 			if(upperName.equals(appVal.toUpperCase())){
 				ApiAlgs.getLog(this).trace("DROP NAME: "+appVal);
 				String dbVal = (String) row.getField(1);
-				TFUtils.assertNotNull(m_appIndexNames.remove(appVal), appVal);
-				TFUtils.assertNotNull(m_dbIndexNames.remove(dbVal), dbVal);
+				ApiAlgs.assertNotNull(m_appIndexNames.remove(appVal), appVal);
+				ApiAlgs.assertNotNull(m_dbIndexNames.remove(dbVal), dbVal);
 				row.delete();
 			}
 		}
@@ -434,10 +433,6 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 	
 	public Set<String> getDbTableNames(){
 		return Collections.unmodifiableSet(m_dbNames);
-	}
-
-	public String queryIndexName(String dbTabName) {
-		return m_dbIndexNames.get(dbTabName);
 	}
 
 }

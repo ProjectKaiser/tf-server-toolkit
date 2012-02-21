@@ -103,51 +103,7 @@ public class ClassParserTest extends TFTestCase {
         }
         static class C53 extends C52{}
     }
-
-    @PropertiesSequence(sequence = { "prop3", "prop1", "prop2", "prop4" })
-    public static class CWithSeq{
-    	String prop1, prop2, prop3, prop4, prop5;
-
-		public String getProp1() {
-			return prop1;
-		}
-
-		public void setProp1(String prop1) {
-			this.prop1 = prop1;
-		}
-
-		public String getProp2() {
-			return prop2;
-		}
-
-		public void setProp2(String prop2) {
-			this.prop2 = prop2;
-		}
-
-		public String getProp3() {
-			return prop3;
-		}
-
-		public void setProp3(String prop3) {
-			this.prop3 = prop3;
-		}
-
-		public String getProp4() {
-			return prop4;
-		}
-
-		public void setProp4(String prop4) {
-			this.prop4 = prop4;
-		}
-		
-		public String getProp5() {
-			return prop5;
-		}
-
-		public void setProp5(String prop5) {
-			this.prop5 = prop5;
-		}
-    }
+    
     
     @Override
     public void test() throws Exception {
@@ -211,14 +167,6 @@ public class ClassParserTest extends TFTestCase {
         } catch(UnsupportedOperationException e){
             
         }
-        
-        cDef = (ClassDef) m_cp.parse(CWithSeq.class, m_lib, null);
-        props = cDef.getOwnProps();
-        assertEquals("prop3", props.get(0).getName());
-        assertEquals("prop1", props.get(1).getName());
-        assertEquals("prop2", props.get(2).getName());
-        assertEquals("prop4", props.get(3).getName());
-        assertEquals("prop5", props.get(4).getName());
         
     }
     
@@ -401,13 +349,5 @@ public class ClassParserTest extends TFTestCase {
     
     public void testReadOnlyProperty(){
     	
-    }
-    
-    public static class COut{
-    	public static class  CIn extends COut{}	
-    }
-    
-    public void testInnerClss(){
-    	m_lib.add(COut.class);
     }
 }

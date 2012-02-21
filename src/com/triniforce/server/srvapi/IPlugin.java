@@ -27,9 +27,6 @@ public interface IPlugin {
      * 
      */
     public void doRegistration(ISORegistration reg) throws EDBObjectException;
-    
-    public void doExtensionPointsRegistration();
-    public void doRegistration();
 
     /**
      * @return like "Triniforce Server Core Plug-in"

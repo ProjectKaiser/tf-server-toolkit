@@ -14,28 +14,22 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import com.triniforce.db.ddl.UpgradeRunner.DbType;
 import com.triniforce.db.dml.PrepStmt;
 import com.triniforce.db.dml.ResSet;
 import com.triniforce.db.dml.StmtContainer;
 import com.triniforce.server.plugins.kernel.tables.TDbQueues;
-import com.triniforce.server.srvapi.IDatabaseInfo;
 import com.triniforce.server.srvapi.IDbQueue;
-import com.triniforce.server.srvapi.IIdGenerator;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
-import com.triniforce.server.srvapi.ITransactionWriteLock2;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 
 public class DbQueue implements IDbQueue {
 	private final long m_queueId;
-	private IIdGenerator m_idGen;
 	
-	public DbQueue(long queueId, IIdGenerator idGen) {
+	public DbQueue(long queueId) {
 		m_queueId = queueId;
-		m_idGen = idGen;
 	}
 
 	synchronized public Object get(long timeoutMilliseconds) {
@@ -87,7 +81,7 @@ public class DbQueue implements IDbQueue {
 	public void put(Serializable data) {
 		InputStream is = writeObjectInStream(data);
 		try {
-			long recId = m_idGen.getKey();
+			long recId = SrvApiAlgs2.generateId();
 			TDbQueues.PQInsert.exec(recId, m_queueId, is, is.available());
 			is.close();
 			ISrvSmartTran srvTran = SrvApiAlgs2.getIServerTran();
@@ -128,12 +122,6 @@ public class DbQueue implements IDbQueue {
 
 	private DbRecord readDbRecord() {
 		DbRecord res = null;
-		IDatabaseInfo dbi = ApiStack.getInterface(IDatabaseInfo.class);
-		if(DbType.H2.equals(dbi.getDbType())){
-		    ITransactionWriteLock2 tl2 = ApiStack.getInterface(ITransactionWriteLock2.class);
-		    tl2.lock();
-		}
-		
 		StmtContainer sc = SrvApiAlgs2.getStmtContainer();
 		try{
 			ResSet rs = TDbQueues.PQGetHead.exec(sc, m_queueId);

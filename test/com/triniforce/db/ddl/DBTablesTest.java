@@ -83,26 +83,23 @@ public class DBTablesTest extends TestCase {
 		}
 
 		public String generateIndexName(String appName) {
-			fail();
+			// TODO Auto-generated method stub
 			return null;
 		}
 
 		public String getIndexDbName(String appName) {
-			fail();
+			// TODO Auto-generated method stub
 			return null;
 		}
 
 		public void deleteIndexName( String appName) {
-			fail();
+			// TODO Auto-generated method stub
+			
 		}
 
 		public void flush(Connection conn) throws SQLException {
-			fail();
-		}
-
-		public String queryIndexName(String dbTabName) {
-			fail();
-			return null;
+			// TODO Auto-generated method stub
+			
 		}
         
     }
@@ -263,7 +260,7 @@ public class DBTablesTest extends TestCase {
 
             List<DBOperation> cl = m_db.getCommandList();
             
-            assertEquals(5, cl.size());
+            assertEquals(4, cl.size());
             int idx_pk = cl.indexOf(new DBOperation("tab1", tab1_pk1));
             int idx_fk = cl.indexOf(new DBOperation("tab2", tab2_fk1));
             assertTrue("Find tab1_fk1 failed",idx_pk >= 0);

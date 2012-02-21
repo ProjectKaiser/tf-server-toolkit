@@ -13,11 +13,7 @@ import com.triniforce.utils.Entity;
  *
  */
 public class UpgradeProcedure extends Entity{
-    private String m_hint;
-    
-    public UpgradeProcedure() {
-        setHint(this.getClass().getName());
-    }
+    private final String m_hint;
 
     /**
      * @param hint Human-readable description to be shown to user. 
@@ -26,7 +22,7 @@ public class UpgradeProcedure extends Entity{
      */
     public UpgradeProcedure(String hint){
         super();
-        setHint(hint);        
+        m_hint = hint;        
     }
     
     /**
@@ -38,10 +34,6 @@ public class UpgradeProcedure extends Entity{
     
     public String getHint() {
         return m_hint;
-    }
-
-    public void setHint(String hint) {
-        m_hint = hint;
     }
 
 }

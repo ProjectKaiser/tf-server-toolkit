@@ -21,7 +21,6 @@ import com.triniforce.db.qbuilder.QSelect;
 import com.triniforce.db.qbuilder.QStatement;
 import com.triniforce.db.qbuilder.WhereClause;
 import com.triniforce.server.plugins.kernel.SrvTable;
-import com.triniforce.server.srvapi.IIdDef;
 import com.triniforce.server.srvapi.INamedDbId;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
@@ -29,7 +28,7 @@ import com.triniforce.server.srvapi.SrvApiAlgs2;
 
 public class TNamedDbId extends TableDef implements INamedDbId {
 	
-	public static final FieldDef id = IIdDef.Helper.getFieldDef();
+	public static final FieldDef id = FieldDef.createScalarField("ID", ColumnType.LONG, true);
 	public static final FieldDef name = FieldDef.createStringField("name", ColumnType.VARCHAR, 250, true, null);
 	
 	static class EInterfaceNotLoaded extends RuntimeException{

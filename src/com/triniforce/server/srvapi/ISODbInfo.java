@@ -64,7 +64,4 @@ public interface ISODbInfo extends IModeRunning {
      * @throws EServerObjectNotFound
      */
     //public String getEntityName(int id) throws EServerObjectNotFound;
-    
-    Set<String> getCompletedUpgradeProcedures();
-    Set<String> getCompletedDataPreparationProcedures();
 }

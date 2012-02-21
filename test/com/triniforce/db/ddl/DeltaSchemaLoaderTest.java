@@ -48,7 +48,6 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
         //createTableIfNeeded(tabDef, m_as);
 
 		tabDef = new TableDef("DeltaSchemaLoaderTest2");
-		tabDef.setSupportForeignKeys(true);
 		tabDef.addStringField(1, "field1", ColumnType.NVARCHAR, 100, false, null);
 		tabDef.addStringField(2, "field2", ColumnType.CHAR, 15, true, "123456789012345");
 		tabDef.addStringField(3, "field3", ColumnType.NCHAR, 15, true, "123456789012345");

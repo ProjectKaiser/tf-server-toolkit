@@ -141,11 +141,9 @@ public class DeltaTableCmdFactoryTest extends TFTestCase {
 		}
 		{// indexes have same fields but other parents
 			TableDef src = new TableDef("tab_No2");
-			src.setSupportForeignKeys(true);
 			src.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
 			src.addForeignKey(2, "fk", new String[]{"f1"}, "tab_no_1", "pk", false);
 			TableDef dst = new TableDef("tab_No2");
-			dst.setSupportForeignKeys(true);
 			dst.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
 			dst.addForeignKey(2, "fk", new String[]{"f1"}, "tab_no_2", "pk", false);
 			

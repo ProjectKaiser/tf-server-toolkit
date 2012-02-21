@@ -1,7 +1,11 @@
 package com.triniforce.utils;
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.text.MessageFormat;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,28 +66,49 @@ public class ApiAlgs {
     }    
     
     public static void assertNotNull(Object value, String name){
-        TFUtils.assertNotNull(value, name);
+        if(null != value) return;
+        throw new EUtils.EAssertNotNullFailed(MessageFormat.format("Unexpected null value for \"{0}\"",name)); //$NON-NLS-1$
     }   
     
     
     
     public static void assertEquals(Object expected, Object actual){
-        TFUtils.assertEquals(expected, actual);
+        if( expected == actual ) return;
+        if( expected == null || actual == null){
+            throw new EUtils.EAssertEqualsFailed(expected, actual);
+        }
+        if(expected.equals(actual)) return;
+        throw new EUtils.EAssertEqualsFailed(expected, actual);
     }
     public static void assertTrue(boolean expr, String msg){
-        TFUtils.assertTrue(expr, msg);
+        if(!expr){
+            throw new EUtils.EAssertTrueFailed(msg);
+        }
     }
     
     
     /**
-	 * @param cls Class reousrce will be read from
-	 * @param name Resource name
-	 * @return String with resource content 
-	 * @throws EUtils.EResourceNotFound
-	 */
-	public static String readResource(Class cls, String resourceName) throws EUtils.EResourceNotFound{
-		return TFUtils.readResource(cls, resourceName);
-	}
+     * @param cls Class reousrce will be read from
+     * @param name Resource name
+     * @return String with resource content 
+     * @throws EUtils.EResourceNotFound
+     */
+    public static String readResource(Class cls, String resourceName) throws EUtils.EResourceNotFound{
+        StringBuffer res = new StringBuffer();
+        char buf[] = new char[256];
+        try {
+            InputStream is = cls.getResourceAsStream(resourceName);
+            if( null == is) throw new EUtils.EResourceNotFound(cls, resourceName);            
+            InputStreamReader isReader = new InputStreamReader(is);
+            int nRead;
+            while ((nRead = isReader.read(buf)) > 0) {
+                res.append(buf, 0, nRead);
+            }
+        } catch (IOException e) {
+            ApiAlgs.rethrowException(e);
+        }
+        return res.toString();
+    }
     
     /**
      *  For testing purposes, when it is needed to pass IName parameter
