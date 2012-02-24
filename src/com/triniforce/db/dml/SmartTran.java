@@ -130,7 +130,10 @@ public class SmartTran extends StmtContainer implements ISmartTran {
 	        	}
 	        	else if(lookUpValues[i].getClass().isArray()){
 	        		wc.and(new Expr.In("", name.getName(), Array.getLength(lookUpValues[i])));
-	        	} 
+	        	}
+                else if(lookUpValues[i] instanceof ISmartTran.Between){
+                    wc.and(new Expr.Between("", name.getName()));
+                }        	
 	        	else{
 	        		wc.andCompare("", name.getName(), "=");
 	        	}
@@ -159,6 +162,11 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         		for(int i=0; i<Array.getLength(arg); i++)
         			ps.setObject(col++, Array.get(arg, i));
         	}
+            else if(arg instanceof ISmartTran.Between){
+                ISmartTran.Between data = (Between) arg;
+                ps.setObject(col++, data.getLeftValue());
+                ps.setObject(col++, data.getRightValue());
+            }           
         	else{
         		ps.setObject(col++, arg);
         	}

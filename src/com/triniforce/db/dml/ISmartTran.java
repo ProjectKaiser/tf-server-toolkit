@@ -64,5 +64,29 @@ public interface ISmartTran extends IStmtContainer {
         }
         
     }
+    
+    public static class Between{
+        private Object leftValue;
+        private Object rightValue;
+        
+        public Between(Object a_leftValue, Object a_rightValue) {
+            leftValue = a_leftValue;
+            rightValue = a_rightValue;
+        }
+        public void setLeftValue(Object leftValue) {
+            this.leftValue = leftValue;
+        }
+        public Object getLeftValue() {
+            return leftValue;
+        }
+        public void setRightValue(Object rightValue) {
+            this.rightValue = rightValue;
+        }
+        public Object getRightValue() {
+            return rightValue;
+        }
+        
+    }
+    
 
 }
