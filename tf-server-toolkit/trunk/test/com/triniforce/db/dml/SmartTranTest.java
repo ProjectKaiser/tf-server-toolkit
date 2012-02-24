@@ -178,6 +178,37 @@ public class SmartTranTest extends DBTestCase {
 			addField(3, f3);
 		}
     }
+
+    public void testSelectBetween() throws Exception{
+        createTableIfNeeded(new TestDef());
+        SmartTran tr2 = new SmartTran(getConnection());
+        tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{1,"v_1", 100});
+        tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{2,"v_2", 100});
+        tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{3,"v_3", 101});
+        ResSet res = tr2.select(TestDef.class
+                , new IName[]{TestDef.f1}
+                , new IName[]{TestDef.f1}, new Object[]{new ISmartTran.Between((Integer)1, (Integer)2)}
+                , new IName[]{TestDef.f1}
+        );
+        assertTrue(res.next());
+        assertEquals("1", res.getString(1));
+        assertTrue(res.next());
+        assertEquals("2", res.getString(1));
+        assertFalse(res.next());
+        
+        res = tr2.select(TestDef.class
+                , new IName[]{TestDef.f1}
+                , new IName[]{TestDef.f1}, new Object[]{new ISmartTran.Between((Integer)2, (Integer)3)}
+                , new IName[]{TestDef.f1}
+        );
+        assertTrue(res.next());
+        assertEquals("2", res.getString(1));
+        assertTrue(res.next());
+        assertEquals("3", res.getString(1));
+        assertFalse(res.next());        
+        
+    }
+
     
     public void testSelect() throws Exception{
     	createTableIfNeeded(new TestDef());
