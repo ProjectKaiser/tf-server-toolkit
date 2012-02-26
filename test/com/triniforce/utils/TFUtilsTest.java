@@ -13,7 +13,11 @@ public class TFUtilsTest extends TFTestCase {
     public void test() throws Exception {
         String us = TFUtils.readResource(this.getClass(), "TFUtilsTest_unicode.txt");
         assertEquals(UNICODE_PATTERN, us);
-     
+    }
+    
+    public void testToString(){
+    	assertEquals("null", TFUtils.toString(null));
+    	assertEquals("5", TFUtils.toString(new Integer(5)));
     }
 
 }
