@@ -72,6 +72,11 @@ public class TFUtils {
 	    return (Integer)value;
 	}
 	
+	public static String toString(Object o){
+		if(null == o) return "null";
+		return o.toString();
+	}
+	
 	public static Long asLong(Object value){
 	    if( null == value )return null;
 	    if( value instanceof Short){
