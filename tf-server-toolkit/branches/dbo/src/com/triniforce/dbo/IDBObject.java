@@ -18,4 +18,9 @@ public interface IDBObject {
     IDBObject[] synthDBObjects();
     
     Class getActualizerClass();
+    
+    /**
+     * @return 
+     */
+    Object getKey();
 }
