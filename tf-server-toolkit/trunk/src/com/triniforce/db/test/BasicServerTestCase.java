@@ -20,7 +20,6 @@ import org.apache.commons.dbcp.BasicDataSource;
 import com.triniforce.db.ddl.UpgradeRunner;
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
-import com.triniforce.extensions.IPKExtension;
 import com.triniforce.extensions.IPKExtensionBase;
 import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.server.plugins.kernel.BasicServer;
@@ -271,18 +270,19 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
     
     protected static Set<Class> m_allowedEmptyWiki = new HashSet<Class>();
     
-    public static void checkExtensions(IBasicServer srv){
+    public static void checkExtensions(TFTestCase tc, IBasicServer srv){
     	List<String> problems = new ArrayList<String>();
     	
    	
     	for(IPKExtensionPoint ep: srv.getExtensionPoints().values()){
     		checkWiki(ep, null, problems);
     		checkExtensionClass(ep, problems);
-    		for(IPKExtension e: ep.getExtensions().values()){
-    		    if(m_allowedEmptyWiki.contains(e.getObjectClass())){
-    		        checkWiki(e, ep.getId(), problems);
-    		    }
-    		}
+//    		for(IPKExtension e: ep.getExtensions().values()){
+//    			tc.trace(e.getId());
+//    		    if(!m_allowedEmptyWiki.contains(e.getObjectClass())){
+//    		        checkWiki(e, ep.getId(), problems);
+//    		    }
+//    		}
     	}
     	if(problems.size() > 0){
     		StringBuffer strProblems = new StringBuffer();
