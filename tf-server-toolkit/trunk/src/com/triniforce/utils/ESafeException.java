@@ -10,4 +10,6 @@ public class ESafeException extends RuntimeException {
     public ESafeException(String msg) {
         super(msg);
     }
+    public ESafeException(){
+    }
 }
