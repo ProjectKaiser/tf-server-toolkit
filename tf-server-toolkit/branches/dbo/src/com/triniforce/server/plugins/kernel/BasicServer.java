@@ -36,6 +36,7 @@ import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.ddl.UpgradeRunner.DbType;
 import com.triniforce.db.ddl.UpgradeRunner.IActualState;
 import com.triniforce.dbo.DBOActualizer;
+import com.triniforce.dbo.DBOSort;
 import com.triniforce.dbo.IDBObject;
 import com.triniforce.dbo.PKEPDBOActualizers;
 import com.triniforce.dbo.PKEPDBObjects;
@@ -466,6 +467,10 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 				List<IDBObject> list = dboLists.get(actualizer.getClass());
 				if(null == list)
 					list = Collections.emptyList();
+				if(!actualizer.hasOwnVersioning()){
+					DBOSort sort = new DBOSort();
+					list = sort.sort(list);
+				}	
 				actualizer.actualize(list);
 			}
 		}

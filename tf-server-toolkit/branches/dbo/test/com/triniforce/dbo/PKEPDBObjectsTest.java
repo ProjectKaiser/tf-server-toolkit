@@ -6,7 +6,6 @@
 package com.triniforce.dbo;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
 
 import com.triniforce.db.test.BasicServerTestCase;
@@ -85,6 +84,6 @@ public class PKEPDBObjectsTest extends BasicServerTestCase {
 			new TestDBO("TestDBO_01_01", null, null, new IDBObject[]{})
 		}));
 		Map<String, IPKExtension> map = ep.getExtensions();
-		assertEquals(new HashSet<String>(Arrays.asList("TestDBO_01", "TestDBO_01_01")), map.keySet());
+		assertTrue(map.keySet().containsAll(Arrays.asList("TestDBO_01", "TestDBO_01_01")));
 	}
 }

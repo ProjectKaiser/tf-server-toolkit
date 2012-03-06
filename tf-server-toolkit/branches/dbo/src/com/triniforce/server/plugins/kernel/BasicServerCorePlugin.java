@@ -12,7 +12,9 @@ import java.util.Set;
 import java.util.Stack;
 
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
+import com.triniforce.dbo.DBOTabDef;
 import com.triniforce.dbo.DBOUpgProcedure;
+import com.triniforce.dbo.DBOVersion;
 import com.triniforce.dbo.ExDBOATables;
 import com.triniforce.dbo.ExDBOAUpgradeProcedures;
 import com.triniforce.dbo.PKEPDBOActualizers;
@@ -105,6 +107,9 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         		new DBOUpgProcedure(new BreakIdGenerator(m_queueIdGenerator)));
         
         getBasicServer().addPeriodicalTask(new TimedLockTicker());
+        
+        putExtension(PKEPDBObjects.class, DBOVersion.class.getName(), 
+        		new DBOTabDef(new DBOVersion()));
         
 	}
 	
