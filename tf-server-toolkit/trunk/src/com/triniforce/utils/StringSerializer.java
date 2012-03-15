@@ -14,7 +14,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.sf.sojo.interchange.json.JsonSerializer;
+import net.sf.sojo.interchange.AbstractSerializer;
 
 public class StringSerializer {
 
@@ -36,7 +36,7 @@ public class StringSerializer {
 
     public static class PojojaSerializer implements ISerializer {
         
-        JsonSerializer m_js = new JsonSerializer();
+        AbstractSerializer m_js = new PKJsonSerializer();
 
         public String getPrefix() {
             return PREFIX_JSON;
