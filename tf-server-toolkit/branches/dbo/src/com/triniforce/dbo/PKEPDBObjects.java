@@ -10,6 +10,10 @@ import com.triniforce.extensions.IPKExtension;
 import com.triniforce.extensions.PKExtensionPoint;
 
 public class PKEPDBObjects extends PKExtensionPoint{
+	
+	public PKEPDBObjects() {
+		setExtensionClass(IDBObject.class);
+	}
 
 	@Override
 	public IPKExtension putExtension(String extensionId, Object obj)

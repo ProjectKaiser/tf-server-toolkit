@@ -238,7 +238,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 	private boolean m_bRegistered;
 
-	private boolean m_bDbModNeeded;
+	private boolean m_bDbModNeeded=true;
 
 	private DBTables m_desiredTables;
 
@@ -290,7 +290,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 
         m_bRegistered = false;
-        m_bDbModNeeded = false;
+//        m_bDbModNeeded = false;
 
         m_desiredTables = new DBTables();
 
@@ -442,9 +442,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 						loadRegLists(connection);
 
-						m_bDbModNeeded = !(
-//								m_upRegList.isEmpty() && 
-								m_dppRegList.isEmpty());
+						m_bDbModNeeded = true; 
 					}
 				} finally {
 					trf.pop();
@@ -627,13 +625,13 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 			throw new ServerException(Messages
 					.getString("Server.SrvNotRegError")); //$NON-NLS-1$
 		
-		return true;
+//		return true;
 //
-//		if (!m_bDbModNeeded) {
-//			List<DBOperation> cl = m_desiredTables.getCommandList();
-//			m_bDbModNeeded = !cl.isEmpty();
-//		}
-//		return m_bDbModNeeded;
+		if (!m_bDbModNeeded) {
+			List<DBOperation> cl = m_desiredTables.getCommandList();
+			m_bDbModNeeded = !cl.isEmpty();
+		}
+		return m_bDbModNeeded;
 	}
 
 	/**
@@ -688,7 +686,6 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 //						flushEntities(connection);
 
 						connection.commit();
-						m_bDbModNeeded = false;
 					}
 
 				});
@@ -700,6 +697,8 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 			leaveMode();
 		}
 
+		m_bDbModNeeded = false;
+
 		// run DataPreparationProcedures
 		enterMode(Mode.Running);
 		try {
@@ -710,6 +709,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 		} finally {
 			leaveMode();
 		}
+		
 	}
 
 	private Map<Class, List<IDBObject>> getDBOLists() {
@@ -767,6 +767,9 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 												.format(
 														"Data preparation procedure: \"%s\"", proc.getEntityName())); //$NON-NLS-1$
 						proc.run();
+					} catch (Throwable t){
+						ApiAlgs.getLog(this).error(t.getMessage(), t);
+						ApiAlgs.rethrowException((Exception) t);
 					} finally {
 						ApiAlgs.closeProfItem(psi);
 					}

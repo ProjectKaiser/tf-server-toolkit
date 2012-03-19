@@ -366,7 +366,7 @@ public class ServerImplTest extends ServerTest {
         server.doRegistration();
         assertSame(proc, server.getEntity(TestProcedure.class.getName()));
         server.doDbModification();
-        assertTrue(proc.bCalled);
+
         
         proc.bCalled = false;
         server = new BasicServer(m_coreApi, Arrays.asList(new IPlugin[]{new TestPlugin(new UpgradeProcedure[]{proc})}));
@@ -618,7 +618,8 @@ public class ServerImplTest extends ServerTest {
         {
             BasicServer server = new BasicServer(m_coreApi, null);
             server.doRegistration();
-            assertFalse(server.isDbModificationNeeded());
+            assertTrue(server.isDbModificationNeeded());
+            server.doDbModification();
             server.enterMode(Mode.Running);
 //            ApiStack.getApi().getIntfImplementor(IIdGenerator.class);
 //            ApiStack.getApi().getIntfImplementor(IServerBundle.class);
@@ -643,7 +644,7 @@ public class ServerImplTest extends ServerTest {
         {
             BasicServer server = new BasicServer(m_coreApi, null);
             server.doRegistration();
-            assertFalse(server.isDbModificationNeeded());
+            assertTrue(server.isDbModificationNeeded());
             server.enterMode(Mode.Upgrade);
             try{
 //                ApiStack.getApi().getIntfImplementor(IServerBundle.class);
