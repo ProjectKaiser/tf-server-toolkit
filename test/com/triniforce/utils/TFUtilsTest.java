@@ -19,5 +19,11 @@ public class TFUtilsTest extends TFTestCase {
     	assertEquals("null", TFUtils.toString(null));
     	assertEquals("5", TFUtils.toString(new Integer(5)));
     }
+    
+    public void testAsInteger(){
+        Short s = 10;
+        assertEquals((Integer)10, TFUtils.asInteger(s));
+        assertEquals((Integer)10, TFUtils.asInteger("10"));
+    }
 
 }
