@@ -710,6 +710,13 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 			leaveMode();
 		}
 		
+		enterMode(Mode.Running);
+		try {
+			runActualizers(Mode.Running);
+		} finally {
+			leaveMode();
+		}
+		
 	}
 
 	private Map<Class, List<IDBObject>> getDBOLists() {
