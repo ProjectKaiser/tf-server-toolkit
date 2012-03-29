@@ -198,7 +198,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         {
             sd = gen.parse(null, TestSrv3.class);
             
-            op = sd.getOperations().get(0);
+            op = sd.getOperation("run1");
             assertNotNull(op.getRequestType());
             ClassDef cd = (ClassDef) op.getRequestType().getProps().get(0).getType();
             assertEquals("v1", cd.getProps().get(0).getName());

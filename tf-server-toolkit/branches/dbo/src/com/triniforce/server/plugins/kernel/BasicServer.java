@@ -37,6 +37,7 @@ import com.triniforce.db.ddl.UpgradeRunner.DbType;
 import com.triniforce.db.ddl.UpgradeRunner.IActualState;
 import com.triniforce.dbo.DBOActualizer;
 import com.triniforce.dbo.DBOSort;
+import com.triniforce.dbo.DBOUpgProcedure;
 import com.triniforce.dbo.IDBObject;
 import com.triniforce.dbo.PKEPDBOActualizers;
 import com.triniforce.dbo.PKEPDBObjects;
@@ -326,7 +327,6 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 					public String getIdentifierQuoteString() {
 						return quoteString;
 					}
-
 				};
 			} finally {
 				pool.returnConnection(conn);
@@ -533,6 +533,10 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	 */
 	public void registerUpgradeProcedure(UpgradeProcedure updProc) {
 		registerEntity(updProc);
+		
+		IPKExtensionPoint ep = getExtensionPoint(PKEPDBObjects.class);
+        ep.putExtension(updProc.getEntityName(), new DBOUpgProcedure(updProc));
+
 	}
 
 	/*
