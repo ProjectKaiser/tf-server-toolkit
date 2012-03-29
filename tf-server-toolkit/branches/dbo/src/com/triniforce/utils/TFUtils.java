@@ -69,7 +69,19 @@ public class TFUtils {
 	    if( value instanceof Short){
 	        return (int)(short)(Short) value;
 	    }
-	    return (Integer)value;
+	    if( value instanceof Integer){
+	        return (Integer)value;
+        }
+	    if( value instanceof String){
+            return Integer.parseInt((String) value);
+        }
+	    TFUtils.assertTrue(false, "Unknown type for asInteger" + value.getClass());
+	    return 0;
+	}
+	
+	public static String toString(Object o){
+		if(null == o) return "null";
+		return o.toString();
 	}
 	
 	public static Long asLong(Object value){

@@ -82,7 +82,7 @@ public class BasicServerTest extends BasicServerTestCase {
 	}
 
 	public void testExtensions(){
-		checkExtensions(getServer());
+		checkExtensions(this, getServer());
 	}
 	
 	public void testProcedures(){

@@ -255,6 +255,8 @@ public class InterfaceDescriptionGenerator {
 	                            if(!val.getType().getTypeDef().getType().equals(Object.class.getName()))
 	                                e.attr("type", getTypeName(val.getType()));                            
 	                        }
+	                        if(val.getMinOccur()>0 && val.isNillable())
+	                        	e.attr("nillable", "true");
 	                    }
 	                })
 	                .end()

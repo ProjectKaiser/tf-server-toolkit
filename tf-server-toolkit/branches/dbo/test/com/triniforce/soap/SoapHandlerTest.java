@@ -27,10 +27,9 @@ import com.triniforce.soap.InterfaceDescriptionGenerator.SoapHandler.CurrentObje
 import com.triniforce.soap.SoapHandlerTest.IService.Cls2;
 import com.triniforce.soap.SoapHandlerTest.IService.Req1;
 import com.triniforce.soap.SoapHandlerTest.IService2.C1;
-import com.triniforce.soap.TypeDefLibCache.MapEntry;
-import com.triniforce.soap.TypeDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
+import com.triniforce.soap.TypeDefLibCache.MapEntry;
 
 public class SoapHandlerTest extends TFTestCase {
 
@@ -913,4 +912,5 @@ public class SoapHandlerTest extends TFTestCase {
 	        "</soap:Envelope>", string);
         return (String) gen.deserialize(desc, inSource(req)).m_args[1];
 	}
+	
 }

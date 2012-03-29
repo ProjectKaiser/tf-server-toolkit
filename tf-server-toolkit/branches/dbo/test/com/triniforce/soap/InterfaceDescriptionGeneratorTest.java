@@ -154,7 +154,9 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
     
     @SoapInclude(extraClasses={Cls2.InnerObject.class})
     interface TestSrv3{
-        Cls2 run1(Cls1 req);  
+        Cls2 run1(Cls1 req);
+        
+        Long run2();
     }
     
     static Order DEFAULT_ORDER = null; 

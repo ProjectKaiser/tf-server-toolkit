@@ -79,7 +79,11 @@ public class TypeDef extends SimpleName{
         
         @Override
         boolean isNullable() {
-            return !BOXES.containsKey(getType());
+            return !isBoxType();
+        }
+        
+        boolean isBoxType(){
+        	return BOXES.containsKey(getType());
         }
 
         public Object valueOf(String value) {
