@@ -20,6 +20,7 @@ import com.triniforce.server.plugins.kernel.ep.sp.PKEPServerProcedures;
 import com.triniforce.server.plugins.kernel.ep.srv_ev.PKEPServerEvents;
 import com.triniforce.server.plugins.kernel.ext.br.BackupRestoreDb;
 import com.triniforce.server.plugins.kernel.ext.br.BackupRestorePluginVersions;
+import com.triniforce.server.plugins.kernel.recurring.TRecurringTasks;
 import com.triniforce.server.plugins.kernel.tables.EntityJournal;
 import com.triniforce.server.plugins.kernel.tables.NextId;
 import com.triniforce.server.plugins.kernel.tables.TNamedDbId;
@@ -93,6 +94,8 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         reg.registerTableDef(new TNamedDbId());
         reg.registerTableDef(new com.triniforce.server.plugins.kernel.tables.TDbQueues());
         reg.registerTableDef(m_tQueueId);
+        reg.registerTableDef(new TRecurringTasks());
+        
         reg.registerUpgradeProcedure(new ConvertForeignKeys());
         reg.registerUpgradeProcedure(new BreakIdGenerator(m_queueIdGenerator));
         
