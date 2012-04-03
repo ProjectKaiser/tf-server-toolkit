@@ -14,6 +14,7 @@ import com.triniforce.server.srvapi.INamedDbId;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
+import com.triniforce.utils.ICheckInterrupted;
 
 public class PKEPRecurringTasks extends PKExtensionPoint{
     
@@ -88,6 +89,7 @@ public class PKEPRecurringTasks extends PKExtensionPoint{
         int res = 0;
         while(true){
             TRecurringTasks.Data data = null;
+            ICheckInterrupted.Helper.checkInterrupted();
             synchronized(this) {
                 try{
                     TRecurringTasks.BL bl = ISmartTran.Helper.instantiateBL(TRecurringTasks.BL.class);
