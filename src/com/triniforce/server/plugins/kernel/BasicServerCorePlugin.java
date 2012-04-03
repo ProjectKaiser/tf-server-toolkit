@@ -20,6 +20,8 @@ import com.triniforce.server.plugins.kernel.ep.sp.PKEPServerProcedures;
 import com.triniforce.server.plugins.kernel.ep.srv_ev.PKEPServerEvents;
 import com.triniforce.server.plugins.kernel.ext.br.BackupRestoreDb;
 import com.triniforce.server.plugins.kernel.ext.br.BackupRestorePluginVersions;
+import com.triniforce.server.plugins.kernel.recurring.PKEPRecurringTasks;
+import com.triniforce.server.plugins.kernel.recurring.PTRecurringTasks;
 import com.triniforce.server.plugins.kernel.recurring.TRecurringTasks;
 import com.triniforce.server.plugins.kernel.tables.EntityJournal;
 import com.triniforce.server.plugins.kernel.tables.NextId;
@@ -100,6 +102,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         reg.registerUpgradeProcedure(new BreakIdGenerator(m_queueIdGenerator));
         
         getBasicServer().addPeriodicalTask(new TimedLockTicker());
+        getBasicServer().addPeriodicalTask(new PTRecurringTasks());
         
 	}
 	
@@ -488,6 +491,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         putExtensionPoint(new PKEPServerProcedures());
         putExtensionPoint(new PKEPBackupRestore());
         putExtensionPoint(new PKEPServerEvents());
+        putExtensionPoint(new PKEPRecurringTasks());
     }
 
 
