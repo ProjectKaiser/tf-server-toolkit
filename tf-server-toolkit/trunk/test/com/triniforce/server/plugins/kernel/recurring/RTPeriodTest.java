@@ -60,7 +60,7 @@ public class RTPeriodTest extends TFTestCase {
         assertEquals(1000 * 3600 * 24 * 3, RTPeriod.YEAR.getPastThreshold());
     }
     
-    DateTimeZone tzMsc = DateTimeZone.forID("Europe/Moscow");
+    public static DateTimeZone tzMsc = DateTimeZone.forID("Europe/Moscow");
     DateTime april2012Msc = new DateTime(2012, 04, 1, 12, 0, tzMsc);
     //2011-03-27 01:59:59.999+03:00
     DateTime prevTransitionMsc = new DateTime(tzMsc.previousTransition(april2012Msc.getMillis()), tzMsc);
