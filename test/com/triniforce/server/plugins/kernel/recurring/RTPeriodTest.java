@@ -42,6 +42,8 @@ public class RTPeriodTest extends TFTestCase {
             assertEquals(periods.size(), dbValues.size());
         }
         
+        assertNull(RTPeriod.fromDbValue("", false));
+        
         //test wrong values
         assertNull(RTPeriod.fromDbValue(-1, false));
         try{
@@ -64,25 +66,36 @@ public class RTPeriodTest extends TFTestCase {
     DateTime prevTransitionMsc = new DateTime(tzMsc.previousTransition(april2012Msc.getMillis()), tzMsc);
     
     public void test_calcNextOccurence(){
+        
+        long afterPrevTransitionMsc =  prevTransitionMsc.getMillis() + 612308734;
+        
         //test day
         {
-            for(int i = 1;i< 10;i++){
+            assertEquals(afterPrevTransitionMsc, RTPeriod.DAY.calcNextOccurence(afterPrevTransitionMsc, prevTransitionMsc.getMillis(), tzMsc.getID()));
+            for(int i = 0;i< 10;i++){
                 DateTime before =  prevTransitionMsc.minusDays(i).plusHours(3);
                 Long nextOccurence = RTPeriod.DAY.calcNextOccurence(before.getMillis(), prevTransitionMsc.getMillis(), tzMsc.getID());
                 DateTime after = new DateTime(nextOccurence, tzMsc);
-                assertFalse(before.isBefore(before));
-                assertTrue(before.isBefore(after));
+                if(i>0){
+                    assertTrue(before.isBefore(after));
+                }else{
+                    assertEquals(after, before);                    
+                }
                 assertEquals(0, Days.daysBetween(prevTransitionMsc, after).getDays());
                 assertEquals(before.getHourOfDay(), after.getHourOfDay());
             }
         }
         //test week
         {
-            for(int i = 1;i< 10;i++){
+            for(int i = 0;i< 10;i++){
                 DateTime before =  prevTransitionMsc.minusWeeks(i).plusDays(2);
                 Long nextOccurence = RTPeriod.WEEK.calcNextOccurence(before.getMillis(), prevTransitionMsc.getMillis(), tzMsc.getID());
                 DateTime after = new DateTime(nextOccurence, tzMsc);
-                assertTrue(before.isBefore(after));
+                if(i>0){
+                    assertTrue(before.isBefore(after));
+                }else{
+                    assertEquals(after, before);                    
+                }
                 assertEquals(0, Weeks.weeksBetween(prevTransitionMsc, after).getWeeks());
                 assertEquals(before.getHourOfDay(), after.getHourOfDay());
                 assertEquals(before.getDayOfWeek(), after.getDayOfWeek());
@@ -90,11 +103,15 @@ public class RTPeriodTest extends TFTestCase {
         }
         //test month
         {
-            for(int i = 1;i< 10;i++){
+            for(int i = 0;i< 10;i++){
                 DateTime before =  prevTransitionMsc.minusMonths(i).plusDays(2);
                 Long nextOccurence = RTPeriod.MONTH.calcNextOccurence(before.getMillis(), prevTransitionMsc.getMillis(), tzMsc.getID());
                 DateTime after = new DateTime(nextOccurence, tzMsc);
-                assertTrue(before.isBefore(after));
+                if(i>0){
+                    assertTrue(before.isBefore(after));
+                }else{
+                    assertEquals(after, before);                    
+                }
                 assertEquals(0, Months.monthsBetween(prevTransitionMsc, after).getMonths());
                 assertEquals(before.getHourOfDay(), after.getHourOfDay());
                 assertEquals(before.getDayOfMonth(), after.getDayOfMonth());
@@ -106,7 +123,11 @@ public class RTPeriodTest extends TFTestCase {
                 DateTime before =  prevTransitionMsc.minusMonths(i).plusDays(2);
                 Long nextOccurence = RTPeriod.YEAR.calcNextOccurence(before.getMillis(), prevTransitionMsc.getMillis(), tzMsc.getID());
                 DateTime after = new DateTime(nextOccurence, tzMsc);
-                assertTrue(before.isBefore(after));
+                if(i>0){
+                    assertTrue(before.isBefore(after));
+                }else{
+                    assertEquals(after, before);                    
+                }
                 assertEquals(0, Years.yearsBetween(prevTransitionMsc, after).getYears());
                 assertEquals(before.getHourOfDay(), after.getHourOfDay());
                 assertEquals(before.getDayOfMonth(), after.getDayOfMonth());
