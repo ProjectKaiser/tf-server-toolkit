@@ -13,10 +13,13 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -32,6 +35,13 @@ import com.triniforce.db.ddl.TableDef.EReferenceError;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.ddl.UpgradeRunner.DbType;
 import com.triniforce.db.ddl.UpgradeRunner.IActualState;
+import com.triniforce.dbo.DBOActualizer;
+import com.triniforce.dbo.DBOSort;
+import com.triniforce.dbo.DBOUpgProcedure;
+import com.triniforce.dbo.IDBObject;
+import com.triniforce.dbo.PKEPDBOActualizers;
+import com.triniforce.dbo.PKEPDBObjects;
+import com.triniforce.extensions.IPKExtension;
 import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.extensions.PKPlugin;
 import com.triniforce.extensions.PKRootExtensionPoint;
@@ -229,7 +239,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 	private boolean m_bRegistered;
 
-	private boolean m_bDbModNeeded;
+	private boolean m_bDbModNeeded=true;
 
 	private DBTables m_desiredTables;
 
@@ -237,7 +247,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 	private LinkedHashMap<String, IEntity> m_entities;
 
-	private List<UpgradeProcedure> m_upRegList = null;
+//	private List<UpgradeProcedure> m_upRegList = null;
 
 	private List<DataPreparationProcedure> m_dppRegList = null;
 	
@@ -281,7 +291,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 
         m_bRegistered = false;
-        m_bDbModNeeded = false;
+//        m_bDbModNeeded = false;
 
         m_desiredTables = new DBTables();
 
@@ -317,7 +327,6 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 					public String getIdentifierQuoteString() {
 						return quoteString;
 					}
-
 				};
 			} finally {
 				pool.returnConnection(conn);
@@ -410,6 +419,8 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 			    
 				for (IPlugin plugin : m_plugins)
 					plugin.prepareApi();
+				
+				runActualizers(Mode.Registration);
 
 				ISrvSmartTranFactory trf = SrvApiAlgs2.getISrvTranFactory();
 				trf.push();
@@ -431,8 +442,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 						loadRegLists(connection);
 
-						m_bDbModNeeded = !(m_upRegList.isEmpty() && m_dppRegList
-								.isEmpty());
+						m_bDbModNeeded = true; 
 					}
 				} finally {
 					trf.pop();
@@ -445,6 +455,25 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 			ApiStack.popApi();
 		}
 	}
+
+	private void runActualizers(Mode mode) {
+		Map<Class, List<IDBObject>> dboLists = getDBOLists();
+		
+		for(IPKExtension extension : getExtensionPoint(PKEPDBOActualizers.class).getExtensions().values()){
+			DBOActualizer actualizer = extension.getInstance();
+			if(mode.equals(actualizer.getAtualizationMode())){
+				List<IDBObject> list = dboLists.get(actualizer.getClass());
+				if(null == list)
+					list = Collections.emptyList();
+				if(!actualizer.hasOwnVersioning()){
+					DBOSort sort = new DBOSort();
+					list = sort.sort(list);
+				}	
+				actualizer.actualize(list);
+			}
+		}
+	}
+
 
 	/**
 	 * Load registered upgrade procedures and data preparation procedures from
@@ -465,8 +494,8 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 			}
 		}
 
-		m_upRegList = ((EntityJournal<UpgradeProcedure>) getEntity(UP_TABLE))
-				.exclude(connection, getTableDbName(UP_TABLE), upList);
+//		m_upRegList = ((EntityJournal<UpgradeProcedure>) getEntity(UP_TABLE))
+//				.exclude(connection, getTableDbName(UP_TABLE), upList);
 
 		m_dppRegList = ((EntityJournal<DataPreparationProcedure>) getEntity(DPP_TABLE))
 				.exclude(connection, getTableDbName(DPP_TABLE), dppList);
@@ -504,6 +533,10 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	 */
 	public void registerUpgradeProcedure(UpgradeProcedure updProc) {
 		registerEntity(updProc);
+		
+		IPKExtensionPoint ep = getExtensionPoint(PKEPDBObjects.class);
+        ep.putExtension(updProc.getEntityName(), new DBOUpgProcedure(updProc));
+
 	}
 
 	/*
@@ -595,7 +628,9 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 		if (!isRegistered())
 			throw new ServerException(Messages
 					.getString("Server.SrvNotRegError")); //$NON-NLS-1$
-
+		
+//		return true;
+//
 		if (!m_bDbModNeeded) {
 			List<DBOperation> cl = m_desiredTables.getCommandList();
 			m_bDbModNeeded = !cl.isEmpty();
@@ -646,16 +681,19 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 								(Connection) connection, m_actualTabStates);
 						List<DBOperation> cl = m_desiredTables.getCommandList();
 						player.run(cl);
+						
 						connection.commit();
+						runActualizers(Mode.Upgrade);
+						
 
 						// upgrade Upgradeprocedures
-						flushEntities(connection);
+//						flushEntities(connection);
 
 						connection.commit();
-						m_bDbModNeeded = false;
 					}
 
 				});
+				
 			} finally {
 				trnFact.pop();
 			}
@@ -663,22 +701,49 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 			leaveMode();
 		}
 
+		m_bDbModNeeded = false;
+
 		// run DataPreparationProcedures
 		enterMode(Mode.Running);
 		try {
+			loadRegLists(ApiStack.getInterface(Connection.class));
 			if (!m_dppRegList.isEmpty()) {
 				runDataPreparationProcedures();
 			}
 		} finally {
 			leaveMode();
 		}
+		
+		enterMode(Mode.Running);
+		try {
+			runActualizers(Mode.Running);
+		} finally {
+			leaveMode();
+		}
+		
 	}
 
-	interface ICallback {
+	private Map<Class, List<IDBObject>> getDBOLists() {
+		HashMap<Class, List<IDBObject>> res = new HashMap<Class, List<IDBObject>>();
+		IPKExtensionPoint epDBO = getExtensionPoint(PKEPDBObjects.class);
+		for(IPKExtension extension : epDBO.getExtensions().values()){
+			IDBObject dbo = extension.getInstance();
+			Class actKey = dbo.getActualizerClass();
+			List<IDBObject> list = res.get(actKey);
+			if(null == list){
+				list = new ArrayList<IDBObject>();
+				res.put(actKey, list);
+			}
+			list.add(dbo);
+		}
+		return res;
+	}
+
+	public interface ICallback {
 		void call() throws Exception;
 	}
 
-	private void runInSingleConnectionMode(ICallback cb) throws Exception {
+	public static void runInSingleConnectionMode(ICallback cb) throws Exception {
 		IDatabaseInfo dbInfo = ApiStack.getInterface(IDatabaseInfo.class);
 		IPooledConnection pool = null;
 		int oldMaxIdle = 0;
@@ -713,6 +778,9 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 												.format(
 														"Data preparation procedure: \"%s\"", proc.getEntityName())); //$NON-NLS-1$
 						proc.run();
+					} catch (Throwable t){
+						ApiAlgs.getLog(this).error(t.getMessage(), t);
+						ApiAlgs.rethrowException((Exception) t);
 					} finally {
 						ApiAlgs.closeProfItem(psi);
 					}
@@ -733,24 +801,24 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	 *            database connection
 	 * @throws Exception
 	 */
-	private void flushEntities(Connection connection) throws Exception {
-		if (m_upRegList == null) {
-			loadRegLists(connection);
-		}
-		if (!m_upRegList.isEmpty()) {
-			for (UpgradeProcedure proc : m_upRegList) {
-                ApiAlgs
-                .getLog(this)
-                .info(
-                        String
-                                .format(
-                                        "Upgrade procedure: \"%s\"", proc.getEntityName())); //$NON-NLS-1$			    
-				proc.run();
-			}
-			((EntityJournal<UpgradeProcedure>) getEntity(UP_TABLE)).add(
-					connection, getTableDbName(UP_TABLE), m_upRegList);
-		}
-	}
+//	private void flushEntities(Connection connection) throws Exception {
+//		if (m_upRegList == null) {
+//			loadRegLists(connection);
+//		}
+//		if (!m_upRegList.isEmpty()) {
+//			for (UpgradeProcedure proc : m_upRegList) {
+//                ApiAlgs
+//                .getLog(this)
+//                .info(
+//                        String
+//                                .format(
+//                                        "Upgrade procedure: \"%s\"", proc.getEntityName())); //$NON-NLS-1$			    
+//				proc.run();
+//			}
+//			((EntityJournal<UpgradeProcedure>) getEntity(UP_TABLE)).add(
+//					connection, getTableDbName(UP_TABLE), m_upRegList);
+//		}
+//	}
 
 	/**
 	 * All entity register procedures must call this
