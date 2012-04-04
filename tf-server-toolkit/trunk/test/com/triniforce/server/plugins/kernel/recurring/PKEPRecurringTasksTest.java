@@ -34,7 +34,7 @@ public class PKEPRecurringTasksTest extends BasicServerTestCase {
     
     static int prevCallNumber;
     
-    static class SimpleTask extends PKEPRecurringTask{
+    static class SimpleTask implements IPKEPRecurringTask{
 
         public long m_id;
         public long m_start;
@@ -42,7 +42,7 @@ public class PKEPRecurringTasksTest extends BasicServerTestCase {
         public boolean m_isTooLate;
         int callNumber;
 
-        @Override
+        //@Override
         public void processTask(long id, long start, long currentTime,
                 boolean isTooLate) {
                     m_id = id;

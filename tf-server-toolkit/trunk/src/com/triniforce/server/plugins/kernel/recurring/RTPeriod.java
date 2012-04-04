@@ -99,7 +99,7 @@ public abstract class RTPeriod {
             return YEAR;
         default:
             if (throwIfWrong){
-                throw new IllegalArgumentException("RTPeriod wrong dbValue: " + dbValue);
+                throw new IllegalArgumentException("The RTPeriod dbValue '" + dbValue +"' is not recognized");
             }
         }
         return null;

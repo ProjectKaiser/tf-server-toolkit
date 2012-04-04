@@ -29,7 +29,7 @@ public class PKEPRecurringTasks extends PKExtensionPoint{
     
     public PKEPRecurringTasks() {
         setSingleExtensionInstances(true);
-        setExtensionClass(PKEPRecurringTask.class);
+        setExtensionClass(IPKEPRecurringTask.class);
     }
 
     
@@ -104,7 +104,7 @@ public class PKEPRecurringTasks extends PKExtensionPoint{
                     }
                     bl.delete(data.id);                
                     String extId = dbId.getName(data.extension_id);
-                    PKEPRecurringTask rt = getExtension(extId).getInstance();
+                    IPKEPRecurringTask rt = getExtension(extId).getInstance();
                     try{
                         rt.processTask(data.id, data.start, currentTime, currentTime - data.start > data.past_threshold);
                     }catch(Throwable t){
