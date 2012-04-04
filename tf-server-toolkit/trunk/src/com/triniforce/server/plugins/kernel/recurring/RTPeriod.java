@@ -81,13 +81,17 @@ public abstract class RTPeriod {
         m_pastThreshold = pastThreshold;
     }
     
-    public static RTPeriod fromDbValue(Integer dbValue){
+    public static RTPeriod fromDbValue(Object dbValue){
         return fromDbValue(dbValue, true);
     }
     
-    public static RTPeriod fromDbValue(Integer dbValue, boolean throwIfWrong){
-        if (dbValue == null)
+    public static RTPeriod fromDbValue(Object adbValue, boolean throwIfWrong){
+        if (adbValue == null)
             return null;
+        if (! (adbValue instanceof Integer)){
+            return null;
+        }
+        Integer dbValue = (Integer) adbValue;
         switch (dbValue) {
         case 0:
             return DAY;
@@ -108,6 +112,7 @@ public abstract class RTPeriod {
     protected abstract DurationFieldType getDurationFieldType();
     
     public long calcNextOccurence(long pastInstant, long currentInstant, String timeZone){
+        if(pastInstant > currentInstant)return pastInstant;
         DateTimeZone tz = DateTimeZone.forID(timeZone);
         DateTime start = new DateTime(pastInstant, tz);
         DateTime through = new DateTime(currentInstant, tz);
