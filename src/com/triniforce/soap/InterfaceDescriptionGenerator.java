@@ -435,16 +435,16 @@ public class InterfaceDescriptionGenerator {
             
             static final Object DEFAULT_OBJECT = new Object();
             
-            public CurrentObject(TypeDef objDef) throws ESoap.ENonNullableObject {
-                this(objDef, false);
+            public CurrentObject(QName qn, TypeDef objDef) throws ESoap.ENonNullableObject {
+                this(qn, objDef, false);
             }
             
-            public CurrentObject(TypeDef objDef, boolean bNull) throws ESoap.ENonNullableObject{
+            public CurrentObject(QName qn, TypeDef objDef, boolean bNull) throws ESoap.ENonNullableObject{
                 if(null == objDef)
                     throw new NullPointerException("objDef");
                 if(bNull){
                     if(!objDef.isNullable())
-                        throw new ESoap.ENonNullableObject(objDef.getType());
+                        throw new ESoap.ENonNullableObject(qn, objDef.getType());
                 }
                 else{
                     m_objDef = objDef;
@@ -630,7 +630,7 @@ public class InterfaceDescriptionGenerator {
                     if(null != m_result.m_method)
                         throw new ESoap.EElementReentry(qn);
                     MessageDef methodDef = getMethodDef(tag);
-                    co = new CurrentObject(methodDef, bNull);
+                    co = new CurrentObject(qn, methodDef, bNull);
                 }
                 else{
                     co = m_objStk.peek();
@@ -645,7 +645,7 @@ public class InterfaceDescriptionGenerator {
                         }
                         typeDef = reqTypeDef;
                     }
-                    co = new CurrentObject(typeDef, bNull);
+                    co = new CurrentObject(qn, typeDef, bNull);
                 }
                 m_objStk.push(co);
             }

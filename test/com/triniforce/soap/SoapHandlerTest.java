@@ -246,14 +246,15 @@ public class SoapHandlerTest extends TFTestCase {
     @SuppressWarnings("unchecked")
     public void testCurrentObject() throws SAXException, InstantiationException, IllegalAccessException, SecurityException, NoSuchMethodException{
         
+    	QName qn = new QName("test.com", "var_001");
         try{
-            new CurrentObject(null);
+            new CurrentObject(qn, null);
             fail();
         } catch(NullPointerException e){}
         
         //assertNull(new CurrentObject(null, true).toObject());
         
-        CurrentObject obj = new CurrentObject(new TypeDef.ScalarDef(int.class));
+        CurrentObject obj = new CurrentObject(qn, new TypeDef.ScalarDef(int.class));
         try{
             obj.setCurrentProp("anything");
             fail();
@@ -281,44 +282,44 @@ public class SoapHandlerTest extends TFTestCase {
         }
         
         //check all scalars
-        obj = new CurrentObject(new ScalarDef(Boolean.class));
+        obj = new CurrentObject(qn, new ScalarDef(Boolean.class));
         checkBool(obj);
-        obj = new CurrentObject(new ScalarDef(Boolean.TYPE));
+        obj = new CurrentObject(qn, new ScalarDef(Boolean.TYPE));
         checkBool(obj);
-        obj = new CurrentObject(new ScalarDef(Integer.class));
-        obj = new CurrentObject(new ScalarDef(Long.class));
+        obj = new CurrentObject(qn, new ScalarDef(Integer.class));
+        obj = new CurrentObject(qn, new ScalarDef(Long.class));
         checkLong(obj);
-        obj = new CurrentObject(new ScalarDef(Long.TYPE));
+        obj = new CurrentObject(qn, new ScalarDef(Long.TYPE));
         checkLong(obj);
-        obj = new CurrentObject(new ScalarDef(Short.class)); 
+        obj = new CurrentObject(qn, new ScalarDef(Short.class)); 
         checkShort(obj);
-        obj = new CurrentObject(new ScalarDef(Short.TYPE));
+        obj = new CurrentObject(qn, new ScalarDef(Short.TYPE));
         checkShort(obj);
-        obj = new CurrentObject(new ScalarDef(Float.class));
+        obj = new CurrentObject(qn, new ScalarDef(Float.class));
         checkFloat(obj);
-        obj = new CurrentObject(new ScalarDef(Float.TYPE)); 
+        obj = new CurrentObject(qn, new ScalarDef(Float.TYPE)); 
         checkFloat(obj);
-        obj = new CurrentObject(new ScalarDef(Double.class));
+        obj = new CurrentObject(qn, new ScalarDef(Double.class));
         checkDouble(obj);
-        obj = new CurrentObject(new ScalarDef(Double.TYPE)); 
+        obj = new CurrentObject(qn, new ScalarDef(Double.TYPE)); 
         checkDouble(obj);
-        obj = new CurrentObject(new ScalarDef(String.class));
+        obj = new CurrentObject(qn, new ScalarDef(String.class));
         obj.setStringValue("76yhfj\n\n\t\td;fjh");
         assertEquals("76yhfj\n\n\t\td;fjh", obj.toObject());
-        obj = new CurrentObject(new ScalarDef(String.class));
+        obj = new CurrentObject(qn, new ScalarDef(String.class));
         assertEquals("", obj.toObject());
         
-        obj = new CurrentObject(new ScalarDef(BigDecimal.class));
+        obj = new CurrentObject(qn, new ScalarDef(BigDecimal.class));
         obj.setStringValue("0.32");
         assertEquals(new BigDecimal(0.32, new MathContext(2)), obj.toObject());
         
         try{
-            obj = new CurrentObject(new ScalarDef(double.class), true);
+            obj = new CurrentObject(qn, new ScalarDef(double.class), true);
             fail();
         } catch(ESoap.ENonNullableObject e){
-            assertEquals(Double.TYPE.toString(), e.getMessage());
+            assertEquals(qn.toString() + ":"+Double.TYPE.toString(), e.getMessage());
         }
-        obj = new CurrentObject(new ScalarDef(String.class), true);
+        obj = new CurrentObject(qn, new ScalarDef(String.class), true);
         assertEquals(null, obj.toObject());
         
         obj.setStringValue("gsgdg");
@@ -328,7 +329,7 @@ public class SoapHandlerTest extends TFTestCase {
         TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(this.getClass().getPackage()));
         TypeDef def = lib.add(TestCls1.class);
 
-        obj = new CurrentObject(def);
+        obj = new CurrentObject(qn, def);
         
         // no effect
         obj.setStringValue("anything");
@@ -346,7 +347,7 @@ public class SoapHandlerTest extends TFTestCase {
         assertEquals("string value in var1", vObj.getVariable1());
         assertEquals("default value", vObj.getVariable2());
         
-        obj = new CurrentObject(lib.add(Integer[].class));
+        obj = new CurrentObject(qn, lib.add(Integer[].class));
         try{
             obj.setCurrentProp("unkProp");
             fail();
@@ -369,22 +370,22 @@ public class SoapHandlerTest extends TFTestCase {
         assertEquals(Integer.valueOf(762034), res.get(1));
         assertEquals(Integer.valueOf(683), res.get(2));
         
-        obj = new CurrentObject(def, true);
+        obj = new CurrentObject(qn, def, true);
         assertNull(obj.toObject());
 
         
         // check primitive types for array
-        obj = new CurrentObject(lib.add(int[].class));
+        obj = new CurrentObject(qn, lib.add(int[].class));
         obj.setCurrentProp("value");
         obj.setPropValue(875);
         assertEquals(875, ((List)obj.toObject()).get(0));
         
-        obj = new CurrentObject(lib.add(boolean[].class));
+        obj = new CurrentObject(qn, lib.add(boolean[].class));
         obj.setCurrentProp("value");
         obj.setPropValue(false);
         assertEquals(false, ((List)obj.toObject()).get(0));
 
-        obj = new CurrentObject(lib.add(double[].class));
+        obj = new CurrentObject(qn, lib.add(double[].class));
         obj.setCurrentProp("value");
         obj.setPropValue(6834.532);
         obj.setCurrentProp("value");
@@ -393,7 +394,7 @@ public class SoapHandlerTest extends TFTestCase {
         assertEquals(7885.66, ((List)obj.toObject()).get(1));
         
         Type t1 = IService.class.getMethod("methodMap", new Class[]{Map.class}).getGenericReturnType();
-        obj = new CurrentObject(lib.add(t1));
+        obj = new CurrentObject(qn, lib.add(t1));
         Map res2 = (Map) obj.toObject();
         assertEquals(Collections.emptyMap(), res2);
         
