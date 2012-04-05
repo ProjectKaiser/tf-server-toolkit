@@ -59,7 +59,7 @@ public class WsdlDescription {
             	m_bNillable = m_td.isNullable();
             }
             else{
-            	m_bNillable = ScalarDef.BOXES.keySet().contains(td.getName());
+            	m_bNillable = m_td.isNullable();
             }
             
         }

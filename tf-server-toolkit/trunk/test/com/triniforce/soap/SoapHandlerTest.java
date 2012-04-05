@@ -149,10 +149,11 @@ public class SoapHandlerTest extends TFTestCase {
         "    </decimalMethod>"+
         "  </soap:Body>"+
         "</soap:Envelope>";
-    
+        
     @SuppressWarnings("unchecked")
     public void test() throws Exception {
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        
         InterfaceDescription desc = gen.parse(null, IService.class);
         
         SOAPDocument res = gen.deserialize(desc, inSource(REQ1));

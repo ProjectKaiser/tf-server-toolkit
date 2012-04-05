@@ -163,6 +163,7 @@ public class ClassParserTest extends TFTestCase {
         assertEquals(int.class.getName(), scDef.getType());
         prop = cDef.getProp("boolV1");
         assertNotNull(prop);
+        assertFalse(cDef.getProp("boolV1").getType().isNullable());
 
         cDef = (ClassDef) m_cp.parse(C3.class, m_lib, null);
         assertEquals(1, cDef.getProps().size());
