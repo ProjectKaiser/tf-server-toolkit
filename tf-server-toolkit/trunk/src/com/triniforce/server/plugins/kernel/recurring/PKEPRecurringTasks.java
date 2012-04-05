@@ -18,7 +18,7 @@ import com.triniforce.utils.ICheckInterrupted;
 
 public class PKEPRecurringTasks extends PKExtensionPoint{
     
-    public static final int DEFAULT_PAST_THRESHOLD = 1000 * 3600 * 24;
+    public static final int  DEFAULT_PAST_THRESHOLD = 1000 * 3600 * 24;
     public static final int ALWAYS_READ_INTERVAL = 1000 * 3600;//per hour
     
     /**
