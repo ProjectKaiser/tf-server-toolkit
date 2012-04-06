@@ -29,6 +29,7 @@ import com.triniforce.server.plugins.kernel.tables.TNamedDbId;
 import com.triniforce.server.plugins.kernel.tables.TQueueId;
 import com.triniforce.server.plugins.kernel.upg_procedures.BreakIdGenerator;
 import com.triniforce.server.plugins.kernel.upg_procedures.ConvertForeignKeys;
+import com.triniforce.server.plugins.kernel.upg_procedures.Upg_120406_NamedDbIdNname;
 import com.triniforce.server.srvapi.DataPreparationProcedure;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IDbQueueFactory;
@@ -100,6 +101,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         
         reg.registerUpgradeProcedure(new ConvertForeignKeys());
         reg.registerUpgradeProcedure(new BreakIdGenerator(m_queueIdGenerator));
+        reg.registerUpgradeProcedure(new Upg_120406_NamedDbIdNname());
         
         getBasicServer().addPeriodicalTask(new TimedLockTicker());
         getBasicServer().addPeriodicalTask(new PTRecurringTasks());
