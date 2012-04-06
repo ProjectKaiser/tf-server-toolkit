@@ -53,8 +53,26 @@ public class TNamedDbIdTest extends BasicServerTestCase {
 		}
 	}
 
+	public static final String UNICODE_PATTERN = "۞∑русскийڧüöäë面伴";
+	String longUnicodeId;
+	{
+		longUnicodeId = UNICODE_PATTERN;
+		while(longUnicodeId.length() + 1 + UNICODE_PATTERN.length() < TNamedDbId.name.getSize()){
+			longUnicodeId+= "." + UNICODE_PATTERN;	
+		}
+		
+	}
+	
 	public void testQueryId() {
 		TNamedDbId dbId = (TNamedDbId) ApiStack.getInterface(INamedDbId.class);
+
+		//unicode pattern
+		{
+			assertNull(dbId.queryId(longUnicodeId));
+			
+		}
+		
+		
 		assertNull(dbId.queryId("testQueryId"));
 		long res[] = {
 				dbId.createId("testQueryId1"),
