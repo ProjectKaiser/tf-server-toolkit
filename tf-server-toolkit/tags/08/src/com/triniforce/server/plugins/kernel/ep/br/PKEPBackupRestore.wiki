@@ -1,0 +1,48 @@
+Extensions must extends PKEPBackupRestoreEntry class.
+
+{code:lang="java"}public abstract class PKEPBackupRestoreEntry {
+	boolean shouldBackup(){return true;};
+	
+	public void initBackup(){};
+	public abstract void backup(IBackupStorage stg);
+	public void finitBackup(){};
+	
+	public String initRestore(IRestoreCtx ctx){return true;};
+	public abstract void restore(IRestoreStorage stg);
+	public void finitRestore(){};
+}
+
+public interface IBackupStorage {
+	void writeObject(String key, IPropSerializabe obj);
+	void writeFolder(String key, File folder);
+	File getTempFolder();
+}
+public interface IRestoreStorage {
+	File getTempFolder();
+	boolean queryKey(String key);
+	Object readObject(String key) throws EObjectNotFound;
+	void restoreFolder(String key, File folder) throws EObjectNotFound;;
+}
+{code}
+h5.Backup
+* List of entries which *shouldBackup()* is built. shouldBackup() can return false if entry became obsolete.
+* *initBackup()* function is called for each entry.
+* *backup()* function is called for each entry
+** entry uses *IBackupStorage* interface to store data
+** {color:value="null"}{*}stg.writeObject(){*} saves an object{color}
+** {color:value="null"}{*}writeFolder() {*}saves a {color}folder
+** To save temp folder entry should get temp folder using getTempFolder(), put data there and then call saveFolder() method
+* *finitBackup()* is invoked for each entry
+Exception handling. If initBackup() is called inifBackup() is always called.
+
+h5.Restore
+* List of archived entries retrieved from archive.
+* List of *restorable* entries is built as intersection between archived entries and registered entries.
+* *initRestore()* is called for each restorable entry. If method returns not null exception *EEntryMayNotBeRestored* is thrown.
+* *restore()* function is called for each restorable entry.
+** entry uses *IRestoreStorage* interface to restore data
+*** {color:value="null"}{*}stg.readObject(){*}{color} to restore object
+*** *stg.restoreFolder()* to restore folder
+*** *queryKey()* is used to check if key exists (getObject/restoreFolder throws exception if key does not exist).
+* {*}finitRestore() {*}is invoked
+Exception handling. If initRestore() is called finitRestore() is always called.
