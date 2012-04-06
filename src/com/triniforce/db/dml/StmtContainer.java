@@ -164,7 +164,7 @@ public class StmtContainer implements IStmtContainer {
             checkClosed();
             String sql = m_sqlGetter.getSql(prepSql);
             PSI psi = ApiAlgs.getProfItem(PrepStmt.class.getName(), PROF_PREPARE);
-            ApiAlgs.getLog(StmtContainer.class).trace(prepSql.getName());
+            ApiAlgs.getLog(StmtContainer.class).trace(prepSql.getName() + ": " + sql);
             PreparedStatement stmnt;
             try {
                 stmnt = m_conn.prepareStatement(sql);
