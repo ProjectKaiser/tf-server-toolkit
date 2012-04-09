@@ -106,8 +106,6 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         reg.registerTableDef(m_tQueueId);
         reg.registerTableDef(new TRecurringTasks());
         
-        reg.registerUpgradeProcedure(new ConvertForeignKeys());
-        reg.registerUpgradeProcedure(new BreakIdGenerator(m_queueIdGenerator));
         reg.registerUpgradeProcedure(new Upg_120406_NamedDbIdNname());
         
         putExtension(PKEPDBObjects.class, ConvertForeignKeys.class.getName(), 
