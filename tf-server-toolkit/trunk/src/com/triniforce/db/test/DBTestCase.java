@@ -43,7 +43,7 @@ public class DBTestCase extends TFTestCase {
     	ApiAlgs.getLog(this).trace("getNewConnection");
         try{
             Connection conn = getDataSource().getConnection();
-            conn.setAutoCommit(true);
+            conn.setAutoCommit(false);
             return conn;
         }catch(Exception e){
             ApiAlgs.rethrowException(e);

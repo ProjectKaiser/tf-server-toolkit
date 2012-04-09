@@ -905,7 +905,11 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
     
     @Override
     public TableDef clone() throws CloneNotSupportedException {
-        TableDef res = new TableDef(getEntityName());
+    	return clone(getEntityName());
+    }
+    
+    public TableDef clone(String withName) throws CloneNotSupportedException {
+        TableDef res = new TableDef(withName);
         
         int vId=1;
         for (TableUpdateOperation op : m_history) {

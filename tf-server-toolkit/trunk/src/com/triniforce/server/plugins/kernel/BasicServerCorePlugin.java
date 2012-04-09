@@ -12,6 +12,13 @@ import java.util.Set;
 import java.util.Stack;
 
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
+import com.triniforce.dbo.DBOTabDef;
+import com.triniforce.dbo.DBOUpgProcedure;
+import com.triniforce.dbo.DBOVersion;
+import com.triniforce.dbo.ExDBOATables;
+import com.triniforce.dbo.ExDBOAUpgradeProcedures;
+import com.triniforce.dbo.PKEPDBOActualizers;
+import com.triniforce.dbo.PKEPDBObjects;
 import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.server.TFPlugin;
 import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
@@ -99,12 +106,18 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         reg.registerTableDef(m_tQueueId);
         reg.registerTableDef(new TRecurringTasks());
         
-        reg.registerUpgradeProcedure(new ConvertForeignKeys());
-        reg.registerUpgradeProcedure(new BreakIdGenerator(m_queueIdGenerator));
         reg.registerUpgradeProcedure(new Upg_120406_NamedDbIdNname());
+        
+        putExtension(PKEPDBObjects.class, ConvertForeignKeys.class.getName(), 
+        		new DBOUpgProcedure(new ConvertForeignKeys()));
+        putExtension(PKEPDBObjects.class, BreakIdGenerator.class.getName() + ".queue", 
+        		new DBOUpgProcedure(new BreakIdGenerator(m_queueIdGenerator)));
         
         getBasicServer().addPeriodicalTask(new TimedLockTicker());
         getBasicServer().addPeriodicalTask(new PTRecurringTasks());
+        
+        putExtension(PKEPDBObjects.class, DBOVersion.class.getName(), 
+        		new DBOTabDef(new DBOVersion()));
         
 	}
 	
@@ -494,6 +507,11 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         putExtensionPoint(new PKEPBackupRestore());
         putExtensionPoint(new PKEPServerEvents());
         putExtensionPoint(new PKEPRecurringTasks());
+        PKEPDBOActualizers actualizers = new PKEPDBOActualizers();
+        actualizers.putExtension(ExDBOATables.class);
+        actualizers.putExtension(ExDBOAUpgradeProcedures.class);
+        putExtensionPoint(actualizers);
+        putExtensionPoint(new PKEPDBObjects());
     }
 
 
