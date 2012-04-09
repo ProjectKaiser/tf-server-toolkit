@@ -5,13 +5,18 @@
  */
 package com.triniforce.server.plugins.kernel.tables;
 
+import java.util.UUID;
+
+import com.triniforce.db.dml.ResSet;
 import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.server.srvapi.INamedDbId;
+import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.INamedDbId.ENotFound;
 import com.triniforce.utils.ApiStack;
+import com.triniforce.utils.IName;
 
 public class TNamedDbIdTest extends BasicServerTestCase {
 
@@ -28,6 +33,40 @@ public class TNamedDbIdTest extends BasicServerTestCase {
 		m_server.leaveMode();
 		super.tearDown();
 	}
+	
+	@SuppressWarnings("deprecation")
+    public void test_updateNname() {
+	    final String key1 = UUID.randomUUID().toString();
+	    final String key2 = UUID.randomUUID().toString();
+	    ISrvSmartTran tr = ApiStack.getInterface(ISrvSmartTran.class);
+	    
+        TNamedDbId dbId = (TNamedDbId) ApiStack.getInterface(INamedDbId.class);
+
+	    tr.insert(TNamedDbId.class, new IName[]{TNamedDbId.name, TNamedDbId.id}, new Object[]{key1, 1});
+	    tr.insert(TNamedDbId.class, new IName[]{TNamedDbId.name, TNamedDbId.id}, new Object[]{key2, 2});
+	    
+	    //
+	    {
+	        ResSet res = tr.select(TNamedDbId.class, new IName[]{TNamedDbId.name, TNamedDbId.nname}, new IName[]{}, new Object[]{});
+	        res.next();
+	        assertNotNull(res.getObject(1));	        
+	        assertNull(res.getObject(2));
+	    }
+	    
+	    assertNotNull(dbId.queryId(key1));
+	    assertNotNull(dbId.queryId(key2));
+	    TNamedDbId.updateNname();
+	    
+	    final String key3 = UUID.randomUUID().toString();
+	    tr.insert(TNamedDbId.class, new IName[]{TNamedDbId.name, TNamedDbId.nname, TNamedDbId.id}, new Object[]{"", key3, 3});
+	    
+	    dbId.loadData();
+	    assertEquals((Long)1L, dbId.queryId(key1));
+	    assertEquals((Long)2L, dbId.queryId(key2));
+	    assertEquals((Long)3L, dbId.queryId(key3));
+	    
+	}
+	
 	
 	public void testCreateId() {
 		// close current transaction
@@ -53,8 +92,28 @@ public class TNamedDbIdTest extends BasicServerTestCase {
 		}
 	}
 
+	
 	public void testQueryId() {
+	    
 		TNamedDbId dbId = (TNamedDbId) ApiStack.getInterface(INamedDbId.class);
+
+		//unicode pattern
+		{
+	        final String UNICODE_PATTERN = "۞∑русскийڧüöäë面伴";
+	        String longUnicodeId = "";
+	        {
+	            longUnicodeId = UNICODE_PATTERN;
+	            while(longUnicodeId.length() + 1 + UNICODE_PATTERN.length() < TNamedDbId.nname.getSize()){
+	                longUnicodeId+= "." + UNICODE_PATTERN;  
+	            }
+	        }
+			assertNull(dbId.queryId(longUnicodeId));
+			Long id = dbId.createId(longUnicodeId);
+			assertEquals(id, dbId.queryId(longUnicodeId));
+			
+		}
+		
+		
 		assertNull(dbId.queryId("testQueryId"));
 		long res[] = {
 				dbId.createId("testQueryId1"),

@@ -66,8 +66,12 @@ public class TypeDef extends SimpleName{
             SCALAR_NAMES.put(byte[].class.getName(), "base64Binary");
         }
         
+        boolean m_bNillable;
+        
+        
         public ScalarDef(Class type) {
             super(scalarName(type.getName()), type);
+            m_bNillable = !BOXES.containsKey(type.getSimpleName());
         }
 
         private static String scalarName(String typeName) {
@@ -79,7 +83,7 @@ public class TypeDef extends SimpleName{
         
         @Override
         boolean isNullable() {
-            return !isBoxType();
+            return m_bNillable;
         }
         
         boolean isBoxType(){

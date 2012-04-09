@@ -27,12 +27,16 @@ import com.triniforce.server.plugins.kernel.ep.sp.PKEPServerProcedures;
 import com.triniforce.server.plugins.kernel.ep.srv_ev.PKEPServerEvents;
 import com.triniforce.server.plugins.kernel.ext.br.BackupRestoreDb;
 import com.triniforce.server.plugins.kernel.ext.br.BackupRestorePluginVersions;
+import com.triniforce.server.plugins.kernel.recurring.PKEPRecurringTasks;
+import com.triniforce.server.plugins.kernel.recurring.PTRecurringTasks;
+import com.triniforce.server.plugins.kernel.recurring.TRecurringTasks;
 import com.triniforce.server.plugins.kernel.tables.EntityJournal;
 import com.triniforce.server.plugins.kernel.tables.NextId;
 import com.triniforce.server.plugins.kernel.tables.TNamedDbId;
 import com.triniforce.server.plugins.kernel.tables.TQueueId;
 import com.triniforce.server.plugins.kernel.upg_procedures.BreakIdGenerator;
 import com.triniforce.server.plugins.kernel.upg_procedures.ConvertForeignKeys;
+import com.triniforce.server.plugins.kernel.upg_procedures.Upg_120406_NamedDbIdNname;
 import com.triniforce.server.srvapi.DataPreparationProcedure;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IDbQueueFactory;
@@ -100,6 +104,11 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         reg.registerTableDef(new TNamedDbId());
         reg.registerTableDef(new com.triniforce.server.plugins.kernel.tables.TDbQueues());
         reg.registerTableDef(m_tQueueId);
+        reg.registerTableDef(new TRecurringTasks());
+        
+        reg.registerUpgradeProcedure(new ConvertForeignKeys());
+        reg.registerUpgradeProcedure(new BreakIdGenerator(m_queueIdGenerator));
+        reg.registerUpgradeProcedure(new Upg_120406_NamedDbIdNname());
         
         putExtension(PKEPDBObjects.class, ConvertForeignKeys.class.getName(), 
         		new DBOUpgProcedure(new ConvertForeignKeys()));
@@ -107,6 +116,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         		new DBOUpgProcedure(new BreakIdGenerator(m_queueIdGenerator)));
         
         getBasicServer().addPeriodicalTask(new TimedLockTicker());
+        getBasicServer().addPeriodicalTask(new PTRecurringTasks());
         
         putExtension(PKEPDBObjects.class, DBOVersion.class.getName(), 
         		new DBOTabDef(new DBOVersion()));
@@ -498,6 +508,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         putExtensionPoint(new PKEPServerProcedures());
         putExtensionPoint(new PKEPBackupRestore());
         putExtensionPoint(new PKEPServerEvents());
+        putExtensionPoint(new PKEPRecurringTasks());
         PKEPDBOActualizers actualizers = new PKEPDBOActualizers();
         actualizers.putExtension(ExDBOATables.class);
         actualizers.putExtension(ExDBOAUpgradeProcedures.class);
