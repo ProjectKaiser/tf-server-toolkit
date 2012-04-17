@@ -1,5 +1,5 @@
-tf_version = '8.0';
-tf_release = false
+tf_version = '9.0';
+tf_release = true
 tf_vendor = 'Triniforce.com'
 
 
