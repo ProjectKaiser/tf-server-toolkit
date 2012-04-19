@@ -6,7 +6,6 @@
 
 package com.triniforce.server.plugins.kernel.recurring;
 
-import com.triniforce.db.dml.ISmartTran;
 import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 
@@ -26,7 +25,7 @@ public class TRecurringTasksTest extends BasicServerTestCase{
     
     @Override
     public void test() throws Exception {
-        TRecurringTasks.BL bl = ISmartTran.Helper.instantiateBL(TRecurringTasks.BL.class); 
+        TRecurringTasks.BL bl = new TRecurringTasks.BL(); 
         bl.deleteAll();
         assertNull(bl.selectFirst());
         bl.insert(111, 222, 333, 444);

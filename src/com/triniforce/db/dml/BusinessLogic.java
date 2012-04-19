@@ -5,6 +5,8 @@
  */ 
 package com.triniforce.db.dml;
 
+import com.triniforce.server.srvapi.ISrvSmartTran;
+import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.IName;
 
 /**
@@ -12,39 +14,42 @@ import com.triniforce.utils.IName;
  */
 public abstract class BusinessLogic {
     
-    private ISmartTran m_st;
+    private ISmartTran m_st_;
 
     public ISmartTran getSt() {
-        return m_st;
+        if( null == m_st_){
+            return ApiStack.getInterface(ISrvSmartTran.class);
+        }
+        return m_st_;
     }
 
     public void setSt(ISmartTran st) {
-        m_st = st;
+        m_st_ = st;
     }
     
     public abstract Class getTable();
     
     protected void insert(IName fields[], Object values[]){
-        m_st.insert(getTable(), fields, values);
+        getSt().insert(getTable(), fields, values);
     }
     
     protected ResSet select(IName fields[],
                 IName lookUpFields[], Object lookUpValues[]){
-        return m_st.select(getTable(), fields, lookUpFields, lookUpValues);
+        return getSt().select(getTable(), fields, lookUpFields, lookUpValues);
     }
  
     protected void update(IName fields[], Object values[],
             IName lookUpFields[], Object lookUpValues[]){
-        m_st.update(getTable(), fields, values, lookUpFields, lookUpValues);
+        getSt().update(getTable(), fields, values, lookUpFields, lookUpValues);
     }    
     
     protected ResSet select(IName fields[],
             IName lookUpFields[], Object lookUpValues[], IName orderByFields[]){
-        return m_st.select(getTable(), fields, lookUpFields, lookUpValues, orderByFields);
+        return getSt().select(getTable(), fields, lookUpFields, lookUpValues, orderByFields);
     }
     
     protected void delete(IName lookUpFields[], Object lookUpValues[]){
-    	m_st.delete(getTable(), lookUpFields, lookUpValues);
+        getSt().delete(getTable(), lookUpFields, lookUpValues);
     }
     
 }
