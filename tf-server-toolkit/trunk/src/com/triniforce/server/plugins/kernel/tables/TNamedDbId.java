@@ -251,7 +251,7 @@ public class TNamedDbId extends TableDef implements INamedDbId {
 	    StmtContainer sc = SrvApiAlgs2.getStmtContainer();
 	    String tableName = SrvApiAlgs2.getISODbInfo().getTableDbName(TNamedDbId.class.getName());
 	    PrepStmt ps = sc.prepareStatement("update " 
-	            + QTable.joinPrefixedCol("", tableName)
+	            + tableName
 	            + " set " + QTable.joinPrefixedCol("", "nname") + "=" + QTable.joinPrefixedCol("", "name")
 	    );
 	    ps.execute();
