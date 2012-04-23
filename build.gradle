@@ -1,4 +1,4 @@
-tf_version = '8.0';
+tf_version = '10.0';
 tf_release = false
 tf_vendor = 'Triniforce.com'
 
