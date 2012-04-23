@@ -52,7 +52,7 @@ public class TNamedDbId extends TableDef implements INamedDbId {
 		addIndex(4, "idx_name", new String[]{name.getName()}, true, true);
 		addField(5, nname);
 		addIndex(6, "idx_nname", new String[]{nname.getName()}, false, true);
-		deleteIndex(7, "idx_name", true);
+		deleteIndex(7, "idx_name");
 	}
 	
 	public static class PQInsert extends PrepSql{
