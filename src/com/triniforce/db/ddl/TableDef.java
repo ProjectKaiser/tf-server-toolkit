@@ -21,6 +21,7 @@ import java.util.ListIterator;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.server.soap.NamedVar;
 import com.triniforce.server.soap.VObject;
+import com.triniforce.utils.ApiAlgs;
 
 /**
  * Class for presentation of table in base
@@ -893,15 +894,25 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
         return this;
     }
 
+    @Deprecated
     public TableDef deleteIndex(int version, String name, IndexDef.TYPE type) throws EDBObjectException {
         addModification(version, new DeleteIndexOperation(name, type, false));
         return this;
     }
 
+    @Deprecated
     public TableDef deleteIndex(int version, String name, boolean bUnique) throws EDBObjectException {
         addModification(version, new DeleteIndexOperation(name, IndexDef.TYPE.INDEX, bUnique));
         return this;
     }
+    
+    public TableDef deleteIndex(int version, String name) throws EDBObjectException {
+    	ElementVerStored<IndexDef> e = getIndices().findElement(name);
+    	ApiAlgs.assertNotNull(e, name);
+    	IndexDef idxDef = e.getElement();
+        addModification(version, new DeleteIndexOperation(name, idxDef.getType(), idxDef.isUnique()));
+        return this;
+    }    
     
     @Override
     public TableDef clone() throws CloneNotSupportedException {
