@@ -23,15 +23,15 @@ public class HudsonApiTest extends TFTestCase {
     @Override
     public void test() throws Exception {
         {
-            HudsonApi h = new HudsonApi("http://gmpxp:8080/hudson");
+            HudsonApi h = new HudsonApi("http://gmpxp:8080/hudson", "" , "");
             assertEquals("http://gmpxp:8080/hudson/", h.getBaseAddress());
-            h = new HudsonApi("http://gmpxp:8080/hudson/");
+            h = new HudsonApi("http://gmpxp:8080/hudson/", "","");
             assertEquals("http://gmpxp:8080/hudson/", h.getBaseAddress());
         }
     }
     
     public void testFullUrl(){
-        HudsonApi h = new HudsonApi("http://gmpxp:8080/hudson");
+        HudsonApi h = new HudsonApi("http://gmpxp:8080/hudson", "", "");
         assertEquals( "http://gmpxp:8080/hudson/api/json", h.calcFullUrl(null, null, "json", null));
         Map<String, String> q = new LinkedHashMap<String, String>();
         q.put("tree", "jobs[name]");
