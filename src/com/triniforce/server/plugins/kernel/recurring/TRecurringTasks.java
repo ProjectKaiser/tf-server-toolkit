@@ -46,6 +46,8 @@ public class TRecurringTasks extends TableDef {
         addField(4, f_past_threshold);
         addIndex(5, "start_idx", new String[]{f_start.getName()}, false, true);
         addIndex(6, "id_idx", new String[]{f_id.getName()}, true, true);
+        deleteIndex(7, "id_idx");
+        addIndex(8, "id_extension_idx", new String[]{f_id.getName(), f_extension_id.getName()}, true, true);
     }
     
     public static class BL extends BusinessLogic{
@@ -70,8 +72,13 @@ public class TRecurringTasks extends TableDef {
             return res;
         }
         
+        @Deprecated
         public void delete(long id){
             delete(new IName[]{f_id}, new Object[]{id});
+        }
+        
+        public void delete(long id, long extensionId){
+            delete(new IName[]{f_id, f_extension_id}, new Object[]{id, extensionId});
         }
         
         public void deleteAll(){
