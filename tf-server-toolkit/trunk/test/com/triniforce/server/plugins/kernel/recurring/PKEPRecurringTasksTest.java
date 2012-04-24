@@ -235,7 +235,7 @@ public class PKEPRecurringTasksTest extends BasicServerTestCase {
             rts.createOrUpdateTask(id2, st2.getClass(), start2);
             TRecurringTasks.Data data = rts.peekNextData(); 
             assertEquals(start2, data.start);
-            rts.deleteTask(id2);
+            rts.deleteTask(id2, st2.getClass());
             data = rts.peekNextData(); 
             assertEquals(start1, data.start);            
         }

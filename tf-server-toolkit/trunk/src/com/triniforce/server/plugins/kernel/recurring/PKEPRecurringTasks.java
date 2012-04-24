@@ -49,7 +49,7 @@ public class PKEPRecurringTasks extends PKExtensionPoint{
         {
             //check that extension exists
             getExtension(extClass);
-            extId = dbId.createId(extClass.getName());            
+            extId = dbId.createId(getExtension(extClass).getId());            
         }
         
         long start;
@@ -63,14 +63,15 @@ public class PKEPRecurringTasks extends PKExtensionPoint{
             }
         }
         TRecurringTasks.BL bl = ISmartTran.Helper.instantiateBL(TRecurringTasks.BL.class);
-        bl.delete(id);
+        bl.delete(id, extId);
         bl.insert(id, extId, start, pastThreshold);
         m_nextTime = 0;
     }
     
-    public synchronized void deleteTask(long id){
+    public synchronized void deleteTask(long id, Class extClass){
+        INamedDbId dbId = ApiStack.getInterface(INamedDbId.class);
         TRecurringTasks.BL bl = ISmartTran.Helper.instantiateBL(TRecurringTasks.BL.class);    
-        bl.delete(id);
+        bl.delete(id, dbId.createId(getExtension(extClass).getId()));
     }
     
     public synchronized void deleteAllTasks(){
@@ -92,7 +93,7 @@ public class PKEPRecurringTasks extends PKExtensionPoint{
             ICheckInterrupted.Helper.checkInterrupted();
             synchronized(this) {
                 try{
-                    TRecurringTasks.BL bl = ISmartTran.Helper.instantiateBL(TRecurringTasks.BL.class);
+                    TRecurringTasks.BL bl = new TRecurringTasks.BL();
                     data = bl.selectFirst();
                     if(null == data){
                         m_nextTime = currentTime + ALWAYS_READ_INTERVAL;
@@ -102,7 +103,7 @@ public class PKEPRecurringTasks extends PKExtensionPoint{
                         m_nextTime = data.start;
                         break;
                     }
-                    bl.delete(data.id);                
+                    bl.delete(data.id, data.extension_id);                
                     String extId = dbId.getName(data.extension_id);
                     IPKEPRecurringTask rt = getExtension(extId).getInstance();
                     try{
@@ -117,7 +118,7 @@ public class PKEPRecurringTasks extends PKExtensionPoint{
                         //delete record                    
                         {
                             TRecurringTasks.BL bl2 = ISmartTran.Helper.instantiateBL(TRecurringTasks.BL.class);
-                            bl2.delete(data.id);
+                            bl2.delete(data.id, data.extension_id);
                         }
                     }
                     ISrvSmartTranFactory.Helper.commit();
