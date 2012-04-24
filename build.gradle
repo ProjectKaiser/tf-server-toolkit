@@ -97,6 +97,10 @@ uploadArchives {
 }
 
 task printEnv{
+	System.out.println("****************** PROPERTIES *********************************");    
+
+	Map<String, String> variables = System.getenv();  
+
         Properties props = System.getProperties();
         List names = new ArrayList();
         for(Object name:props.keySet()){
@@ -106,6 +110,14 @@ task printEnv{
         for(Object name: names){
             println(name + ": " + props.getProperty((String) name));               
         }
+	System.out.println("****************** ENVIRONMENT *********************************");    
+	for (Map.Entry<String, String> entry : variables.entrySet())  
+	{  
+	   String name = entry.getKey();  
+	   String value = entry.getValue();  
+	   System.out.println(name + "=" + value);  
+	}  
+
 }
 
 jar {
