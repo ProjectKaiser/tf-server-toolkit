@@ -96,6 +96,18 @@ uploadArchives {
 	}
 }
 
+task printEnv{
+        Properties props = System.getProperties();
+        List names = new ArrayList();
+        for(Object name:props.keySet()){
+            names.add(name);               
+        }
+        Collections.sort(names);
+        for(Object name: names){
+            println(name + ": " + props.getProperty((String) name));               
+        }
+}
+
 jar {
     manifest {
         attributes(
