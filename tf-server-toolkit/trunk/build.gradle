@@ -97,26 +97,30 @@ uploadArchives {
 }
 
 task printEnv{
-	System.out.println("****************** PROPERTIES *********************************");    
+	props:{
+            System.out.println("\n\n\n****************** PROPERTIES *********************************\n\n\n");
+	        Properties props = System.getProperties();
+	        List names = new ArrayList();
+	        for(Object name:props.keySet()){
+	            names.add(name);               
+	        }
+	        Collections.sort(names);
+	        for(Object name: names){
+	            println(name + ": " + props.getProperty((String) name));               
+	        }
+	}
+    env:{
+    	System.out.println("\n\n\n****************** ENVIRONMENT *********************************\n\n\n");
 
-	Map<String, String> variables = System.getenv();  
-
-        Properties props = System.getProperties();
+		Map<String, String> variables = System.getenv();      
         List names = new ArrayList();
-        for(Object name:props.keySet()){
-            names.add(name);               
-        }
-        Collections.sort(names);
-        for(Object name: names){
-            println(name + ": " + props.getProperty((String) name));               
-        }
-	System.out.println("****************** ENVIRONMENT *********************************");    
-	for (Map.Entry<String, String> entry : variables.entrySet())  
-	{  
-	   String name = entry.getKey();  
-	   String value = entry.getValue();  
-	   System.out.println(name + "=" + value);  
-	}  
+        names.addAll(variables.keySet());
+        Collections.sort(names);        
+        
+        for (String name: names){  
+            System.out.println(name + "=" + variables.get(name));
+        }  
+    }
 
 }
 
