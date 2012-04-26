@@ -14,8 +14,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.sf.sojo.interchange.AbstractSerializer;
-
 public class StringSerializer {
 
 	public static interface IAfterDeserialization{
@@ -36,18 +34,16 @@ public class StringSerializer {
 
     public static class PojojaSerializer implements ISerializer {
         
-        AbstractSerializer m_js = new PKJsonSerializer();
-
         public String getPrefix() {
             return PREFIX_JSON;
         }
 
         public String object2String(Object data) {
-            return m_js.serialize(data).toString();
+            return new PKJsonSerializer().serialize(data).toString();
         }
 
         public Object string2Object(String data) {
-            return m_js.deserialize(data);
+            return new PKJsonSerializer().deserialize(data);
         }
     }
     
