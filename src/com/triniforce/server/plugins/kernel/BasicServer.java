@@ -13,6 +13,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -765,8 +766,8 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	protected void runDataPreparationProcedures() throws Exception {
 		runInSingleConnectionMode(new ICallback() {
 			public void call() throws Exception {
-				Connection connection = ApiStack.getApi().getIntfImplementor(
-						Connection.class);
+//				Connection connection = ApiStack.getApi().getIntfImplementor(
+//						Connection.class);
 				for (DataPreparationProcedure proc : m_dppRegList) {
 					PSI psi = ApiAlgs.getProfItem("Server initialization", proc
 							.getEntityName());
@@ -778,6 +779,10 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 												.format(
 														"Data preparation procedure: \"%s\"", proc.getEntityName())); //$NON-NLS-1$
 						proc.run();
+						((EntityJournal<DataPreparationProcedure>) getEntity(DPP_TABLE))
+						.add((Connection) ApiStack.getApi().getIntfImplementor(Connection.class), 
+								getTableDbName(DPP_TABLE), Arrays.asList(proc));
+						ISrvSmartTranFactory.Helper.commitAndStartTran();
 					} catch (Throwable t){
 						ApiAlgs.getLog(this).error(t.getMessage(), t);
 						ApiAlgs.rethrowException((Exception) t);
@@ -785,10 +790,10 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 						ApiAlgs.closeProfItem(psi);
 					}
 				}
-				((EntityJournal<DataPreparationProcedure>) getEntity(DPP_TABLE))
-						.add(connection, getTableDbName(DPP_TABLE),
-								m_dppRegList);
-				SrvApiAlgs2.getIServerTran().commit();
+//				((EntityJournal<DataPreparationProcedure>) getEntity(DPP_TABLE))
+//						.add(connection, getTableDbName(DPP_TABLE),
+//								m_dppRegList);
+//				SrvApiAlgs2.getIServerTran().commit();
 			}
 		});
 	}
