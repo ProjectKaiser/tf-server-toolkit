@@ -1,5 +1,5 @@
-tf_version = '10.0';
-tf_release = false
+tf_version = '11.0';
+tf_release = true
 tf_vendor = 'Triniforce.com'
 
 
@@ -96,7 +96,7 @@ uploadArchives {
 	}
 }
 
-task printEnv{
+task printEnv << {
 	props:{
             System.out.println("\n\n\n****************** PROPERTIES *********************************\n\n\n");
 	        Properties props = System.getProperties();
