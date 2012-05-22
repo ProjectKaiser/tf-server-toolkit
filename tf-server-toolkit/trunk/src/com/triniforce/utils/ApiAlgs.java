@@ -10,6 +10,13 @@ import com.triniforce.utils.IProfilerStack.PSI;
 
 public class ApiAlgs {
     
+    @SuppressWarnings("serial")
+    public static class RethrownException extends RuntimeException{
+        public RethrownException(Throwable t) {
+            super(t);
+        }
+    }
+    
     public static Log getLog(Object category){
         return getLog(category.getClass());
     }    
@@ -28,7 +35,7 @@ public class ApiAlgs {
         //writeExceptionInfo(e, "handleException"); gmp: is it not really needed, will
         //be reported at the top
         if( e instanceof RuntimeException)throw (RuntimeException)e;
-        throw new RuntimeException(e);
+        throw new RethrownException(e);
     }
     
     public static void rethrowException(String msg, Exception e) throws RuntimeException{
