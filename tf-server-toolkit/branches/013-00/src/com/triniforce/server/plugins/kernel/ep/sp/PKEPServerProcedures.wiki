@@ -1,1 +1,0 @@
-Procedures are invoked using IBasicServer.invokeProcedure() method. Procedure must extends ServerProcedure interface.
