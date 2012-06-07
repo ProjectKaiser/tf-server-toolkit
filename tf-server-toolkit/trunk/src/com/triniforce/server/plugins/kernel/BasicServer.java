@@ -718,6 +718,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 		enterMode(Mode.Running);
 		try {
 			runActualizers(Mode.Running);
+			SrvApiAlgs2.getIServerTran().commit();
 		} finally {
 			leaveMode();
 		}
