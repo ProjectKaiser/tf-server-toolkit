@@ -829,6 +829,7 @@ public class Delta {
 		orderNo.put(DeleteColumnOperation.class, -1);
 		orderNo.put(CreateTableOperation.class, 0);
 		orderNo.put(AddColumnOperation.class, 1);
+		orderNo.put(AlterColumnOperation.class, 2);
 		orderNo.put(AddIndexOperation.class, 2);
 		orderNo.put(AddPrimaryKeyOperation.class, 3);
 		orderNo.put(AddForeignKeyOperation.class, 4);
