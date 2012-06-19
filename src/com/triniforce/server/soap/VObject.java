@@ -122,10 +122,28 @@ public class VObject {
     }
 
     public void setProp(String name, Object value) {
+    	if(value instanceof IVOSerializable)
+    		value = ((IVOSerializable)value).toVObject();
+    	if(value instanceof Object[])
+    		value = convertArray((Object[]) value);
+    		
         m_props.put(name, value);
     }
 
-    public void setListProp(String name, List value) {
+    private Object[] convertArray(Object[] value) {
+    	Object[] res = new Object[value.length];
+        for (int i = 0; i < res.length; i++) {
+            Object obj = value[i];
+            if (obj instanceof IVOSerializable) {
+                res[i] = ((IVOSerializable) obj).toVObject();
+            } else {
+                res[i] = obj;
+            }
+        }
+        return res;
+	}
+
+	public void setListProp(String name, List value) {
         Object res[] = new Object[value.size()];
         for (int i = 0; i < res.length; i++) {
             Object obj = value.get(i);
@@ -135,7 +153,7 @@ public class VObject {
                 res[i] = obj;
             }
         }
-        m_props.put(name, value.toArray());
+        m_props.put(name, res);
     }
 
     public Map<String, Object> getProps() {

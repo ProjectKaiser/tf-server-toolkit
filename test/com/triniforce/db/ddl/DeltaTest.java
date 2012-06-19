@@ -103,5 +103,27 @@ public class DeltaTest extends TFTestCase {
 		table = sch.get("pkg1.testCalculateTabDefs2");
 		assertEquals(2, table.getVersion());
 	}
+	
+	
+	public void testEditTable(){
+		Delta delta = new Delta();
+		DeltaSchema src = new Delta.DeltaSchema();
+		DeltaSchema dst = new Delta.DeltaSchema();
+		
+		TableDef table = new TableDef("testEditTable");
+		table.addStringField(1, "fstr", ColumnType.NVARCHAR, 60, false, null);
+		src.addTable(table);
+		
+		table = new TableDef("testEditTable");
+		table.addStringField(1, "fstr", ColumnType.VARCHAR, 60, false, null);
+		dst.addTable(table);
+		
+		List<DBOperation> res = delta.calculateDelta(src.getTables(), dst.getTables());
+		assertEquals(1, res.size());
+		AlterColumnOperation op  = (AlterColumnOperation) res.get(0).getOperation();
+		assertNotNull(op);
+		assertEquals(ColumnType.VARCHAR, op.getNewField().getType());
+		
+	}
 
 }
