@@ -709,7 +709,7 @@ public class Delta {
 
 		public TableUpdateOperation editCmd(FieldDef srcElement,
 				FieldDef dstElement) {
-			return null;
+			return new AlterColumnOperation(srcElement, dstElement);
 		}
 		
 		static class ETypesNotEquals extends ICmdFactory.EUnsuccessOperation{
@@ -722,8 +722,12 @@ public class Delta {
 
 		public com.triniforce.db.ddl.DiffLeader.ICmdFactory.Action getEqKeyAction(
 				FieldDef srcElement, FieldDef dstElement) {
-			if(!srcElement.getType().equals(dstElement.getType()))
+			if(!srcElement.getType().equals(dstElement.getType())){
+				if(FieldDef.isStringType(srcElement.getType()) && FieldDef.isStringType(dstElement.getType())){
+					return ICmdFactory.Action.EDIT;
+				}
 				throw new ETypesNotEquals(srcElement.getName(), srcElement.getType(), dstElement.getType());
+			}
 			return ICmdFactory.Action.NONE;
 		}
 
