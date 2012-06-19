@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.triniforce.db.ddl.DBTables.DBOperation;
+import com.triniforce.db.ddl.TableDef.EReferenceError;
 import com.triniforce.db.ddl.TableDef.FieldDef;
 import com.triniforce.db.ddl.TableDef.IElementDef;
 import com.triniforce.db.ddl.TableDef.IndexDef;
@@ -1009,6 +1010,24 @@ public class UpgradeRunnerTest extends DDLTestCase {
 
 		}
     	
+	}
+	
+	public void testAlterColumn() throws EReferenceError, SQLException{
+    	TableDef def1 = new TableDef("testAlterColumn");
+    	def1.setDbName("testAlterColumn");
+    	FieldDef oldF = FieldDef.createStringField("f1", ColumnType.NVARCHAR, 60, false, null);
+    	def1.addField(1, oldF);
+    	HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
+   		desired.put(def1.getEntityName(), def1);
+       	DBTables db = new DBTables(m_as, desired);
+    	m_player.run(db.getCommandList());
+    	
+    	FieldDef newF = FieldDef.createStringField("f1", ColumnType.VARCHAR, 60, false, null);
+    	def1.addModification(2, new AlterColumnOperation(oldF, newF));
+    	m_player.run(db.getCommandList());
+    	
+    	assertEquals(ColumnType.VARCHAR , def1.getFields().findElement("f1").getElement().getType());
+		
 	}
     
 }
