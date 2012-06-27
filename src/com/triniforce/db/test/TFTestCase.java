@@ -7,7 +7,10 @@ package com.triniforce.db.test;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
@@ -211,6 +214,9 @@ public class TFTestCase extends TestCase {
     static Properties m_props;
     
     public static BasicDataSource DATA_SOURCE = null;
+    
+    static boolean bInitLogFile = true;
+    static File TEST_LOG_FILE = null;
 
     public static String getTestPropFile() {
         return new File(System.getenv(TFTestCase.TF_TEST_FOLDER),
@@ -257,10 +263,34 @@ public class TFTestCase extends TestCase {
         api.setIntfImplementor(IIdDef.class, new IdDef(ColumnType.LONG));
         ApiStack.pushApi(api);
         m_expectedLogErrorCount = 0;
-        Thread.currentThread().setName(this.getClass().getSimpleName());        
+        Thread.currentThread().setName(this.getClass().getSimpleName());
+        
+        File testLog;
+        if(null != (testLog = getTestsLogFile())){
+        	FileOutputStream out = new FileOutputStream(testLog, true);
+        	out.write(String.format("%s %s\n", getClass().getName(), getName()).getBytes("utf-8"));
+        	out.flush();
+        	out.close();
+        }
     }
 
-    private int m_expectedLogErrorCount;
+    public File getTestsLogFile() {
+		if(bInitLogFile){
+			String fname = getTestProperty("testSeqFile");
+			if(null != fname){
+				TEST_LOG_FILE = new File(System.getenv(TF_TEST_FOLDER), fname);
+				try {
+					TEST_LOG_FILE.createNewFile();
+				} catch (IOException e) {
+					ApiAlgs.rethrowException(e);
+				}
+			}
+			bInitLogFile = false;
+		}
+		return TEST_LOG_FILE;
+	}
+
+	private int m_expectedLogErrorCount;
     
     public void incExpectedLogErrorCount(int value){
 		m_expectedLogErrorCount += value;
@@ -290,6 +320,7 @@ public class TFTestCase extends TestCase {
     }
 
     public void test() throws Exception {
+    	trace(TimeZone.getDefault());
     }
 
     public void trace(Object obj) {
