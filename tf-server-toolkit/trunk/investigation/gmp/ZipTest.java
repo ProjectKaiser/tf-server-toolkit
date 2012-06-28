@@ -39,10 +39,10 @@ public class ZipTest extends TFTestCase {
                 } else {
                     FileInputStream fin = new FileInputStream(f);
                     byte[] buffer = new byte[4096];
-                    long sz = 0;
+                    //long sz = 0;
                     for (int n; (n = fin.read(buffer)) > 0;){
                         zout.write(buffer, 0, n);
-                        sz += n;
+                        //sz += n;
                     }
                     fin.close();
                     //fileEntry.setSize(sz);
