@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.Stack;
 
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
-import com.triniforce.dbo.DBOTabDef;
 import com.triniforce.dbo.DBOUpgProcedure;
 import com.triniforce.dbo.DBOVersion;
 import com.triniforce.dbo.ExDBOATables;
@@ -39,6 +38,7 @@ import com.triniforce.server.plugins.kernel.upg_procedures.ConvertForeignKeys;
 import com.triniforce.server.plugins.kernel.upg_procedures.Upg_120406_NamedDbIdNname;
 import com.triniforce.server.srvapi.DataPreparationProcedure;
 import com.triniforce.server.srvapi.IBasicServer;
+import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.IIdGenerator;
 import com.triniforce.server.srvapi.INamedDbId;
@@ -50,17 +50,16 @@ import com.triniforce.server.srvapi.ISORegistration;
 import com.triniforce.server.srvapi.IServerMode;
 import com.triniforce.server.srvapi.ISrvPrepSqlGetter;
 import com.triniforce.server.srvapi.ISrvSmartTran;
+import com.triniforce.server.srvapi.ISrvSmartTranExtenders.IFiniter;
+import com.triniforce.server.srvapi.ISrvSmartTranExtenders.ILocker;
+import com.triniforce.server.srvapi.ISrvSmartTranExtenders.ILocker.LockerValue;
+import com.triniforce.server.srvapi.ISrvSmartTranExtenders.IRefCountHashMap;
+import com.triniforce.server.srvapi.ISrvSmartTranExtenders.IRefCountHashMap.IFactory;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
+import com.triniforce.server.srvapi.ISrvSmartTranFactory.ITranExtender;
 import com.triniforce.server.srvapi.ITimedLock2;
 import com.triniforce.server.srvapi.ITransactionWriteLock2;
 import com.triniforce.server.srvapi.UpgradeProcedure;
-import com.triniforce.server.srvapi.IBasicServer.Mode;
-import com.triniforce.server.srvapi.ISrvSmartTranExtenders.IFiniter;
-import com.triniforce.server.srvapi.ISrvSmartTranExtenders.ILocker;
-import com.triniforce.server.srvapi.ISrvSmartTranExtenders.IRefCountHashMap;
-import com.triniforce.server.srvapi.ISrvSmartTranExtenders.ILocker.LockerValue;
-import com.triniforce.server.srvapi.ISrvSmartTranExtenders.IRefCountHashMap.IFactory;
-import com.triniforce.server.srvapi.ISrvSmartTranFactory.ITranExtender;
 import com.triniforce.utils.Api;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
@@ -70,9 +69,9 @@ import com.triniforce.utils.IFinitableWithRollback;
 import com.triniforce.utils.IProfiler;
 import com.triniforce.utils.IProfilerStack;
 import com.triniforce.utils.ITime;
-import com.triniforce.utils.TFUtils;
 import com.triniforce.utils.Profiler.INanoTimer;
 import com.triniforce.utils.Profiler.ProfilerStack;
+import com.triniforce.utils.TFUtils;
 
 public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	
@@ -116,8 +115,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         getBasicServer().addPeriodicalTask(new TimedLockTicker());
         getBasicServer().addPeriodicalTask(new PTRecurringTasks());
         
-        putExtension(PKEPDBObjects.class, DBOVersion.class.getName(), 
-        		new DBOTabDef(new DBOVersion()));
+        putExtension(PKEPDBObjects.class, DBOVersion.class.getName(), new DBOVersion());
         
 	}
 	

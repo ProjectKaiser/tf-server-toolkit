@@ -26,7 +26,7 @@ public class ExDBOATables extends DBOActualizer {
 		        TableDef td = (TableDef) dbo;
 		        reg.registerTableDef(td);
 		    }else{
-		        TableDef td = ((DBOTabDef)dbo).getDef();
+		        TableDef td = (DBOTableDef)dbo;
 		        reg.registerTableDef(td);
 		    }
 		}

@@ -36,9 +36,9 @@ public class ExDBOATablesTest extends BasicServerTestCase {
 		IPKRootExtensionPoint rootEP = ApiStack.getInterface(IBasicServer.class);
 		IPKExtensionPoint ep = rootEP.getExtensionPoint(PKEPDBOActualizers.class);
 		ExDBOATables act = ep.getExtension(ExDBOATables.class).getInstance();
-		TableDef td = new TableDef("ExDBOATablesTest_01");
+		TableDef td = new DBOTableDef("ExDBOATablesTest_01");
 		td.addScalarField(1, "f_01", ColumnType.INT, true, 0);
-		act.actualize(Arrays.asList((IDBObject)new DBOTabDef(td)));
+		act.actualize(Arrays.asList((IDBObject)td));
 		
 		ApiStack.getInterface(ISOQuery.class).getEntity("ExDBOATablesTest_01");
 	}

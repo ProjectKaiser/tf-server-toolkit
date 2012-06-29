@@ -8,13 +8,12 @@ package com.triniforce.dbo;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.triniforce.db.ddl.TableDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.dml.BusinessLogic;
 import com.triniforce.db.dml.ResSet;
 import com.triniforce.utils.IName;
 
-public class DBOVersion extends TableDef {
+public class DBOVersion extends DBOTableDef {
 	public static final FieldDef fkey = FieldDef.createStringField("fkey", ColumnType.VARCHAR, 255, true, null);
 	public static final FieldDef version = FieldDef.createScalarField("version", ColumnType.INT, true);
 	
