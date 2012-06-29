@@ -9,7 +9,13 @@ import com.triniforce.db.ddl.TableDef;
 
 public class DBOTableDef extends TableDef implements IDBObject {
 
-    public IDBObject[] getDependiencies() {
+	public DBOTableDef(){}
+	
+    public DBOTableDef(String name) {
+		super(name);
+	}
+
+	public IDBObject[] getDependiencies() {
         return new IDBObject[]{};
     }
 
