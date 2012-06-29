@@ -22,13 +22,8 @@ public class ExDBOATables extends DBOActualizer {
 	public void actualize(List<IDBObject> dboList) {
 		ISORegistration reg = ApiStack.getInterface(ISORegistration.class);
 		for(IDBObject dbo : dboList){
-		    if(dbo instanceof DBOTableDef){
-		        TableDef td = (TableDef) dbo;
-		        reg.registerTableDef(td);
-		    }else{
-		        TableDef td = (DBOTableDef)dbo;
-		        reg.registerTableDef(td);
-		    }
+	        TableDef td = (TableDef)dbo;
+	        reg.registerTableDef(td);
 		}
 	}
 
