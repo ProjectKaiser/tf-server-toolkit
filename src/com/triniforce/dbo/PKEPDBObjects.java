@@ -18,8 +18,9 @@ public class PKEPDBObjects extends PKExtensionPoint{
 	@Override
 	public IPKExtension putExtension(String extensionId, Object obj)
 			throws EExtensionPointNotFound {
-		IDBObject dbo = (IDBObject) obj;
+		
 		IPKExtension res = super.putExtension(extensionId, obj);
+		IDBObject dbo = res.getInstance();
 		for(IDBObject synth : dbo.synthDBObjects()){
 			super.putExtension((String) synth.getKey(), synth);
 		}
