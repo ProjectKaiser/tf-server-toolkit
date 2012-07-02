@@ -12,6 +12,7 @@ package com.triniforce.db.dml;
 
 import java.lang.reflect.Array;
 import java.sql.Connection;
+import java.util.List;
 
 import com.triniforce.db.qbuilder.Expr;
 import com.triniforce.db.qbuilder.OrderByClause;
@@ -90,6 +91,12 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         return !m_doNotCommit;
     }
 
+	public void insert(Class table, List<IName> fields, List<Object> values) {
+		IName a_fields[] = new IName[fields.size()];
+		fields.toArray(a_fields);
+		insert(table, a_fields, values.toArray());
+	}
+    
 	public void insert(Class table, IName[] fields, Object[] values) {
         QTable t = new SrvTable(table);
         for (IName name : fields) {

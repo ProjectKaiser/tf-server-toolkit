@@ -41,6 +41,7 @@ import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.IIdGenerator;
+import com.triniforce.server.srvapi.IMiscIdGenerator;
 import com.triniforce.server.srvapi.INamedDbId;
 import com.triniforce.server.srvapi.IPlugin;
 import com.triniforce.server.srvapi.IPooledConnection;
@@ -77,7 +78,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	
 	private Api m_runningApi;
 	private IdGenerator m_idGenerator;
-	private IdGenerator m_queueIdGenerator;
+	private IdGenerator m_miscIdGenerator;
 	private TQueueId m_tQueueId;
 
 	private BasicServer getBasicServer(){
@@ -91,7 +92,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	
 	public BasicServerCorePlugin() {
 		m_tQueueId =  new TQueueId();
-        m_queueIdGenerator = new IdGenerator(
+        m_miscIdGenerator = new IdGenerator(
         		IdGenerator.KEY_CACHE_SIZE,
                 m_tQueueId);
 	}
@@ -110,7 +111,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         putExtension(PKEPDBObjects.class, ConvertForeignKeys.class.getName(), 
         		new DBOUpgProcedure(new ConvertForeignKeys()));
         putExtension(PKEPDBObjects.class, BreakIdGenerator.class.getName() + ".queue", 
-        		new DBOUpgProcedure(new BreakIdGenerator(m_queueIdGenerator)));
+        		new DBOUpgProcedure(new BreakIdGenerator(m_miscIdGenerator)));
         
         getBasicServer().addPeriodicalTask(new TimedLockTicker());
         getBasicServer().addPeriodicalTask(new PTRecurringTasks());
@@ -147,7 +148,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
                 new SrvPrepSqlGetter());
 
         ISOQuery soQuery = ApiStack.getInterface(ISOQuery.class);
-        api.setIntfImplementor(IDbQueueFactory.class, new DbQueueFactory(m_queueIdGenerator));
+        api.setIntfImplementor(IDbQueueFactory.class, new DbQueueFactory(m_miscIdGenerator));
 
         api.setIntfImplementor(ISrvSmartTranFactory.class,
                 m_tranFactory);
@@ -156,6 +157,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         		IdGenerator.KEY_CACHE_SIZE,
                 (NextId) soQuery.getEntity(NextId.class.getName()));
         api.setIntfImplementor(IIdGenerator.class, m_idGenerator);
+        api.setIntfImplementor(IMiscIdGenerator.class, m_miscIdGenerator);
         
         api.setIntfImplementor(IBasicServer.class, getBasicServer());
         api.setIntfImplementor(IPKExtensionPoint.class, getBasicServer());

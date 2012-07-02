@@ -6,6 +6,8 @@
 
 package com.triniforce.db.dml;
 
+import java.util.List;
+
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.IName;
@@ -34,6 +36,7 @@ public interface ISmartTran extends IStmtContainer {
     boolean isCommited();
     
     void insert(Class table, IName fields[], Object values[]);
+    void insert(Class table, List<IName> fields, List<Object> values);
     void update(Class table, IName fields[], Object values[], IName lookUpFields[], Object lookUpValues[]);
 	ResSet select(Class table, IName fields[],
 	            IName lookUpFields[], Object lookUpValues[]);
