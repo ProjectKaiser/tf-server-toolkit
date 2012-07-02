@@ -12,6 +12,9 @@ package com.triniforce.db.dml;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import com.triniforce.db.ddl.AddColumnOperation;
 import com.triniforce.db.ddl.TableDef;
@@ -214,7 +217,14 @@ public class SmartTranTest extends DBTestCase {
     	createTableIfNeeded(new TestDef());
     	
         SmartTran tr2 = new SmartTran(getConnection());
-    	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{1,"v_1", 100});
+        {
+        	List<IName> fields = new ArrayList<IName>();
+        	fields.add(TestDef.f1);
+        	fields.add(TestDef.f2);
+        	fields.add(TestDef.f3);
+        	tr2.insert(TestDef.class, fields, Arrays.asList(new Object[]{1,"v_1", 100}));
+        }
+    	//tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{1,"v_1", 100});
     	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{2,"v_2", 100});
     	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{3,"v_3", 101});
     	

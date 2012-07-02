@@ -5,6 +5,8 @@
  */ 
 package com.triniforce.db.dml;
 
+import java.util.List;
+
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.IName;
@@ -28,6 +30,11 @@ public abstract class BusinessLogic {
     }
     
     public abstract Class getTable();
+
+    protected void insert(List<IName> fields, List<Object> values){
+        getSt().insert(getTable(), fields, values);
+    }
+
     
     protected void insert(IName fields[], Object values[]){
         getSt().insert(getTable(), fields, values);
