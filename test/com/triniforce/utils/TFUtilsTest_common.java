@@ -50,20 +50,6 @@ public class TFUtilsTest_common extends TestCase {
         Integer i2 = 20;
         i1 = TFUtils.asInteger(i2);
         assertTrue(20 == i1);        
-    }   
-    
-    public void testAsLong(){
-        assertEquals(null, TFUtils.asLong(null) );
-        Short s1 = 10;
-        Long l1 = TFUtils.asLong(s1);
-        assertTrue(10L == l1);
-        Integer i2 = 20;
-        l1 = TFUtils.asLong(i2);
-        assertTrue(20 == l1);   
-        
-        Long l2 = Integer.MAX_VALUE * 2L;
-        l1 = TFUtils.asLong(l2);
-        assertEquals(l2, l1);
     }    
     
     public void testEquals(){

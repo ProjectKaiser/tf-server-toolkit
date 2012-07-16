@@ -19,7 +19,6 @@ import com.triniforce.db.qbuilder.QDelete;
 import com.triniforce.db.qbuilder.QInsert;
 import com.triniforce.db.qbuilder.QSelect;
 import com.triniforce.db.qbuilder.QStatement;
-import com.triniforce.db.qbuilder.QTable;
 import com.triniforce.db.qbuilder.WhereClause;
 import com.triniforce.server.plugins.kernel.SrvTable;
 import com.triniforce.server.srvapi.IIdDef;
@@ -27,16 +26,11 @@ import com.triniforce.server.srvapi.INamedDbId;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
-import com.triniforce.utils.ApiStack;
-import com.triniforce.utils.IName;
-import com.triniforce.utils.TFUtils;
 
 public class TNamedDbId extends TableDef implements INamedDbId {
 	
 	public static final FieldDef id = IIdDef.Helper.getFieldDef();
-	@Deprecated
 	public static final FieldDef name = FieldDef.createStringField("name", ColumnType.VARCHAR, 250, true, null);
-	public static final FieldDef nname = FieldDef.createStringField("nname", ColumnType.NVARCHAR, 250, false, null);
 	
 	static class EInterfaceNotLoaded extends RuntimeException{
 		private static final long serialVersionUID = 6125067000647690657L;
@@ -50,22 +44,18 @@ public class TNamedDbId extends TableDef implements INamedDbId {
 		addField(2, name);
 		addPrimaryKey(3, "pk",  new String[]{id.getName()});
 		addIndex(4, "idx_name", new String[]{name.getName()}, true, true);
-		addField(5, nname);
-		addIndex(6, "idx_nname", new String[]{nname.getName()}, false, true);
-		deleteIndex(7, "idx_name");
 	}
 	
 	public static class PQInsert extends PrepSql{
 		@Override
 		public QStatement buildSql() {
-			return new QInsert(new SrvTable(TNamedDbId.class).addCol(id).addCol(nname).addCol(name));
+			return new QInsert(new SrvTable(TNamedDbId.class).addCol(id).addCol(name));
 		}
 		
 		public static void exec(IStmtContainer sc, long id, String name){
 			PrepStmt ps = sc.prepareStatement(PQInsert.class);
 			ps.setLong(1, id);
 			ps.setObject(2, name);
-			ps.setObject(3, "");
 			ps.execute();
 		}
 	}
@@ -75,7 +65,7 @@ public class TNamedDbId extends TableDef implements INamedDbId {
 		public QStatement buildSql() {
 			return new QSelect()
 			.joinLast(new SrvTable(TNamedDbId.class).addCol(id))
-			.where(new WhereClause().andCompare("", nname.getName(), "="));
+			.where(new WhereClause().andCompare("", name.getName(), "="));
 		}
 		
 		public static Long exec(String name){
@@ -99,7 +89,7 @@ public class TNamedDbId extends TableDef implements INamedDbId {
 		@Override
 		public QStatement buildSql() {
 			return new QSelect()
-			.joinLast(new SrvTable(TNamedDbId.class).addCol(id).addCol(nname).addCol(name));
+			.joinLast(new SrvTable(TNamedDbId.class).addCol(id).addCol(name));
 		}
 		
 		public static Map<String, Long> exec(){
@@ -109,11 +99,7 @@ public class TNamedDbId extends TableDef implements INamedDbId {
 				PrepStmt ps = sc.prepareStatement(PQGetAll.class);
 				ResSet rs = ps.executeQuery();
 				while(rs.next()){
-				    String key = rs.getString(2);
-				    if(TFUtils.isEmptyString(key)){
-				        key = rs.getString(3);				        
-				    }
-					res.put(key, rs.getLong(1));
+					res.put(rs.getString(2), rs.getLong(1));
 				}
 				return res;
 			}finally{
@@ -126,7 +112,7 @@ public class TNamedDbId extends TableDef implements INamedDbId {
 		@Override
 		public QStatement buildSql() {
 			return new QSelect()
-			.joinLast(new SrvTable(TNamedDbId.class).addCol(nname))
+			.joinLast(new SrvTable(TNamedDbId.class).addCol(name))
 			.where(new WhereClause().andCompare("", id.getName(), "="));
 		}
 		
@@ -179,7 +165,6 @@ public class TNamedDbId extends TableDef implements INamedDbId {
 	}
 
 	public synchronized long createId(final String name) {
-	    TFUtils.assertNotNull(name, "Name");
 		checkLoaded();
 		{
 		    Long res = m_idByName.get(name);
@@ -247,36 +232,18 @@ public class TNamedDbId extends TableDef implements INamedDbId {
 		}
 	}
 	
-	public static void updateNname(){
-	    StmtContainer sc = SrvApiAlgs2.getStmtContainer();
-	    String tableName = SrvApiAlgs2.getISODbInfo().getTableDbName(TNamedDbId.class.getName());
-	    PrepStmt ps = sc.prepareStatement("update " 
-	            + tableName
-	            + " set " + QTable.joinPrefixedCol("", "nname") + "=" + QTable.joinPrefixedCol("", "name")
-	    );
-	    ps.execute();
-	}
-	
 	/**
 	 * For tests
 	 */
 	public void clear(){
+		checkLoaded();
 		callInOwntransaction(new ICallback() {
 			public Object call(ISrvSmartTran trn) {
 				PQDeleteAll.exec(trn);
 				return null;
 			}});
 	}
-	
-	
-	/**
-	 * For tests
-	 */
-	public void clearInSameTransaction(){
-	    ISrvSmartTran tr = ApiStack.getInterface(ISrvSmartTran.class);
-	    tr.delete(TNamedDbId.class, new IName[]{}, new String[]{});
-	}
-	
+
 	private void checkLoaded() {
 		if(null == m_idByName)
 			loadData();

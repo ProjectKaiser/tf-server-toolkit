@@ -43,7 +43,7 @@ public class DBTestCase extends TFTestCase {
     	ApiAlgs.getLog(this).trace("getNewConnection");
         try{
             Connection conn = getDataSource().getConnection();
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(true);
             return conn;
         }catch(Exception e){
             ApiAlgs.rethrowException(e);
@@ -88,7 +88,6 @@ public class DBTestCase extends TFTestCase {
      * @throws Exception
      */
     public String createTableIfNeeded(TableDef tabDef) throws Exception{
-    	getConnection().setAutoCommit(false);
     	return createTableIfNeeded(tabDef, m_as);
     }
     
@@ -171,8 +170,8 @@ public class DBTestCase extends TFTestCase {
 		});
         ApiStack.pushApi(api);
         
-//        Connection conn = getConnection();
-//        conn.setAutoCommit(false);
+        Connection conn = getConnection();
+        conn.setAutoCommit(false);
         super.setUp();
     }
     

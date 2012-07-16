@@ -45,9 +45,5 @@ public class PKExtension extends PKExtensionBase implements IPKExtension{
     public void setExtensionPoint(IPKExtensionPoint ep) {
         m_extensionPoint = ep;
     }
-
-    public Class getObjectClass() {
-        return m_oi.getObjectClass();
-    }
 	
 }

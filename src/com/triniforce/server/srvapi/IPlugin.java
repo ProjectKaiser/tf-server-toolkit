@@ -28,7 +28,6 @@ public interface IPlugin {
      */
     public void doRegistration(ISORegistration reg) throws EDBObjectException;
     
-    public void doExtensionPointsRegistration();
     public void doRegistration();
 
     /**

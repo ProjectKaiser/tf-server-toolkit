@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Set;
-import java.util.TimeZone;
 
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.test.BasicServerTestCase;
@@ -21,7 +20,6 @@ import com.triniforce.server.srvapi.IIdDef;
 import com.triniforce.server.srvapi.ISODbInfo;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
-import com.triniforce.server.srvapi.ITaskExecutors;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.utils.Api;
 import com.triniforce.utils.ApiStack;
@@ -38,22 +36,6 @@ public class BasicServerTest extends BasicServerTestCase {
 	}
 	
 	static class TestUProc extends DPPProcPlugin{}  
-	
-	@Override
-	public void test() throws Exception {
-	    @SuppressWarnings("unused")
-        BasicServer bs = new BasicServer();
-	    TimeZone def = TimeZone.getDefault();
-	    TimeZone gmt = TimeZone.getTimeZone("GMT");
-	    assertEquals(gmt, def);
-        m_server.enterMode(Mode.Running);
-        try{
-            ApiStack.getInterface(TimeZone.class);            
-        } finally{
-            m_server.leaveMode();
-        }
-	 
-	}
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -82,7 +64,7 @@ public class BasicServerTest extends BasicServerTestCase {
 	}
 
 	public void testExtensions(){
-		checkExtensions(this, getServer());
+		checkExtensions(getServer());
 	}
 	
 	public void testProcedures(){
@@ -181,10 +163,9 @@ public class BasicServerTest extends BasicServerTestCase {
 		api.setIntfImplementor(IIdDef.class, null);
 	}
 	
-	public void testInterfaces(){
+	public void testDefaultInterfaces(){
 		m_server.enterMode(Mode.Running);
 		try{
-		    ApiStack.getInterface(ITaskExecutors.class);		    
 			assertEquals(ColumnType.LONG, IIdDef.Helper.getFieldDef().getType());
 		} finally{
 			m_server.leaveMode();

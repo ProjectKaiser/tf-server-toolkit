@@ -12,22 +12,13 @@ package com.triniforce.db.dml;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import com.triniforce.db.ddl.AddColumnOperation;
 import com.triniforce.db.ddl.TableDef;
 import com.triniforce.db.ddl.TableDef.FieldDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
-import com.triniforce.db.qbuilder.QSelect;
 import com.triniforce.db.test.DBTestCase;
-import com.triniforce.server.plugins.kernel.SrvTable;
-import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.IName;
-import com.triniforce.utils.IProfilerStack;
-import com.triniforce.utils.Profiler;
-import com.triniforce.utils.Profiler.INanoTimer;
 
 /**
  *
@@ -181,50 +172,12 @@ public class SmartTranTest extends DBTestCase {
 			addField(3, f3);
 		}
     }
-
-    public void testSelectBetween() throws Exception{
-        createTableIfNeeded(new TestDef());
-        SmartTran tr2 = new SmartTran(getConnection());
-        tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{1,"v_1", 100});
-        tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{2,"v_2", 100});
-        tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{3,"v_3", 101});
-        ResSet res = tr2.select(TestDef.class
-                , new IName[]{TestDef.f1}
-                , new IName[]{TestDef.f1}, new Object[]{new ISmartTran.Between((Integer)1, (Integer)2)}
-                , new IName[]{TestDef.f1}
-        );
-        assertTrue(res.next());
-        assertEquals("1", res.getString(1));
-        assertTrue(res.next());
-        assertEquals("2", res.getString(1));
-        assertFalse(res.next());
-        
-        res = tr2.select(TestDef.class
-                , new IName[]{TestDef.f1}
-                , new IName[]{TestDef.f1}, new Object[]{new ISmartTran.Between((Integer)2, (Integer)3)}
-                , new IName[]{TestDef.f1}
-        );
-        assertTrue(res.next());
-        assertEquals("2", res.getString(1));
-        assertTrue(res.next());
-        assertEquals("3", res.getString(1));
-        assertFalse(res.next());        
-        
-    }
-
     
     public void testSelect() throws Exception{
     	createTableIfNeeded(new TestDef());
     	
         SmartTran tr2 = new SmartTran(getConnection());
-        {
-        	List<IName> fields = new ArrayList<IName>();
-        	fields.add(TestDef.f1);
-        	fields.add(TestDef.f2);
-        	fields.add(TestDef.f3);
-        	tr2.insert(TestDef.class, fields, Arrays.asList(new Object[]{1,"v_1", 100}));
-        }
-    	//tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{1,"v_1", 100});
+    	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{1,"v_1", 100});
     	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{2,"v_2", 100});
     	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{3,"v_3", 101});
     	
@@ -258,31 +211,6 @@ public class SmartTranTest extends DBTestCase {
     	assertTrue(res.next());
     	assertEquals(1, res.getInt(1));
     	assertFalse(res.next());
-    	
-    }
-    
-    public void testPrepareStatement() throws Exception{
-    	createTableIfNeeded(new TestDef());
-    	
-        SmartTran tr2 = new SmartTran(getConnection());
-    	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{1,"v_1", 100});
-    	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{2,"v_2", 100});
-    	tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{3,"v_3", 101});
-    	
-    	PrepStmt ps = tr2.prepareStatement(new QSelect().joinLast(new SrvTable(TestDef.class).addCol(TestDef.f1)).toString(), "testPrepareStatement_profItem1");
-    	Profiler pr = new Profiler();
-    	ApiStack.pushInterface(IProfilerStack.class, new Profiler.ProfilerStack(pr, new INanoTimer() {
-            public long get() {
-                return System.nanoTime();
-            }
-        }));
-    	try{
-	    	ps.executeQuery();
-	    	String res = pr.toString();
-	    	assertTrue(res, res.contains("testPrepareStatement_profItem1"));
-    	} finally{
-    		ApiStack.popInterface(1);
-    	}
     	
     }
 

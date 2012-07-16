@@ -6,8 +6,6 @@
 
 package com.triniforce.db.dml;
 
-import java.util.List;
-
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.IName;
@@ -36,7 +34,6 @@ public interface ISmartTran extends IStmtContainer {
     boolean isCommited();
     
     void insert(Class table, IName fields[], Object values[]);
-    void insert(Class table, List<IName> fields, List<Object> values);
     void update(Class table, IName fields[], Object values[], IName lookUpFields[], Object lookUpValues[]);
 	ResSet select(Class table, IName fields[],
 	            IName lookUpFields[], Object lookUpValues[]);
@@ -67,29 +64,5 @@ public interface ISmartTran extends IStmtContainer {
         }
         
     }
-    
-    public static class Between{
-        private Object leftValue;
-        private Object rightValue;
-        
-        public Between(Object a_leftValue, Object a_rightValue) {
-            leftValue = a_leftValue;
-            rightValue = a_rightValue;
-        }
-        public void setLeftValue(Object leftValue) {
-            this.leftValue = leftValue;
-        }
-        public Object getLeftValue() {
-            return leftValue;
-        }
-        public void setRightValue(Object rightValue) {
-            this.rightValue = rightValue;
-        }
-        public Object getRightValue() {
-            return rightValue;
-        }
-        
-    }
-    
 
 }

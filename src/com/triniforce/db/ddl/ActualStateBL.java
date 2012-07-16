@@ -374,8 +374,8 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
     }
 
 	public void addIndexName(String appName, String dbName) {
-		TFUtils.assertTrue(null == m_appIndexNames.put(appName, dbName), appName);
-		TFUtils.assertTrue(null == m_dbIndexNames.put(dbName, appName), dbName);
+		TFUtils.assertTrue(null == m_appIndexNames.put(appName, dbName), "");
+		TFUtils.assertTrue(null == m_dbIndexNames.put(dbName, appName), "");
 		Row row = m_asIndexTable.newRow();
 		row.setField(0, appName);
 		row.setField(1, dbName);

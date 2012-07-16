@@ -12,7 +12,6 @@ package com.triniforce.db.dml;
 
 import java.lang.reflect.Array;
 import java.sql.Connection;
-import java.util.List;
 
 import com.triniforce.db.qbuilder.Expr;
 import com.triniforce.db.qbuilder.OrderByClause;
@@ -91,12 +90,6 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         return !m_doNotCommit;
     }
 
-	public void insert(Class table, List<IName> fields, List<Object> values) {
-		IName a_fields[] = new IName[fields.size()];
-		fields.toArray(a_fields);
-		insert(table, a_fields, values.toArray());
-	}
-    
 	public void insert(Class table, IName[] fields, Object[] values) {
         QTable t = new SrvTable(table);
         for (IName name : fields) {
@@ -126,8 +119,7 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         }
         QSelect q = new QSelect();
         q.joinLast(t);
-        
-//TODO bPreparedStatement
+
         {
 	        int i=0;
 	        WhereClause wc = new WhereClause();
@@ -137,10 +129,7 @@ public class SmartTran extends StmtContainer implements ISmartTran {
 	        	}
 	        	else if(lookUpValues[i].getClass().isArray()){
 	        		wc.and(new Expr.In("", name.getName(), Array.getLength(lookUpValues[i])));
-	        	}
-                else if(lookUpValues[i] instanceof ISmartTran.Between){
-                    wc.and(new Expr.Between("", name.getName()));
-                }        	
+	        	} 
 	        	else{
 	        		wc.andCompare("", name.getName(), "=");
 	        	}
@@ -160,6 +149,7 @@ public class SmartTran extends StmtContainer implements ISmartTran {
             }
             q.orderBy(oc);
         }
+        
         PrepStmt ps = this.prepareStatement(q.toString());
         int col = 1;
         for (Object arg : lookUpValues) {
@@ -169,11 +159,6 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         		for(int i=0; i<Array.getLength(arg); i++)
         			ps.setObject(col++, Array.get(arg, i));
         	}
-            else if(arg instanceof ISmartTran.Between){
-                ISmartTran.Between data = (Between) arg;
-                ps.setObject(col++, data.getLeftValue());
-                ps.setObject(col++, data.getRightValue());
-            }           
         	else{
         		ps.setObject(col++, arg);
         	}

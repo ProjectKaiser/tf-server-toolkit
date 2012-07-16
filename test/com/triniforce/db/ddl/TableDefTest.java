@@ -17,7 +17,6 @@ import com.triniforce.db.ddl.TableDef.EDBObjectException;
 import com.triniforce.db.ddl.TableDef.EInvalidModificationSequence;
 import com.triniforce.db.ddl.TableDef.EUnknownHistoryRequest;
 import com.triniforce.db.ddl.TableDef.FieldDef;
-import com.triniforce.db.ddl.TableDef.IndexDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 
 /**
@@ -168,24 +167,12 @@ public class TableDefTest extends TestCase {
         m_dbo.addScalarField(7, "scalar_field2", FieldDef.ColumnType.FLOAT, true, Float.valueOf(43.2f));
         m_dbo.addIndex(8, "index_2", new String[]{"string_field1"}, true, true);
         m_dbo.deleteField(9, "scalar_field2");
-        m_dbo.deleteIndex(10, "index_2");
-        m_dbo.addIndex(11, "index_3", new String[]{"string_field1"}, true, true);
-        m_dbo.deleteIndex(12, "index_3");
+        m_dbo.deleteIndex(10, "index_2", true);
         
-        assertEquals(12, m_dbo.getVersion());
+        assertEquals(10, m_dbo.getVersion());
         assertEquals(3, m_dbo.getFields().size());
         assertEquals(3, m_dbo.getIndices().size());
         
-        DeleteIndexOperation op = (DeleteIndexOperation) m_dbo.getHistory(12).get(0);
-        assertEquals(IndexDef.TYPE.INDEX, op.getType());
-        assertEquals(true, op.isUniqueIndex());
-        
-//        m_dbo.addPrimaryKey(13, "pk_001", new String[]{"string_field1"});
-        m_dbo.deleteIndex(13, "fk_1");
-        
-        op = (DeleteIndexOperation) m_dbo.getHistory(13).get(0);
-        assertEquals(IndexDef.TYPE.FOREIGN_KEY, op.getType());
-        assertEquals(false, op.isUniqueIndex());
     }
     
     public void testClone() throws CloneNotSupportedException{

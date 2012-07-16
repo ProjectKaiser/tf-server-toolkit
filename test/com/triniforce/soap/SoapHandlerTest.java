@@ -27,9 +27,10 @@ import com.triniforce.soap.InterfaceDescriptionGenerator.SoapHandler.CurrentObje
 import com.triniforce.soap.SoapHandlerTest.IService.Cls2;
 import com.triniforce.soap.SoapHandlerTest.IService.Req1;
 import com.triniforce.soap.SoapHandlerTest.IService2.C1;
+import com.triniforce.soap.TypeDefLibCache.MapEntry;
+import com.triniforce.soap.TypeDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
-import com.triniforce.soap.TypeDefLibCache.MapEntry;
 
 public class SoapHandlerTest extends TFTestCase {
 
@@ -73,8 +74,7 @@ public class SoapHandlerTest extends TFTestCase {
     "       xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
     "       xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"+
     "  <soap:Body>"+
-    "    <method1 xmlns=\"http://tempuri.org/\">" +
-    "garbage"+
+    "    <method1 xmlns=\"http://tempuri.org/\">"+
     "      <arg1>  \t string parameter 1   \t\r\n</arg1>"+
     "      <arg0>  \t 1800   \t\r\n</arg0>"+
     "    </method1>"+
@@ -149,18 +149,17 @@ public class SoapHandlerTest extends TFTestCase {
         "    </decimalMethod>"+
         "  </soap:Body>"+
         "</soap:Envelope>";
-        
+    
     @SuppressWarnings("unchecked")
     public void test() throws Exception {
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
-        
         InterfaceDescription desc = gen.parse(null, IService.class);
         
         SOAPDocument res = gen.deserialize(desc, inSource(REQ1));
         assertEquals("method1", res.m_method);
         assertEquals(2, res.m_args.length);
         assertEquals(Integer.valueOf(1800), res.m_args[0]);
-        assertEquals("  \t string parameter 1   \t\n",  res.m_args[1]);
+        assertEquals("string parameter 1",  res.m_args[1]);
         assertEquals("http://schemas.xmlsoap.org/soap/envelope/", res.m_soap);
         assertEquals(true, res.m_bIn);
         
@@ -184,7 +183,7 @@ public class SoapHandlerTest extends TFTestCase {
         assertEquals(2, res.m_args.length);
         Req1 req =  (Req1) res.m_args[0];
         assertNotNull(req);
-        assertEquals("               Request value _0001           ", req.getValue1());
+        assertEquals("Request value _0001", req.getValue1());
         
         List<IService.Cls2> arg1 = (List<Cls2>) res.m_args[1];
         
@@ -194,7 +193,7 @@ public class SoapHandlerTest extends TFTestCase {
         
         res = gen.deserialize(desc, inSource(REQ3));
         Req1 req1 = (Req1) res.m_args[0];
-        assertEquals(" !!!Req1 value CONTENT!!!", req1.getValue1());
+        assertEquals("!!!Req1 value CONTENT!!!", req1.getValue1());
         
         res = gen.deserialize(desc, inSource("<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
                 "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
@@ -214,7 +213,7 @@ public class SoapHandlerTest extends TFTestCase {
                 "  </soap:Body>"+
                 "</soap:Envelope>"));
         req1 = (Req1) res.m_args[0];
-        assertEquals(" !!!Req1 value CONTENT!!!", req1.getValue1());
+        assertEquals("!!!Req1 value CONTENT!!!", req1.getValue1());
         
         res = gen.deserialize(desc, inSource(REQ4));
         assertEquals(new BigDecimal(0.4567, new MathContext(4)), res.m_args[0]);
@@ -247,15 +246,14 @@ public class SoapHandlerTest extends TFTestCase {
     @SuppressWarnings("unchecked")
     public void testCurrentObject() throws SAXException, InstantiationException, IllegalAccessException, SecurityException, NoSuchMethodException{
         
-    	QName qn = new QName("test.com", "var_001");
         try{
-            new CurrentObject(qn, null);
+            new CurrentObject(null);
             fail();
         } catch(NullPointerException e){}
         
         //assertNull(new CurrentObject(null, true).toObject());
         
-        CurrentObject obj = new CurrentObject(qn, new TypeDef.ScalarDef(int.class));
+        CurrentObject obj = new CurrentObject(new TypeDef.ScalarDef(int.class));
         try{
             obj.setCurrentProp("anything");
             fail();
@@ -283,44 +281,44 @@ public class SoapHandlerTest extends TFTestCase {
         }
         
         //check all scalars
-        obj = new CurrentObject(qn, new ScalarDef(Boolean.class));
+        obj = new CurrentObject(new ScalarDef(Boolean.class));
         checkBool(obj);
-        obj = new CurrentObject(qn, new ScalarDef(Boolean.TYPE));
+        obj = new CurrentObject(new ScalarDef(Boolean.TYPE));
         checkBool(obj);
-        obj = new CurrentObject(qn, new ScalarDef(Integer.class));
-        obj = new CurrentObject(qn, new ScalarDef(Long.class));
+        obj = new CurrentObject(new ScalarDef(Integer.class));
+        obj = new CurrentObject(new ScalarDef(Long.class));
         checkLong(obj);
-        obj = new CurrentObject(qn, new ScalarDef(Long.TYPE));
+        obj = new CurrentObject(new ScalarDef(Long.TYPE));
         checkLong(obj);
-        obj = new CurrentObject(qn, new ScalarDef(Short.class)); 
+        obj = new CurrentObject(new ScalarDef(Short.class)); 
         checkShort(obj);
-        obj = new CurrentObject(qn, new ScalarDef(Short.TYPE));
+        obj = new CurrentObject(new ScalarDef(Short.TYPE));
         checkShort(obj);
-        obj = new CurrentObject(qn, new ScalarDef(Float.class));
+        obj = new CurrentObject(new ScalarDef(Float.class));
         checkFloat(obj);
-        obj = new CurrentObject(qn, new ScalarDef(Float.TYPE)); 
+        obj = new CurrentObject(new ScalarDef(Float.TYPE)); 
         checkFloat(obj);
-        obj = new CurrentObject(qn, new ScalarDef(Double.class));
+        obj = new CurrentObject(new ScalarDef(Double.class));
         checkDouble(obj);
-        obj = new CurrentObject(qn, new ScalarDef(Double.TYPE)); 
+        obj = new CurrentObject(new ScalarDef(Double.TYPE)); 
         checkDouble(obj);
-        obj = new CurrentObject(qn, new ScalarDef(String.class));
+        obj = new CurrentObject(new ScalarDef(String.class));
         obj.setStringValue("76yhfj\n\n\t\td;fjh");
         assertEquals("76yhfj\n\n\t\td;fjh", obj.toObject());
-        obj = new CurrentObject(qn, new ScalarDef(String.class));
+        obj = new CurrentObject(new ScalarDef(String.class));
         assertEquals("", obj.toObject());
         
-        obj = new CurrentObject(qn, new ScalarDef(BigDecimal.class));
+        obj = new CurrentObject(new ScalarDef(BigDecimal.class));
         obj.setStringValue("0.32");
         assertEquals(new BigDecimal(0.32, new MathContext(2)), obj.toObject());
         
         try{
-            obj = new CurrentObject(qn, new ScalarDef(double.class), true);
+            obj = new CurrentObject(new ScalarDef(double.class), true);
             fail();
         } catch(ESoap.ENonNullableObject e){
-            assertEquals(qn.toString() + ":"+Double.TYPE.toString(), e.getMessage());
+            assertEquals(Double.TYPE.toString(), e.getMessage());
         }
-        obj = new CurrentObject(qn, new ScalarDef(String.class), true);
+        obj = new CurrentObject(new ScalarDef(String.class), true);
         assertEquals(null, obj.toObject());
         
         obj.setStringValue("gsgdg");
@@ -330,7 +328,7 @@ public class SoapHandlerTest extends TFTestCase {
         TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(this.getClass().getPackage()));
         TypeDef def = lib.add(TestCls1.class);
 
-        obj = new CurrentObject(qn, def);
+        obj = new CurrentObject(def);
         
         // no effect
         obj.setStringValue("anything");
@@ -348,7 +346,7 @@ public class SoapHandlerTest extends TFTestCase {
         assertEquals("string value in var1", vObj.getVariable1());
         assertEquals("default value", vObj.getVariable2());
         
-        obj = new CurrentObject(qn, lib.add(Integer[].class));
+        obj = new CurrentObject(lib.add(Integer[].class));
         try{
             obj.setCurrentProp("unkProp");
             fail();
@@ -371,22 +369,22 @@ public class SoapHandlerTest extends TFTestCase {
         assertEquals(Integer.valueOf(762034), res.get(1));
         assertEquals(Integer.valueOf(683), res.get(2));
         
-        obj = new CurrentObject(qn, def, true);
+        obj = new CurrentObject(def, true);
         assertNull(obj.toObject());
 
         
         // check primitive types for array
-        obj = new CurrentObject(qn, lib.add(int[].class));
+        obj = new CurrentObject(lib.add(int[].class));
         obj.setCurrentProp("value");
         obj.setPropValue(875);
         assertEquals(875, ((List)obj.toObject()).get(0));
         
-        obj = new CurrentObject(qn, lib.add(boolean[].class));
+        obj = new CurrentObject(lib.add(boolean[].class));
         obj.setCurrentProp("value");
         obj.setPropValue(false);
         assertEquals(false, ((List)obj.toObject()).get(0));
 
-        obj = new CurrentObject(qn, lib.add(double[].class));
+        obj = new CurrentObject(lib.add(double[].class));
         obj.setCurrentProp("value");
         obj.setPropValue(6834.532);
         obj.setCurrentProp("value");
@@ -395,7 +393,7 @@ public class SoapHandlerTest extends TFTestCase {
         assertEquals(7885.66, ((List)obj.toObject()).get(1));
         
         Type t1 = IService.class.getMethod("methodMap", new Class[]{Map.class}).getGenericReturnType();
-        obj = new CurrentObject(qn, lib.add(t1));
+        obj = new CurrentObject(lib.add(t1));
         Map res2 = (Map) obj.toObject();
         assertEquals(Collections.emptyMap(), res2);
         
@@ -842,77 +840,4 @@ public class SoapHandlerTest extends TFTestCase {
         }
     } 
     
-    
-    String REQ_SYMB = 
-        "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
-        "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-        "       xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
-        "       xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"+
-        "  <soap:Body>"+
-        "    <method1 xmlns=\"http://tempuri.org/\">"+
-        "      <arg1>s=\"a&gt;&lt;b\"</arg1>"+
-        "      <arg0></arg0>"+
-        "    </method1>"+
-        "  </soap:Body>"+
-        "</soap:Envelope>";
-    
-    String REQ_SYMB2 = 
-        "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
-        "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-        "       xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
-        "       xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"+
-        "  <soap:Body>"+
-        "    <method1 xmlns=\"http://tempuri.org/\">"+
-        "      <arg1>a\nb\nc</arg1>"+
-        "      <arg0></arg0>"+
-        "    </method1>"+
-        "  </soap:Body>"+
-        "</soap:Envelope>";
-    String REQ_SYMB3 = 
-        "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
-        "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-        "       xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
-        "       xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"+
-        "  <soap:Body>"+
-        "    <method1 xmlns=\"http://tempuri.org/\">"+
-        "      <arg1>a\n>\r\nb</arg1>"+
-        "      <arg0></arg0>"+
-        "    </method1>"+
-        "  </soap:Body>"+
-        "</soap:Envelope>";
-    
-    public void testHttpCodedSymbols() throws ParserConfigurationException, SAXException, IOException{
-        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
-        InterfaceDescription desc = gen.parse(null, IService.class);
-        
-        SOAPDocument res = gen.deserialize(desc, inSource(REQ_SYMB));
-        String str = (String) res.m_args[1];
-        assertEquals("s=\"a><b\"", str);
-        res = gen.deserialize(desc, inSource(REQ_SYMB2));
-        assertEquals("a\nb\nc", res.m_args[1]);
-        res = gen.deserialize(desc, inSource(REQ_SYMB3));
-        assertEquals("a\n>\nb", res.m_args[1]);
-        
-        assertEquals("         a        ", deserialize(gen, desc,"         a        "));
-
-    }
-
-	private String deserialize(InterfaceDescriptionGenerator gen,
-			InterfaceDescription desc, String string) throws ParserConfigurationException, SAXException, IOException {
-		
-		String req = String.format( 
-	        "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
-	        "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-	        "       xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
-	        "       xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"+
-	        "  <soap:Body>"+
-	        "    <method1 xmlns=\"http://tempuri.org/\">"+
-	        "      <arg1>%s</arg1>"+
-	        "      <arg0></arg0>"+
-	        "    </method1>"+
-	        "  </soap:Body>"+
-	        "</soap:Envelope>", string);
-        return (String) gen.deserialize(desc, inSource(req)).m_args[1];
-	}
-	
 }

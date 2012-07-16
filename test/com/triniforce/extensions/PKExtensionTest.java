@@ -92,14 +92,14 @@ public class PKExtensionTest extends TFTestCase {
         // wiki description MyExtension
         {
             IPKExtension e = new PKExtension(null,
-                    new ObjectFactoryFromClass(MyExtension.class));
+                    new ObjectFactoryFromClassName(MyExtension.class.getName()));
             assertFalse("".equals(e.getWikiDescription()));
         }
         
         // MyExtension2 - no description
         {
             IPKExtension e = new PKExtension(null,
-                    new ObjectFactoryFromClass(MyExtension2.class));
+                    new ObjectFactoryFromClassName(MyExtension2.class.getName()));
             assertTrue("".equals(e.getWikiDescription()));
         }
 

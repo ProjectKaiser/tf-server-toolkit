@@ -38,8 +38,8 @@ public class ESoap {
 
 	static class ENonNullableObject extends SAXException{
 	    private static final long serialVersionUID = -7975756834097126342L;
-	    public ENonNullableObject(QName qn, String name) {
-	        super(qn.toString()+":"+name);
+	    public ENonNullableObject(String name) {
+	        super(name);
 	    }
 	}
 

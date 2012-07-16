@@ -10,16 +10,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.dbcp.BasicDataSource;
 
 import com.triniforce.db.ddl.UpgradeRunner;
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
+import com.triniforce.extensions.IPKExtension;
 import com.triniforce.extensions.IPKExtensionBase;
 import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.server.plugins.kernel.BasicServer;
@@ -86,11 +85,6 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
             // TODO Auto-generated method stub
             
         }
-
-        public void doExtensionPointsRegistration() {
-            // TODO Auto-generated method stub
-            
-        }
     }
 	
     protected BasicServerApiEmu m_bemu = new BasicServerApiEmu(); 
@@ -103,7 +97,6 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
 
         public Pool(BasicDataSource ds ){
             m_ds = ds;
-            m_ds.setMaxActive(50);
         }
 
         public Connection getPooledConnection() throws SQLException {
@@ -268,21 +261,14 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
 		}
 	}
     
-    protected static Set<Class> m_allowedEmptyWiki = new HashSet<Class>();
-    
-    public static void checkExtensions(TFTestCase tc, IBasicServer srv){
+    public static void checkExtensions(IBasicServer srv){
     	List<String> problems = new ArrayList<String>();
-    	
-   	
     	for(IPKExtensionPoint ep: srv.getExtensionPoints().values()){
     		checkWiki(ep, null, problems);
     		checkExtensionClass(ep, problems);
-//    		for(IPKExtension e: ep.getExtensions().values()){
-//    			tc.trace(e.getId());
-//    		    if(!m_allowedEmptyWiki.contains(e.getObjectClass())){
-//    		        checkWiki(e, ep.getId(), problems);
-//    		    }
-//    		}
+    		for(IPKExtension e: ep.getExtensions().values()){
+    			checkWiki(e, ep.getId(), problems);
+    		}
     	}
     	if(problems.size() > 0){
     		StringBuffer strProblems = new StringBuffer();

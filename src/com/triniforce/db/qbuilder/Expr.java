@@ -282,7 +282,7 @@ public class Expr {
         }
 
         public In(String prefix, String col, int nargs, boolean bIn) {
-        	this(prefix, col, Collections.nCopies(nargs, '?'), bIn);
+        	this(prefix, col, Collections.nCopies(nargs, "?"), bIn);
 		}
         
         public In(String prefix, String col, Collection vals, boolean bIn) {
@@ -293,19 +293,13 @@ public class Expr {
         	StringBuffer buf = new StringBuffer();
         	boolean bFirst = true;
         	for (Object object : vals) {
-        		String str;
-        		if(object instanceof String){
-        			str = "\'"+object+"\'";
-        		}
-        		else 
-        			str = object.toString();
         		if(bFirst){
-        			buf.append(str);
+        			buf.append(object.toString());
         			bFirst = false;
         		}
         		else{
 					buf.append(',');
-					buf.append(str);
+					buf.append(object.toString());
         		}
 			}
         	return buf.toString();

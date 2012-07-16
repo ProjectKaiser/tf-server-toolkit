@@ -66,12 +66,8 @@ public class TypeDef extends SimpleName{
             SCALAR_NAMES.put(byte[].class.getName(), "base64Binary");
         }
         
-        boolean m_bNillable;
-        
-        
         public ScalarDef(Class type) {
             super(scalarName(type.getName()), type);
-            m_bNillable = !BOXES.containsKey(type.getSimpleName());
         }
 
         private static String scalarName(String typeName) {
@@ -83,53 +79,45 @@ public class TypeDef extends SimpleName{
         
         @Override
         boolean isNullable() {
-            return m_bNillable;
-        }
-        
-        boolean isBoxType(){
-        	return BOXES.containsKey(getType());
+            return !BOXES.containsKey(getType());
         }
 
         public Object valueOf(String value) {
             Object res;
             String typeName = getName();
-            if(typeName.equals("string"))
-            	res = value;
-            else{
-	            value = value.trim();
-	            if(typeName.equals("int"))
-	                res = Integer.valueOf(value);
-	            else if(typeName.equals("short"))
-	                res = Short.valueOf(value);
-	            else if(typeName.equals("long"))
-	                res = Long.valueOf(value);
-	            else if(typeName.equals("float"))
-	                res = Float.valueOf(value);
-	            else if(typeName.equals("double"))
-	                res = Double.valueOf(value);
-	            else if(typeName.equals("boolean")){
-	                res = "1".equals(value) || "true".equals(value);
-	            }
-	            else if(typeName.equals("dateTime")){
-	            	DatatypeFactory tf;
-					try {
-						tf = DatatypeFactory.newInstance();
-		            	XMLGregorianCalendar gregCal = tf.newXMLGregorianCalendar(value);
-		            	return gregCal.toGregorianCalendar().getTime();
-					} catch (DatatypeConfigurationException e) {
-						ApiAlgs.rethrowException(e);
-						res = null;
-					}
-	            }
-	            else if(typeName.equals("decimal")){
-	            	res = new BigDecimal(value);
-	            }
-	            else if(typeName.equals("base64Binary")){
-	            	res = Base64.decode(value);
-	            }
-	            else
-	                res = value;
+            value = value.trim();
+            if(typeName.equals("int"))
+                res = Integer.valueOf(value);
+            else if(typeName.equals("short"))
+                res = Short.valueOf(value);
+            else if(typeName.equals("long"))
+                res = Long.valueOf(value);
+            else if(typeName.equals("float"))
+                res = Float.valueOf(value);
+            else if(typeName.equals("double"))
+                res = Double.valueOf(value);
+            else if(typeName.equals("boolean")){
+                res = "1".equals(value) || "true".equals(value);
             }
+            else if(typeName.equals("dateTime")){
+            	DatatypeFactory tf;
+				try {
+					tf = DatatypeFactory.newInstance();
+	            	XMLGregorianCalendar gregCal = tf.newXMLGregorianCalendar(value);
+	            	return gregCal.toGregorianCalendar().getTime();
+				} catch (DatatypeConfigurationException e) {
+					ApiAlgs.rethrowException(e);
+					res = null;
+				}
+            }
+            else if(typeName.equals("decimal")){
+            	res = new BigDecimal(value);
+            }
+            else if(typeName.equals("base64Binary")){
+            	res = Base64.decode(value);
+            }
+            else
+                res = value;
             return res;
         }
         

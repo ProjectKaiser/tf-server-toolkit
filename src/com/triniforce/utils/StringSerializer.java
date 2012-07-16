@@ -14,12 +14,10 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.sojo.interchange.json.JsonSerializer;
+
 public class StringSerializer {
 
-	public static interface IAfterDeserialization{
-		void afterDeserialization();
-	}
-	
     public static final String PREFIX_BASE64 = "base64";
     public static final String PREFIX_JSON = "pojoja";
     public static final int prefixLength = 6;
@@ -34,16 +32,18 @@ public class StringSerializer {
 
     public static class PojojaSerializer implements ISerializer {
         
+        JsonSerializer m_js = new JsonSerializer();
+
         public String getPrefix() {
             return PREFIX_JSON;
         }
 
         public String object2String(Object data) {
-            return new PKJsonSerializer().serialize(data).toString();
+            return m_js.serialize(data).toString();
         }
 
         public Object string2Object(String data) {
-            return new PKJsonSerializer().deserialize(data);
+            return m_js.deserialize(data);
         }
     }
     
@@ -101,18 +101,6 @@ public class StringSerializer {
     public static String object2String(Object data, ISerializer ser) {
         return ser.getPrefix().substring(0, prefixLength)
                 + ser.object2String(data);
-    }
-    
-    public static String Object2JSON(Object data){
-    	return rawObject2String(data, PREFIX_JSON);
-    }
-    
-    public static Object JSON2Object(String data){
-    	Object res = rawString2Object(data, PREFIX_JSON);
-    	if( res instanceof IAfterDeserialization){
-    		((IAfterDeserialization) res).afterDeserialization();
-    	}
-    	return res;
     }
     
     public static String rawObject2String(Object data, String serKey) {

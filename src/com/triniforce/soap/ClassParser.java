@@ -8,13 +8,11 @@ package com.triniforce.soap;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 
-import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
+import com.triniforce.soap.TypeDef;
+import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.utils.TFUtils;
 
 public class ClassParser {
@@ -60,20 +58,6 @@ public class ClassParser {
                 }
 //            } catch (SecurityException e) {
 //            } catch (NoSuchMethodException e) {}
-        }
-        
-        PropertiesSequence propSeq = (PropertiesSequence) key.getAnnotation(PropertiesSequence.class);
-        if(null !=propSeq){
-        	final String[]seq = propSeq.sequence();
-	        Collections.sort(res.getOwnProps(), new Comparator<PropDef>(){
-				public int compare(PropDef prop1, PropDef prop2) {
-					return pos(prop1) - pos(prop2); 
-				}
-				int pos(PropDef prop){
-					int res = Arrays.asList(seq).indexOf(prop.getName());
-					return res < 0 ? seq.length : res;
-				}
-	        });
         }
         
 //        for (Class innerCls : cls.getDeclaredClasses()) {

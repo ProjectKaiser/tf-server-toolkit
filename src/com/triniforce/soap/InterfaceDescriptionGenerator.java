@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
@@ -47,13 +46,13 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.triniforce.soap.InterfaceDescription.MessageDef;
 import com.triniforce.soap.InterfaceDescription.Operation;
 import com.triniforce.soap.InterfaceDescriptionGenerator.ObjectConverter.TypedObject;
-import com.triniforce.soap.InterfaceOperationDescription.NamedArg;
+import com.triniforce.soap.TypeDefLibCache.PropDef;
+import com.triniforce.soap.TypeDef;
 import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.EnumDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
-import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.WsdlDescription.WsdlMessage;
 import com.triniforce.soap.WsdlDescription.WsdlType;
 import com.triniforce.soap.WsdlDescription.WsdlTypeElement;
@@ -106,63 +105,66 @@ public class InterfaceDescriptionGenerator {
      * @return - new description
      */
     public InterfaceDescription parse(InterfaceDescription oldDesc, Class<?> cls, Package pkg){
-        try{
-	    	return parse(oldDesc, listInterfaceOperations(cls), pkg, cls.getAnnotation(SoapInclude.class));
+        InterfaceDescription res = new InterfaceDescription();
+        try {
+            BeanInfo info = Introspector.getBeanInfo(cls);
+            TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(pkg));
+            for (MethodDescriptor mDesc : info.getMethodDescriptors()) {
+                res.getOperations().add(parseOperation(mDesc, lib));
+            }
+            SoapInclude soapInc = cls.getAnnotation(SoapInclude.class);
+            if(null != soapInc){
+                for(Class extraCls : soapInc.extraClasses()){
+                    lib.add(extraCls);
+                }
+            }
+            
+            List<TypeDef> typeDefs = lib.getDefs();
+            if(null != oldDesc){
+                // Order operations
+                Order.orderINames(res.getOperations(), oldDesc.getOperations());
+                // Order types
+                Order.orderINames(typeDefs, oldDesc.getTypes());
+                // Order properties in ClassDefs 
+                Iterator<TypeDef> iOldDef = oldDesc.getTypes().iterator();
+                for (TypeDef def : typeDefs) {
+                    ClassDef oldDef = null;
+                    while(iOldDef.hasNext()){
+                        TypeDef def2 = iOldDef.next();
+                        if(def2.getName().equals(def.getName())){
+                            if(def2 instanceof ClassDef)
+                                oldDef = (ClassDef) def2;
+                            break;
+                        }
+                    }
+                    if(def instanceof ClassDef && oldDef != null){
+                        ClassDef cDef = (ClassDef) def;
+                        Order.orderINames(cDef.getOwnProps(), oldDef.getOwnProps());                        
+                    }                    
+                }
+            }
+            res.getTypes().addAll(typeDefs);
         } catch (IntrospectionException e) {
             ApiAlgs.rethrowException(e);
-            return null;
         }
+        return res;
     }
     
-    private List<InterfaceOperationDescription> listInterfaceOperations(Class<?> cls) throws IntrospectionException {
-    	BeanInfo info = Introspector.getBeanInfo(cls);
-        List<InterfaceOperationDescription> methods = new ArrayList<InterfaceOperationDescription>();
-        for (MethodDescriptor mDesc : info.getMethodDescriptors()) {
-        	InterfaceOperationDescription opDesc = new InterfaceOperationDescription();
-        	opDesc.setName(mDesc.getName());
-        	ArrayList<NamedArg> args = new ArrayList<NamedArg>();
-        	int i = 0;
-            for(Type type : mDesc.getMethod().getGenericParameterTypes()){
-            	args.add(new NamedArg("arg"+i++, type));
-            }
-        	opDesc.setArgs(args);
-        	opDesc.setResult(new NamedArg(mDesc.getName()+"Result", mDesc.getMethod().getGenericReturnType()));
-        	methods.add(opDesc);
-        }
-        return methods;
-	}
-
-//    private Operation parseOperation(String mName, Method method, TypeDefLibCache lib) {
-//        MessageDef inMsgType = new InterfaceDescription.MessageDef(mName);
-//        int i=0;
-//        for(Type type : method.getGenericParameterTypes()){
-//            TypeDef def = lib.add(type);
-//            inMsgType.addParameter("arg"+i++, TypeDefLibCache.toClass(type), def);
-//        }
-//        
-//        MessageDef outMsgType = new MessageDef(mName + "Response");
-//        Type retType = method.getGenericReturnType();
-//        if(!retType.equals(Void.TYPE)){
-//            outMsgType.addParameter(mName+"Result", TypeDefLibCache.toClass(retType), lib.add(retType));
-//        }
-//        
-//        return new Operation(mName, inMsgType, outMsgType);
-//    }
-    
-    private Operation parseOperation(InterfaceOperationDescription opDesc, TypeDefLibCache lib) {
-        MessageDef inMsgType = new InterfaceDescription.MessageDef(opDesc.getName());
-        for(NamedArg arg: opDesc.getArgs()){
-            TypeDef def = lib.add(arg.getType());
-            inMsgType.addParameter(arg.getName(), TypeDefLibCache.toClass(arg.getType()), def);
+    private Operation parseOperation(MethodDescriptor mDesc, TypeDefLibCache lib) {
+        MessageDef inMsgType = new InterfaceDescription.MessageDef(mDesc.getName());
+        int i=0;
+        for(Type type : mDesc.getMethod().getGenericParameterTypes()){
+            TypeDef def = lib.add(type);
+            inMsgType.addParameter("arg"+i++, TypeDefLibCache.toClass(type), def);
         }
         
-        MessageDef outMsgType = new MessageDef(opDesc.getName() + "Response");
-        Type retType = opDesc.getResult().getType();
+        MessageDef outMsgType = new MessageDef(mDesc.getName() + "Response");
+        Type retType = mDesc.getMethod().getGenericReturnType();
         if(!retType.equals(Void.TYPE)){
-            outMsgType.addParameter(opDesc.getResult().getName(), TypeDefLibCache.toClass(retType), lib.add(retType));
+            outMsgType.addParameter(mDesc.getName()+"Result", TypeDefLibCache.toClass(retType), lib.add(retType));
         }
         
-        return new Operation(opDesc.getName(), inMsgType, outMsgType);
+        return new Operation(mDesc.getName(), inMsgType, outMsgType);
     }
 
     static String wsdl = "http://schemas.xmlsoap.org/wsdl/";
@@ -255,8 +257,6 @@ public class InterfaceDescriptionGenerator {
 	                            if(!val.getType().getTypeDef().getType().equals(Object.class.getName()))
 	                                e.attr("type", getTypeName(val.getType()));                            
 	                        }
-	                        if(val.getMinOccur()>0 && val.isNillable())
-	                        	e.attr("nillable", "true");
 	                    }
 	                })
 	                .end()
@@ -435,16 +435,16 @@ public class InterfaceDescriptionGenerator {
             
             static final Object DEFAULT_OBJECT = new Object();
             
-            public CurrentObject(QName qn, TypeDef objDef) throws ESoap.ENonNullableObject {
-                this(qn, objDef, false);
+            public CurrentObject(TypeDef objDef) throws ESoap.ENonNullableObject {
+                this(objDef, false);
             }
             
-            public CurrentObject(QName qn, TypeDef objDef, boolean bNull) throws ESoap.ENonNullableObject{
+            public CurrentObject(TypeDef objDef, boolean bNull) throws ESoap.ENonNullableObject{
                 if(null == objDef)
                     throw new NullPointerException("objDef");
                 if(bNull){
                     if(!objDef.isNullable())
-                        throw new ESoap.ENonNullableObject(qn, objDef.getType());
+                        throw new ESoap.ENonNullableObject(objDef.getType());
                 }
                 else{
                     m_objDef = objDef;
@@ -579,7 +579,7 @@ public class InterfaceDescriptionGenerator {
         private HashMap<String, String> m_uriMap;
         
         private SOAPDocument m_result;
-        private List<String> m_stringValue = new ArrayList<String>();
+        private StringBuffer m_stringValue;
         
         private FaultMessage m_fault=null;
         
@@ -603,8 +603,6 @@ public class InterfaceDescriptionGenerator {
                     throw new ESoap.EUnknownElement(qn);
                 }
             }
-
-            m_stringValue.clear();
             
             if(ns.equals(m_result.m_soap)){
                 if(tag.equals("Envelope")){
@@ -630,7 +628,7 @@ public class InterfaceDescriptionGenerator {
                     if(null != m_result.m_method)
                         throw new ESoap.EElementReentry(qn);
                     MessageDef methodDef = getMethodDef(tag);
-                    co = new CurrentObject(qn, methodDef, bNull);
+                    co = new CurrentObject(methodDef, bNull);
                 }
                 else{
                     co = m_objStk.peek();
@@ -645,9 +643,10 @@ public class InterfaceDescriptionGenerator {
                         }
                         typeDef = reqTypeDef;
                     }
-                    co = new CurrentObject(qn, typeDef, bNull);
+                    co = new CurrentObject(typeDef, bNull);
                 }
                 m_objStk.push(co);
+                m_stringValue = null;
             }
             else{
             	if(!(m_fault != null && 
@@ -717,11 +716,20 @@ public class InterfaceDescriptionGenerator {
 
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException {
-        	String vStr = new String(ch, start, length);
-//        	if(start+length < ch.length && ('\n' == ch[start+length] || '\r' == ch[start+length])){
-//        		vStr += '\n';
-//        	}
-        	m_stringValue.add(vStr);
+//            if(!m_objStk.isEmpty()){
+            	String vStr = new String(ch, start, length).trim();
+            	if(null != m_stringValue){
+            		m_stringValue.append('\n');
+            		m_stringValue.append(vStr);
+            	}
+            	else{
+            		m_stringValue = new StringBuffer();
+            		m_stringValue.append(vStr);
+            	}
+//                CurrentObject obj = m_objStk.peek();
+//                String str = new String(ch, start, length);
+//                obj.setStringValue(str.trim());
+//            }
         }
         
         @Override
@@ -732,32 +740,22 @@ public class InterfaceDescriptionGenerator {
                     m_result.m_args = (Object[]) obj.toObject();
                 }
                 else{
-                	if(!m_stringValue.isEmpty())
-                		obj.setStringValue(getNodeCharacters());
+                	if(null != m_stringValue)
+                		obj.setStringValue(m_stringValue.toString());
                     CurrentObject parent = m_objStk.peek();
                     parent.setPropValue(obj.toObject());
                 }
             }
             if(m_fault != null){
             	if("faultstring".equals(localName)){
-            		m_fault.m_string = getNodeCharacters();
+            		m_fault.m_string = m_stringValue.toString().trim();
             	}
             }
-        	m_stringValue.clear();
+        	m_stringValue = null;
             m_stk.pop();
         }
         
-        private String getNodeCharacters() {
-        	StringBuffer res = new StringBuffer();
-        	Iterator<String> i = m_stringValue.iterator();
-        	while(i.hasNext()){
-        		String v = i.next();
-    			res.append(v);
-        	}
-			return res.toString();
-		}
-        
-		@Override
+        @Override
         public void startPrefixMapping(String prefix, String uri) throws SAXException {
             m_uriMap.put(prefix, uri); 
             super.startPrefixMapping(prefix, uri);
@@ -1000,159 +998,6 @@ public class InterfaceDescriptionGenerator {
     public void writeDocument(OutputStream output, Document doc) throws TransformerException {
         getTransformer().transform(new DOMSource(doc), new StreamResult(output));
     }
-
-	public InterfaceDescription parse(InterfaceDescription oldDesc, 
-			List<InterfaceOperationDescription> operationDescs, Package pkg, SoapInclude soapInc) {
-    	
-        InterfaceDescription res = new InterfaceDescription();
-        TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(pkg));
-        for (InterfaceOperationDescription opDesc : operationDescs) {
-            res.getOperations().add(parseOperation(opDesc, lib));
-        }
-        if(null != soapInc){
-            for(Class extraCls : soapInc.extraClasses()){
-                lib.add(extraCls);
-            }
-        }
-        
-        List<TypeDef> typeDefs = lib.getDefs();
-        if(null != oldDesc){
-            // Order operations
-            Order.orderINames(res.getOperations(), oldDesc.getOperations());
-            // Order types
-            Order.orderINames(typeDefs, oldDesc.getTypes());
-            // Order properties in ClassDefs 
-            Iterator<TypeDef> iOldDef = oldDesc.getTypes().iterator();
-            for (TypeDef def : typeDefs) {
-                ClassDef oldDef = null;
-                while(iOldDef.hasNext()){
-                    TypeDef def2 = iOldDef.next();
-                    if(def2.getName().equals(def.getName())){
-                        if(def2 instanceof ClassDef)
-                            oldDef = (ClassDef) def2;
-                        break;
-                    }
-                }
-                if(def instanceof ClassDef && oldDef != null){
-                    ClassDef cDef = (ClassDef) def;
-                    Order.orderINames(cDef.getOwnProps(), oldDef.getOwnProps());                        
-                }                    
-            }
-        }
-        res.getTypes().addAll(typeDefs);
-        return res;
-
-	}
-	
-	public static class ValErrItem{
-		
-		public static class EPropSeqNotFound extends ValErrItem{
-
-			public EPropSeqNotFound(String prop) {
-				super(prop);
-			}
-			
-		}
-
-		public static class ENoPropInSequence extends ValErrItem{
-
-			private String m_prop;
-
-			public ENoPropInSequence(String type, String prop) {
-				super(type);
-				m_prop = prop;
-			}
-			@Override
-			public boolean equals(Object obj) {
-				return super.equals(obj) && m_prop.equals(((ENoPropInSequence)obj).m_prop);
-			}
-
-			@Override
-			public String toString() {
-				return String.format("Type: %s, prop: %s", m_type, m_prop);
-			}
-
-		}
-		
-		public static class ENoPropDefForSequence extends ValErrItem{
-
-			private String m_prop;
-
-			public ENoPropDefForSequence(String type, String prop) {
-				super(type);
-				m_prop = prop;
-			}
-			@Override
-			public boolean equals(Object obj) {
-				return super.equals(obj) && m_prop.equals(((ENoPropDefForSequence)obj).m_prop);
-			}
-			
-			@Override
-			public String toString() {
-				return String.format("Type: %s, prop: %s", m_type, m_prop);
-			}
-			
-		}
-
-		protected String m_type;
-		
-		public ValErrItem(String prop) {
-			m_type = prop;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			ValErrItem other = (ValErrItem) obj; 
-			return getClass().equals(obj.getClass()) && m_type.equals(other.m_type);
-		}
-		
-		@Override
-		public String toString() {
-			return String.format("Type: %s", m_type);
-		}
-	}
-	
-	public List<ValErrItem> validateInterface(Class key) throws IntrospectionException{
-		return validateInterface(listInterfaceOperations(key), key.getPackage(), (SoapInclude) key.getAnnotation(SoapInclude.class));
-	}
-	
-	public List<ValErrItem> validateInterface(List<InterfaceOperationDescription> ops, Package pkg, SoapInclude soapInc){
-		ArrayList<ValErrItem> res = new ArrayList<ValErrItem>();
-		InterfaceDescription desc = parse(null, ops, pkg, soapInc);
-		for(TypeDef td : desc.getTypes()){
-			if(td instanceof ClassDef){
-				ClassDef cd = (ClassDef) td;
-				try {
-					if(!cd.getOwnProps().isEmpty()){
-						Class<?> cls = Class.forName(cd.getType());
-						PropertiesSequence seq = cls.getAnnotation(PropertiesSequence.class);
-						if(null == seq)
-							res.add(new ValErrItem.EPropSeqNotFound(td.getName()));
-						else{
-							HashSet<String> declared = new HashSet<String>();
-							for(PropDef pd : cd.getOwnProps()){
-								declared.add(pd.getName());
-							}
-							HashSet<String> seqSet = new HashSet<String>(Arrays.asList(seq.sequence()));
-							seqSet.removeAll(declared);
-							for(String pname : seqSet){
-								res.add(new ValErrItem.ENoPropDefForSequence(td.getName(),pname));								
-							}
-							
-							declared.removeAll(Arrays.asList(seq.sequence()));
-							for(String pname : declared){
-								res.add(new ValErrItem.ENoPropInSequence(td.getName(),pname));								
-							}
-						}
-					}
-						
-				} catch (ClassNotFoundException e) {
-					ApiAlgs.rethrowException(e);
-				}
-			}
-		}
-		return res;
-	}
     
 
 }

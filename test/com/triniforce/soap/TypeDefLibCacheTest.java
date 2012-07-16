@@ -85,11 +85,6 @@ public class TypeDefLibCacheTest extends TFTestCase {
 	        byte[] bytes =  (byte[]) sd.valueOf("AQID");
 	        assertEquals(Arrays.asList((byte)1,(byte)2,(byte)3), Arrays.asList(bytes[0], bytes[1], bytes[2]));
 	        assertEquals("MyString_005624634", new String(Base64.decode(sd.stringValue("MyString_005624634".getBytes()))));
-	        
-	        assertFalse(scLib.get(boolean.class).isNullable());
-	        assertTrue(scLib.get(Boolean.class).isNullable());
-	        assertTrue(scLib.get(String.class).isNullable());
-	        
     	}
 
     }

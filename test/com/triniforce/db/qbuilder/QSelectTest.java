@@ -53,33 +53,25 @@ public class QSelectTest extends TFTestCase {
     }
     
 	public void testAddGetExpr(){
-		{
-			QSelect qSel = new QSelect();
-			try{
-				qSel.addGetExpr(new Expr.Column("ttt", "unkColumn"), null);
-				fail();
-			} catch(Err.EPrefixNotFound e){
-				assertEquals("ttt", e.getMessage());
-			}
-			
-			try{
-				qSel.addGetExpr(new Expr.Column("tbt", "unkColumn"), null);
-				fail();
-			} catch(Err.EPrefixNotFound e){
-				assertEquals("tbt", e.getMessage());
-			}
-			
-			qSel.joinLast(new QTable("Table_001", "T1"));
-			qSel.addGetExpr(new Expr.Column("T1", "Column_1"), "COL_TITLE1");
-			
-			assertEquals("select T1.\"COLUMN_1\" AS COL_TITLE1 from Table_001 T1", qSel.toString());
+		QSelect qSel = new QSelect();
+		try{
+			qSel.addGetExpr(new Expr.Column("ttt", "unkColumn"), null);
+			fail();
+		} catch(Err.EPrefixNotFound e){
+			assertEquals("ttt", e.getMessage());
 		}
-		{
-			QSelect qSel = new QSelect();
-			qSel.joinLast(new QTable("table_0041"));
-			qSel.addGetExpr(new Expr.SinglePred("count", new Expr.Column("", "col1")), "cnt");
-			assertEquals("select count(\"COL1\") AS cnt from table_0041", qSel.toString());
+		
+		try{
+			qSel.addGetExpr(new Expr.Column("tbt", "unkColumn"), null);
+			fail();
+		} catch(Err.EPrefixNotFound e){
+			assertEquals("tbt", e.getMessage());
 		}
+		
+		qSel.joinLast(new QTable("Table_001", "T1"));
+		qSel.addGetExpr(new Expr.Column("T1", "Column_1"), "COL_TITLE1");
+		
+		assertEquals("select T1.\"COLUMN_1\" AS COL_TITLE1 from Table_001 T1", qSel.toString());
 	}
 	
 	public void testJoinTableWithParams(){
@@ -101,13 +93,5 @@ public class QSelectTest extends TFTestCase {
 				"select from( tab1 T " +
 				"inner join tab2 T2 on T.\"LEFT_COL1\" = T2.\"RIGHT_COL1\" and T.\"LEFT_COL2\" = T2.\"RIGHT_COL2\" )", 
 				qsel.toString());
-	}
-	
-	public void testGroupBy(){
-		QSelect qsel = new QSelect();
-		qsel.joinLast(new QTable("tab1", "T"));
-		assertSame(qsel, qsel.groupBy(new GroupByClause().addCol("T", "column_00")));
-		assertEquals("select from tab1 T group by T.\"COLUMN_00\"", qsel.toString());
-		
 	}
 }

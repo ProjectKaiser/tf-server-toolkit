@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.triniforce.db.ddl.DBTables.DBOperation;
-import com.triniforce.db.ddl.TableDef.EReferenceError;
 import com.triniforce.db.ddl.TableDef.FieldDef;
 import com.triniforce.db.ddl.TableDef.IElementDef;
 import com.triniforce.db.ddl.TableDef.IndexDef;
@@ -832,15 +831,15 @@ public class UpgradeRunnerTest extends DDLTestCase {
 	    	
 	    	assertEquals("T_TESTLONGCONSTRAINTNAMES_TESTL", m_as.getIndexDbName(appName1));
 	    	
-	    	tabDef.deleteIndex(7, fk1);
-	    	tabDef.deleteIndex(8, idx1);
+	    	tabDef.deleteIndex(7, fk1, IndexDef.TYPE.FOREIGN_KEY);
+	    	tabDef.deleteIndex(8, idx1, IndexDef.TYPE.INDEX);
 	    	m_player.run(db.getCommandList());
 
 	    	assertEquals(appName1, m_as.getIndexDbName( appName1)); // dbIndexName not found 
 	    	assertEquals("T_TESTLONGCONSTRAINTNAMES_TEST1", m_as.getIndexDbName(appName2));
 	    	assertEquals(appName3, m_as.getIndexDbName(appName3)); // dbIndexName not found 
 
-	    	tabDef.deleteIndex(9, idx2);
+	    	tabDef.deleteIndex(9, idx2, true);
 	    	m_player.run(db.getCommandList());
     	}
     }
@@ -964,70 +963,36 @@ public class UpgradeRunnerTest extends DDLTestCase {
 
 	}
 	
-	public void testDropIndex() throws Exception{
-		{ // unique index
-	    	TableDef def1 = new TableDef("testDropUniqueIndex");
-	    	def1.setDbName("testDropUniqueIndex");
-	    	def1.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
-	    	def1.addField(2, FieldDef.createScalarField("f2", ColumnType.INT, true));
-	    	def1.addIndex(3, "unique_idx1",new String[]{"f1"}, true, true);
-	    	def1.addIndex(4, "unique_idx2",new String[]{"f2"}, true, true);
-	    	HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
-	   		desired.put(def1.getEntityName(), def1);
-	       	DBTables db = new DBTables(m_as, desired);
-	    	m_player.run(db.getCommandList());
-	    	
-	    	def1.deleteIndex(5, "unique_idx1");
-	    	m_player.run(db.getCommandList());
-	    	
-	    	Connection con = getConnection();
-	    	Statement st = con.createStatement();
-	    	st.execute("insert into testDropUniqueIndex (F1, F2) values (50, 50)");
-	    	
-	    	try{
-	    		// unique index constraint works
-	        	st.execute("insert into testDropUniqueIndex (F1, F2) values (51, 50)");
-	    		fail();
-	    	}catch(SQLException e){
-	    	}
-	    	
-	    	// unique index constrain dropped
-	    	st.execute("insert into testDropUniqueIndex (F1, F2) values (50, 51)");
-		}
-		{
-	    	TableDef def1 = new TableDef("testDropNonUniqueIndex");
-	    	def1.setDbName("testDropNonUniqueIndex");
-	    	def1.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
-	    	def1.addField(2, FieldDef.createScalarField("f2", ColumnType.INT, true));
-	    	def1.addIndex(3, "idx1", new String[]{"f1"}, false, true);
-	    	HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
-	   		desired.put(def1.getEntityName(), def1);
-	       	DBTables db = new DBTables(m_as, desired);
-	    	m_player.run(db.getCommandList());
-	    	
-	    	def1.deleteIndex(4, "idx1");
-	    	m_player.run(db.getCommandList());
-
-		}
-    	
-	}
-	
-	public void testAlterColumn() throws EReferenceError, SQLException{
-    	TableDef def1 = new TableDef("testAlterColumn");
-    	def1.setDbName("testAlterColumn");
-    	FieldDef oldF = FieldDef.createStringField("f1", ColumnType.NVARCHAR, 60, false, null);
-    	def1.addField(1, oldF);
+	public void testDropUniqueIndex() throws Exception{
+    	TableDef def1 = new TableDef("testDropUniqueIndex");
+    	def1.setDbName("testDropUniqueIndex");
+    	def1.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
+    	def1.addField(2, FieldDef.createScalarField("f2", ColumnType.INT, true));
+    	def1.addIndex(3, "unique_idx1",new String[]{"f1"}, true, true);
+    	def1.addIndex(4, "unique_idx2",new String[]{"f2"}, true, true);
     	HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
    		desired.put(def1.getEntityName(), def1);
        	DBTables db = new DBTables(m_as, desired);
     	m_player.run(db.getCommandList());
     	
-    	FieldDef newF = FieldDef.createStringField("f1", ColumnType.VARCHAR, 60, false, null);
-    	def1.addModification(2, new AlterColumnOperation(oldF, newF));
+    	def1.deleteIndex(5, "unique_idx1", true);
     	m_player.run(db.getCommandList());
     	
-    	assertEquals(ColumnType.VARCHAR , def1.getFields().findElement("f1").getElement().getType());
+    	Connection con = getConnection();
+    	Statement st = con.createStatement();
+    	st.execute("insert into testDropUniqueIndex (F1, F2) values (50, 50)");
+    	
+    	try{
+    		// unique index constraint works
+        	st.execute("insert into testDropUniqueIndex (F1, F2) values (51, 50)");
+    		fail();
+    	}catch(SQLException e){
+    	}
+    	
+    	// unique index constrain dropped
+    	st.execute("insert into testDropUniqueIndex (F1, F2) values (50, 51)");
 		
+    	
 	}
     
 }

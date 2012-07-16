@@ -9,9 +9,6 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.Date;
 
-import com.triniforce.soap.PropertiesSequence;
-
-@PropertiesSequence(sequence = {"mimeType", "value", "creatorId", "creatorNickName", "created"})
 public class CLOBValue {
     
     private String m_mimeType;

@@ -124,11 +124,6 @@ public class ServerTest extends DBTestCase {
 
         public void doRegistration() {
         }
-
-        public void doExtensionPointsRegistration() {
-            // TODO Auto-generated method stub
-            
-        }
     }
     
     protected Api m_coreApi;

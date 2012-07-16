@@ -8,7 +8,6 @@ package com.triniforce.extensions;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.TFUtils;
 
-@Deprecated
 public class ObjectFactoryFromClassName implements ISimpleObjectFactory {
 
     private final String m_className;

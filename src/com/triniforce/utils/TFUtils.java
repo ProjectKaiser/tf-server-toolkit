@@ -6,7 +6,6 @@
 
 package com.triniforce.utils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -69,30 +68,7 @@ public class TFUtils {
 	    if( value instanceof Short){
 	        return (int)(short)(Short) value;
 	    }
-	    if( value instanceof Integer){
-	        return (Integer)value;
-        }
-	    if( value instanceof String){
-            return Integer.parseInt((String) value);
-        }
-	    TFUtils.assertTrue(false, "Unknown type for asInteger" + value.getClass());
-	    return 0;
-	}
-	
-	public static String toString(Object o){
-		if(null == o) return "null";
-		return o.toString();
-	}
-	
-	public static Long asLong(Object value){
-	    if( null == value )return null;
-	    if( value instanceof Short){
-	        return (long)(short)(Short) value;
-	    }
-	    if( value instanceof Integer){
-	        return (long)(int)(Integer) value;
-	    }
-	    return (Long)value;
+	    return (Integer)value;
 	}
 
 	public static boolean equals(Object expected, Object actual) {
@@ -400,10 +376,9 @@ public class TFUtils {
 	    try {
 	        InputStream is = cls.getResourceAsStream(resourceName);
 	        if( null == is) throw new EUtils.EResourceNotFound(cls, resourceName);            
-	        InputStreamReader iReader = new InputStreamReader(is, "utf-8");
-	        BufferedReader br = new BufferedReader(iReader);
+	        InputStreamReader isReader = new InputStreamReader(is);
 	        int nRead;
-	        while ((nRead = br.read(buf)) > 0) {
+	        while ((nRead = isReader.read(buf)) > 0) {
 	            res.append(buf, 0, nRead);
 	        }
 	    } catch (IOException e) {

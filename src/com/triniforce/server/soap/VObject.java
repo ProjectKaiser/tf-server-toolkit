@@ -31,11 +31,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
-import com.triniforce.soap.PropertiesSequence;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.xml.tfserver._200701.serialization.DOMSerializer;
 
-@PropertiesSequence( sequence = {"type", "props"})
 public class VObject {
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -122,28 +120,10 @@ public class VObject {
     }
 
     public void setProp(String name, Object value) {
-    	if(value instanceof IVOSerializable)
-    		value = ((IVOSerializable)value).toVObject();
-    	if(value instanceof Object[])
-    		value = convertArray((Object[]) value);
-    		
         m_props.put(name, value);
     }
 
-    private Object[] convertArray(Object[] value) {
-    	Object[] res = new Object[value.length];
-        for (int i = 0; i < res.length; i++) {
-            Object obj = value[i];
-            if (obj instanceof IVOSerializable) {
-                res[i] = ((IVOSerializable) obj).toVObject();
-            } else {
-                res[i] = obj;
-            }
-        }
-        return res;
-	}
-
-	public void setListProp(String name, List value) {
+    public void setListProp(String name, List value) {
         Object res[] = new Object[value.size()];
         for (int i = 0; i < res.length; i++) {
             Object obj = value.get(i);
@@ -153,7 +133,7 @@ public class VObject {
                 res[i] = obj;
             }
         }
-        m_props.put(name, res);
+        m_props.put(name, value.toArray());
     }
 
     public Map<String, Object> getProps() {

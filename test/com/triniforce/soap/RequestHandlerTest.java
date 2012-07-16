@@ -42,7 +42,7 @@ public class RequestHandlerTest extends TFTestCase {
     public void test() throws Exception {
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
         InterfaceDescription desc = gen.parse(null, TestService.class);
-        RequestHandler handler = new RequestHandler(gen, desc, new RequestHandler.ReflectServiceInvoker(new TestService()));
+        RequestHandler handler = new RequestHandler(gen, desc, new TestService());
         
         String REQ1 = 
             "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
@@ -125,7 +125,7 @@ public class RequestHandlerTest extends TFTestCase {
         public void run() {
             try {
                 while(!bShutDown){
-                    RequestHandler h = new RequestHandler(m_gen, m_desc, new RequestHandler.ReflectServiceInvoker(m_svc));
+                    RequestHandler h = new RequestHandler(m_gen, m_desc, m_svc);
                     String REQ1 = 
                         "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
                         "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +

@@ -55,17 +55,13 @@ public class PKExtensionPoint extends PKExtensionBase implements IPKExtensionPoi
     }
     
     
-    protected void validateExtension(IPKExtension ext){
-        
-    }
-    
     
     public IPKExtension putExtension(String extensionId,
             Object obj) throws EExtensionPointNotFound {
         
         ObjectInstantiator oi = null;
         if(obj instanceof Class){
-            oi = new ObjectInstantiator(new ObjectFactoryFromClass(((Class)obj)));    
+            oi = new ObjectInstantiator(new ObjectFactoryFromClassName(((Class)obj).getName()));    
         } else{
             oi = new ObjectInstantiator(new ObjectFactoryFromObject(obj));
         }
@@ -74,8 +70,6 @@ public class PKExtensionPoint extends PKExtensionBase implements IPKExtensionPoi
         }
         IPKExtension res = new PKExtension(this, oi);
         res.setId(extensionId);
-        
-        validateExtension(res);
         m_extensions.put(extensionId, res);
         return res;
     }

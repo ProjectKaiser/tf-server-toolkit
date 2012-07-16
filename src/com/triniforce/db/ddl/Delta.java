@@ -709,7 +709,7 @@ public class Delta {
 
 		public TableUpdateOperation editCmd(FieldDef srcElement,
 				FieldDef dstElement) {
-			return new AlterColumnOperation(srcElement, dstElement);
+			return null;
 		}
 		
 		static class ETypesNotEquals extends ICmdFactory.EUnsuccessOperation{
@@ -722,12 +722,8 @@ public class Delta {
 
 		public com.triniforce.db.ddl.DiffLeader.ICmdFactory.Action getEqKeyAction(
 				FieldDef srcElement, FieldDef dstElement) {
-			if(!srcElement.getType().equals(dstElement.getType())){
-				if(FieldDef.isStringType(srcElement.getType()) && FieldDef.isStringType(dstElement.getType())){
-					return ICmdFactory.Action.EDIT;
-				}
+			if(!srcElement.getType().equals(dstElement.getType()))
 				throw new ETypesNotEquals(srcElement.getName(), srcElement.getType(), dstElement.getType());
-			}
 			return ICmdFactory.Action.NONE;
 		}
 
@@ -829,7 +825,6 @@ public class Delta {
 		orderNo.put(DeleteColumnOperation.class, -1);
 		orderNo.put(CreateTableOperation.class, 0);
 		orderNo.put(AddColumnOperation.class, 1);
-		orderNo.put(AlterColumnOperation.class, 2);
 		orderNo.put(AddIndexOperation.class, 2);
 		orderNo.put(AddPrimaryKeyOperation.class, 3);
 		orderNo.put(AddForeignKeyOperation.class, 4);

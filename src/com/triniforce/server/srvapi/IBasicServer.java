@@ -13,7 +13,6 @@ import com.triniforce.db.ddl.TableDef.EReferenceError;
 import com.triniforce.extensions.IPKRootExtensionPoint;
 import com.triniforce.server.plugins.kernel.BasicServer.ServerException;
 import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
-import com.triniforce.utils.Api;
 import com.triniforce.utils.ApiStack;
 
 public interface IBasicServer extends IPKRootExtensionPoint {
@@ -34,8 +33,6 @@ public interface IBasicServer extends IPKRootExtensionPoint {
         None, Registration, Upgrade, Running
     }
     
-    public void doPluginsRegistration();
-    
     /**
      * Register server. Run doRegistration for all plugin. Calculate
      * isDbModification() flag
@@ -53,7 +50,6 @@ public interface IBasicServer extends IPKRootExtensionPoint {
      *             something wrong in table referenes
      */
     public boolean isDbModificationNeeded() throws ServerException, EReferenceError;
-    public boolean isRegistered();
     
     /**
      * Run database modification first run table schemas modification
@@ -67,9 +63,6 @@ public interface IBasicServer extends IPKRootExtensionPoint {
      */
     public void doDbModification() throws Exception;
     
-    /**
-     * Invokes stopPeriodicalTasks() then Plugin.finit();
-     */
     void finit();
     
     List<IPlugin> getPlugins();
@@ -97,15 +90,6 @@ public interface IBasicServer extends IPKRootExtensionPoint {
     void init();
     
     ApiStack getCoreApi();
-    
-    void setBaseApi(Api baseApi);
-    
-    void initAndStart();
-    /**
-     * Does NOT throw any exception
-     */
-    void stopAndFinit();
-    
   
 }
 

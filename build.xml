@@ -3,12 +3,19 @@
 	<property name="tmp_folder" value="../tmp" />
 	<property name="jar_bin" value="${tmp_folder}/jar_bin"/>
 	<property name="src" value="${basedir}/src" />
+	<property name="lib" value="lib" />
 	<property name="tflib" value="../tflib" />
 	<property name="rs-toolkit" value="../UntillReportingService/lib/redist" />	
 
 	<path id="jar.classpath">
 		<!-- project libraries (needed at runtime) -->
 		<fileset dir="${tflib}/srvdist">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${lib}">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${lib}/jmock">
 			<include name="*.jar" />
 		</fileset>
 		<pathelement path="${src}" />

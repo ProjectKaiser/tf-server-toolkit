@@ -9,5 +9,4 @@ public interface IPKExtension extends IPKExtensionBase{
     IPKExtensionPoint getExtensionPoint();
     void setExtensionPoint(IPKExtensionPoint ep);
     <T> T getInstance();
-    Class getObjectClass();
 }

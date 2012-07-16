@@ -28,7 +28,6 @@ public class ObjectInstantiatorTest extends TFTestCase {
         assertSame(instance0, oi.getInstance());
     }
 
-    @SuppressWarnings("deprecation")
     public void testIsNewInstance() {
         //multiple
         {
@@ -52,58 +51,13 @@ public class ObjectInstantiatorTest extends TFTestCase {
             assertFalse(oi.isNewInstance());            
         }
     }
-    
-    public void testIsNewInstance2() {
-        //multiple
-        {
-            ObjectInstantiator oi = new ObjectInstantiator(
-                    new ObjectFactoryFromClass(MyClass.class));
-            assertFalse(oi.isSingle());
-            assertTrue(oi.isNewInstance());
-            oi.getInstance();
-            assertTrue(oi.isNewInstance());
-            
-        }
-        //single
-        {
-            ObjectInstantiator oi = new ObjectInstantiator(
-                    new ObjectFactoryFromClass(MyClass.class));
-            assertFalse(oi.isSingle());
-            oi.setSingle(true);
-            assertTrue(oi.isSingle());
-            assertTrue(oi.isNewInstance());
-            oi.getInstance();
-            assertFalse(oi.isNewInstance());            
-        }
-    }
 
-    @SuppressWarnings("deprecation")
     public void testFromClassName() throws Exception {
         // from object
         Object instance0 = new MyClass();
 
         ObjectInstantiator oi = new ObjectInstantiator(
                 new ObjectFactoryFromClassName(MyClass.class.getName()));
-        Object instance1 = oi.getInstance();
-        assertTrue(instance1 instanceof MyClass);
-        Object instance2 = oi.getInstance();
-        assertNotSame(instance1, instance2);
-        assertNotSame(instance0, instance1);
-
-        oi.setSingle(true);
-        Object instance3 = oi.getInstance();
-        assertNotSame(instance1, instance3);
-        assertNotSame(instance0, instance3);
-        Object instance4 = oi.getInstance();
-        assertSame(instance3, instance4);
-    }
-    
-    public void testFromClass() throws Exception {
-        // from object
-        Object instance0 = new MyClass();
-
-        ObjectInstantiator oi = new ObjectInstantiator(
-                new ObjectFactoryFromClass(MyClass.class));
         Object instance1 = oi.getInstance();
         assertTrue(instance1 instanceof MyClass);
         Object instance2 = oi.getInstance();
