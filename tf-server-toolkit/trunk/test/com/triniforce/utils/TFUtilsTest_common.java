@@ -67,18 +67,43 @@ public class TFUtilsTest_common extends TestCase {
     }    
     
     public void testEquals(){
-        String s1_1 = "s1";
-        String s1_2 = "s";
-        s1_2 += "1";
-        String s2 = "s2";
-        assertNotSame(s1_1, s1_2);
-        assertTrue( TFUtils.equals(null, null));
-        assertFalse( TFUtils.equals(null, s1_1));
-        assertFalse( TFUtils.equals(s1_1, null));
-        assertTrue( TFUtils.equals(s1_1, s1_2));
-        assertTrue( TFUtils.equals(s1_1, s1_1));
-        assertFalse( TFUtils.equals(s1_1, s2));
-        assertFalse( TFUtils.equals(s1_2, s2));
+        {
+            String s1_1 = "s1";
+            String s1_2 = "s";
+            s1_2 += "1";
+            String s2 = "s2";
+            assertNotSame(s1_1, s1_2);
+            assertTrue( TFUtils.equals(null, null));
+            assertFalse( TFUtils.equals(null, s1_1));
+            assertFalse( TFUtils.equals(s1_1, null));
+            assertTrue( TFUtils.equals(s1_1, s1_2));
+            assertTrue( TFUtils.equals(s1_1, s1_1));
+            assertFalse( TFUtils.equals(s1_1, s2));
+            assertFalse( TFUtils.equals(s1_2, s2));
+        }
+        
+        //numbers
+        {
+            Long l = 8907L;
+            Long l2 = l + 1;
+            Short s = (short) 8907;
+            Short s2 = (short) (s + 1);
+            Integer i = 8907;
+            Integer i2 = i + 1;
+            
+            assertTrue(TFUtils.equals(l, s));
+            assertTrue(TFUtils.equals(l, i));
+            assertTrue(TFUtils.equals(i, l));
+            
+            assertTrue(TFUtils.equals(l2, s2));
+            assertTrue(TFUtils.equals(l2, i2));
+            assertTrue(TFUtils.equals(i2, l2));
+            
+            assertFalse(TFUtils.equals(l, s2));
+            assertFalse(TFUtils.equals(l, i2));
+            assertFalse(TFUtils.equals(i, l2));
+            
+        }
     }
 
 }

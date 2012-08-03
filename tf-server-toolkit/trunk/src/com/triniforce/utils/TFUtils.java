@@ -95,11 +95,20 @@ public class TFUtils {
 	    return (Long)value;
 	}
 
+	
 	public static boolean equals(Object expected, Object actual) {
 	    if (expected == actual)
 	        return true;
 	    if (expected == null || actual == null)
 	        return false;
+	    
+	    if(expected instanceof Number){
+	        if(! (actual instanceof Number)){
+	            return false;
+	        }
+	        return TFUtils.asLong(expected).equals(TFUtils.asLong(actual));
+	    }
+	    
 	    return expected.equals(actual);
 	}
 
