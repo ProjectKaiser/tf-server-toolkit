@@ -31,6 +31,11 @@ public class ApiAlgs {
         return res;
     }
 
+    public static void rethrowException(Throwable e) throws RuntimeException{
+        if( e instanceof RuntimeException)throw (RuntimeException)e;
+        throw new RethrownException(e);
+    }
+    
     public static void rethrowException(Exception e) throws RuntimeException{
         //writeExceptionInfo(e, "handleException"); gmp: is it not really needed, will
         //be reported at the top
