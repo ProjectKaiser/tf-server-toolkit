@@ -406,6 +406,13 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
             return m_type;
         }
         
+        public boolean getMustHaveValue(){
+            return m_bNotNull;
+        }
+        public void setMustHaveValue(boolean value){
+            m_bNotNull = value;
+        }
+        
         public boolean bNotNull(){
             return m_bNotNull;
         }
