@@ -14,7 +14,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import com.triniforce.db.ddl.AddColumnOperation;
 import com.triniforce.db.ddl.TableDef;
@@ -182,6 +185,75 @@ public class SmartTranTest extends DBTestCase {
 		}
     }
 
+    public void testInsertUpdate() throws Exception{
+    	createTableIfNeeded(new TestDef());
+    	SmartTran tr = new SmartTran(getConnection());
+    	String guid = UUID.randomUUID().toString();
+    	String guid2 = UUID.randomUUID().toString();
+
+    	//insert
+    	{
+	    	Map<IName, Object> values = new HashMap<IName, Object>();
+	    	values.put(TestDef.f1, 1);
+	    	values.put(TestDef.f2, guid);
+	    	values.put(TestDef.f3, 3);
+	    	tr.insert(TestDef.class, values);
+	    	ResSet rs = tr.select(TestDef.class, new IName[]{TestDef.f1, TestDef.f2, TestDef.f3}, new IName[]{TestDef.f2},  new Object[]{guid});
+	    	assertTrue(rs.next());
+	    	assertEquals(1, rs.getObject(1));
+	    	assertEquals(guid, rs.getObject(2));
+	    	assertEquals(3, rs.getObject(3));
+	    	assertFalse(rs.next());
+    	}
+    	
+    	//insert2
+    	{
+	    	Map<IName, Object> values = new HashMap<IName, Object>();
+	    	values.put(TestDef.f1, 1);
+	    	values.put(TestDef.f2, guid2);
+	    	values.put(TestDef.f3, 3);
+	    	tr.insert(TestDef.class, values);
+	    	ResSet rs = tr.select(TestDef.class, new IName[]{TestDef.f1, TestDef.f2, TestDef.f3}, new IName[]{TestDef.f2},  new Object[]{guid2});
+	    	assertTrue(rs.next());
+	    	assertEquals(1, rs.getObject(1));
+	    	assertEquals(guid2, rs.getObject(2));
+	    	assertEquals(3, rs.getObject(3));
+	    	assertFalse(rs.next());
+    	}
+    	
+    	//update
+    	{
+    		Map<IName, Object> values = new HashMap<IName, Object>();
+    		values.put(TestDef.f1, 111);
+    		Map<IName, Object> where = new HashMap<IName, Object>();
+    		where.put(TestDef.f2, guid);
+    		tr.update(TestDef.class, values, where);
+    		ResSet rs = tr.select(TestDef.class, new IName[]{TestDef.f1, TestDef.f2, TestDef.f3}, new IName[]{TestDef.f2},  new Object[]{guid});
+    		assertTrue(rs.next());
+	    	assertEquals(111, rs.getObject(1));
+	    	rs = tr.select(TestDef.class, new IName[]{TestDef.f1, TestDef.f2, TestDef.f3}, new IName[]{TestDef.f2},  new Object[]{guid2});
+    		assertTrue(rs.next());
+	    	assertEquals(1, rs.getObject(1));
+    	}
+    	
+    	//update2
+    	{
+    		Map<IName, Object> values = new HashMap<IName, Object>();
+    		values.put(TestDef.f1, 1111);
+    		Map<IName, Object> where = new HashMap<IName, Object>();
+    		where.put(TestDef.f2, guid2);
+    		tr.update(TestDef.class, values, where);
+    		ResSet rs = tr.select(TestDef.class, new IName[]{TestDef.f1, TestDef.f2, TestDef.f3}, new IName[]{TestDef.f2},  new Object[]{guid});
+    		assertTrue(rs.next());
+	    	assertEquals(111, rs.getObject(1));
+	    	rs = tr.select(TestDef.class, new IName[]{TestDef.f1, TestDef.f2, TestDef.f3}, new IName[]{TestDef.f2},  new Object[]{guid2});
+    		assertTrue(rs.next());
+	    	assertEquals(1111, rs.getObject(1));
+    	}
+    	
+    	
+    }
+    
     public void testSelectBetween() throws Exception{
         createTableIfNeeded(new TestDef());
         SmartTran tr2 = new SmartTran(getConnection());

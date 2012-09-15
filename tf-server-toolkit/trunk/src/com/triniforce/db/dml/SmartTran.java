@@ -12,7 +12,10 @@ package com.triniforce.db.dml;
 
 import java.lang.reflect.Array;
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import com.triniforce.db.qbuilder.Expr;
 import com.triniforce.db.qbuilder.OrderByClause;
@@ -193,9 +196,57 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         return null;
     }
 
+    public void delete(Class table, IName[] lookUpFields, Object[] lookUpValues) {
+        QTable t = new SrvTable(table);
+        QDelete q = new QDelete(t);
+        WhereClause wc = new WhereClause();
+        for (IName name : lookUpFields) {
+            wc.andCompare("", name.getName(), "=");
+        }
+        q.where(wc);
+        IStmtContainer sc = this;
+        PrepStmt ps = sc.prepareStatement(q.toString());
+        int col = 1;
+        for (Object arg : lookUpValues) {
+            ps.setObject(col++, arg);
+        }        
+        ps.execute();
+        ps.close();
+    }
+
+    public static class FieldsValues{
+    	final public List<IName> m_fields;
+    	final public List<Object> m_values;
+    	FieldsValues(Map<IName, Object> values){
+    		m_fields =new ArrayList<IName>(values.size());
+    		m_values =new ArrayList<Object>(values.size());
+    		for(Map.Entry<IName, Object> e: values.entrySet()){
+    			m_fields.add(e.getKey());
+    			m_values.add(e.getValue());
+    		}
+    	}
+    }
+    
+	public void insert(Class table, Map<IName, Object> values) {
+		FieldsValues fv = new FieldsValues(values);
+		insert(table, fv.m_fields, fv.m_values);
+	}
+	
     public void update(Class table, IName[] fields, Object[] values,
             IName[] lookUpFields, Object[] lookUpValues) {
-        QTable t = new SrvTable(table);
+    	update(table, Arrays.asList(fields), Arrays.asList(values), Arrays.asList(lookUpFields), Arrays.asList(lookUpValues));
+    }
+	
+	public void update(Class table, Map<IName, Object> values, Map<IName, Object> lookUpValues){
+		FieldsValues fv = new FieldsValues(values);
+		FieldsValues lu = new FieldsValues(lookUpValues);
+		update(table, fv.m_fields, fv.m_values, lu.m_fields, lu.m_values);
+	}
+
+	public void update(Class table, List<IName> fields, List<Object> values,
+			List<IName> lookUpFields, List<Object> lookUpValues) {
+		
+		QTable t = new SrvTable(table);
         for (IName name : fields) {
             t.addCol(name);
         }        
@@ -216,24 +267,7 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         }        
         ps.execute();
         ps.close();
-    }
-
-    public void delete(Class table, IName[] lookUpFields, Object[] lookUpValues) {
-        QTable t = new SrvTable(table);
-        QDelete q = new QDelete(t);
-        WhereClause wc = new WhereClause();
-        for (IName name : lookUpFields) {
-            wc.andCompare("", name.getName(), "=");
-        }
-        q.where(wc);
-        IStmtContainer sc = this;
-        PrepStmt ps = sc.prepareStatement(q.toString());
-        int col = 1;
-        for (Object arg : lookUpValues) {
-            ps.setObject(col++, arg);
-        }        
-        ps.execute();
-        ps.close();
-    }
+		
+	}
 	
 }
