@@ -398,11 +398,14 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 			EDBObjectException {
 
 		{// push IBasicServer api
-			Api api = new Api();
-			api.setIntfImplementor(IBasicServer.class, this);
-			api.setIntfImplementor(IPKExtensionPoint.class,
-					this);
-			ApiStack.pushApi(api);
+		    ApiStack apiStack = new ApiStack();
+//			Api api = new Api();
+//			api.setIntfImplementor(IBasicServer.class, this);
+//			api.setIntfImplementor(IPKExtensionPoint.class,
+//					this);
+//			apiStack.pushApiIntoStack(api);
+			apiStack.pushApiIntoStack(getCoreApi());
+			ApiStack.pushApi(apiStack);
 		}
         doPluginsRegistration();		
 		try {
