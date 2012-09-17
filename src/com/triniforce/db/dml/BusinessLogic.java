@@ -6,6 +6,7 @@
 package com.triniforce.db.dml;
 
 import java.util.List;
+import java.util.Map;
 
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.utils.ApiStack;
@@ -34,6 +35,10 @@ public abstract class BusinessLogic {
     protected void insert(List<IName> fields, List<Object> values){
         getSt().insert(getTable(), fields, values);
     }
+    
+    protected void insert(Map<IName, Object> values){
+    	getSt().insert(getTable(), values);
+    }
 
     
     protected void insert(IName fields[], Object values[]){
@@ -49,6 +54,10 @@ public abstract class BusinessLogic {
             IName lookUpFields[], Object lookUpValues[]){
         getSt().update(getTable(), fields, values, lookUpFields, lookUpValues);
     }    
+    
+    protected void update(Map<IName, Object> values, Map<IName, Object> lookUp){
+    	getSt().update(getTable(), values, lookUp);
+    }
     
     protected ResSet select(IName fields[],
             IName lookUpFields[], Object lookUpValues[], IName orderByFields[]){
