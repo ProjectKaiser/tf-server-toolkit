@@ -6,6 +6,7 @@
 package com.triniforce.server.srvapi;
 
 import com.triniforce.db.ddl.TableDef.FieldDef;
+import com.triniforce.db.qbuilder.QSelect;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.IName;
@@ -26,7 +27,11 @@ public interface IIdDef {
 		public static FieldDef getFieldDef(IName name, boolean bNotNull){
 			IIdDef idDef = ApiStack.getInterface(IIdDef.class);
 			return idDef.getFieldDef(name, bNotNull);
-		}		
+		}
+        public static FieldDef getParentRef(boolean bNotNull){
+            return getFieldDef(QSelect.PARENT_REF_COLUMN, bNotNull);
+        }		
+		
 		public static FieldDef getFieldDef(String fname){
 			IIdDef idDef = ApiStack.getInterface(IIdDef.class);
 			return idDef.getFieldDef(new ApiAlgs.SimpleName(fname));
