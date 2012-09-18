@@ -78,7 +78,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	
 	private Api m_runningApi;
 	private IdGenerator m_idGenerator;
-	private IdGenerator m_miscIdGenerator;
+	private MiscIdGenerator m_miscIdGenerator;
 	private TQueueId m_tQueueId;
 
 	private BasicServer getBasicServer(){
@@ -92,7 +92,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	
 	public BasicServerCorePlugin() {
 		m_tQueueId =  new TQueueId();
-        m_miscIdGenerator = new IdGenerator(
+        m_miscIdGenerator = new MiscIdGenerator(
         		IdGenerator.KEY_CACHE_SIZE,
                 m_tQueueId);
 	}
