@@ -5,11 +5,17 @@
  */
 package com.triniforce.db.qbuilder;
 
+import com.triniforce.utils.IName;
+
 public class OrderByClause extends Expr.List {
 	
 	public static class DescColumn extends Expr.Column{
 
 		public DescColumn(String tablePrefix, String col) {
+			super(tablePrefix, col);
+		}
+		
+		public DescColumn(String tablePrefix, IName col) {
 			super(tablePrefix, col);
 		}
 		
