@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import com.triniforce.db.qbuilder.Err.EPrefixNotFound;
+import com.triniforce.utils.IName;
 
 /**
  * Operation like =, >, < for where clause Usage - Constructor - add
@@ -146,6 +147,11 @@ public class Expr {
         public Column(String tablePrefix, String col) {
             addPrefixToCheck(tablePrefix, ""); //$NON-NLS-1$
             m_str = QTable.joinPrefixedCol(tablePrefix, col);
+        }
+        
+        public Column(String tablePrefix, IName col) {
+            addPrefixToCheck(tablePrefix, ""); //$NON-NLS-1$
+            m_str = QTable.joinPrefixedCol(tablePrefix, col.getName());
         }
 
         @Override

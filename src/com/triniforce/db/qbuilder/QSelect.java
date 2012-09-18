@@ -17,6 +17,8 @@ import com.triniforce.server.srvapi.IDatabaseInfo;
 import com.triniforce.utils.ApiStack;
 
 public class QSelect extends QStatementWithWhere{
+	
+	private boolean m_prefixesInSelectList = true; 
 
     // http://savage.net.au/SQL/sql-92.bnf.html#query specification
     public static class SelectList{
@@ -215,7 +217,7 @@ public class QSelect extends QStatementWithWhere{
                         res = res.append(" "); //$NON-NLS-1$
                         bComma = true;
                     }
-                    if (t.qt.getPrefix().length() > 0) {
+                    if ( isPrefixesInSelectList() && t.qt.getPrefix().length() > 0) {
                         res = res.append(t.qt.getPrefixedCol(name)).append(" as ") //$NON-NLS-1$
                         .append(t.qt.getPrefix()).append("_").append(name); //$NON-NLS-1$
                     } else {
@@ -302,5 +304,13 @@ public class QSelect extends QStatementWithWhere{
 		m_group = groupByClause;
 		return this;
 		
+	}
+
+	public boolean isPrefixesInSelectList() {
+		return m_prefixesInSelectList;
+	}
+
+	public void setPrefixesInSelectList(boolean prefixesInSelectList) {
+		m_prefixesInSelectList = prefixesInSelectList;
 	}
 }
