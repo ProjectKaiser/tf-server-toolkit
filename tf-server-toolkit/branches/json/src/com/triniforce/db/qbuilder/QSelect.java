@@ -17,6 +17,8 @@ import com.triniforce.server.srvapi.IDatabaseInfo;
 import com.triniforce.utils.ApiStack;
 
 public class QSelect extends QStatementWithWhere{
+	
+	private boolean m_prefixesInSelectList = true; 
 
     // http://savage.net.au/SQL/sql-92.bnf.html#query specification
     public static class SelectList{
@@ -89,13 +91,15 @@ public class QSelect extends QStatementWithWhere{
     protected LinkedHashMap<String,Expr> m_getExprs = new LinkedHashMap<String,Expr>();
 	private GroupByClause m_group;
     
+	public static final String PARENT_REF_COLUMN = "id_parent";
+	
     public QSelect joinLast(IQTable qt) {
         return joinByPrefix(JoinType.INNER, null, new String[] { "id" }, //$NON-NLS-1$
-                new String[] { "id_parent" }, qt); //$NON-NLS-1$
+                new String[] { PARENT_REF_COLUMN }, qt); //$NON-NLS-1$
     }
 
     public QSelect joinLast(JoinType jt, IQTable qt) {
-        return joinByPrefix(jt, null, new String[] { "id" }, new String[] { "id_parent" }, //$NON-NLS-1$ //$NON-NLS-2$
+        return joinByPrefix(jt, null, new String[] { "id" }, new String[] { PARENT_REF_COLUMN }, //$NON-NLS-1$ //$NON-NLS-2$
                 qt);
     }
 
@@ -213,7 +217,7 @@ public class QSelect extends QStatementWithWhere{
                         res = res.append(" "); //$NON-NLS-1$
                         bComma = true;
                     }
-                    if (t.qt.getPrefix().length() > 0) {
+                    if ( isPrefixesInSelectList() && t.qt.getPrefix().length() > 0) {
                         res = res.append(t.qt.getPrefixedCol(name)).append(" as ") //$NON-NLS-1$
                         .append(t.qt.getPrefix()).append("_").append(name); //$NON-NLS-1$
                     } else {
@@ -300,5 +304,13 @@ public class QSelect extends QStatementWithWhere{
 		m_group = groupByClause;
 		return this;
 		
+	}
+
+	public boolean isPrefixesInSelectList() {
+		return m_prefixesInSelectList;
+	}
+
+	public void setPrefixesInSelectList(boolean prefixesInSelectList) {
+		m_prefixesInSelectList = prefixesInSelectList;
 	}
 }
