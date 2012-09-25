@@ -726,6 +726,9 @@ public class Delta {
 				if(FieldDef.isStringType(srcElement.getType()) && FieldDef.isStringType(dstElement.getType())){
 					return ICmdFactory.Action.EDIT;
 				}
+				if(FieldDef.isScalarType(srcElement.getType()) && FieldDef.isScalarType(dstElement.getType())){
+					return ICmdFactory.Action.EDIT;
+				}
 				throw new ETypesNotEquals(srcElement.getName(), srcElement.getType(), dstElement.getType());
 			}
 			return ICmdFactory.Action.NONE;
