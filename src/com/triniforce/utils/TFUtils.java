@@ -86,6 +86,9 @@ public class TFUtils {
 	
 	public static Long asLong(Object value){
 	    if( null == value )return null;
+	    if( value instanceof Long){
+	        return (Long)value;    
+	    }
 	    if( value instanceof Short){
 	        return (long)(short)(Short) value;
 	    }
