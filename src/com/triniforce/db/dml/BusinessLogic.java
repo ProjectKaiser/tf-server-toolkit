@@ -67,5 +67,8 @@ public abstract class BusinessLogic {
     protected void delete(IName lookUpFields[], Object lookUpValues[]){
         getSt().delete(getTable(), lookUpFields, lookUpValues);
     }
+    protected void delete(Map<IName, Object> lookUpValues){
+        getSt().delete(getTable(), lookUpValues);
+    }
     
 }
