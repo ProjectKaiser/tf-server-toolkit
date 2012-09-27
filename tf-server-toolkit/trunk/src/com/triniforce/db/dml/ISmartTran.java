@@ -48,6 +48,7 @@ public interface ISmartTran extends IStmtContainer {
             IName lookUpFields[], Object lookUpValues[], IName orderByFields[]);
     
     void delete(Class table, IName lookUpFields[], Object lookUpValues[]);
+    void delete(Class table, Map<IName, Object> lookUpValues);
     
     public <T> T instantiateBL(Class<? extends T> cls);    
     

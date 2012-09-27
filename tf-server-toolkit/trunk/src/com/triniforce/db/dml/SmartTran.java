@@ -204,6 +204,15 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         return null;
     }
 
+    public void delete(Class table, Map<IName, Object> lookUpValues){
+        NamesValues fv = new NamesValues(lookUpValues);
+        IName names[] = new IName[lookUpValues.size()];
+        fv.m_names.toArray(names);
+        Object values[] = new Object[lookUpValues.size()];
+        fv.m_values.toArray(values);
+        delete(table, names, values);        
+    }
+    
     public void delete(Class table, IName[] lookUpFields, Object[] lookUpValues) {
         QTable t = new SrvTable(table);
         QDelete q = new QDelete(t);
@@ -222,22 +231,22 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         ps.close();
     }
 
-    public static class FieldsValues{
-    	final public List<IName> m_fields;
+    public static class NamesValues{
+    	final public List<IName> m_names;
     	final public List<Object> m_values;
-    	FieldsValues(Map<IName, Object> values){
-    		m_fields =new ArrayList<IName>(values.size());
+    	NamesValues(Map<IName, Object> values){
+    		m_names =new ArrayList<IName>(values.size());
     		m_values =new ArrayList<Object>(values.size());
     		for(Map.Entry<IName, Object> e: values.entrySet()){
-    			m_fields.add(e.getKey());
+    			m_names.add(e.getKey());
     			m_values.add(e.getValue());
     		}
     	}
     }
     
 	public void insert(Class table, Map<IName, Object> values) {
-		FieldsValues fv = new FieldsValues(values);
-		insert(table, fv.m_fields, fv.m_values);
+		NamesValues fv = new NamesValues(values);
+		insert(table, fv.m_names, fv.m_values);
 	}
 	
     public void update(Class table, IName[] fields, Object[] values,
@@ -246,9 +255,9 @@ public class SmartTran extends StmtContainer implements ISmartTran {
     }
 	
 	public void update(Class table, Map<IName, Object> values, Map<IName, Object> lookUpValues){
-		FieldsValues fv = new FieldsValues(values);
-		FieldsValues lu = new FieldsValues(lookUpValues);
-		update(table, fv.m_fields, fv.m_values, lu.m_fields, lu.m_values);
+		NamesValues fv = new NamesValues(values);
+		NamesValues lu = new NamesValues(lookUpValues);
+		update(table, fv.m_names, fv.m_values, lu.m_names, lu.m_values);
 	}
 
 	public void update(Class table, List<IName> fields, List<Object> values,
