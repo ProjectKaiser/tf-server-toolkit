@@ -77,7 +77,8 @@ public class JSONSerializer {
 
 	public void serializeError(InterfaceDescription desc, Throwable t,
 			ByteArrayOutputStream out) {
-		// TODO Auto-generated method stub
-		
+		JsonSerializer js = new JsonSerializer();
+//		JsonRpc obj = new JsonRpc("2.0", soap.m_method, soap.m_args, 1);
+//		js.serialize(obj, new String[]{UniqueIdGenerator.UNIQUE_ID_PROPERTY, "class"})
 	}
 }
