@@ -79,14 +79,16 @@ public class DeltaTableCmdFactoryTest extends TFTestCase {
 		
 		assertEquals(ICmdFactory.Action.NONE, f.getEqKeyAction(def, def));
 		
-		FieldDef def2 = FieldDef.createScalarField("f1", ColumnType.FLOAT, true);
 		
 		try{
-			f.getEqKeyAction(def, def2);
+			f.getEqKeyAction(def, FieldDef.createStringField("f1", ColumnType.CHAR, 112, false, null));
 			fail();
 		} catch(EUnsuccessOperation e){
-			
 		}
+		
+		assertEquals(ICmdFactory.Action.EDIT, f.getEqKeyAction(
+				FieldDef.createScalarField("F1", ColumnType.LONG, false), 
+				FieldDef.createScalarField("F1", ColumnType.INT, false)));
 	}
 
 	public void testEditCmd() {
@@ -163,7 +165,19 @@ public class DeltaTableCmdFactoryTest extends TFTestCase {
 			List<DBOperation> commands = fact.editCmd(src, dst).toDBOperationList();
 			assertEquals(0, commands.size());
 		}
-		
+		{ // Field cahange type
+			TableDef src = new TableDef("tab_No2");
+			src.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
+			src.addField(2, FieldDef.createScalarField("f2", ColumnType.LONG, true));
+			TableDef dst = new TableDef("tab_No2");
+			dst.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
+			dst.addField(2, FieldDef.createScalarField("f2", ColumnType.INT, true));
+			
+			EditTabCmd cmd = fact.editCmd(src, dst);
+			List<DBOperation> opList = cmd.toDBOperationList();
+			AlterColumnOperation op = (AlterColumnOperation) opList.get(0).getOperation();
+			assertEquals(ColumnType.INT, op.getNewField().getType());
+		}
 	}
 
 	public void testGetEqKeyAction() {

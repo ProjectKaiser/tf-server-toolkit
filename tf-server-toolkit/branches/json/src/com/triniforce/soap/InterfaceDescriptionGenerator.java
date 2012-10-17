@@ -9,8 +9,10 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
@@ -22,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import javax.xml.namespace.QName;
@@ -37,11 +40,14 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import net.sf.sojo.interchange.json.JsonSerializer;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.triniforce.soap.InterfaceDescription.MessageDef;
@@ -523,6 +529,8 @@ public class InterfaceDescriptionGenerator {
                     }
                 }
                 
+                ApiAlgs.getLog(this).trace(m_objDef.getName());
+                
                 throw new ESoap.EUnknownElement(new QName(propName));
             }
             
@@ -591,6 +599,7 @@ public class InterfaceDescriptionGenerator {
         
         @Override
         public void startElement(String ns, String tag, String arg2, Attributes attrs) throws SAXException {
+        	ApiAlgs.getLog(this).trace("<"+tag+">");
             QName qn = new QName(ns, tag);
             
             if(m_stk.isEmpty()){
@@ -718,6 +727,7 @@ public class InterfaceDescriptionGenerator {
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException {
         	String vStr = new String(ch, start, length);
+        	ApiAlgs.getLog(this).trace(vStr);
 //        	if(start+length < ch.length && ('\n' == ch[start+length] || '\r' == ch[start+length])){
 //        		vStr += '\n';
 //        	}
@@ -726,6 +736,7 @@ public class InterfaceDescriptionGenerator {
         
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
+        	ApiAlgs.getLog(this).trace("</"+localName+">");
             if(uri.equals(m_tns)){
                 CurrentObject obj = m_objStk.pop();
                 if(m_objStk.isEmpty()){
@@ -772,9 +783,89 @@ public class InterfaceDescriptionGenerator {
     }
 
     public SOAPDocument deserialize(InterfaceDescription desc, InputStream source) throws ParserConfigurationException, SAXException, IOException {
-        SAXParser parser = getParser();
+    	return deserialize(desc, source, new IParser(){
+			public void parse(InputStream source, SoapHandler handler) throws SAXException, IOException, ParserConfigurationException {
+		        SAXParser parser = getParser();
+		        parser.parse(new InputSource(source), handler);
+			}
+    	});
+    }
+    
+    public SOAPDocument deserializeJson(InterfaceDescription desc, InputStream source) throws SAXException, IOException, ParserConfigurationException{
+		return deserialize(desc, source, new JsonParser());
+    }
+    
+    interface IParser{
+    	void parse(InputStream source, SoapHandler handler) throws SAXException, IOException, ParserConfigurationException;
+    }
+    
+	static final AttributesImpl EMPTY_ATTRS = new AttributesImpl();
+    class JsonParser implements IParser{
+		
+		public void parse(InputStream source, SoapHandler handler) throws SAXException, IOException {
+			callStartSoapHeaders(handler);
+			
+			BufferedReader reader = new BufferedReader(new InputStreamReader(source));
+			String str = reader.readLine();
+			JsonSerializer js = new JsonSerializer();
+			Map<String, Object> src = (Map<String, Object>) js.deserialize(str);
+			String methodName  = (String) src.get("method");
+			handler.startElement(m_targetNamespace, methodName, null, EMPTY_ATTRS);
+			List<Object> params = (List<Object>) src.get("params");
+			int i = 0;
+			for(Object value : params){
+				String argName = "arg"+i;
+				parseValue(handler, argName, value);
+			}
+			handler.endElement(m_targetNamespace, methodName, null);
+			
+			callEndSoapHeaders(handler);
+		}
+
+		private void parseMap(SoapHandler handler, Map<String, Object> value) throws SAXException {
+			for(Map.Entry<String, Object> entry: value.entrySet()){
+				parseValue(handler, entry.getKey(), entry.getValue());
+			}
+		}
+
+		private void parseValue(SoapHandler handler, String name, Object value) throws SAXException {
+			handler.startElement(m_targetNamespace, name, null, EMPTY_ATTRS);
+			if(value instanceof Map){
+				parseMap(handler, (Map<String, Object>) value);
+			}
+			else if(value instanceof List){
+				parseList(handler, (List<Object>) value);
+			}
+			else{
+				String argValue = value.toString(); 
+				handler.characters(argValue.toCharArray(), 0, argValue.length());
+			}
+			handler.endElement(m_targetNamespace, name, null);			
+		}
+
+		private void parseList(SoapHandler handler, List<Object> value) throws SAXException {
+			for (Object object : value) {
+				parseValue(handler, "value", object);
+			}
+		}
+
+		private void callStartSoapHeaders(SoapHandler handler) throws SAXException {
+			handler.startElement(soapenv, "Envelope", null, null);
+			handler.startElement(soapenv, "Body", null, null);
+			
+		}
+		
+		private void callEndSoapHeaders(SoapHandler handler) throws SAXException {
+			handler.endElement(soapenv, "Body", null);
+			handler.endElement(soapenv, "Envelope", null);
+			
+		}
+
+    }
+    
+    private SOAPDocument deserialize(InterfaceDescription desc, InputStream source, IParser parser) throws SAXException, IOException, ParserConfigurationException{
         SoapHandler h = new SoapHandler(m_targetNamespace, desc);
-        parser.parse(new InputSource(source), h);
+        parser.parse(source, h);
         if(null != h.m_fault)
         	throw new ESoap.EFaultCode(h.m_fault.m_string);
         SOAPDocument res = h.m_result;

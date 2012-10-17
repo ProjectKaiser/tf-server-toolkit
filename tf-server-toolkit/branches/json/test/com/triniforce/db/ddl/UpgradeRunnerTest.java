@@ -460,7 +460,11 @@ public class UpgradeRunnerTest extends DDLTestCase {
                     FieldDef.createScalarField("col1", ColumnType.FLOAT, true), 
                     FieldDef.createScalarField("col1", ColumnType.INT, false));
             String sql = m_player.getOperationString(new DBOperation(tabName, op));
-            assertEquals(MessageFormat.format("ALTER TABLE {0} ALTER COLUMN {1} {2} NULL", dbName, "col1", m_player.getTypeString(ColumnType.INT, 0, 0)), sql);                      
+            if(getDbType().equals(DbType.MYSQL)){
+            	assertEquals(MessageFormat.format("ALTER TABLE {0} MODIFY COLUMN {1} {2} NULL", dbName, "col1", m_player.getTypeString(ColumnType.INT, 0, 0)), sql);
+            }
+            else
+            	assertEquals(MessageFormat.format("ALTER TABLE {0} ALTER COLUMN {1} {2} NULL", dbName, "col1", m_player.getTypeString(ColumnType.INT, 0, 0)), sql);                      
         }
         {
             DeleteDefaultConstraintOperation op = new DeleteDefaultConstraintOperation("DEFAULT_CONSTRAINT", "COLUMN1", "TEMPLATE");

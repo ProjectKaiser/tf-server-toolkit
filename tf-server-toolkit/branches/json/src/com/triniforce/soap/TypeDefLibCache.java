@@ -351,7 +351,7 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
                 if(getType() instanceof ArrayDef){
                     Class<?> cls = Class.forName(getRawType());
                     if(cls.isArray())
-                        value = convertListToArray(cls.getComponentType(), (List) value);
+                        value = convertListToArray(cls.getComponentType().getComponentType(), (List) value);
                 }
             } catch (ClassNotFoundException e) {
                 ApiAlgs.rethrowException(e);
@@ -359,10 +359,30 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
             return value;
         }
         private Object convertListToArray(Class compType, List value) {
+        	ApiAlgs.getLog(this).trace(compType.getSimpleName());
+        	ApiAlgs.getLog(this).trace(compType.getName());
             Object res = Array.newInstance(compType, value.size());
             int i=0;
             for (Object object : value) {
-                Array.set(res, i++, object);
+            	ApiAlgs.getLog(this).trace(object.getClass().getName());
+            	ApiAlgs.getLog(this).trace(res.getClass().getName());
+            	if(compType.equals(int.class))
+            		Array.setInt(res, i, ((Integer)object).intValue());
+            	else if(compType.equals(byte.class))
+	            	Array.setByte(res, i, ((Byte)object).byteValue()); 
+            	else if(compType.equals(char.class)) 
+            		Array.setChar(res, i, ((Character)object).charValue());
+            	else if(compType.equals(double.class))
+            		Array.setDouble(res, i, ((Double)object).doubleValue());
+            	else if(compType.equals(float.class))
+            		Array.setFloat(res, i, ((Float)object).floatValue());
+            	else if(compType.equals(long.class))
+            		Array.setLong(res, i, ((Long)object).longValue());
+            	else if(compType.equals(short.class))
+            		Array.setShort(res, i, ((Short)object).shortValue());
+            	else
+            		Array.set(res, i, object);
+            	i++;
             }
             return res;
         }
