@@ -522,12 +522,17 @@ public class UpgradeRunner {
                 AlterColumnOperation alterCol = (AlterColumnOperation) op
                         .getOperation();
                 FieldDef f = alterCol.getNewField();
+                String alterColumnOp;
+                if(m_dbType.equals(DbType.MYSQL))
+                	alterColumnOp = "MODIFY";
+                else
+                	alterColumnOp = "ALTER";
                 sql = MessageFormat
                         .format(
-                                "ALTER TABLE {0} ALTER COLUMN {1} {2} {3}", dbName, alterCol.getName(), //$NON-NLS-1$
+                                "ALTER TABLE {0} {4} COLUMN {1} {2} {3}", dbName, alterCol.getName(), //$NON-NLS-1$
                                 alterCol.bSetType() ? getTypeString(f.m_type,
                                         f.m_size, f.m_scale) : "", //$NON-NLS-1$
-                                alterCol.bSetNotNullFlag() ? (f.m_bNotNull ? "NOT NULL" : "NULL") : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                                alterCol.bSetNotNullFlag() ? (f.m_bNotNull ? "NOT NULL" : "NULL") : "", alterColumnOp); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             }
         } else if (op.getOperation() instanceof CreateTableOperation) {
             sql = null;
