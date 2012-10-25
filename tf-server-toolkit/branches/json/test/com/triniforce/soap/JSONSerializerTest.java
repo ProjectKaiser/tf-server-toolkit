@@ -10,12 +10,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
+
+import org.json.simple.parser.ParseException;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
+import com.triniforce.soap.JSONSerializerTest.Service001.Real1;
 
 public class JSONSerializerTest extends TFTestCase {
 	
+	@SoapInclude(extraClasses={
+			Service001.Real1.class
+	})
 	static class Service001{
 		public String method_001(int v1, int v2){
 			return null;
@@ -24,6 +31,24 @@ public class JSONSerializerTest extends TFTestCase {
 		public String method_002(int v1, int v2){
 			return null;
 		}
+		
+		interface IAbstract{}
+		static class Real1  implements IAbstract{
+			private String m_prop_001;
+
+			public String getProp_001() {
+				return m_prop_001;
+			}
+
+			public void setProp_001(String prop_001) {
+				m_prop_001 = prop_001;
+			}
+		}
+		public void method_003(IAbstract v){}
+		
+		public void method_004(Object[] v){}
+		
+		public void method_005(Map<String, String> map){}
 	}
 	
 	static class Prop01{
@@ -68,21 +93,39 @@ public class JSONSerializerTest extends TFTestCase {
 		return out.toString("utf-8");
 	}
 
-	public void testDeserialize() throws IOException {
+	public void testDeserialize() throws IOException, ParseException {
 		JSONSerializer srz = new JSONSerializer();
 		InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
 		InterfaceDescription desc = gen.parse(null, Service001.class);
-		SOAPDocument res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"params\":[124],\"method\":\"method_001\",\"id\":1}"));
+		SOAPDocument res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_001\",\"params\":[124],\"id\":1}"));
 		assertNotNull(res);
-		assertEquals(false, res.m_bIn);
+		assertEquals(true, res.m_bIn);
 		assertEquals("method_001", res.m_method);
 		assertEquals(124, res.m_args[0]);
 		
-		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"params\":[532, 2131],\"method\":\"method_002\",\"id\":1}"));
-		assertEquals(false, res.m_bIn);
+		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_002\",\"params\":[532, 2131],\"id\":1}"));
+		assertEquals(true, res.m_bIn);
 		assertEquals("method_002", res.m_method);
 		assertEquals(532, res.m_args[0]);
 		assertEquals(2131, res.m_args[1]);
+		
+		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_003\",\"params\":[{\"type\":\"Real1\", \"prop_001\":\"setter\"}],\"id\":1}"));
+		Service001.Real1 obj = (Real1) res.m_args[0];
+		assertEquals("setter",obj.getProp_001());
+		
+		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_004\",\"params\":[[{\"type\":\"Real1\",\"prop_001\":\"setter\"}, {\"type\":\"int\", \"value\":7652}]],\"id\":1}"));
+		Object[] arg0 = (Object[]) res.m_args[0];
+		obj = (Real1) arg0[0];
+		assertNotNull(obj);
+		assertEquals("setter",obj.getProp_001());
+
+		Integer  i = (Integer) arg0[1];
+		assertNotNull(i);
+		
+		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_005\",\"params\":[[" +
+				"{\"key\":\"key_001\", \"value\":\"vvvv\"}, {\"key\":\"key_002\", \"value\":\"vvv2\"}]],\"id\":1}"));
+		Map<String,String> map = (Map<String, String>) res.m_args[0];
+		assertEquals("vvvv", map.get("key_001"));
 	}
 
 	public static InputStream source(String string) throws UnsupportedEncodingException {

@@ -145,6 +145,11 @@ public class ApiAlgs {
                 return false;
             return true;
         }
+        
+        @Override
+        public String toString() {
+        	return m_name;
+        }
     }
 
 }

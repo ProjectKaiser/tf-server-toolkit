@@ -25,8 +25,8 @@ import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.utils.ApiAlgs;
-import com.triniforce.utils.UniqueNameGenerator;
 import com.triniforce.utils.ApiAlgs.SimpleName;
+import com.triniforce.utils.UniqueNameGenerator;
 
 public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
     
@@ -348,10 +348,15 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         }
         protected Object toRawValue(Object value) {
             try {
-                if(getType() instanceof ArrayDef){
-                    Class<?> cls = Class.forName(getRawType());
-                    if(cls.isArray())
-                        value = convertListToArray(cls.getComponentType().getComponentType(), (List) value);
+            	TypeDef type = getType();
+                if(type instanceof ArrayDef){
+                    ArrayDef ad = (ArrayDef) type;
+                    Class<?> cls = Class.forName(ad.getPropDef().getRawType());
+                    Class<?> rawCls = Class.forName(getRawType());
+                    if(rawCls.isArray() && cls.isArray()){
+                    	Class<?> compType = cls.getComponentType();
+                        value = convertListToArray(compType, (List) value);
+                    }
                 }
             } catch (ClassNotFoundException e) {
                 ApiAlgs.rethrowException(e);
@@ -359,13 +364,9 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
             return value;
         }
         private Object convertListToArray(Class compType, List value) {
-        	ApiAlgs.getLog(this).trace(compType.getSimpleName());
-        	ApiAlgs.getLog(this).trace(compType.getName());
             Object res = Array.newInstance(compType, value.size());
             int i=0;
             for (Object object : value) {
-            	ApiAlgs.getLog(this).trace(object.getClass().getName());
-            	ApiAlgs.getLog(this).trace(res.getClass().getName());
             	if(compType.equals(int.class))
             		Array.setInt(res, i, ((Integer)object).intValue());
             	else if(compType.equals(byte.class))

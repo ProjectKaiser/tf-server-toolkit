@@ -25,6 +25,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.json.simple.parser.ParseException;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -62,14 +63,16 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         int  method3(String v1);
         void method4(int arg);
         void method5(int[] arg);
+        void method6(int arg0, int arg1);
     }
     
     static class Cls1{
-        public List<int[]> getV1(){
-            return null;
+        private List<int[]> m_v1;
+		public List<int[]> getV1(){
+            return m_v1;
         }
         public void setV1(List<int[]> v){
-            
+            m_v1 = v;
         }
         
         public Map<String, Integer> getVMap(){
@@ -353,7 +356,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
     }
     */
     
-    public void testParseOrder(){
+    public void ntestParseOrder(){
         InterfaceDescription oldDesc = new InterfaceDescription();
         oldDesc.getOperations().add(new Operation("method2", null, null));
         oldDesc.getOperations().add(new Operation("method4", null, null));
@@ -647,41 +650,88 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
           		 gen.validateInterface(I6.class));
     }
     
-    public void testDeserializeJson() throws SAXException, IOException, ParserConfigurationException{
+    public void testDeserializeJson() throws SAXException, IOException, ParserConfigurationException, ParseException{
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
-//        {
-//	        InterfaceDescription desc = gen.parse(null, TestSrv2.class);
-//	        
-//	        SOAPDocument res = gen.deserializeJson(desc, JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"params\":[\"string_value\"],\"method\":\"method3\",\"id\":1}"));
-//	        
-//	        assertNotNull(res);
-//	        assertEquals("method3", res.m_method);
-//	        assertEquals(1, res.m_args.length);
-//	        assertEquals("string_value", res.m_args[0]);
-//	        
-//	        res = gen.deserializeJson(desc, JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"params\":[65412],\"method\":\"method4\",\"id\":1}"));
-//	        assertNotNull(res);
-//	        assertEquals("method4", res.m_method);
-//	        assertEquals(1, res.m_args.length);
-//	        assertEquals(65412, res.m_args[0]);
-//	        
-//	        
-//	        res = gen.deserializeJson(desc, JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"params\":[[65412, 763573]],\"method\":\"method5\",\"id\":1}"));
-//	        int[] arg0 = (int[]) res.m_args[0];
-//	        assertEquals(65412, arg0[0]);
-//	        assertEquals(763573, arg0[1]);
-//
-//        }
+        {
+	        InterfaceDescription desc = gen.parse(null, TestSrv2.class);
+	        
+	        SOAPDocument res = gen.deserializeJson(desc, JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"method\":\"method3\",\"params\":[\"string_value\"],\"id\":1}"));
+	        
+	        assertNotNull(res);
+	        assertEquals("method3", res.m_method);
+	        assertEquals(1, res.m_args.length);
+	        assertEquals("string_value", res.m_args[0]);
+	        
+	        res = gen.deserializeJson(desc, JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"method\":\"method4\",\"params\":[65412],\"id\":1}"));
+	        assertNotNull(res);
+	        assertEquals("method4", res.m_method);
+	        assertEquals(1, res.m_args.length);
+	        assertEquals(65412, res.m_args[0]);
+	        
+	        
+	        res = gen.deserializeJson(desc, JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"method\":\"method5\",\"params\":[[65412, 763573]],\"id\":1}"));
+	        int[] arg0 = (int[]) res.m_args[0];
+	        assertEquals(65412, arg0[0]);
+	        assertEquals(763573, arg0[1]);
+
+	        res = gen.deserializeJsonResponse(desc, "method3", JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"result\":65412,\"id\":1}"));
+	        assertEquals(65412, res.m_args[0]);
+	        
+	        try{
+	        	gen.deserializeJson(desc, JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"method\":\"method_unknown\",\"params\":[],\"id\":1}"));
+	        	fail();
+	        } catch(ESoap.EMethodNotFound e){}
+
+	        try{
+	        	gen.deserializeJson(desc, JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"params\":[[65412, 763573], 235],\"method\":\"method5\",\"id\":1}"));
+	        	fail();
+	        } catch(ESoap.EUnknownElement e){}
+	        
+	        try{
+	        	gen.deserializeJson(desc, JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"method\":\"method6\",\"params\":[65412, {763573],\"id\":1}"));
+	        	fail();
+	        } catch(ParseException e){}
+	     
+	        try{
+	        	gen.deserializeJson(desc, JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"method\":\"method6\",\"params\":[65412, \"string instead int\"],\"id\":1}"));
+	        	fail();
+	        } catch(NumberFormatException e){}
+	        
+	        gen.deserializeJsonResponse(desc, "method3", JSONSerializerTest.source("{\"jsonrpc\": \"2.0\", \"result\": 19, \"id\": 1}"));
+        }
         {
         	InterfaceDescription desc = gen.parse(null, TestSrv3.class);
         	ClassDef cd1 = (ClassDef) desc.getOperation("run1").getRequestType().getProp("arg0").getType();
         	ArrayDef ad1 = (ArrayDef) cd1.getProp("v1").getType();
         	ApiAlgs.getLog(this).trace("raw type : " + ad1.getPropDef().getRawType());
+        	ArrayDef ad2 = (ArrayDef) ad1.getPropDef().getType();
+        	ApiAlgs.getLog(this).trace("raw type : " + ad2.getPropDef().getRawType());
         	
-        	SOAPDocument res = gen.deserializeJson(desc, JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"params\":[{\"v1\":[[12, 15], [13]]}],\"method\":\"run1\",\"id\":1}"));
+        	SOAPDocument res = gen.deserializeJson(desc, JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"method\":\"run1\",\"params\":[{\"v1\":[[12, 15], [13]]}],\"id\":1}"));
         	Cls1 arg0 = (Cls1) res.m_args[0];
         	assertNotNull(arg0);
-        	assertEquals(1, arg0.getV1().size());
+        	assertEquals(2, arg0.getV1().size());
+        	assertEquals(15, arg0.getV1().get(0)[1]);
+        }
+    }
+    
+    public void testSerializeJson() throws UnsupportedEncodingException, SAXException, IOException, ParserConfigurationException{
+        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        InterfaceDescription desc = gen.parse(null, TestSrv2.class);
+        {
+	        String strRes = gen.serializeJson(desc, 77);
+	        
+	        assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":77}", strRes);
+	        
+	        SOAPDocument res = gen.deserializeJsonResponse(desc, "method3", JSONSerializerTest.source(strRes));
+	        assertEquals(77, res.m_args[0]);
+        }
+        
+        {
+        	String res = gen.serializeJsonException(new ESoap.EMethodNotFound("unk_method"));
+        	assertEquals("{\"error\":{\"code\":-32601,\"~unique-id~\":\"0\",\"class\":" +
+        			"\"com.triniforce.soap.JSONSerializer$JsonRpcError$Error\"," +
+        			"\"message\":\"unk_method\"},\"jsonrpc\":\"2.0\",\"id\":1}", res);
         }
     }
 

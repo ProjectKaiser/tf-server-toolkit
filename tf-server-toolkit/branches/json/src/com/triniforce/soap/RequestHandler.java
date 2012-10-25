@@ -11,6 +11,7 @@ import java.beans.Introspector;
 import java.beans.MethodDescriptor;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
 
 import javax.xml.transform.TransformerException;
@@ -97,6 +98,26 @@ public class RequestHandler {
 
 	public IServiceInvoker getInvoker() {
 		return m_invoker;
+	}
+
+	public void execJson(InputStream input, OutputStream output) {
+        String soapNS = null;
+		try {
+            SOAPDocument in = m_gen.deserializeJson(m_desc, input);
+            soapNS = in.m_soap;
+            Object res = m_invoker.invokeService(in.m_method, in.m_args);
+            String str = m_gen.serializeJson(m_desc, res);
+            OutputStreamWriter writer = new OutputStreamWriter(output);
+            writer.write(str);
+            writer.close();
+        } catch (Throwable e) {
+            try {
+            	e.printStackTrace(System.out);
+                m_gen.writeDocument(output, m_gen.serializeException(soapNS, e));
+            } catch (TransformerException e1) {
+                ApiAlgs.rethrowException(e1);
+            }
+        }	
 	}
 
 

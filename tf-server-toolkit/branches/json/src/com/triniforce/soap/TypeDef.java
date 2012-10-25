@@ -21,19 +21,19 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.TypeDefLibCache.MapDefLib.MapComponentDef;
+import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.utils.ApiAlgs;
+import com.triniforce.utils.ApiAlgs.SimpleName;
 import com.triniforce.utils.Base64;
 import com.triniforce.utils.TFUtils;
-import com.triniforce.utils.ApiAlgs.SimpleName;
 
 public class TypeDef extends SimpleName{
     private static final long serialVersionUID = 6626564048671748844L;
@@ -79,6 +79,10 @@ public class TypeDef extends SimpleName{
             if(null != box)
                 typeName = box;
             return SCALAR_NAMES.get(typeName);
+        }
+        
+        public static Collection<String> scalarNames(){
+        	return SCALAR_NAMES.values();
         }
         
         @Override
@@ -256,8 +260,8 @@ public class TypeDef extends SimpleName{
                     BeanInfo info = Introspector.getBeanInfo(cls);
                     for (MethodDescriptor mDesc : info.getMethodDescriptors()) {
                         if(mDesc.getName().equals(name)){
-                            res = mDesc.getMethod();
-                            break;
+                        	res = mDesc.getMethod();
+                  			break;
                         }
                     }
                 } catch (Exception e) {
@@ -272,6 +276,9 @@ public class TypeDef extends SimpleName{
                 Method setter = getMethod(m_setterRawType, m_setterName);
                 try {
                     setter.invoke(obj, new Object[]{value});
+                } catch(IllegalArgumentException e){
+                	ApiAlgs.getLog(this).trace(obj.toString() + "."+m_setterName + "."+value);
+                	throw e;
                 } catch (Exception e) {
                     ApiAlgs.rethrowException(e);
                 }
