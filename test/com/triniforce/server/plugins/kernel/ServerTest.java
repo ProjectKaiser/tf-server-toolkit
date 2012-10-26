@@ -126,7 +126,6 @@ public class ServerTest extends DBTestCase {
         }
 
         public void doExtensionPointsRegistration() {
-            // TODO Auto-generated method stub
             
         }
     }

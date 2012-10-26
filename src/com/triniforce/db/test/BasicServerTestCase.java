@@ -83,13 +83,9 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
         }
 
         public void doRegistration() {
-            // TODO Auto-generated method stub
-            
         }
 
         public void doExtensionPointsRegistration() {
-            // TODO Auto-generated method stub
-            
         }
     }
 	
