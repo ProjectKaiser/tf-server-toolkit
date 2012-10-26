@@ -32,13 +32,11 @@ public class SetAutoIncFieldOperation extends TableOperation {
 
 	@Override
 	public TableOperation getReverseOperation() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public int getVersionIncrease() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 

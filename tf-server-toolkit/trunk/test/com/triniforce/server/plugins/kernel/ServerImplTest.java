@@ -88,8 +88,6 @@ public class ServerImplTest extends ServerTest {
             public void doRegistration() {
             }
             public void doExtensionPointsRegistration() {
-                // TODO Auto-generated method stub
-                
             }
         };      
         {
@@ -653,10 +651,6 @@ public class ServerImplTest extends ServerTest {
                 server.leaveMode();
             }
         }
-    }
-    
-    public void testUpdateTable(){
-    	// TODO
     }
     
     public void testLeaveMode() throws Exception{

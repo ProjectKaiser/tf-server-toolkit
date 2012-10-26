@@ -251,7 +251,7 @@ public class ClassParserTest extends TFTestCase {
         //test caching
         assertSame(arr, m_lib.add(int[].class));      
         
-        //TODO: Nullabe array
+        //UNKNOWN: Nullabe array
 //        ArrayDef nullableArr = (ArrayDef)m_lib.add(Integer[].class);
         //test arrays
 //        assertNotSame(arr, nullableArr);

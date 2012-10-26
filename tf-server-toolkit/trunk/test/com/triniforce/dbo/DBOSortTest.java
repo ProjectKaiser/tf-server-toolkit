@@ -47,12 +47,10 @@ public class DBOSortTest extends TFTestCase {
 		return new IDBObject() {
 			
 			public IDBObject[] synthDBObjects() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			
 			public Object getKey() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			

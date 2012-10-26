@@ -131,7 +131,6 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         QSelect q = new QSelect();
         q.joinLast(t);
         
-//TODO bPreparedStatement
         {
 	        int i=0;
 	        WhereClause wc = new WhereClause();
