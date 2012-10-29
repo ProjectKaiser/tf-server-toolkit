@@ -23,7 +23,7 @@ import org.xml.sax.SAXException;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
-import com.triniforce.soap.InterfaceDescriptionGenerator.SoapHandler.CurrentObject;
+import com.triniforce.soap.SAXHandler.CurrentObject;
 import com.triniforce.soap.SoapHandlerTest.IService.Cls2;
 import com.triniforce.soap.SoapHandlerTest.IService.Req1;
 import com.triniforce.soap.SoapHandlerTest.IService2.C1;
@@ -247,7 +247,7 @@ public class SoapHandlerTest extends TFTestCase {
     @SuppressWarnings("unchecked")
     public void testCurrentObject() throws SAXException, InstantiationException, IllegalAccessException, SecurityException, NoSuchMethodException{
         
-    	QName qn = new QName("test.com", "var_001");
+    	String qn = "var_001";
         try{
             new CurrentObject(qn, null);
             fail();
@@ -510,7 +510,7 @@ public class SoapHandlerTest extends TFTestCase {
             gen.deserialize(desc, inSource(REQ_Reentry2));
             fail();
         } catch(ESoap.EElementReentry e){
-            assertEquals(new QName("http://tempuri.org/", "method1").toString(), e.getMessage());
+            assertEquals("method1", e.getMessage());
         }
     }
     
