@@ -331,7 +331,7 @@ public class JSONSerializer {
 		
 		public boolean primitive(Object arg0) throws ParseException,
 				IOException {
-			ApiAlgs.getLog(this).trace("primitive:" + arg0);
+			ApiAlgs.getLog(this).trace("primitive:" + arg0 + ", cls: "+arg0.getClass().getSimpleName());
 			Element top = m_stk.peek();
 			if(Element.Type.Array.equals(top.m_type)){
 				String argName = top.m_name;
@@ -340,7 +340,13 @@ public class JSONSerializer {
 					m_argIdx++;
 
 				}
-				m_handler.startElement(argName, false, null);
+				TypeDef td = m_handler.startElement(argName, false, null);
+				ApiAlgs.getLog(this).trace("type:" + td.getName());
+				if(td.getName().equals("object")){
+					if(arg0 instanceof Number){
+						m_handler.getTopObject().setType(m_handler.getType(numericType(arg0.getClass()), true));
+					}
+				}
 				String str = arg0.toString();
 				m_handler.characters(str.toCharArray(), 0, str.length());
 				m_handler.endElement();
@@ -353,6 +359,12 @@ public class JSONSerializer {
 			}
 			m_value = arg0;
 			return true;
+		}
+
+
+
+		private String numericType(Class<? extends Object> cls) {
+			return ScalarDef.scalarName(cls.getName());
 		}
 	}
 

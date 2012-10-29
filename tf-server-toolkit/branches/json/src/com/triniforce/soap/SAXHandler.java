@@ -197,16 +197,18 @@ public class SAXHandler {
         m_desc = desc;
     }
     
-    public void startElement(String tag, boolean bNull, TypeDef reqTypeDef) throws EInterfaceElementException {
+    public TypeDef startElement(String tag, boolean bNull, TypeDef reqTypeDef) throws EInterfaceElementException {
     	ApiAlgs.getLog(this).trace("<"+tag+">");
         m_stringValue.clear();
         
         CurrentObject co;
+        TypeDef res;
         if(m_objStk.isEmpty()){
             if(null != m_method)
                 throw new ESoap.EElementReentry(tag);
             MessageDef methodDef = getMethodDef(tag);
             co = new CurrentObject(tag, methodDef, bNull);
+            res = methodDef;
         }
         else{
             co = m_objStk.peek();
@@ -218,8 +220,10 @@ public class SAXHandler {
                 typeDef = reqTypeDef;
             }
             co = new CurrentObject(tag, typeDef, bNull);
+            res = typeDef;
         }
         m_objStk.push(co);
+        return res;
     }
     
 

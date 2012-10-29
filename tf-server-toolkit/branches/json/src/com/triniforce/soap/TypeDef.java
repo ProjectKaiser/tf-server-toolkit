@@ -74,7 +74,7 @@ public class TypeDef extends SimpleName{
             m_bNillable = !BOXES.containsKey(type.getSimpleName());
         }
 
-        private static String scalarName(String typeName) {
+        public static String scalarName(String typeName) {
             String box = BOXES.get(typeName);
             if(null != box)
                 typeName = box;

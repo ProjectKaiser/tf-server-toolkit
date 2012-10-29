@@ -16,6 +16,7 @@ import org.json.simple.parser.ParseException;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
+import com.triniforce.soap.JSONSerializerTest.Service001.Outter01;
 import com.triniforce.soap.JSONSerializerTest.Service001.Real1;
 
 public class JSONSerializerTest extends TFTestCase {
@@ -49,6 +50,18 @@ public class JSONSerializerTest extends TFTestCase {
 		public void method_004(Object[] v){}
 		
 		public void method_005(Map<String, String> map){}
+		
+		static class Outter01{
+			private Object m_objValue;
+			public Object getObjValue() {
+				return m_objValue;
+			}
+			public void setObjValue(Object objValue) {
+				m_objValue = objValue;
+			}
+		}
+		
+		public void method_006(Outter01 v){}
 	}
 	
 	static class Prop01{
@@ -118,6 +131,21 @@ public class JSONSerializerTest extends TFTestCase {
 				"{\"key\":\"key_001\", \"value\":\"vvvv\"}, {\"key\":\"key_002\", \"value\":\"vvv2\"}]],\"id\":1}"));
 		Map<String,String> map = (Map<String, String>) res.m_args[0];
 		assertEquals("vvvv", map.get("key_001"));
+		
+		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_004\",\"params\":[[\"string_value\", 362472]],\"id\":1}"));
+		arg0 = (Object[]) res.m_args[0];
+		assertEquals("string_value", arg0[0]);
+		assertEquals(362472L, arg0[1]);
+		
+		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_006\",\"params\":[{\"objValue\":\"string_YT\"}],\"id\":1}"));
+		Outter01 obj01 = (Outter01) res.m_args[0];
+		assertEquals("string_YT", obj01.getObjValue());
+		
+		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_006\",\"params\":[{\"objValue\":672}],\"id\":1}"));
+		obj01 = (Outter01) res.m_args[0];
+		assertEquals(672L, obj01.getObjValue());
+
+		
 	}
 
 	public static InputStream source(String string) throws UnsupportedEncodingException {
