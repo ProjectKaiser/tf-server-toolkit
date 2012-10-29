@@ -22,7 +22,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
-import com.triniforce.soap.JSONSerializer.JsonRpcError.Error;
 import com.triniforce.soap.JSONSerializer.KeyFinder.Element.Type;
 import com.triniforce.soap.SAXHandler.CurrentObject;
 import com.triniforce.soap.TypeDef.ScalarDef;
@@ -74,14 +73,17 @@ public class JSONSerializer {
 		}
 	}
 	
-	static class JsonRpcError extends JsonRpc{
-		static class Error{
+	public static class JsonRpcError extends JsonRpc{
+		public static class Error{
 			private int m_code;
 			private String m_message;
+			private String m_stackTrace;
 			
-			public Error(int code, String msg) {
+			public Error(){}
+			public Error(int code, String msg, String stackTrace) {
 				setCode(code);
 				setMessage(msg);
+				setStackTrace(stackTrace);
 			}
 
 			public int getCode() {
@@ -98,6 +100,14 @@ public class JSONSerializer {
 
 			public void setMessage(String message) {
 				m_message = message;
+			}
+
+			public String getStackTrace() {
+				return m_stackTrace;
+			}
+
+			public void setStackTrace(String stackTrace) {
+				m_stackTrace = stackTrace;
 			}
 		}
 		private Error m_error;
@@ -140,6 +150,13 @@ public class JSONSerializer {
 	}
 	
 	static class KeyFinder implements ContentHandler{
+		
+		static final Element PARAMS = new Element(Element.Type.Entry, "params");
+		static final Element PARAMS_ARRAY = new Element(Element.Type.Array, "arg");
+		static final Element METHOD = new Element(Element.Type.Entry, "method");
+		static final Element SCALAR_VALUE = new Element(Element.Type.Entry, "value");
+		static final Element RESULT = new Element(Element.Type.Entry, "result");
+
 		enum State {Method, Arguments, Finit};
 		
 		private SAXHandler m_handler;
@@ -148,6 +165,7 @@ public class JSONSerializer {
 		
 		private String m_entry;
 		int m_argIdx = 0;
+		
 		private State m_state;
 		private boolean m_bSetType=false;
 		private boolean m_bSetScalarValue=false;
@@ -205,7 +223,7 @@ public class JSONSerializer {
 				IOException {
 			ApiAlgs.getLog(this).trace("startObjectEntry." + arg0);
 			if(null != m_method){
-				if("params".equals(arg0)){
+				if(PARAMS.m_name.equals(arg0)){
 					m_handler.startElement(m_method, false, null);
 					m_state = State.Arguments;
 				}
@@ -259,10 +277,6 @@ public class JSONSerializer {
 			return true;
 		}	
 		
-		static final Element PARAMS = new Element(Element.Type.Entry, "params");
-		static final Element PARAMS_ARRAY = new Element(Element.Type.Array, "arg");
-		static final Element METHOD = new Element(Element.Type.Entry, "method");
-		static final Element SCALAR_VALUE = new Element(Element.Type.Entry, "value");
 		
 		public boolean startArray() throws ParseException, IOException {
 			Element top = m_stk.peek();
@@ -343,19 +357,10 @@ public class JSONSerializer {
 	}
 
 	public SOAPDocument deserialize(InterfaceDescription desc, InputStream source) throws IOException, ParseException{
-//		BufferedReader reader = new BufferedReader(new InputStreamReader(source));
-//		String str = reader.readLine();
-//		Map<String, Object> map = (Map<String, Object>) js.deserialize(str);
-//		SOAPDocument res = new SOAPDocument();
-//		res.m_method = (String) map.get("method");
-//		List params = (List) map.get("params");
-		// res.m_args = params.toArray();
-		// return res;
 		SAXHandler handler = new SAXHandler(desc);
 
 		JSONParser parser = new JSONParser();
 		KeyFinder finder = new KeyFinder(handler);
-		// finder.setMatchKey("id");
 		InputStreamReader reader = new InputStreamReader(source);
 		parser.parse(reader, finder, true);
 		SOAPDocument res = new SOAPDocument();
@@ -365,8 +370,4 @@ public class JSONSerializer {
 		return res;
 	}
 
-	public void serializeError(InterfaceDescription desc, Throwable t, OutputStream out) throws IOException {
-		JsonRpc obj = new JsonRpcError("2.0",1, new Error(0, null));
-		serializeObject(obj, out);
-	}
 }

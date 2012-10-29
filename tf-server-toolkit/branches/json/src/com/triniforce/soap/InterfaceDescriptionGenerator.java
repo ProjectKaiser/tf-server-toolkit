@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -955,7 +957,7 @@ public class InterfaceDescriptionGenerator {
 		return new String(out.toByteArray(), "utf-8");
 	}
 
-	public String serializeJsonException(Exception e) throws IOException {
+	public String serializeJsonException(Throwable e) throws IOException {
 		JSONSerializer js = new JSONSerializer();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JsonRpcError jsonRes = new JSONSerializer.JsonRpcError("2.0", 1, exceptionToError(e));
@@ -963,7 +965,7 @@ public class InterfaceDescriptionGenerator {
 		return new String(out.toByteArray(), "utf-8");
 	}
 
-	private Error exceptionToError(Exception e) {
+	private Error exceptionToError(Throwable e) {
 		int code; 
 		if(e instanceof ESoap.EMethodNotFound)
 			code = -32601;
@@ -972,8 +974,12 @@ public class InterfaceDescriptionGenerator {
 		else if(e instanceof JsonParserException)
 			code = -32700;
 		else 
-			code = -32600; 
-		return new JSONSerializer.JsonRpcError.Error(code, e.getMessage());
+			code = -32600;
+		StringWriter strBuffer = new StringWriter();
+		PrintWriter writer = new PrintWriter(strBuffer);
+		e.printStackTrace(writer);
+		writer.close();
+		return new JSONSerializer.JsonRpcError.Error(code, e.toString(), strBuffer.getBuffer().toString());
 	}
 
     

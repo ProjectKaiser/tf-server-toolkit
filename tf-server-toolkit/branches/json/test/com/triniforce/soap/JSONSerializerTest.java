@@ -73,14 +73,6 @@ public class JSONSerializerTest extends TFTestCase {
 		assertEquals( "{\"jsonrpc\":\"2.0\",\"params\":[515],\"method\":\"method_001\",\"id\":1}", serialize(srz, desc, 515));
 		assertEquals( "{\"jsonrpc\":\"2.0\",\"params\":[515,634,\"turbo\"],\"method\":\"method_001\",\"id\":1}", serialize(srz, desc, 515, 634, "turbo"));
 		assertEquals( "{\"jsonrpc\":\"2.0\",\"params\":[515,{\"~unique-id~\":\"0\",\"value\":\"val_0012\",\"class\":\"com.triniforce.soap.JSONSerializerTest$1\"}],\"method\":\"method_001\",\"id\":1}", serialize(srz, desc, 515, new Prop01(){{setValue("val_0012");}}));
-		
-		assertEquals("{\"jsonrpc\": \"2.0\", \"error\": {\"code\": -32601, \"message\": \"Procedure not found.\"}, \"id\": 10}", error(srz,desc, new Exception("alarm error")));
-	}
-
-	private String error(JSONSerializer srz, InterfaceDescription desc, Throwable t) throws IOException {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		srz.serializeError(desc, t, out);
-		return out.toString("utf-8");
 	}
 
 	private String serialize(JSONSerializer srz, InterfaceDescription desc,

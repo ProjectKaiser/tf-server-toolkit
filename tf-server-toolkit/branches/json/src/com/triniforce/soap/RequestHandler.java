@@ -101,23 +101,23 @@ public class RequestHandler {
 	}
 
 	public void execJson(InputStream input, OutputStream output) {
-        String soapNS = null;
-		try {
-            SOAPDocument in = m_gen.deserializeJson(m_desc, input);
-            soapNS = in.m_soap;
-            Object res = m_invoker.invokeService(in.m_method, in.m_args);
-            String str = m_gen.serializeJson(m_desc, res);
-            OutputStreamWriter writer = new OutputStreamWriter(output);
-            writer.write(str);
-            writer.close();
-        } catch (Throwable e) {
-            try {
-            	e.printStackTrace(System.out);
-                m_gen.writeDocument(output, m_gen.serializeException(soapNS, e));
-            } catch (TransformerException e1) {
-                ApiAlgs.rethrowException(e1);
-            }
-        }	
+        String str = null;
+        try{
+			try {
+	            SOAPDocument in = m_gen.deserializeJson(m_desc, input);
+	            Object res = m_invoker.invokeService(in.m_method, in.m_args);
+	            str = m_gen.serializeJson(m_desc, res);
+	        } catch (Throwable e) {
+	            str = m_gen.serializeJsonException(e);
+	        }
+			finally{
+	            OutputStreamWriter writer = new OutputStreamWriter(output);
+	            writer.write(str);
+	            writer.close();
+			}
+        } catch(Exception e){
+        	ApiAlgs.rethrowException(e);
+        }
 	}
 
 

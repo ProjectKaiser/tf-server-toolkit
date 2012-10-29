@@ -32,6 +32,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import com.triniforce.db.test.TFTestCase;
+import com.triniforce.soap.ESoap.EMethodNotFound;
 import com.triniforce.soap.InterfaceDescription.Operation;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
 import com.triniforce.soap.InterfaceDescriptionGeneratorTest.Cls2.InnerObject;
@@ -715,7 +716,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         }
     }
     
-    public void testSerializeJson() throws UnsupportedEncodingException, SAXException, IOException, ParserConfigurationException{
+    public void testSerializeJson() throws UnsupportedEncodingException, SAXException, IOException, ParserConfigurationException, ParseException{
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
         InterfaceDescription desc = gen.parse(null, TestSrv2.class);
         {
@@ -729,9 +730,13 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         
         {
         	String res = gen.serializeJsonException(new ESoap.EMethodNotFound("unk_method"));
-        	assertEquals("{\"error\":{\"code\":-32601,\"~unique-id~\":\"0\",\"class\":" +
-        			"\"com.triniforce.soap.JSONSerializer$JsonRpcError$Error\"," +
-        			"\"message\":\"unk_method\"},\"jsonrpc\":\"2.0\",\"id\":1}", res);
+        	try{
+        		gen.deserializeJsonResponse(desc, "unk_method", JSONSerializerTest.source(res));
+        		fail();
+        	} catch(EMethodNotFound e){}
+        	
+        	assertTrue(res, res.contains("\"error\":{\"code\":-32601"));
+        	
         }
     }
 
