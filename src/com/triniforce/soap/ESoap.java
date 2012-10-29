@@ -12,6 +12,13 @@ import org.xml.sax.SAXException;
 
 public class ESoap {
 	
+	
+	static class EInterfaceElementException extends RuntimeException{
+		public EInterfaceElementException(String e) {
+			super(e);
+		}
+
+		private static final long serialVersionUID = 7033589483728802780L;}
 	// SoapHandler exceptions
 
 	static class EElementNotFound extends SAXException{
@@ -22,40 +29,40 @@ public class ESoap {
 	    }
 	}
 
-	static class EElementReentry extends SAXException{
+	static class EElementReentry extends EInterfaceElementException{
 	    private static final long serialVersionUID = -2707949043156630746L;
-	    public EElementReentry(QName name) {
-	        super(name.toString());
+	    public EElementReentry(String tag) {
+	        super(tag.toString());
 	    }
 	}
 
 	static class EMethodNotFound extends ESoap.EUnknownElement{
 	    private static final long serialVersionUID = 4658888395760467956L;
-	    public EMethodNotFound(QName e) {
-	        super(e);
+	    public EMethodNotFound(String tag) {
+	        super(tag);
 	    }
 	}
 
-	static class ENonNullableObject extends SAXException{
+	static class ENonNullableObject extends EInterfaceElementException{
 	    private static final long serialVersionUID = -7975756834097126342L;
-	    public ENonNullableObject(QName qn, String name) {
+	    public ENonNullableObject(String qn, String name) {
 	        super(qn.toString()+":"+name);
 	    }
 	}
 
-	static class EUnknownElement extends SAXException{
+	static class EUnknownElement extends EInterfaceElementException{
 	    private static final long serialVersionUID = -5654077158782927631L;
 	
-	    public EUnknownElement(QName e) {
-	        super(e.toString());
+	    public EUnknownElement(String e) {
+	        super(e);
 	    }
 	}
 	
-	static class EWrongElementType extends SAXException{
+	static class EWrongElementType extends EInterfaceElementException{
 	    private static final long serialVersionUID = -5654077158782927631L;
 	
-	    public EWrongElementType(QName e, String type) {
-	        super(e.toString());
+	    public EWrongElementType(String type) {
+	        super(type);
 	    }
 	}
 	

@@ -6,6 +6,7 @@
 package com.triniforce.soap;
 
 import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import com.triniforce.db.test.TFTestCase;
@@ -174,5 +175,15 @@ public class RequestHandlerTest extends TFTestCase {
             ApiAlgs.getLog(this).trace("allRequests = "+thread.m_count); 
         }
         
+    }
+    
+    public void testExecJson() throws UnsupportedEncodingException{
+    	InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        InterfaceDescription desc = gen.parse(null, TestService.class);
+        RequestHandler handler = new RequestHandler(gen, desc, new RequestHandler.ReflectServiceInvoker(new TestService()));
+        
+        String REQ1 =
+        		"{\"jsonrpc\":\"2.0\", \"method\":\"method1\",\"params\":[\"test_string\"]}";
+        handler.execJson(new ByteArrayInputStream(REQ1.getBytes("utf-8")), System.out);
     }
 }

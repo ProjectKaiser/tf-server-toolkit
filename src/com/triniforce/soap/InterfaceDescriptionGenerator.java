@@ -9,22 +9,24 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Stack;
+import java.util.Map;
 
-import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -37,27 +39,32 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import net.sf.sojo.interchange.json.JsonParserException;
+import net.sf.sojo.interchange.json.JsonSerializer;
+
+import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.helpers.AttributesImpl;
 
 import com.triniforce.soap.InterfaceDescription.MessageDef;
 import com.triniforce.soap.InterfaceDescription.Operation;
 import com.triniforce.soap.InterfaceDescriptionGenerator.ObjectConverter.TypedObject;
 import com.triniforce.soap.InterfaceOperationDescription.NamedArg;
+import com.triniforce.soap.JSONSerializer.JsonRpc;
+import com.triniforce.soap.JSONSerializer.JsonRpcError;
+import com.triniforce.soap.JSONSerializer.JsonRpcError.Error;
 import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.EnumDef;
-import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.WsdlDescription.WsdlMessage;
+import com.triniforce.soap.WsdlDescription.WsdlPort.WsdlOperation;
 import com.triniforce.soap.WsdlDescription.WsdlType;
 import com.triniforce.soap.WsdlDescription.WsdlTypeElement;
-import com.triniforce.soap.WsdlDescription.WsdlPort.WsdlOperation;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.IName;
 import com.triniforce.utils.TFUtils;
@@ -426,343 +433,7 @@ public class InterfaceDescriptionGenerator {
         return doc;
     }
 
-    static class SoapHandler extends DefaultHandler{
-        static class CurrentObject{
-            TypeDef  m_objDef;
-            int      m_propIdx;
-            Object[] m_props;
-            private boolean m_bNull;
-            
-            static final Object DEFAULT_OBJECT = new Object();
-            
-            public CurrentObject(QName qn, TypeDef objDef) throws ESoap.ENonNullableObject {
-                this(qn, objDef, false);
-            }
-            
-            public CurrentObject(QName qn, TypeDef objDef, boolean bNull) throws ESoap.ENonNullableObject{
-                if(null == objDef)
-                    throw new NullPointerException("objDef");
-                if(bNull){
-                    if(!objDef.isNullable())
-                        throw new ESoap.ENonNullableObject(qn, objDef.getType());
-                }
-                else{
-                    m_objDef = objDef;
-                    m_bNull = bNull;
-                    
-                    if(m_objDef instanceof ClassDef){
-                        m_props = new Object[((ClassDef)m_objDef).getProps().size()];
-                        Arrays.fill(m_props, DEFAULT_OBJECT);
-                    }
-                    else if (m_objDef instanceof MapDef){
-                        m_props = new Object[]{new HashMap<Object, Object>()};
-                    }
-                    else if (m_objDef instanceof ArrayDef){
-                        m_props = new Object[]{new ArrayList<Object>()};
-                    }
-                    else if (m_objDef instanceof ScalarDef){
-                    	ScalarDef sd = (ScalarDef) m_objDef;
-                    	if(sd.getType().equals(String.class.getName()))
-                    		m_props = new Object[]{""};
-                    	else
-                    		m_props = null;
-                    }
-                }
-            }
-
-            @SuppressWarnings("unchecked")
-            Object toObject(){
-                Object res = null;
-                if(!m_bNull){
-                    if(m_objDef instanceof ClassDef){
-                        ClassDef cd = (ClassDef) m_objDef;
-                        try {
-                            Class<?> cls = Class.forName(cd.getType());
-                            Object instance;
-                            if(cls.isArray())
-                                instance = Array.newInstance(Object.class, m_props.length);
-                            else
-                                instance = cls.newInstance();
-                            res = instance;
-                            for (int i=0; i<cd.getProps().size(); i++) {
-                                PropDef propDef = cd.getProps().get(i);
-                                Object val = m_props[i];
-                                if(!DEFAULT_OBJECT.equals(val))
-                                	propDef.set(instance, val);
-                            }
-                        }catch(InstantiationException e){
-                        	ApiAlgs.rethrowException(cd.getType().toString(), e);
-                        }catch (Exception e) {
-                            ApiAlgs.rethrowException(e);
-                        }
-                    }
-                    else{
-                        if(null != m_props)
-                            res = m_props[0];
-                    }
-                }
-                return res;
-            }
-
-            TypeDef setCurrentProp(String propName) throws ESoap.EUnknownElement, ESoap.EElementReentry{
-                if(m_objDef instanceof ClassDef){
-                    ClassDef cd = (ClassDef) m_objDef;
-                    m_propIdx = getPos(cd.getProps(), propName);
-                    if(m_propIdx !=-1){
-                        Object v = m_props[m_propIdx];
-                        if(!DEFAULT_OBJECT.equals(v)){
-                            throw new ESoap.EElementReentry(new QName(propName));
-                        }
-                        return cd.getProps().get(m_propIdx).getType();
-                    }
-                }
-                else if (m_objDef instanceof ArrayDef){
-                    ArrayDef ad = (ArrayDef) m_objDef;
-                    if(ad.getPropDef().getName().equals(propName)){
-                        return ad.getComponentType();
-                    }
-                }
-                
-                throw new ESoap.EUnknownElement(new QName(propName));
-            }
-            
-            @SuppressWarnings("unchecked")
-            void setPropValue(Object value){
-                if(m_objDef instanceof ClassDef){
-                    m_props[m_propIdx] = value;
-                }
-                else if (m_objDef instanceof ArrayDef){
-                    ArrayDef ad = (ArrayDef) m_objDef;
-                    ad.getPropDef().set(m_props[0], value);
-                }
-                else
-                    throw new RuntimeException("ScalarDef");
-            }
-            
-            Object[] getProps(){
-                return m_props;
-            }
-
-            public void setStringValue(String value) {
-                if(null == value)
-                    throw new NullPointerException();
-                if(m_objDef instanceof ScalarDef){
-                    if(null == m_props || (null != m_props && value.length() != 0)){
-                        Object res = null;
-                        ScalarDef sd = (ScalarDef)m_objDef;
-                        res = sd.valueOf(value);
-                        
-                        m_props = new Object[]{res};
-                    }
-                }
-            }
-            
-            private <T extends IName> int getPos(List<T> col, String tag) {
-                for (int i=0; i<col.size(); i++) {
-                    if(col.get(i).getName().equals(tag))
-                        return i;
-                }
-                return -1;
-            }
-        }
-        
-        static class FaultMessage{
-        	String m_string;
-        	String m_code;
-        }
-        
-        Stack<QName> m_stk = new Stack<QName>();
-        private String m_tns;
-        Stack<CurrentObject> m_objStk = new Stack<CurrentObject>(); 
-        private InterfaceDescription m_desc;
-        //private ClassDef m_methodDef;
-        private HashMap<String, String> m_uriMap;
-        
-        private SOAPDocument m_result;
-        private List<String> m_stringValue = new ArrayList<String>();
-        
-        private FaultMessage m_fault=null;
-        
-        public SoapHandler(String tns, InterfaceDescription desc) {
-            m_tns = tns;
-            m_desc = desc;
-            m_uriMap = new HashMap<String, String>();
-        }
-        
-        @Override
-        public void startElement(String ns, String tag, String arg2, Attributes attrs) throws SAXException {
-            QName qn = new QName(ns, tag);
-            
-            if(m_stk.isEmpty()){
-                // must be soap
-                if(soapenv.equals(ns) || soapenv12.equals(ns)){
-                    m_result = new SOAPDocument();
-                    m_result.m_soap = ns;
-                }
-                else{
-                    throw new ESoap.EUnknownElement(qn);
-                }
-            }
-
-            m_stringValue.clear();
-            
-            if(ns.equals(m_result.m_soap)){
-                if(tag.equals("Envelope")){
-                    if(!m_stk.isEmpty())
-                        throw new ESoap.EUnknownElement(qn);
-                }
-                else if(tag.equals("Body")){
-                    if(!m_stk.peek().equals(new QName(m_result.m_soap, "Envelope")))
-                        throw new ESoap.EUnknownElement(qn);
-                    if(null != m_result.m_method)
-                        throw new ESoap.EElementReentry(qn);
-                }
-                else if(tag.equals("Fault")){
-                    if(!m_stk.peek().equals(new QName(m_result.m_soap, "Body")))
-                        throw new ESoap.EUnknownElement(qn);
-                    m_fault = new FaultMessage();
-                }
-            }
-            else if(ns.equals(m_tns)){
-                CurrentObject co;
-                boolean bNull = isNull(attrs);
-                if(m_stk.peek().equals(new QName(m_result.m_soap, "Body"))){
-                    if(null != m_result.m_method)
-                        throw new ESoap.EElementReentry(qn);
-                    MessageDef methodDef = getMethodDef(tag);
-                    co = new CurrentObject(qn, methodDef, bNull);
-                }
-                else{
-                    co = m_objStk.peek();
-                    TypeDef typeDef = co.setCurrentProp(tag);
-                    String typeName = attrs.getValue(xsi, "type");
-                    if(null != typeName){
-                        QName qName = getQName(typeName);
-                        TypeDef reqTypeDef = m_desc.getTypeDef(qName.getLocalPart(), !m_tns.equals(qName.getNamespaceURI()));
-                        TFUtils.assertNotNull(reqTypeDef, qName.toString());
-                        if(!isSubtype(typeDef, reqTypeDef)){
-                        	throw new ESoap.EWrongElementType(qn, typeName);
-                        }
-                        typeDef = reqTypeDef;
-                    }
-                    co = new CurrentObject(qn, typeDef, bNull);
-                }
-                m_objStk.push(co);
-            }
-            else{
-            	if(!(m_fault != null && 
-            			("faultcode".equals(tag) || "faultstring".equals(tag) || "detail".equals(tag))))
-            		throw new ESoap.EUnknownElement(qn);
-            }
-            
-            m_stk.push(qn);
-        }
-        
-
-        private boolean isSubtype(TypeDef parentDef, TypeDef childDef) {
-        	if(childDef.getName().equals(parentDef.getName()))
-        		return true;
-        	if(parentDef.getType().equals(Object.class.getName()))
-        		return true;
-        	if(!(parentDef instanceof ClassDef) || !(childDef instanceof ClassDef))
-        		return false;
-        	ClassDef child = (ClassDef) childDef;
-        	ClassDef parent =  (ClassDef) parentDef;
-        	boolean res=false;
-        	while(null != child && !(res = child.getType().equals(parent.getType()))){
-        		child = child.getParentDef();
-        	}
-        	return res;
-		}
-
-		private QName getQName(String typeName) {
-            int iDiv = typeName.indexOf(':');
-            String prefix = "";
-            String local = typeName;
-            if(iDiv!=-1){
-                prefix = typeName.substring(0, iDiv);
-                local = typeName.substring(iDiv+1);
-            }
-            QName res = new QName(m_uriMap.get(prefix), local, prefix);
-            return res;
-        }
-
-        private boolean isNull(Attributes attrs) {
-            boolean res = false;
-            String strNull = attrs.getValue(xsi, "nil");
-            if(null != strNull){
-                res = strNull.equals("true");
-            }
-            return  res;
-        }
-
-        private MessageDef getMethodDef(String tag) throws ESoap.EMethodNotFound {
-            MessageDef res = null;
-            for (Operation op : m_desc.getOperations()) {
-                if(op.getName().equals(tag)){
-                    m_result.m_method = op.getName();
-                    m_result.m_bIn = true;
-                    res = op.getRequestType();
-                }
-                else if((op.getName() + "Response").equals(tag)){
-                    m_result.m_method = op.getName();
-                    m_result.m_bIn = false;
-                    res = op.getResponseType();
-                }
-            }
-            if(null ==  res)
-                throw new ESoap.EMethodNotFound(new QName(m_tns, tag));
-            return res;
-        }
-
-        @Override
-        public void characters(char[] ch, int start, int length) throws SAXException {
-        	String vStr = new String(ch, start, length);
-//        	if(start+length < ch.length && ('\n' == ch[start+length] || '\r' == ch[start+length])){
-//        		vStr += '\n';
-//        	}
-        	m_stringValue.add(vStr);
-        }
-        
-        @Override
-        public void endElement(String uri, String localName, String qName) throws SAXException {
-            if(uri.equals(m_tns)){
-                CurrentObject obj = m_objStk.pop();
-                if(m_objStk.isEmpty()){
-                    m_result.m_args = (Object[]) obj.toObject();
-                }
-                else{
-                	if(!m_stringValue.isEmpty())
-                		obj.setStringValue(getNodeCharacters());
-                    CurrentObject parent = m_objStk.peek();
-                    parent.setPropValue(obj.toObject());
-                }
-            }
-            if(m_fault != null){
-            	if("faultstring".equals(localName)){
-            		m_fault.m_string = getNodeCharacters();
-            	}
-            }
-        	m_stringValue.clear();
-            m_stk.pop();
-        }
-        
-        private String getNodeCharacters() {
-        	StringBuffer res = new StringBuffer();
-        	Iterator<String> i = m_stringValue.iterator();
-        	while(i.hasNext()){
-        		String v = i.next();
-    			res.append(v);
-        	}
-			return res.toString();
-		}
-        
-		@Override
-        public void startPrefixMapping(String prefix, String uri) throws SAXException {
-            m_uriMap.put(prefix, uri); 
-            super.startPrefixMapping(prefix, uri);
-        }
-    }
+    
     
     public static class SOAPDocument{
         public String   m_soap;
@@ -772,12 +443,117 @@ public class InterfaceDescriptionGenerator {
     }
 
     public SOAPDocument deserialize(InterfaceDescription desc, InputStream source) throws ParserConfigurationException, SAXException, IOException {
-        SAXParser parser = getParser();
+    	return deserialize(desc, source, new IParser(){
+			public void parse(InputStream source, SoapHandler handler) throws SAXException, IOException, ParserConfigurationException {
+		        SAXParser parser = getParser();
+		        parser.parse(new InputSource(source), handler);
+			}
+    	});
+    }
+    
+    public SOAPDocument deserializeJson(InterfaceDescription desc, InputStream source) throws IOException, ParserConfigurationException, ParseException{
+    	JSONSerializer js = new JSONSerializer();
+    	return js.deserialize(desc, source);
+//		return deserialize(desc, source, new JsonParser(){
+//			protected void parseHeader(Map<String, Object> src, SoapHandler handler) throws SAXException {
+//				String methodName  = (String) src.get("method");
+//				handler.startElement(m_targetNamespace, methodName, null, EMPTY_ATTRS);
+//				List<Object> params = (List<Object>) src.get("params");
+//				int i = 0;
+//				for(Object value : params){
+//					String argName = "arg"+i;
+//					parseValue(handler, argName, value);
+//					i++;
+//				}
+//				handler.endElement(m_targetNamespace, methodName, null);
+//			}
+//		});
+    }
+    
+
+	public SOAPDocument deserializeJsonResponse(InterfaceDescription desc,
+			final String method, InputStream source) throws SAXException, IOException, ParserConfigurationException {
+		return deserialize(desc, source, new JsonParser(){
+			@Override
+			protected void parseHeader(Map<String, Object> src,
+					SoapHandler handler) throws SAXException {
+				String mHeader = method+"Response";
+				handler.startElement(m_targetNamespace, mHeader, null, EMPTY_ATTRS);
+				parseValue(handler, method+"Result", src.get("result"));
+				handler.endElement(m_targetNamespace, mHeader, null);
+			}
+		});
+	}
+    
+    interface IParser{
+    	void parse(InputStream source, SoapHandler handler) throws SAXException, IOException, ParserConfigurationException;
+    }
+    
+	static final AttributesImpl EMPTY_ATTRS = new AttributesImpl();
+    class JsonParser implements IParser{
+		
+		public void parse(InputStream source, SoapHandler handler) throws SAXException, IOException {
+			callStartSoapHeaders(handler);
+			
+			BufferedReader reader = new BufferedReader(new InputStreamReader(source));
+			String str = reader.readLine();
+			JsonSerializer js = new JsonSerializer();
+			Map<String, Object> src = (Map<String, Object>) js.deserialize(str);
+			parseHeader(src, handler);
+			
+			callEndSoapHeaders(handler);
+		}
+		
+		protected void parseHeader(Map<String, Object> src, SoapHandler handler) throws SAXException {
+		}
+
+		private void parseMap(SoapHandler handler, Map<String, Object> value) throws SAXException {
+			for(Map.Entry<String, Object> entry: value.entrySet()){
+				parseValue(handler, entry.getKey(), entry.getValue());
+			}
+		}
+
+		protected void parseValue(SoapHandler handler, String name, Object value) throws SAXException {
+			handler.startElement(m_targetNamespace, name, null, EMPTY_ATTRS);
+			if(value instanceof Map){
+				parseMap(handler, (Map<String, Object>) value);
+			}
+			else if(value instanceof List){
+				parseList(handler, (List<Object>) value);
+			}
+			else{
+				String argValue = value.toString(); 
+				handler.characters(argValue.toCharArray(), 0, argValue.length());
+			}
+			handler.endElement(m_targetNamespace, name, null);			
+		}
+
+		private void parseList(SoapHandler handler, List<Object> value) throws SAXException {
+			for (Object object : value) {
+				parseValue(handler, "value", object);
+			}
+		}
+
+		private void callStartSoapHeaders(SoapHandler handler) throws SAXException {
+			handler.startElement(soapenv, "Envelope", null, null);
+			handler.startElement(soapenv, "Body", null, null);
+			
+		}
+		
+		private void callEndSoapHeaders(SoapHandler handler) throws SAXException {
+			handler.endElement(soapenv, "Body", null);
+			handler.endElement(soapenv, "Envelope", null);
+			
+		}
+
+    }
+    
+    private SOAPDocument deserialize(InterfaceDescription desc, InputStream source, IParser parser) throws SAXException, IOException, ParserConfigurationException{
         SoapHandler h = new SoapHandler(m_targetNamespace, desc);
-        parser.parse(new InputSource(source), h);
+        parser.parse(source, h);
         if(null != h.m_fault)
         	throw new ESoap.EFaultCode(h.m_fault.m_string);
-        SOAPDocument res = h.m_result;
+        SOAPDocument res = h.getResult();
         return res;
     }
     
@@ -1153,6 +929,59 @@ public class InterfaceDescriptionGenerator {
 		}
 		return res;
 	}
+	
+	public static class JsonResult extends JsonRpc{
+		
+		private Object m_result;
+
+		public JsonResult() {
+			super("2.0", 1);
+		}
+
+		public Object getResult() {
+			return m_result;
+		}
+
+		public void setResult(Object result) {
+			m_result = result;
+		}
+		
+	} 
+	
+	public String serializeJson(InterfaceDescription desc, Object response) throws IOException {
+		JSONSerializer js = new JSONSerializer();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		JsonResult jsonRes = new JsonResult();
+		jsonRes.setResult(response);
+		js.serializeObject(jsonRes, out);
+		return new String(out.toByteArray(), "utf-8");
+	}
+
+	public String serializeJsonException(Throwable e) throws IOException {
+		JSONSerializer js = new JSONSerializer();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		JsonRpcError jsonRes = new JSONSerializer.JsonRpcError("2.0", 1, exceptionToError(e));
+		js.serializeObject(jsonRes, out);
+		return new String(out.toByteArray(), "utf-8");
+	}
+
+	private Error exceptionToError(Throwable e) {
+		int code; 
+		if(e instanceof ESoap.EMethodNotFound)
+			code = -32601;
+		else if(e instanceof ESoap.EUnknownElement)
+			code = -32602;
+		else if(e instanceof JsonParserException)
+			code = -32700;
+		else 
+			code = -32600;
+		StringWriter strBuffer = new StringWriter();
+		PrintWriter writer = new PrintWriter(strBuffer);
+		e.printStackTrace(writer);
+		writer.close();
+		return new JSONSerializer.JsonRpcError.Error(code, e.toString(), strBuffer.getBuffer().toString());
+	}
+
     
 
 }

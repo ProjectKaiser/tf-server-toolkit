@@ -7,6 +7,8 @@ package com.triniforce.soap;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -344,6 +346,7 @@ public class ClassParserTest extends TFTestCase {
     
     static class C11{
         int val1;
+		private List<int[]> m_val2;
 
         public int getVal1() {
             return val1;
@@ -351,6 +354,14 @@ public class ClassParserTest extends TFTestCase {
 
         public void setVal1(int val1) {
             this.val1 = val1;
+        }
+        
+        public List<int[]> getVal2(){
+        	return m_val2;
+        }
+        
+        public void setVal2(List<int[]> val2){
+        	m_val2 = val2;
         }
     }
     
@@ -360,6 +371,12 @@ public class ClassParserTest extends TFTestCase {
         PropDef prop = cd.getProps().get(0); 
         prop.set(obj, 41);
         assertEquals(41, prop.get(obj));
+        
+        prop = ((ArrayDef)cd.getProp("val2").getType()).getPropDef();
+        ApiAlgs.getLog(this).trace(prop.getRawType());
+        ArrayList<Object> l = new ArrayList<Object>();
+        prop.set(l, Arrays.asList(123,534));
+
     }
     
     static class Cls101{

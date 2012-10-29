@@ -25,8 +25,8 @@ import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.utils.ApiAlgs;
-import com.triniforce.utils.UniqueNameGenerator;
 import com.triniforce.utils.ApiAlgs.SimpleName;
+import com.triniforce.utils.UniqueNameGenerator;
 
 public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
     
@@ -348,10 +348,15 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         }
         protected Object toRawValue(Object value) {
             try {
-                if(getType() instanceof ArrayDef){
-                    Class<?> cls = Class.forName(getRawType());
-                    if(cls.isArray())
-                        value = convertListToArray(cls.getComponentType(), (List) value);
+            	TypeDef type = getType();
+                if(type instanceof ArrayDef){
+                    ArrayDef ad = (ArrayDef) type;
+                    Class<?> cls = Class.forName(ad.getPropDef().getRawType());
+                    Class<?> rawCls = Class.forName(getRawType());
+                    if(rawCls.isArray() && cls.isArray()){
+                    	Class<?> compType = cls.getComponentType();
+                        value = convertListToArray(compType, (List) value);
+                    }
                 }
             } catch (ClassNotFoundException e) {
                 ApiAlgs.rethrowException(e);
@@ -362,7 +367,23 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
             Object res = Array.newInstance(compType, value.size());
             int i=0;
             for (Object object : value) {
-                Array.set(res, i++, object);
+            	if(compType.equals(int.class))
+            		Array.setInt(res, i, ((Integer)object).intValue());
+            	else if(compType.equals(byte.class))
+	            	Array.setByte(res, i, ((Byte)object).byteValue()); 
+            	else if(compType.equals(char.class)) 
+            		Array.setChar(res, i, ((Character)object).charValue());
+            	else if(compType.equals(double.class))
+            		Array.setDouble(res, i, ((Double)object).doubleValue());
+            	else if(compType.equals(float.class))
+            		Array.setFloat(res, i, ((Float)object).floatValue());
+            	else if(compType.equals(long.class))
+            		Array.setLong(res, i, ((Long)object).longValue());
+            	else if(compType.equals(short.class))
+            		Array.setShort(res, i, ((Short)object).shortValue());
+            	else
+            		Array.set(res, i, object);
+            	i++;
             }
             return res;
         }
