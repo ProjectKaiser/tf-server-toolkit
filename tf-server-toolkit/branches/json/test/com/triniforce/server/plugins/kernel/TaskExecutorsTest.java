@@ -90,6 +90,10 @@ public class TaskExecutorsTest extends TFTestCase {
         };
         
         te.execute(ITaskExecutors.longTaskExecutorKey, if2);
+        
+        q1.put("");
+        q1.take();
+        
         assertEquals(2, te.getTasksCount());
         assertEquals(0, te.getCompletedTasksCount());
         

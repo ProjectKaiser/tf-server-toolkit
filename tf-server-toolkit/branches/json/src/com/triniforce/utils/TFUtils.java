@@ -107,7 +107,15 @@ public class TFUtils {
 	    
 	    if(expected instanceof Number){
 	        if(! (actual instanceof Number)){
-	            return false;
+	            if(! (actual instanceof String)){
+	                return false;
+	            }else{
+	                try{
+	                    actual = Long.parseLong((String) actual);
+	                }catch(Throwable t){
+	                    ApiAlgs.getLog(TFUtils.class).info("parseLong() error: " + actual);
+	                }
+	            }
 	        }
 	        return TFUtils.asLong(expected).equals(TFUtils.asLong(actual));
 	    }

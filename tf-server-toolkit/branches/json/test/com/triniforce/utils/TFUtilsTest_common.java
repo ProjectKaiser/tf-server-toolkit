@@ -67,6 +67,10 @@ public class TFUtilsTest_common extends TestCase {
     }    
     
     public void testEquals(){
+        //nubmer and string
+        {
+            assertTrue(TFUtils.equals(1, "1"));
+        }
         {
             String s1_1 = "s1";
             String s1_2 = "s";

@@ -23,7 +23,7 @@ public class InSeparateThreadExecutor {
     public static class ExecutionResult{
         public boolean timeoutExpired;
         public Throwable exception;
-        public Thread t;
+        protected Thread t;
     }
     
     private ExecutionResult m_res;
