@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Stack;
 
 import net.sf.sojo.core.UniqueIdGenerator;
@@ -170,7 +170,20 @@ public class JSONSerializer {
 		private boolean m_bSetType=false;
 		private boolean m_bSetScalarValue=false;
 		
-		static final HashSet<String> SCALARS = new HashSet<String>(ScalarDef.scalarNames());
+		static final HashMap<String, String> SCALARS = new HashMap<String, String>();
+		static {
+			SCALARS.put("Boolean", "boolean");
+			SCALARS.put("Int", "int");
+			SCALARS.put("Long", "long");
+			SCALARS.put("Short", "short");
+			SCALARS.put("Float", "float");
+			SCALARS.put("Double", "double");
+			SCALARS.put("String", "string"); 
+			SCALARS.put("Object", "object");
+			SCALARS.put("DateTime", "dateTime");
+			SCALARS.put("Decimal", "decimal");
+			SCALARS.put("Base64Binary", "base64Binary");
+		}
 		
 		static class Element{
 			enum Type{Entry, Array, Object};
@@ -254,8 +267,13 @@ public class JSONSerializer {
 			if(State.Arguments.equals(m_state)){
 				if(m_bSetType){
 					CurrentObject top = m_handler.getTopObject();
-					String typeName = (String) m_value;
-					top.setType(m_handler.getType(typeName, SCALARS.contains(typeName)));
+					String typeName = SCALARS.get(m_value);
+					boolean bScalar = null != typeName;
+					if(!bScalar)
+						typeName = (String) m_value;
+					TypeDef type = m_handler.getType(typeName, bScalar);
+					
+					top.setType(type);
 					m_bSetType = false;
 				}
 				else{
@@ -333,32 +351,41 @@ public class JSONSerializer {
 				IOException {
 			ApiAlgs.getLog(this).trace("primitive:" + arg0 + ", cls: "+arg0.getClass().getSimpleName());
 			Element top = m_stk.peek();
-			if(Element.Type.Array.equals(top.m_type)){
-				String argName = top.m_name;
-				if(top.m_name.equals("arg")){
-					argName = "arg"+m_argIdx;
-					m_argIdx++;
-
-				}
-				TypeDef td = m_handler.startElement(argName, false, null);
-				ApiAlgs.getLog(this).trace("type:" + td.getName());
-				if(td.getName().equals("object")){
-					if(arg0 instanceof Number){
-						m_handler.getTopObject().setType(m_handler.getType(numericType(arg0.getClass()), true));
+			if(State.Arguments.equals(m_state)){
+				if(Element.Type.Array.equals(top.m_type)){
+					String argName = top.m_name;
+					if(top.m_name.equals("arg")){
+						argName = "arg"+m_argIdx;
+						m_argIdx++;
+	
 					}
+					m_handler.startElement(argName, false, null);
+					setPrimitive(arg0);
+					m_handler.endElement();
 				}
-				String str = arg0.toString();
-				m_handler.characters(str.toCharArray(), 0, str.length());
-				m_handler.endElement();
-			}
-			else if(Element.Type.Entry.equals(top.m_type)){
-				if(!m_bSetType){
-					String str = arg0.toString();
-					m_handler.characters(str.toCharArray(), 0, str.length());
+				else if(Element.Type.Entry.equals(top.m_type)){
+					if(!m_bSetType){
+						setPrimitive(arg0);
+					}
 				}
 			}
 			m_value = arg0;
 			return true;
+		}
+
+
+
+		private void setPrimitive(Object arg0) {
+			CurrentObject co = m_handler.getTopObject();
+			TypeDef td = co.getType();
+			ApiAlgs.getLog(this).trace("type:" + td.getName());
+			if(td.getName().equals("object")){
+				if(arg0 instanceof Number){
+					co.setType(m_handler.getType(numericType(arg0.getClass()), true));
+				}
+			}
+			String str = arg0.toString();
+			m_handler.characters(str.toCharArray(), 0, str.length());
 		}
 
 
