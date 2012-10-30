@@ -105,6 +105,7 @@ public class SAXHandler {
                 }
             }
             
+            ApiAlgs.assertNotNull(m_objDef, propName);
             ApiAlgs.getLog(this).trace(m_objDef.getName());
             
             throw new ESoap.EUnknownElement(propName);

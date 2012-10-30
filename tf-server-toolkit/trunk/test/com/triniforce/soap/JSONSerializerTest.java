@@ -62,6 +62,8 @@ public class JSONSerializerTest extends TFTestCase {
 		}
 		
 		public void method_006(Outter01 v){}
+		
+		public void method_007(String v){}
 	}
 	
 	static class Prop01{
@@ -118,7 +120,7 @@ public class JSONSerializerTest extends TFTestCase {
 		Service001.Real1 obj = (Real1) res.m_args[0];
 		assertEquals("setter",obj.getProp_001());
 		
-		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_004\",\"params\":[[{\"type\":\"Real1\",\"prop_001\":\"setter\"}, {\"type\":\"int\", \"value\":7652}]],\"id\":1}"));
+		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_004\",\"params\":[[{\"type\":\"Real1\",\"prop_001\":\"setter\"}, {\"type\":\"Int\", \"value\":7652}]],\"id\":1}"));
 		Object[] arg0 = (Object[]) res.m_args[0];
 		obj = (Real1) arg0[0];
 		assertNotNull(obj);
@@ -144,7 +146,14 @@ public class JSONSerializerTest extends TFTestCase {
 		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_006\",\"params\":[{\"objValue\":672}],\"id\":1}"));
 		obj01 = (Outter01) res.m_args[0];
 		assertEquals(672L, obj01.getObjValue());
+		
+		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_006\",\"params\":[{\"objValue\":{\"type\":\"Short\", \"value\":67}}],\"id\":1}"));
+		obj01 = (Outter01) res.m_args[0];
+		assertEquals((short)67, obj01.getObjValue());
 
+
+		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_007\",\"params\":[\"string cont\\\"aining [ ;)\"],\"id\":1}"));
+		assertEquals("string cont\"aining [ ;)", res.m_args[0]);
 		
 	}
 
