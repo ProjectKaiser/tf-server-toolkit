@@ -21,8 +21,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.triniforce.db.ddl.DBTables.DBOperation;
 import com.triniforce.db.ddl.Delta.DBMetadata.IIndexLocNames;
@@ -30,11 +30,11 @@ import com.triniforce.db.ddl.Delta.DeltaSchemaLoader.IndexTemporary;
 import com.triniforce.db.ddl.DiffLeader.ICmdFactory;
 import com.triniforce.db.ddl.ResultSetWalker.IObjectFactory;
 import com.triniforce.db.ddl.TableDef.FieldDef;
+import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.ddl.TableDef.IElementDef;
 import com.triniforce.db.ddl.TableDef.IndexDef;
-import com.triniforce.db.ddl.TableDef.TableElements;
-import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.ddl.TableDef.IndexDef.TYPE;
+import com.triniforce.db.ddl.TableDef.TableElements;
 import com.triniforce.db.ddl.UpgradeRunner.DbType;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.TFUtils;
@@ -579,16 +579,47 @@ public class Delta {
 			m_src = src;
 			m_dst = dst;
 		}
+		
+		static class FieldKey{
+			
+			String m_name;
+
+			public FieldKey(FieldDef fd) {
+				m_name = fd.getName();
+			}
+			
+			@Override
+			public boolean equals(Object obj) {
+				FieldKey other = (FieldKey) obj; 
+				return m_name.equals(other.m_name);
+			}
+			
+			@Override
+			public int hashCode() {
+				return m_name.hashCode();
+			}
+			
+		}
 
 		public List<DBOperation> toDBOperationList() {
+			
+			IKey<FieldKey, FieldDef> fieldKey = new IKey<FieldKey, FieldDef>(){
+
+				public FieldKey get(FieldDef fd) {
+					return new FieldKey(fd);
+				}
+				
+			};
 
 			ArrayList<DBOperation> res = new ArrayList<DBOperation>();
 			{
 				DiffLeader<TableUpdateOperation, FieldDef> dl = new DiffLeader<TableUpdateOperation, FieldDef>(
-						new ColumnOperationObjectFactory());
+						new ColumnOperationObjectFactory(m_src.isSupportNotNullableFields()));
+				
+				
 
 				for (TableUpdateOperation operation : dl.getCommandSeq(
-						toMap(m_src.getFields()), toMap(m_dst.getFields()))) {
+						toMap(m_src.getFields(), fieldKey), toMap(m_dst.getFields(), fieldKey))) {
 					if(null == operation)
 						throw new RuntimeException(m_dst.getEntityName());
 					res.add(new DBOperation(m_dst.getEntityName(), operation));
@@ -598,7 +629,7 @@ public class Delta {
 				DiffLeader<TableUpdateOperation, IndexDef> dl = new DiffLeader<TableUpdateOperation, IndexDef>(
 						new IndexOperationObjectFactory());
 				
-				IKey<IndexDef> indexKey = new IKey<IndexDef>(){
+				IKey<String, IndexDef> indexKey = new IKey<String, IndexDef>(){
 
 					public String get(IndexDef value) {
 						if(m_src.isSupportForeignKeys()){
@@ -633,27 +664,27 @@ public class Delta {
 			return res;
 		}
 		
-		interface IKey<T>{
-			String get(T value);
+		interface IKey<TKey, T>{
+			TKey get(T value);
 		} 
 		
 		public static <T extends IElementDef> Map<String, T> toMap(final TableElements<T> elements){
-			return toMap(elements, new IKey<T>(){
+			return toMap(elements, new IKey<String, T>(){
 				public String get(T value) {
 					return value.getName();
 				}
 			});
 		}
 		
-		public static <T extends IElementDef> Map<String, T> toMap(final TableElements<T> elements, final IKey<T> key){
-			return new AbstractMap<String, T>(){
+		public static <TKey, T extends IElementDef> Map<TKey, T> toMap(final TableElements<T> elements, final IKey<TKey, T> key){
+			return new AbstractMap<TKey, T>(){
 				@Override
-				public Set<java.util.Map.Entry<String, T>> entrySet() {
-					return new AbstractSet<java.util.Map.Entry<String, T>>(){
+				public Set<java.util.Map.Entry<TKey, T>> entrySet() {
+					return new AbstractSet<java.util.Map.Entry<TKey, T>>(){
 
 						@Override
-						public Iterator<java.util.Map.Entry<String, T>> iterator() {
-							return new Iterator<java.util.Map.Entry<String, T>>(){
+						public Iterator<java.util.Map.Entry<TKey, T>> iterator() {
+							return new Iterator<java.util.Map.Entry<TKey, T>>(){
 								
 								int idx = 0;
 
@@ -661,10 +692,10 @@ public class Delta {
 									return idx < elements.size();
 								}
 
-								public java.util.Map.Entry<String, T> next() {
-									return new java.util.Map.Entry<String, T>(){
+								public java.util.Map.Entry<TKey, T> next() {
+									return new java.util.Map.Entry<TKey, T>(){
 										T e = elements.getElement(idx++);
-										public String getKey() {
+										public TKey getKey() {
 											return key.get(e);
 										}
 
@@ -699,6 +730,12 @@ public class Delta {
 	public static class ColumnOperationObjectFactory implements
 			ICmdFactory<TableUpdateOperation, FieldDef> {
 
+		private boolean m_bSupportNotNullableFields;
+
+		public ColumnOperationObjectFactory(boolean supportNotNullableFields) {
+			m_bSupportNotNullableFields = supportNotNullableFields;
+		}
+
 		public AddColumnOperation addCmd(FieldDef element) {
 			return new AddColumnOperation(element);
 		}
@@ -730,6 +767,12 @@ public class Delta {
 					return ICmdFactory.Action.EDIT;
 				}
 				throw new ETypesNotEquals(srcElement.getName(), srcElement.getType(), dstElement.getType());
+			}
+			else if(srcElement.m_bNotNull != dstElement.m_bNotNull){
+				if(dstElement.m_bNotNull && !m_bSupportNotNullableFields)
+					return ICmdFactory.Action.NONE;
+				else
+					return ICmdFactory.Action.EDIT;
 			}
 			return ICmdFactory.Action.NONE;
 		}

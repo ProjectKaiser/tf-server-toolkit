@@ -44,11 +44,11 @@ public class DiffLeader<TCmd, E> {
 		m_cmdFactory = cmdFact;
 	}
 	
-	List<TCmd> getCommandSeq(Map<String, E> src, Map<String, E> dst){
+	<TKey> List<TCmd> getCommandSeq(Map<TKey, E> src, Map<TKey, E> dst){
 		ArrayList<TCmd> res = new ArrayList<TCmd>();
 		// all destiny elements must be created or edited 
 		// depending on source elements
-		for (Map.Entry<String, E> entry : dst.entrySet()) {
+		for (Map.Entry<TKey, E> entry : dst.entrySet()) {
 			E srcValue = src.get(entry.getKey());
 			if(null != srcValue){
 				// key equal operation
@@ -65,7 +65,7 @@ public class DiffLeader<TCmd, E> {
 			}
 		}
 		// all source elements must be droped if they are not in destiny
-		for (Map.Entry<String, E> entry : src.entrySet()) {
+		for (Map.Entry<TKey, E> entry : src.entrySet()) {
 			if(!dst.containsKey(entry.getKey()))
 				res.add(m_cmdFactory.dropCmd(entry.getValue()));					
 		}

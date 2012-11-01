@@ -69,7 +69,7 @@ public class DeltaTableCmdFactoryTest extends TFTestCase {
 	}
 	
 	public void testOperationObjectFactory(){
-		ColumnOperationObjectFactory f = new Delta.ColumnOperationObjectFactory();
+		ColumnOperationObjectFactory f = new Delta.ColumnOperationObjectFactory(true);
 		FieldDef def = FieldDef.createScalarField("f1", ColumnType.INT, true);
 		AddColumnOperation res = (AddColumnOperation) f.addCmd(def);
 		assertSame(def, res.getField());
@@ -177,6 +177,53 @@ public class DeltaTableCmdFactoryTest extends TFTestCase {
 			List<DBOperation> opList = cmd.toDBOperationList();
 			AlterColumnOperation op = (AlterColumnOperation) opList.get(0).getOperation();
 			assertEquals(ColumnType.INT, op.getNewField().getType());
+		}
+		
+		{// Field set NOT NULL flag
+			{
+				TableDef src = new TableDef("tab_No2");
+				src.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
+				src.addField(2, FieldDef.createScalarField("f2", ColumnType.INT, true));
+				TableDef dst = new TableDef("tab_No2");
+				dst.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
+				dst.addField(2, FieldDef.createScalarField("f2", ColumnType.INT, false));
+				
+				EditTabCmd cmd = fact.editCmd(src, dst);
+				List<DBOperation> opList = cmd.toDBOperationList();
+				AlterColumnOperation op = (AlterColumnOperation) opList.get(0).getOperation();
+				assertEquals(ColumnType.INT, op.getNewField().getType());
+				assertEquals(true, op.bSetNotNullFlag());
+			}
+			
+			{
+				TableDef src = new TableDef("tab_No2");
+				src.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, false));
+				src.addField(2, FieldDef.createScalarField("f2", ColumnType.INT, false));
+				TableDef dst = new TableDef("tab_No2");
+				src.setSupportNotNullableFields(false);
+				dst.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
+				dst.addField(2, FieldDef.createScalarField("f2", ColumnType.INT, true));
+				EditTabCmd cmd = fact.editCmd(src, dst);
+				List<DBOperation> opList = cmd.toDBOperationList();
+				assertTrue(opList.isEmpty());
+				
+			}
+			{
+				TableDef src = new TableDef("tab_No2");
+				src.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, false));
+				src.addField(2, FieldDef.createScalarField("f2", ColumnType.INT, true));
+				TableDef dst = new TableDef("tab_No2");
+				src.setSupportNotNullableFields(false);
+				dst.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, false));
+				dst.addField(2, FieldDef.createScalarField("f2", ColumnType.INT, false));
+				EditTabCmd cmd = fact.editCmd(src, dst);
+				List<DBOperation> opList = cmd.toDBOperationList();
+				AlterColumnOperation op = (AlterColumnOperation) opList.get(0).getOperation();
+				assertEquals(ColumnType.INT, op.getNewField().getType());
+				assertEquals(true, op.bSetNotNullFlag());
+				
+			}
+
 		}
 	}
 

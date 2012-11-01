@@ -152,8 +152,8 @@ public class JSONSerializerTest extends TFTestCase {
 		assertEquals((short)67, obj01.getObjValue());
 
 
-		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_007\",\"params\":[\"string cont\\\"aining [ ;)\"],\"id\":1}"));
-		assertEquals("string cont\"aining [ ;)", res.m_args[0]);
+		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_007\",\"params\":[\"string cont\\\"aining [ :}\"],\"id\":1}"));
+		assertEquals("string cont\"aining [ :}", res.m_args[0]);
 		
 	}
 
