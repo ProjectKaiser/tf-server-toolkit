@@ -1031,6 +1031,12 @@ public class UpgradeRunnerTest extends DDLTestCase {
     	m_player.run(db.getCommandList());
     	
     	assertEquals(ColumnType.VARCHAR , def1.getFields().findElement("f1").getElement().getType());
+    	
+    	oldF = newF;
+    	newF = FieldDef.createStringField("f1", ColumnType.VARCHAR, 60, true, null);
+    	def1.addModification(3, new AlterColumnOperation(oldF, newF));
+    	m_player.run(db.getCommandList());
+    	assertEquals(true, def1.getFields().findElement("f1").getElement().bNotNull());
 		
 	}
     

@@ -530,7 +530,7 @@ public class UpgradeRunner {
                 sql = MessageFormat
                         .format(
                                 "ALTER TABLE {0} {4} COLUMN {1} {2} {3}", dbName, alterCol.getName(), //$NON-NLS-1$
-                                alterCol.bSetType() ? getTypeString(f.m_type,
+                                alterCol.bSetType() || alterCol.bSetNotNullFlag() ? getTypeString(f.m_type,
                                         f.m_size, f.m_scale) : "", //$NON-NLS-1$
                                 alterCol.bSetNotNullFlag() ? (f.m_bNotNull ? "NOT NULL" : "NULL") : "", alterColumnOp); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             }

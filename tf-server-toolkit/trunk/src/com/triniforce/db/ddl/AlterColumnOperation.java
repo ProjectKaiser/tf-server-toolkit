@@ -36,6 +36,10 @@ public class AlterColumnOperation extends TableUpdateOperation {
     		Fields fs = table.getFields();
     		fs.findElement(getNewField().getName()).getElement().m_type = getNewField().getType();
     	}
+    	if(bSetNotNullFlag()){
+    		Fields fs = table.getFields();
+    		fs.findElement(getNewField().getName()).getElement().setMustHaveValue(getNewField().bNotNull());
+    	}    	
     	return ;
 //        throw new EMetadataException(table==null ? null : table.getEntityName(), null);         //$NON-NLS-1$
     }

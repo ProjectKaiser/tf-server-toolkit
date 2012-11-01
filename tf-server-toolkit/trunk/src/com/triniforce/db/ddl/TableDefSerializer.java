@@ -57,7 +57,7 @@ public class TableDefSerializer {
 	}
 
 	private void readFields(ObjectInputStream in, TableDef res) throws IOException, ClassNotFoundException {
-		ColumnOperationObjectFactory f = new Delta.ColumnOperationObjectFactory();
+		ColumnOperationObjectFactory f = new Delta.ColumnOperationObjectFactory(false);
 		int v = res.getVersion();
 		int sz = in.readInt();
 		for(int i=0; i<sz; i++){
