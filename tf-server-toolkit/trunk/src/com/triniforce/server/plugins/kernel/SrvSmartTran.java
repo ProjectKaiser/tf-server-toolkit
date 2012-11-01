@@ -24,7 +24,7 @@ public class SrvSmartTran extends SmartTran implements ISrvSmartTran {
 
     private ArrayList<IDbQueue> m_updatedQueues;
     
-    //TODO gmp:будет проблема с инициализацией/финализацией
+    //LATER gmp:будет проблема с инициализацией/финализацией
     public SrvSmartTran(Connection connection, ISrvPrepSqlGetter sqlGetter) {
         //Here we use queryIntf since it can be not installed
         super(connection, sqlGetter);
@@ -47,7 +47,7 @@ public class SrvSmartTran extends SmartTran implements ISrvSmartTran {
     
     @Override
     public void close(boolean bCommit) {
-        //TODO gmp:test exception during commit. плохо с warn.
+        //LATER gmp:test exception during commit. плохо с warn.
         if (isClosed())
             return;
         
