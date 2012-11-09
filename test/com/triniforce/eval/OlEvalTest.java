@@ -8,8 +8,6 @@ package com.triniforce.eval;
 import java.util.Arrays;
 
 import com.triniforce.db.test.TFTestCase;
-import com.triniforce.eval.OlEval;
-import com.triniforce.utils.EUtils.EAssertTrueFailed;
 
 public class OlEvalTest extends TFTestCase {
     
@@ -74,24 +72,6 @@ public class OlEvalTest extends TFTestCase {
             assertFalse(of.evalList(Arrays.asList(new Object[]{new Long(1), new Short(s), "abc1"}), 0));
             assertTrue(of.evalList(Arrays.asList(new Object[]{"dummy", new Long(1), new Short(s), "abc"}), 1));
         }        
-    }
-    
-    public void testContains(){
-        try {
-            new OlExprContains(null);
-            fail();
-        } catch (EAssertTrueFailed e) {
-            trace(e);
-        }
-        OlEval of = new OlEval();
-        of.addExpr(0, new OlExprContains("tHe"));
-        assertFalse(of.evalArray(new Object[]{null}, 0));
-        assertFalse(of.evalArray(new Object[]{1}, 0));
-        assertFalse(of.evalArray(new Object[]{"2"}, 0));
-        assertFalse(of.evalArray(new Object[]{"th"}, 0));
-        assertTrue(of.evalArray(new Object[]{"the"}, 0));
-        assertTrue(of.evalArray(new Object[]{"qqq the"}, 0));
-        assertTrue(of.evalArray(new Object[]{"qqq ThE"}, 0));
     }
     
     public void testINExpr(){

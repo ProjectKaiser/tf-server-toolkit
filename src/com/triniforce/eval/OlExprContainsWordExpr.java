@@ -15,16 +15,15 @@ public class OlExprContainsWordExpr extends Ol_ExprString{
 
     public OlExprContainsWordExpr(Object value) {
         super(value);
-        StringBuffer sb = new StringBuffer("(^|[\\s.,;\\-]+)");
-        for(int i=0;i<m_value.length();i++){
-            sb.append("\\" + m_value.charAt(i));
-        }
-        m_pattern = Pattern.compile(sb.toString(), Pattern.CASE_INSENSITIVE);
+        m_value = m_value.toLowerCase();
+        m_pattern = Pattern.compile( "(^|[\\s.,;\\-]+)" + Pattern.quote(m_value.toString()), Pattern.CASE_INSENSITIVE);
     }
     
     @Override
     public boolean evaluateString(String value) {
-        Matcher m = m_pattern.matcher(value);
+        if(null == value) return false;
+        String sv = ((String)value).toLowerCase();
+        Matcher m = m_pattern.matcher(sv);
         return m.find();
     }
     
