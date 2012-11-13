@@ -22,7 +22,7 @@ public class OlEvalTest extends TFTestCase {
         // (val[0] == 1 AND val[1] == 2) OR (val[2] == 3 AND val[3] == 4)
         
         OlEval e0 = new OlEval();
-        e0.setIsAndConcatenation(false);
+        e0.setAndConcatenation(false);
         
         OlEval e1 = new OlEval();
         OlEval e2 = new OlEval();
@@ -46,7 +46,7 @@ public class OlEvalTest extends TFTestCase {
     
     public void testOr(){
         OlEval of = new OlEval();
-        of.setIsAndConcatenation(false);
+        of.setAndConcatenation(false);
         of.addExpr(0, new OlExprEQ(1));
         of.addExpr(0, new OlExprEQ(2));
         assertFalse(of.evalArray(new Object[]{6}, 0));

@@ -6,10 +6,10 @@
 
 package com.triniforce.eval;
 
-public class IdxExpr{
+public class OlIdxExpr{
     private final int m_idx;
     private final OlExpr m_expr;
-    public IdxExpr(int idx, OlExpr expr) {
+    public OlIdxExpr(int idx, OlExpr expr) {
         m_idx = idx;
         m_expr = expr;
     }
