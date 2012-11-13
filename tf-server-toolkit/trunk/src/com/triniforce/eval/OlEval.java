@@ -19,11 +19,11 @@ public class OlEval {
 
     List<OlEval> m_evals = new ArrayList<OlEval>();
 
-    private final List<IdxExpr> m_idxExprs = new ArrayList<IdxExpr>();
-    private boolean m_isAndConcatenation = true;
+    private final List<OlIdxExpr> m_idxExprs = new ArrayList<OlIdxExpr>();
+    private boolean m_andConcatenation = true;
     
     public void addExpr(int idx, OlExpr expr) {
-        getIdxExprs().add(new IdxExpr(idx, expr));
+        getIdxExprs().add(new OlIdxExpr(idx, expr));
     }
     
     public void addEval(OlEval eval) {
@@ -31,17 +31,17 @@ public class OlEval {
     }
     
     public boolean eval(IOlValueGetter vg){
-        for (IdxExpr ie : getIdxExprs()) {
-            if (ie.getExpr().evaluate(vg.getValue(ie.getIdx())) != m_isAndConcatenation){
-                return !m_isAndConcatenation;
+        for (OlIdxExpr ie : getIdxExprs()) {
+            if (ie.getExpr().evaluate(vg.getValue(ie.getIdx())) != m_andConcatenation){
+                return !m_andConcatenation;
             }
         }
         for(OlEval eval: m_evals){
-            if (eval.eval(vg) != m_isAndConcatenation){
-                return !m_isAndConcatenation;
+            if (eval.eval(vg) != m_andConcatenation){
+                return !m_andConcatenation;
             }
         }
-        return m_isAndConcatenation;
+        return m_andConcatenation;
     }
     
     public boolean evalArray(final Object values[], final int startIdx){
@@ -62,15 +62,15 @@ public class OlEval {
         return eval(vg);
     }
 
-    public boolean isIsAndConcatenation() {
-        return m_isAndConcatenation;
+    public boolean isAndConcatenation() {
+        return m_andConcatenation;
     }
 
-    public void setIsAndConcatenation(boolean isAndConcatenation) {
-        m_isAndConcatenation = isAndConcatenation;
+    public void setAndConcatenation(boolean isAndConcatenation) {
+        m_andConcatenation = isAndConcatenation;
     }
 
-    public List<IdxExpr> getIdxExprs() {
+    public List<OlIdxExpr> getIdxExprs() {
         return m_idxExprs;
     }
     
