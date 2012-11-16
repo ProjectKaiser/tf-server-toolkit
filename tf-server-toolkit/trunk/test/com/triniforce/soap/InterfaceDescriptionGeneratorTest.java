@@ -684,7 +684,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 	        } catch(ESoap.EMethodNotFound e){}
 
 	        try{
-	        	gen.deserializeJson(desc, JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"params\":[[65412, 763573], 235],\"method\":\"method5\",\"id\":1}"));
+	        	gen.deserializeJson(desc, JSONSerializerTest.source("{\"jsonrpc\":\"2.0\",\"method\":\"method5\",\"params\":[[65412, 763573], 235],\"id\":1}"));
 	        	fail();
 	        } catch(ESoap.EUnknownElement e){}
 	        
