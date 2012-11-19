@@ -17,32 +17,32 @@ public class OlEvalTest extends TFTestCase {
     }
     
     
-    public void testEval(){
-        
-        // (val[0] == 1 AND val[1] == 2) OR (val[2] == 3 AND val[3] == 4)
-        
-        OlEval e0 = new OlEval();
-        e0.setAndConcatenation(false);
-        
-        OlEval e1 = new OlEval();
-        OlEval e2 = new OlEval();
-        
-        e1.addExpr(0, new OlExprEQ(1));
-        e1.addExpr(1, new OlExprEQ(2));
-        
-        e2.addExpr(2, new OlExprEQ(3));
-        e2.addExpr(3, new OlExprEQ(4));
-        
-        e0.addEval(e1);
-        e0.addEval(e2);
-        
-        assertTrue(e0.evalArray(new Object[]{1, 2, 3, 4}, 0));
-        assertTrue(e0.evalArray(new Object[]{1, 2, 3, 3}, 0));
-        assertTrue(e0.evalArray(new Object[]{1, 2, 0, 0}, 0));
-        assertTrue(e0.evalArray(new Object[]{0, 0, 3, 4}, 0));
-        assertFalse(e0.evalArray(new Object[]{1, 1, 3, 3}, 0));
-        assertFalse(e0.evalArray(new Object[]{2, 2, 4, 4}, 0));
-    }
+    public void testEvaluate(){
+            
+            // (val[0] == 1 AND val[1] == 2) OR (val[2] == 3 AND val[3] == 4)
+            
+            OlEval e0 = new OlEval();
+            e0.setAndConcatenation(false);
+            
+            OlEval e1 = new OlEval();
+            OlEval e2 = new OlEval();
+            
+            e1.addExpr(0, new OlExprEQ(1));
+            e1.addExpr(1, new OlExprEQ(2));
+            
+            e2.addExpr(2, new OlExprEQ(3));
+            e2.addExpr(3, new OlExprEQ(4));
+            
+            e0.addEval(e1);
+            e0.addEval(e2);
+            
+            assertTrue(e0.evalArray(new Object[]{1, 2, 3, 4}, 0));
+            assertTrue(e0.evalArray(new Object[]{1, 2, 3, 3}, 0));
+            assertTrue(e0.evalArray(new Object[]{1, 2, 0, 0}, 0));
+            assertTrue(e0.evalArray(new Object[]{0, 0, 3, 4}, 0));
+            assertFalse(e0.evalArray(new Object[]{1, 1, 3, 3}, 0));
+            assertFalse(e0.evalArray(new Object[]{2, 2, 4, 4}, 0));
+        }
     
     public void testOr(){
         OlEval of = new OlEval();

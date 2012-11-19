@@ -6,10 +6,10 @@
 
 package com.triniforce.eval;
 
-public class OlIdxExpr{
+public class Ol_IdxExpr implements IOlEvaluator{
     private final int m_idx;
     private final OlExpr m_expr;
-    public OlIdxExpr(int idx, OlExpr expr) {
+    public Ol_IdxExpr(int idx, OlExpr expr) {
         m_idx = idx;
         m_expr = expr;
     }
@@ -18,5 +18,8 @@ public class OlIdxExpr{
     }
     public OlExpr getExpr() {
         return m_expr;
+    }
+    public boolean evaluate(IOlValueGetter vg) {
+        return getExpr().evaluate(vg.getValue(getIdx()));
     }
 }
