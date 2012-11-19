@@ -17,30 +17,21 @@ import java.util.List;
  */
 public class OlEval implements IOlEvaluator {
 
-    List<OlEval> m_evals = new ArrayList<OlEval>();
 
-    @Deprecated
-    private final List<Ol_IdxExpr> m_idxExprs = new ArrayList<Ol_IdxExpr>();
-    
     private final List<IOlEvaluator> m_evaluators = new ArrayList<IOlEvaluator>();
     private boolean m_andConcatenation = true;
     
     public void addExpr(int idx, OlExpr expr) {
-        getIdxExprs().add(new Ol_IdxExpr(idx, expr));
+        getEvaluators().add(new Ol_IdxExpr(idx, expr));
     }
     
     public void addEval(OlEval eval) {
-        m_evals.add(eval);
+        getEvaluators().add(eval);
     }
     
     public boolean evaluate(IOlValueGetter vg){
-        for (Ol_IdxExpr ie : getIdxExprs()) {
-            if (ie.getExpr().evaluate(vg.getValue(ie.getIdx())) != m_andConcatenation){
-                return !m_andConcatenation;
-            }
-        }
-        for(OlEval eval: m_evals){
-            if (eval.evaluate(vg) != m_andConcatenation){
+        for (IOlEvaluator e : getEvaluators()) {
+            if (e.evaluate(vg) != m_andConcatenation){
                 return !m_andConcatenation;
             }
         }
@@ -73,10 +64,6 @@ public class OlEval implements IOlEvaluator {
         m_andConcatenation = isAndConcatenation;
     }
 
-    @Deprecated
-    public List<Ol_IdxExpr> getIdxExprs() {
-        return m_idxExprs;
-    }
 
     public List<IOlEvaluator> getEvaluators() {
         return m_evaluators;
