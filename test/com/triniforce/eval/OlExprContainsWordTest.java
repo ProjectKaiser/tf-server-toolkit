@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 import com.triniforce.db.test.TFTestCase;
 
-public class OlExprContainsWordExprTest extends TFTestCase {
+public class OlExprContainsWordTest extends TFTestCase {
     
     public void testPattern(){
         Pattern pattern = Pattern.compile("(^|[\\s.,;\\-]+)Р\\а\\б\\о\\т\\а".toLowerCase(), Pattern.CASE_INSENSITIVE);
@@ -52,7 +52,7 @@ public class OlExprContainsWordExprTest extends TFTestCase {
     @Override
     public void test() throws Exception {
         OlEval of = new OlEval();
-        of.addExpr(0, new OlExprContainsWordExpr("tHe"));
+        of.addExpr(0, new OlExprContainsWord("tHe"));
         assertFalse(of.evalArray(new Object[]{null}, 0));
         assertTrue(of.evalArray(new Object[]{"ThE"}, 0));
         assertTrue(of.evalArray(new Object[]{" the"}, 0));
