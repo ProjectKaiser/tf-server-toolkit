@@ -7,13 +7,13 @@
 package com.triniforce.eval;
 
 
-public class OlExprEQ extends OlExpr {
+public class OlExprEquals extends OlExpr {
 
     private final Object m_testValue;
 
     Object m_workTestValue;
 
-    public OlExprEQ(Object testValue) {
+    public OlExprEquals(Object testValue) {
         m_testValue = testValue;
     }
 

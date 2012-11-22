@@ -22,4 +22,10 @@ public class Ol_IdxExpr implements IOlEvaluator{
     public boolean evaluate(IOlValueGetter vg) {
         return getExpr().evaluate(vg.getValue(getIdx()));
     }
+    
+    @Override
+    public String toString() {
+        return null == m_expr?"null":m_expr.getClass().getSimpleName() + "(" + m_idx + ")";
+    }
+    
 }

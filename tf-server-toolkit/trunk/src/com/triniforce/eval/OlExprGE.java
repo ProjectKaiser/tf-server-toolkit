@@ -7,7 +7,7 @@
 package com.triniforce.eval;
 
 
-public class OlExprGE extends OlExprEQ {
+public class OlExprGE extends OlExprEquals {
 
     OlExprGE(Object testValue) {
         super(testValue);

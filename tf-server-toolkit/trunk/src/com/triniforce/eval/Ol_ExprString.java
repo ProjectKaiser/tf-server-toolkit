@@ -11,8 +11,8 @@ import com.triniforce.utils.TFUtils;
 public abstract class Ol_ExprString extends OlExpr{
     String m_value;
     public Ol_ExprString(Object value) {
-        TFUtils.assertTrue(value instanceof String, "Argument for " + this.getClass().getName()+ " must have not null String value");
-        m_value = (String) value;
+        TFUtils.assertNotNull(value, "Argument for " + this.getClass().getName()+ " must have not null String value");
+        m_value = value.toString();
     }
     
     @Override
