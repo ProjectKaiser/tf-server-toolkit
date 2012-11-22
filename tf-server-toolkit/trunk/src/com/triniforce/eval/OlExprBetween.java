@@ -8,10 +8,10 @@ package com.triniforce.eval;
 
 import com.triniforce.utils.TFUtils;
 
-public class OlExprBetween_2 extends OlExpr {
+public class OlExprBetween extends OlExpr {
     private final OlExprGE m_leftExpr;
     private final OlExprLE m_rightExpr;
-    public OlExprBetween_2(Object leftValue, Object rightValue) {
+    public OlExprBetween(Object leftValue, Object rightValue) {
         TFUtils.assertNotNull(leftValue, "BETWEEN 'from' value");
         TFUtils.assertNotNull(rightValue, "BETWEEN 'to' value");            
         m_leftExpr = new OlExprGE(leftValue);
