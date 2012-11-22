@@ -85,7 +85,7 @@ public class OlEvalTest extends TFTestCase {
     
     public void testBETWEENExpr(){
         OlEval of = new OlEval();
-        of.addExpr(0, new OlExprBetween_2(5,8));
+        of.addExpr(0, new OlExprBetween(5,8));
         assertTrue(of.evalArray(new Object[]{5}, 0));
         assertTrue(of.evalArray(new Object[]{6}, 0));
         assertTrue(of.evalArray(new Object[]{7}, 0));
