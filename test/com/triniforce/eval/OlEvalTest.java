@@ -27,11 +27,11 @@ public class OlEvalTest extends TFTestCase {
             OlEval e1 = new OlEval();
             OlEval e2 = new OlEval();
             
-            e1.addExpr(0, new OlExprEQ(1));
-            e1.addExpr(1, new OlExprEQ(2));
+            e1.addExpr(0, new OlExprEquals(1));
+            e1.addExpr(1, new OlExprEquals(2));
             
-            e2.addExpr(2, new OlExprEQ(3));
-            e2.addExpr(3, new OlExprEQ(4));
+            e2.addExpr(2, new OlExprEquals(3));
+            e2.addExpr(3, new OlExprEquals(4));
             
             e0.addEval(e1);
             e0.addEval(e2);
@@ -47,14 +47,14 @@ public class OlEvalTest extends TFTestCase {
     public void testOr(){
         OlEval of = new OlEval();
         of.setAndConcatenation(false);
-        of.addExpr(0, new OlExprEQ(1));
-        of.addExpr(0, new OlExprEQ(2));
+        of.addExpr(0, new OlExprEquals(1));
+        of.addExpr(0, new OlExprEquals(2));
         assertFalse(of.evalArray(new Object[]{6}, 0));
         assertFalse(of.evalArray(new Object[]{3}, 0));
         assertTrue(of.evalArray(new Object[]{1}, 0));
         assertTrue(of.evalArray(new Object[]{2}, 0));
-        of.addExpr(1, new OlExprEQ(3));
-        of.addExpr(1, new OlExprEQ(4));
+        of.addExpr(1, new OlExprEquals(3));
+        of.addExpr(1, new OlExprEquals(4));
         assertTrue(of.evalArray(new Object[]{2, 3}, 0));
         assertTrue(of.evalArray(new Object[]{2, 4}, 0));
         assertTrue(of.evalArray(new Object[]{6, 3}, 0));
@@ -64,9 +64,9 @@ public class OlEvalTest extends TFTestCase {
     public void testList(){
         {//numeric and string
             OlEval of = new OlEval();
-            of.addExpr(0, new OlExprEQ(1));
-            of.addExpr(1, new OlExprEQ(2));
-            of.addExpr(2, new OlExprEQ("abc"));
+            of.addExpr(0, new OlExprEquals(1));
+            of.addExpr(1, new OlExprEquals(2));
+            of.addExpr(2, new OlExprEquals("abc"));
             short s = 2;
             assertTrue(of.evalList( Arrays.asList(new Object[]{new Long(1), new Short(s), "abc"}), 0));
             assertFalse(of.evalList(Arrays.asList(new Object[]{new Long(1), new Short(s), "abc1"}), 0));
@@ -121,27 +121,27 @@ public class OlEvalTest extends TFTestCase {
     public void testValuedExpr(){
         {
             OlEval of = new OlEval();
-            of.addExpr(0, new OlExprEQ(null));
+            of.addExpr(0, new OlExprEquals(null));
             assertTrue(of.evalArray(new Object[]{null}, 0));
             assertFalse(of.evalArray(new Object[]{1}, 0));
         }
         {
             OlEval of = new OlEval();
-            of.addExpr(0, new OlExprEQ(1));
+            of.addExpr(0, new OlExprEquals(1));
             assertFalse(of.evalArray(new Object[]{null}, 0));
         }        
         {//two values in a row
             OlEval of = new OlEval();
-            of.addExpr(0, new OlExprEQ(null));
-            of.addExpr(1, new OlExprEQ(null));
+            of.addExpr(0, new OlExprEquals(null));
+            of.addExpr(1, new OlExprEquals(null));
             assertTrue(of.evalArray(new Object[]{null, null}, 0));
             assertFalse(of.evalArray(new Object[]{null, 1}, 0));
             assertFalse(of.evalArray(new Object[]{1, null}, 0));
         }
         {//numeric value
             OlEval of = new OlEval();
-            of.addExpr(0, new OlExprEQ(1));
-            of.addExpr(1, new OlExprEQ(2));
+            of.addExpr(0, new OlExprEquals(1));
+            of.addExpr(1, new OlExprEquals(2));
             assertTrue(of.evalArray(new Object[]{new Integer(1), new Long(2)}, 0));
             assertFalse(of.evalArray(new Object[]{new Integer(1), new Long(3)}, 0));
             assertFalse(of.evalArray(new Object[]{new Integer(2), new Long(2)}, 0));
@@ -150,9 +150,9 @@ public class OlEvalTest extends TFTestCase {
         }
         {//numeric and string
             OlEval of = new OlEval();
-            of.addExpr(0, new OlExprEQ(1));
-            of.addExpr(1, new OlExprEQ(2));
-            of.addExpr(2, new OlExprEQ("abc"));
+            of.addExpr(0, new OlExprEquals(1));
+            of.addExpr(1, new OlExprEquals(2));
+            of.addExpr(2, new OlExprEquals("abc"));
             short s = 2;
             assertTrue(of.evalArray(new Object[]{new Long(1), new Short(s), "abc"}, 0));
             assertFalse(of.evalArray(new Object[]{new Long(1), new Short(s), "abc1"}, 0));
