@@ -16,7 +16,7 @@ public class OlExprContainsWord extends Ol_ExprString{
     public OlExprContainsWord(Object value) {
         super(value);
         m_value = m_value.toLowerCase();
-        m_pattern = Pattern.compile( "(^|[\\s.,;\\-]+)" + Pattern.quote(m_value.toString()), Pattern.CASE_INSENSITIVE);
+        m_pattern = Pattern.compile( "(^|[\\s@.,;\\-]+)" + Pattern.quote(m_value.toString()), Pattern.CASE_INSENSITIVE);
     }
     
     @Override
