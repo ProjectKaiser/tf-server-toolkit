@@ -7,7 +7,7 @@
 package com.triniforce.eval;
 
 import com.triniforce.db.test.TFTestCase;
-import com.triniforce.utils.EUtils.EAssertTrueFailed;
+import com.triniforce.utils.EUtils.EAssertNotNullFailed;
 
 public class OlExprContainsTest extends TFTestCase {
 	@Override
@@ -15,13 +15,7 @@ public class OlExprContainsTest extends TFTestCase {
         try {
             new OlExprContains(null);
             fail();
-        } catch (EAssertTrueFailed e) {
-            trace(e);
-        }
-        try {
-            new OlExprContains(1L);
-            fail();
-        } catch (EAssertTrueFailed e) {
+        } catch (EAssertNotNullFailed e) {
             trace(e);
         }
         
