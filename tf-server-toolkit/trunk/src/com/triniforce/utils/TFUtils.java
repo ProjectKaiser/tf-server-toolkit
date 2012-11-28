@@ -58,24 +58,25 @@ public class TFUtils {
 
 	public static Short asShort(Object value){
 	    if( null == value )return null;
-	    if( value instanceof Integer){
-	        return (short)(int)(Integer) value;
-	    }
+        if( value instanceof Number){
+            return ((Number)value).shortValue();
+        }
+        if( value instanceof String){
+            return Short.parseShort((String) value);
+        }
+
 	    return (Short)value;
 	}
 
 	public static Integer asInteger(Object value){
 	    if( null == value )return null;
-	    if( value instanceof Short){
-	        return (int)(short)(Short) value;
+	    if( value instanceof Number){
+	        return ((Number)value).intValue();
 	    }
-	    if( value instanceof Integer){
-	        return (Integer)value;
-        }
 	    if( value instanceof String){
             return Integer.parseInt((String) value);
         }
-	    TFUtils.assertTrue(false, "Unknown type for asInteger" + value.getClass());
+	    TFUtils.assertTrue(false, "Unknown type for asInteger " + value.getClass());
 	    return 0;
 	}
 	
@@ -86,16 +87,14 @@ public class TFUtils {
 	
 	public static Long asLong(Object value){
 	    if( null == value )return null;
-	    if( value instanceof Long){
-	        return (Long)value;    
-	    }
-	    if( value instanceof Short){
-	        return (long)(short)(Short) value;
-	    }
-	    if( value instanceof Integer){
-	        return (long)(int)(Integer) value;
-	    }
-	    return (Long)value;
+        if( value instanceof Number){
+            return ((Number)value).longValue();
+        }
+	    if( value instanceof String){
+            return Long.parseLong((String) value);
+        }
+	    TFUtils.assertTrue(false, "Unknown type for asLong " + value.getClass());
+	    return 0L;
 	}
 
 	
