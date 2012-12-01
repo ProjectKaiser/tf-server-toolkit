@@ -7,6 +7,7 @@ package com.triniforce.mds;
 
 import java.util.Arrays;
 
+import com.triniforce.db.dml.IResSet;
 import com.triniforce.db.test.TFTestCase;
 
 public class MDSTest extends TFTestCase {
@@ -81,4 +82,24 @@ public class MDSTest extends TFTestCase {
             }
         }
     }
+    
+    public void testCalcIResSet(){
+        MDS mds = new MDS();
+        mds.addArray(new Object[]{1, 2, 3});
+        mds.addArray(new Object[]{"4", 5, 6});
+        mds.addArray(new Object[]{7, "8", 9});
+        assertEquals(3, mds.getRows().size());
+        
+        IResSet rs = mds.calcIResSet();
+
+        Object testData[] = new Object[]{1, 2, 3, "4", 5, 6, 7, "8", 9};
+        int idx = 0;
+        while(rs.next()){
+            for(int i=0; i< 3; i++){
+                assertEquals(testData[idx++], rs.getObject(i));    
+            }
+        }
+        assertEquals(9, idx);
+    }
+    
 }
