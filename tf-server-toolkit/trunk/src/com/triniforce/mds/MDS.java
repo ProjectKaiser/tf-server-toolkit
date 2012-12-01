@@ -50,7 +50,17 @@ public class MDS implements Iterable<IMDSRow>{
     }
     
     public IResSet calcIResSet(){
-        return null;
+        return new IResSet() {
+            int idx = -1;
+            public boolean next() {
+                idx++;
+                return idx < m_rows.size();
+            }
+            
+            public Object getObject(int columnIndex) throws IndexOutOfBoundsException {
+                return getRows().get(idx).get(columnIndex);
+            }
+        };
     }
 
     public Iterator<IMDSRow> iterator() {
