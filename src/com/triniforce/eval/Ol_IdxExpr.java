@@ -6,6 +6,7 @@
 
 package com.triniforce.eval;
 
+
 public class Ol_IdxExpr implements IOlEvaluator{
     private final int m_idx;
     private final OlExpr m_expr;
@@ -25,7 +26,7 @@ public class Ol_IdxExpr implements IOlEvaluator{
     
     @Override
     public String toString() {
-        return null == m_expr?"null":m_expr.getClass().getSimpleName() + "(" + m_idx + ")";
+        return null == m_expr?"null":m_expr.toString() + "[" + m_idx + "]";
     }
     
 }

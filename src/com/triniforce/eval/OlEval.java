@@ -77,5 +77,16 @@ public class OlEval implements IOlEvaluator {
 	public void setNot(boolean not) {
 		m_not = not;
 	}
+	
+	@Override
+	public String toString() {
+		String res = isNot()?"not (":"(";
+		for(IOlEvaluator e: m_evaluators){
+			res += isAndConcatenation()?" and ":" or ";
+			res +=e.toString();
+		}
+		res+=")";
+		return res;
+	}
 
 }

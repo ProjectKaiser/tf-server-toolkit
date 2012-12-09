@@ -35,6 +35,11 @@ public class OlExprEquals extends OlExpr {
     boolean evaluateValue(Object value) {
         return m_workTestValue.equals(value);
     }
+    
+    @Override
+    public String toString() {
+    	return super.toString() +"(" +m_testValue +")";
+    }
 
     public boolean evaluate(Object value) {
         if (null == value) {
