@@ -43,7 +43,32 @@ public class OlEvalTest extends TFTestCase {
             assertFalse(e0.evalArray(new Object[]{1, 1, 3, 3}, 0));
             assertFalse(e0.evalArray(new Object[]{2, 2, 4, 4}, 0));
         }
-    
+
+    public void testNot(){
+    	
+    	//not = 15678
+    	{
+    		OlEval of = new OlEval();
+    		of.setNot(true);
+    		of.addExpr(0, new OlExprEquals(15678));
+    		assertTrue(of.evalArray(new Object[]{6}, 0));
+    		assertFalse(of.evalArray(new Object[]{15678}, 0));
+    	}
+    	
+    	//not ( in(1,4) or EQ(2) )
+    	{
+    		OlEval of = new OlEval();
+    		of.setNot(true);
+    		of.setAndConcatenation(false);
+    		of.addExpr(0, new OlExprIN(new Object[]{1, 4}));
+    		of.addExpr(0, new OlExprEquals(2));
+    		assertTrue(of.evalArray(new Object[]{6}, 0));
+    		assertTrue(of.evalArray(new Object[]{3}, 0));
+    		assertFalse(of.evalArray(new Object[]{2}, 0));
+    	}
+    	
+    }
+
     public void testOr(){
         OlEval of = new OlEval();
         of.setAndConcatenation(false);

@@ -17,6 +17,8 @@ import java.util.List;
  */
 public class OlEval implements IOlEvaluator {
 
+	
+	private boolean m_not;
 
     private final List<IOlEvaluator> m_evaluators = new ArrayList<IOlEvaluator>();
     private boolean m_andConcatenation = true;
@@ -32,10 +34,10 @@ public class OlEval implements IOlEvaluator {
     public boolean evaluate(IOlValueGetter vg){
         for (IOlEvaluator e : getEvaluators()) {
             if (e.evaluate(vg) != m_andConcatenation){
-                return !m_andConcatenation;
+                return isNot() ^ !m_andConcatenation;
             }
         }
-        return m_andConcatenation;
+        return isNot() ^  m_andConcatenation;
     }
     
     public boolean evalArray(final Object values[], final int startIdx){
@@ -64,9 +66,16 @@ public class OlEval implements IOlEvaluator {
         m_andConcatenation = isAndConcatenation;
     }
 
-
     public List<IOlEvaluator> getEvaluators() {
         return m_evaluators;
     }
+
+	public boolean isNot() {
+		return m_not;
+	}
+
+	public void setNot(boolean not) {
+		m_not = not;
+	}
 
 }
