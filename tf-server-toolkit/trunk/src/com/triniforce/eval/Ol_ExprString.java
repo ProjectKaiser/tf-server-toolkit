@@ -24,5 +24,10 @@ public abstract class Ol_ExprString extends OlExpr{
         return false;
     }
     
+    @Override
+    public String toString() {
+    	return super.toString() +"(" + m_value + ")";
+    }
+    
 
 }

@@ -27,4 +27,15 @@ public class OlExprIN extends OlExpr {
         }
         return false;
     }
+    
+    @Override
+    public String toString() {
+		String res = super.toString() + "(";
+		for (OlExprEquals e : m_exprs) {
+			res += "," + e.getTestValue();
+		}
+		res += ")";
+		return res;
+    }
+    
 }

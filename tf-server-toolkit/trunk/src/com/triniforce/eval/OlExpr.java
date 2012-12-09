@@ -10,4 +10,9 @@ public abstract class OlExpr {
     public boolean evaluate(Object value) {
         return false;
     }
+    
+    @Override
+    public String toString() {
+    	return getClass().getSimpleName();
+    }
 }
