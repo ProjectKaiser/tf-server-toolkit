@@ -217,9 +217,12 @@ public class QSelect extends QStatementWithWhere{
                         res = res.append(" "); //$NON-NLS-1$
                         bComma = true;
                     }
-                    if ( isPrefixesInSelectList() && t.qt.getPrefix().length() > 0) {
-                        res = res.append(t.qt.getPrefixedCol(name)).append(" as ") //$NON-NLS-1$
-                        .append(t.qt.getPrefix()).append("_").append(name); //$NON-NLS-1$
+                    if ( t.qt.getPrefix().length() > 0) {
+                        res = res.append(t.qt.getPrefixedCol(name));
+                        if(isPrefixesInSelectList()){ 
+                            res.append(" as ") //$NON-NLS-1$
+                            .append(t.qt.getPrefix()).append("_").append(name); //$NON-NLS-1$
+                        }
                     } else {
                     	String resName;
                     	if(name.equals("*"))
