@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +27,7 @@ import com.triniforce.db.dml.IStmtContainer;
 import com.triniforce.db.dml.PrepSql;
 import com.triniforce.db.dml.ResSet;
 import com.triniforce.db.dml.Table;
+import com.triniforce.db.dml.Table.Row.State;
 import com.triniforce.db.dml.TableAdapter;
 import com.triniforce.db.dml.Table.Row;
 import com.triniforce.db.qbuilder.QSelect;
@@ -379,6 +381,8 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 		Row row = m_asIndexTable.newRow();
 		row.setField(0, appName);
 		row.setField(1, dbName);
+		ApiAlgs.getLog(this).trace("ADD NAME: "+appName + "("+dbName+")");
+		
 	}
 
 	public String generateIndexName(String appName) {
@@ -415,7 +419,10 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 		for(int i=0; i<m_asIndexTable.getSize(); i++){
 			Row row = m_asIndexTable.getRow(i);
 			String appVal = (String) row.getField(0);
-			if(upperName.equals(appVal.toUpperCase())){
+			if(		!EnumSet.of(State.DELETED, State.CANCELED).contains(row.getState()) 
+					&& 
+					upperName.equals(appVal.toUpperCase())){
+				
 				ApiAlgs.getLog(this).trace("DROP NAME: "+appVal);
 				String dbVal = (String) row.getField(1);
 				TFUtils.assertNotNull(m_appIndexNames.remove(appVal), appVal);
