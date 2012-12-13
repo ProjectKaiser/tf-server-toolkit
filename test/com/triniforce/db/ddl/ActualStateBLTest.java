@@ -199,5 +199,19 @@ public class ActualStateBLTest extends DDLTestCase {
     	
     	
     }
+    
+    public void testDeleteIndexName(){
+    	m_as.addIndexName("testDeleteIndexName.Name1",m_as.generateIndexName("testDeleteIndexName.Name1"));
+    	m_as.addIndexName("testDeleteIndexName.Name2",m_as.generateIndexName("testDeleteIndexName.Name2"));
+    	m_as.addIndexName("testDeleteIndexName.Name3",m_as.generateIndexName("testDeleteIndexName.Name3"));
+    	m_as.addIndexName("testDeleteIndexName.Name4",m_as.generateIndexName("testDeleteIndexName.Name4"));
+    	
+    	m_as.deleteIndexName("testDeleteIndexName.Name2");
+    	m_as.addIndexName("testDeleteIndexName.Name2",m_as.generateIndexName("testDeleteIndexName.Name2"));
+    	m_as.deleteIndexName("testDeleteIndexName.Name2");
+    	
+    	assertEquals("testDeleteIndexName.Name2", m_as.getIndexDbName("testDeleteIndexName.Name2")); // Not found
+    	
+    }
 
 }
