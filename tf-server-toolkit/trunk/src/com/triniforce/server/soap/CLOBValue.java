@@ -20,6 +20,8 @@ public class CLOBValue {
     private String m_creatorNickName;
     private Timestamp m_created;
 
+    public CLOBValue(){}
+    
     public CLOBValue(String mimeType, String value){
         this(mimeType, value, null, null, null);
     }

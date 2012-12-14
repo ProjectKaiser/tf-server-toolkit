@@ -96,7 +96,6 @@ public class SAXHandler {
                     }
                     return cd.getProps().get(m_propIdx).getType();
                 }
-                ApiAlgs.getLog(this).trace(cd.getProps());
             }
             else if (m_objDef instanceof ArrayDef){
                 ArrayDef ad = (ArrayDef) m_objDef;
@@ -106,7 +105,6 @@ public class SAXHandler {
             }
             
             ApiAlgs.assertNotNull(m_objDef, propName);
-            ApiAlgs.getLog(this).trace(m_objDef.getName());
             
             throw new ESoap.EUnknownElement(propName);
         }
@@ -199,7 +197,6 @@ public class SAXHandler {
     }
     
     public TypeDef startElement(String tag, boolean bNull, TypeDef reqTypeDef) throws EInterfaceElementException {
-    	ApiAlgs.getLog(this).trace("<"+tag+">");
         m_stringValue.clear();
         
         CurrentObject co;
@@ -265,12 +262,10 @@ public class SAXHandler {
 
     public void characters(char[] ch, int start, int length){
     	String vStr = new String(ch, start, length);
-    	ApiAlgs.getLog(this).trace(vStr);
     	m_stringValue.add(vStr);
     }
     
     public void endElement(){
-    	ApiAlgs.getLog(this).trace("</>");
         CurrentObject obj = m_objStk.pop();
         if(m_objStk.isEmpty()){
             m_args = (Object[]) obj.toObject();

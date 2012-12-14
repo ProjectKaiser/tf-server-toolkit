@@ -339,8 +339,10 @@ public class JSONSerializer {
 				ApiAlgs.assertEquals(type, res.m_type);
 			}
 			
-			if(!m_stk.isEmpty() && Element.Type.Array.equals(m_stk.peek().m_type)){
-				m_handler.endElement();
+			if(State.Arguments.equals(m_state)){
+				if(!m_stk.isEmpty() && Element.Type.Array.equals(m_stk.peek().m_type)){
+					m_handler.endElement();
+				}
 			}
 			
 			ApiAlgs.getLog(this).trace("<<" + res);

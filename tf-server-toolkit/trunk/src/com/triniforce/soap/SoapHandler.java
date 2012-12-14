@@ -44,7 +44,6 @@ class SoapHandler extends DefaultHandler{
     
     @Override
     public void startElement(String ns, String tag, String arg2, Attributes attrs) throws SAXException {
-    	ApiAlgs.getLog(this).trace("<"+tag+">");
         QName qn = new QName(ns, tag);
         
         if(m_stk.isEmpty()){
@@ -123,7 +122,6 @@ class SoapHandler extends DefaultHandler{
     
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-    	ApiAlgs.getLog(this).trace("</"+localName+">");
         if(uri.equals(m_tns)){
         	m_saxHandler.endElement();
         }
