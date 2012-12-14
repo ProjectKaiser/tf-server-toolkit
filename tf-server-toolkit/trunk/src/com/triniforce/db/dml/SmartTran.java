@@ -18,6 +18,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.triniforce.db.ddl.TableDef;
+import com.triniforce.db.ddl.TableDef.FieldDef;
 import com.triniforce.db.qbuilder.Expr;
 import com.triniforce.db.qbuilder.OrderByClause;
 import com.triniforce.db.qbuilder.QDelete;
@@ -27,7 +29,9 @@ import com.triniforce.db.qbuilder.QTable;
 import com.triniforce.db.qbuilder.QUpdate;
 import com.triniforce.db.qbuilder.WhereClause;
 import com.triniforce.server.plugins.kernel.SrvTable;
+import com.triniforce.server.srvapi.ISOQuery;
 import com.triniforce.utils.ApiAlgs;
+import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.IName;
 
 /**
@@ -110,8 +114,17 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         IStmtContainer sc = this;
         PrepStmt ps = sc.prepareStatement(ins.toString());
         int col = 1;
+        TableDef td = null;
         for (Object arg : values) {
-            ps.setObject(col++, arg);
+        	if(null == arg){
+        		if(null == td)
+        			td = ApiStack.getInterface(ISOQuery.class).getEntity(table.getName());
+        		FieldDef fd = td.getFields().findElement(fields[col-1].getName()).getElement();
+        		ps.setNull(col, FieldDef.sqlType(fd.getType()));
+        	}
+        	else
+        		ps.setObject(col, arg);
+            col++;
         }
         ps.execute();
         ps.close();
@@ -275,8 +288,14 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         IStmtContainer sc = this;
         PrepStmt ps = sc.prepareStatement(q.toString());
         int col = 1;
+        
+        TableDef td = ApiStack.getInterface(ISOQuery.class).getEntity(table.getName());
         for (Object arg : values) {
-            ps.setObject(col++, arg);
+        	if(null == arg)
+        		ps.setNull(col, FieldDef.sqlType(td.getFields().findElement(fields.get(col-1).getName()).getElement().getType()));
+        	else
+        		ps.setObject(col, arg);
+            col++;
         }
         for (Object arg : lookUpValues) {
             ps.setObject(col++, arg);
