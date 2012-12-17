@@ -1,4 +1,4 @@
-tf_version = '18.0';
+tf_version = '19.0';
 tf_release = false
 tf_vendor = 'Triniforce.com'
 
