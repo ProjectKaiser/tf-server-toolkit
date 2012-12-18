@@ -16,4 +16,5 @@ public interface IMDSRow extends Iterable<Object> {
     void appendArray(Object values[], int fromIndex, int cnt);
     void appendList(List values, int fromIndex, int cnt);
     int size();
+    List values();
 }

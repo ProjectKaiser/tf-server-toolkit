@@ -65,5 +65,8 @@ public class MDSRow implements IMDSRow{
     public String toString() {
         return m_values.toString();
     }
-
+    public List values() {
+        return m_values;
+    }
+    
 }
