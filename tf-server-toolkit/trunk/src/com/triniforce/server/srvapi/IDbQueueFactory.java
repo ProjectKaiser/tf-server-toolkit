@@ -26,7 +26,7 @@ public interface IDbQueueFactory {
         
         public static void waitForEmptyQueue(long id){
             IDbQueue q= getQueue(id);
-            while(null != q.get(0))ICheckInterrupted.Helper.sleep(200);
+            while(null != q.peek(0))ICheckInterrupted.Helper.sleep(200);
         }
 
         public static IDbQueue cleanQueue(long id) {
