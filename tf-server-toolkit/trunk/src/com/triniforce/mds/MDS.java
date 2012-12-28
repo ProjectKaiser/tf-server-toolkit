@@ -131,4 +131,27 @@ public class MDS implements Iterable<IMDSRow>{
         return null;        
     }
     
+//    @Override
+//    public String toString() {
+//        int rows = getRowsNumber();
+//        int cols = getColNames().length;
+//        StringBuffer res = new StringBuffer();
+//
+//        res.append(Arrays.toString(getColNames()) + "\n");
+//        for(int i=0;i<rows;i++){
+//            Object vals[] = new Object[cols];
+//            for(int j =0; j<cols ; j++){
+//                vals[j] = getCell(i, j);
+//            }
+//            res.append(Arrays.toString(vals));
+//            res.append("\n");
+//        }
+//        return res.toString();
+//    }    
+    
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+    
 }
