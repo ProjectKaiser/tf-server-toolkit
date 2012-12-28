@@ -86,10 +86,6 @@ public class MDS implements Iterable<IMDSRow>{
         return m_rows.iterator();
     }
     
-    public Object getCell(IMDSRow row, int col) throws IndexOutOfBoundsException{
-        //TODO
-        return null;
-    }
     public Object getCell(IMDSRow row, String col) throws IndexOutOfBoundsException{
         //TODO
         return null;
