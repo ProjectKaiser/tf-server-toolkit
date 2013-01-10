@@ -85,42 +85,68 @@ public class MDS implements Iterable<IMDSRow>{
         return m_rows.iterator();
     }
     
-    public Object getCell(IMDSRow row, String col) throws IndexOutOfBoundsException{
-        //TODO
-        return null;
-    }
-    public Object getCell(IMDSRow row, IName col) throws IndexOutOfBoundsException{
-        //TODO
-        return null;
+    @SuppressWarnings("serial")
+	public static class ColumnNotFound extends RuntimeException{
+		public ColumnNotFound(String s) {
+			super("Column name: " + s);
+		}
+	}
+    
+    public Object getCell(IMDSRow row, String col) throws IndexOutOfBoundsException {
+
+    	if (row == null) throw new NullPointerException("row");
+    	if (col == null) throw new NullPointerException("col");
+    	
+    	Integer index = m_namesMap.get(col);
+    	if (index == null) {
+    		throw new ColumnNotFound(col);
+    	} else {
+    		return row.get(index-1);
+    	}
     }
     
-    
+    public Object getCell(IMDSRow row, IName col) throws IndexOutOfBoundsException {
+    	if (col == null) throw new NullPointerException("col");
+    	return getCell(row, col.getName());
+    }
+        
     public IMDSRow appendRow(IMDSRow src){
-        //TODO
-        return null;        
+        
+    	if (src == null) {
+        	throw new NullPointerException("src");
+        }
+       	m_rows.add(src);
+       	return m_rows.get(m_rows.size()-1);
     }
-    
-//    @Override
-//    public String toString() {
-//        int rows = getRowsNumber();
-//        int cols = getColNames().length;
-//        StringBuffer res = new StringBuffer();
-//
-//        res.append(Arrays.toString(getColNames()) + "\n");
-//        for(int i=0;i<rows;i++){
-//            Object vals[] = new Object[cols];
-//            for(int j =0; j<cols ; j++){
-//                vals[j] = getCell(i, j);
-//            }
-//            res.append(Arrays.toString(vals));
-//            res.append("\n");
-//        }
-//        return res.toString();
-//    }    
     
     @Override
     public String toString() {
-        return super.toString();
+    	
+    	StringBuffer res = new StringBuffer("\n");
+    	
+    	String[] keys = new String[m_namesMap.size()];
+    	m_namesMap.keySet().toArray(keys);
+    	
+    	for (int i = 0; i < keys.length; i++) {
+			if (i > 0) res.append("\t");
+			res.append(keys[i]);
+		}
+		res.append("\n");
+				
+		for (IMDSRow row : m_rows) {
+			for (int i = 0; i < keys.length; i++) {
+				int index = m_namesMap.get(keys[i]);
+				if (i > 0) res.append("\t");
+				if (row.get(index-1) == null) {
+					res.append("null");
+				} else {
+					res.append(row.get(index-1).toString());
+				}
+				
+			}
+			res.append("\n");
+		}
+		return res.toString();
     }
     
 }

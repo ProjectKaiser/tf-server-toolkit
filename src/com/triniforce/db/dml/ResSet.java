@@ -6,6 +6,7 @@
 package com.triniforce.db.dml;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import com.triniforce.utils.ApiAlgs;
@@ -91,6 +92,43 @@ public class ResSet implements IResSet {
             ApiAlgs.rethrowException(e);
         }
         return false;
+    }
+    
+    @Override
+    public String toString() {
+    	
+    	StringBuffer res = new StringBuffer("\n");
+    	
+    	if (m_resultSet != null) {
+    		ResultSetMetaData md;
+			try {
+				md = m_resultSet.getMetaData();
+				int columnCount = md.getColumnCount();
+	    		
+	    		for (int i = 1; i <= columnCount; i++) {
+					if (i > 1) res.append("\t");
+					res.append(md.getColumnName(i));
+				}
+	    		res.append("\n");
+	        	        	
+	        	while(m_resultSet.next()){
+	            	for(int i = 1; i <= columnCount; i++){
+	            		if(i > 1) res.append('\t');
+	                    if (m_resultSet.getObject(i) == null) {
+	                    	res.append("null");
+	                    } else {
+	                    	res.append(m_resultSet.getObject(i).toString());
+	                    }
+	            	}
+	                res.append('\n');
+	            }
+    		
+			} catch (SQLException e) {
+				ApiAlgs.rethrowException(e);
+			}
+    	}
+    	
+       	return res.toString();
     }
     
 }

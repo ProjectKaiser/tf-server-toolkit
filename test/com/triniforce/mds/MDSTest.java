@@ -11,6 +11,8 @@ import java.util.Map;
 
 import com.triniforce.db.dml.IResSet;
 import com.triniforce.db.test.TFTestCase;
+import com.triniforce.mds.MDS.ColumnNotFound;
+import com.triniforce.utils.IName;
 
 public class MDSTest extends TFTestCase {
     @Override
@@ -114,6 +116,120 @@ public class MDSTest extends TFTestCase {
                 }
             }
             assertEquals(9, idx);
-        }
+    }
+    
+    public void testGetCell() {
+    	
+    	MDS mds = new MDS();
+    	IMDSRow row = new MDSRow();
+    	//
+    	class Name implements IName {
+			private String m_name;
+    		public Name(String name) {
+				m_name = name;
+			}
+    		public String getName() {
+				return m_name;
+			}
+		}
+    	
+    	IName name = null; 
+    	
+    	try {
+    		mds.getCell(row, name);
+    		fail();
+    	} catch (NullPointerException e) {
+			assertEquals(e.getMessage(),"col");
+		}
+    	
+    	//
+    	name = new Name("name");
+    	try {
+    		mds.getCell(null, name);
+    		fail();
+    	} catch (NullPointerException e) {
+			assertEquals(e.getMessage(),"row");
+		}
+    	
+    	//
+    	name = new Name(null);
+    	try {
+    		mds.getCell(row, name);
+    		fail();
+    	} catch (NullPointerException e) {
+			assertEquals(e.getMessage(),"col");
+		}
+    	
+    	//
+    	name = new Name("col1");
+    	try {
+    		mds.getCell(row, name);
+    		fail();
+    	} catch (ColumnNotFound e) {
+			assertEquals(e.getMessage(),"Column name: col1");
+		}
+    	
+    	//
+    	mds.appendNames(Arrays.asList(new String[]{"col1", "col2", "col3", "col4"}));
+    	mds.appendRowAsList(Arrays.asList(new Object[]{"3FFF", null, 13L, "AAAA"}));
+    	mds.appendRowAsList(Arrays.asList(new Object[]{"3", null, 10L, "BBBBBB"}));
+    	mds.appendRowAsList(Arrays.asList(new Object[]{"233", 456, null, "CCCCCCC"}));
+    	
+    	assertEquals(mds.getCell(mds.getRows().get(0),new Name("col1")),"3FFF");
+    	assertNull(mds.getCell(mds.getRows().get(0),new Name("col2")));
+    	assertEquals(mds.getCell(mds.getRows().get(1),new Name("col3")),10L);
+    	assertEquals(mds.getCell(mds.getRows().get(2),new Name("col4")),"CCCCCCC");
+        	
+    }
+    
+    public void testAppendRow() {
+    	
+    	MDS mds = new MDS();
+    	//
+    	try {
+    		mds.appendRow(null);
+    	} catch (NullPointerException e) {
+			assertEquals(e.getMessage(),"src");
+		}
+    	//
+    	IMDSRow row1 = new MDSRow();
+    	IMDSRow res = mds.appendRow(row1);
+    	assertEquals(mds.getRows().size(),1);
+    	assertSame(mds.getRows().get(0),row1);
+    	assertSame(mds.getRows().get(0),res);
+    	// 	
+    	IMDSRow row2 = new MDSRow();
+    	res = mds.appendRow(row2);
+    	row2.add(1L); row2.add("AA"); row2.add(null);  
+    	
+    	assertEquals(mds.getRows().size(),2);
+    	assertSame(mds.getRows().get(0),row1);
+    	assertSame(mds.getRows().get(1),row2);
+    	assertSame(mds.getRows().get(1),res);
+    	
+    	assertEquals(mds.getRows().get(1).get(0),1L);
+    	assertEquals(mds.getRows().get(1).get(1),"AA");
+    	assertNull(mds.getRows().get(1).get(2));
+       	
+    }
+    
+    public void testToString() {
+    	
+    	//
+    	MDS mds = new MDS();
+    	assertEquals(mds.toString(),"\n\n");
+    	
+    	//
+    	mds = new MDS();
+    	mds.appendNames(Arrays.asList(new String[]{"col1", "col2", "col3", "col4"}));
+    	mds.appendRowAsList(Arrays.asList(new Object[]{"3FFF", null, 13L, "AAAA"}));
+    	mds.appendRowAsList(Arrays.asList(new Object[]{"3", null, 10L, "BBBBBB"}));
+    	mds.appendRowAsList(Arrays.asList(new Object[]{"233", 456, null, "CCCCCCC"}));
+        
+    	String s = mds.toString();
+    	assertNotNull(s);
+    	trace(s);
+    
+    }
     
 }
