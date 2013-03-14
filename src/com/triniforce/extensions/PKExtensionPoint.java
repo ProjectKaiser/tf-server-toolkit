@@ -8,6 +8,8 @@ package com.triniforce.extensions;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.triniforce.utils.ApiAlgs;
+
 public class PKExtensionPoint extends PKExtensionBase implements IPKExtensionPoint{
 
 	Class m_extensionClass;
@@ -45,6 +47,7 @@ public class PKExtensionPoint extends PKExtensionBase implements IPKExtensionPoi
             throws EExtensionNotFound {
         IPKExtension e = m_extensions.get(extensionId);
         if(null == e){
+        	ApiAlgs.getLog(this).trace(m_extensions.keySet());
             throw new EExtensionNotFound(extensionId, this);
         }
         return e;
