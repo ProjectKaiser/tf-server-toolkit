@@ -13,6 +13,7 @@ import com.triniforce.db.ddl.TableDef.EReferenceError;
 import com.triniforce.extensions.IPKRootExtensionPoint;
 import com.triniforce.server.plugins.kernel.BasicServer.ServerException;
 import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
+import com.triniforce.server.plugins.kernel.service.EP_IService;
 import com.triniforce.utils.Api;
 import com.triniforce.utils.ApiStack;
 
@@ -105,7 +106,27 @@ public interface IBasicServer extends IPKRootExtensionPoint {
      * Does NOT throw any exception
      */
     void stopAndFinit();
+ 
     
+    
+    /**
+     * Start services asyncronouosly. Method returns when ServiceManager is started.
+     */
+    void startServices();
+    
+    /**
+     * Initiate process of stopping all services and return. If startServices was called before
+     * all servces will be started then stopped.
+     */
+    void stopServices();
+    
+    void stopServicesAndWait();
+    
+    /**
+     * @param id
+     * @return
+     */
+    EP_IService.State queryServiceState(long id);
   
 }
 

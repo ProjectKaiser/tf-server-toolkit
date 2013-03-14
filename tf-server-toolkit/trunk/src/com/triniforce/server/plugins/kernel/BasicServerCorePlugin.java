@@ -29,6 +29,9 @@ import com.triniforce.server.plugins.kernel.ext.br.BackupRestorePluginVersions;
 import com.triniforce.server.plugins.kernel.recurring.PKEPRecurringTasks;
 import com.triniforce.server.plugins.kernel.recurring.PTRecurringTasks;
 import com.triniforce.server.plugins.kernel.recurring.TRecurringTasks;
+import com.triniforce.server.plugins.kernel.service.EP_IThreadWatcherRegistrator;
+import com.triniforce.server.plugins.kernel.service.PKEPServices;
+import com.triniforce.server.plugins.kernel.service.EPThreadWatcherRegistrator;
 import com.triniforce.server.plugins.kernel.tables.EntityJournal;
 import com.triniforce.server.plugins.kernel.tables.NextId;
 import com.triniforce.server.plugins.kernel.tables.TNamedDbId;
@@ -167,6 +170,8 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         
         m_runningApi = api;
         m_runningApi.setIntfImplementor(ITimedLock2.class, new TimedLock2());
+        m_runningApi.setIntfImplementor(EP_IThreadWatcherRegistrator.class, new EPThreadWatcherRegistrator());
+
         
         m_tranFactory.registerOuterExtender(new RefCountMapTrnExtender());
         m_tranFactory.registerOuterExtender(new FiniterExtender());
@@ -512,6 +517,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         actualizers.putExtension(ExDBOAUpgradeProcedures.class);
         putExtensionPoint(actualizers);
         putExtensionPoint(new PKEPDBObjects());
+        putExtensionPoint(new PKEPServices());
     }
 
 
