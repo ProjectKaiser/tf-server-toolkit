@@ -9,6 +9,7 @@ import java.text.MessageFormat;
 import java.util.EnumSet;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
@@ -154,7 +155,7 @@ public class EPService implements EP_IService, EP_ICycledThreadLogic, Runnable {
 
     protected void waitForAnyState(EnumSet states, boolean bInterrupt)
             throws EInterrupted {
-        EP_IThreadWatcherRegistrator  itwr  = ApiStack.getInterface(EP_IThreadWatcherRegistrator .class);
+        IThrdWatcherRegistrator  itwr  = ApiStack.getInterface(IThrdWatcherRegistrator .class);
         itwr.registerLongTermOp(Thread.currentThread());
         try {
             while (true) {

@@ -5,7 +5,7 @@
  */
 package com.triniforce.server.plugins.kernel.service;
 
-import com.triniforce.server.plugins.kernel.service.EP_IThreadWatcherRegistrator;
+import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.server.srvapi.IDbQueue;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.ISrvSmartTran;
@@ -54,7 +54,7 @@ public class EP_QueuedService extends EPService {
     public void initCycle() {       
         while (true) {
             m_tf.push();
-            EP_IThreadWatcherRegistrator itw = ApiStack.getInterface(EP_IThreadWatcherRegistrator.class);
+            IThrdWatcherRegistrator itw = ApiStack.getInterface(IThrdWatcherRegistrator.class);
             itw.registerLongTermOp(Thread.currentThread());
             try{
                 m_item = m_queue.get(1000*60*5);//5 minutes

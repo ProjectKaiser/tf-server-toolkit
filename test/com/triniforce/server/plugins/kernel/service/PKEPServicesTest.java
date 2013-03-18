@@ -6,6 +6,7 @@
 package com.triniforce.server.plugins.kernel.service;
 
 import com.triniforce.db.test.BasicServerTestCase;
+import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.utils.ApiStack;
@@ -32,7 +33,7 @@ public class PKEPServicesTest extends BasicServerTestCase {
 		ep = (PKEPServices) rep.getExtensionPoint(PKEPServices.class);
 		ep.putExtension(TestService.class);
 		
-        EP_IThreadWatcherRegistrator twr = ApiStack.getInterface(EP_IThreadWatcherRegistrator.class);
+        IThrdWatcherRegistrator twr = ApiStack.getInterface(IThrdWatcherRegistrator.class);
         twr.registerThread(Thread.currentThread(), null);
 
 	}

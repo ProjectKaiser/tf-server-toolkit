@@ -3,11 +3,11 @@
  * All Rights Reserved.
  *
  */ 
-package com.triniforce.server.plugins.kernel.service;
+package com.triniforce.server.srvapi;
 
 import java.util.Map;
 
-public interface EP_IThreadWatcherRegistrator {
+public interface IThrdWatcherRegistrator {
     public void registerThread(Thread thread, String threadExtraInfo);
     public void unregisterThread(Thread thread);
     public void registerLongTermOp(Thread thread);
