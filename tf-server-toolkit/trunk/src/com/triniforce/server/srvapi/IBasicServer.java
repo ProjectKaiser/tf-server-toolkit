@@ -13,7 +13,7 @@ import com.triniforce.db.ddl.TableDef.EReferenceError;
 import com.triniforce.extensions.IPKRootExtensionPoint;
 import com.triniforce.server.plugins.kernel.BasicServer.ServerException;
 import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
-import com.triniforce.server.plugins.kernel.service.EP_IService;
+import com.triniforce.server.plugins.kernel.services.EP_IService;
 import com.triniforce.utils.Api;
 import com.triniforce.utils.ApiStack;
 

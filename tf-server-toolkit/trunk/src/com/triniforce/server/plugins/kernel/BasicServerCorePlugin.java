@@ -29,7 +29,7 @@ import com.triniforce.server.plugins.kernel.ext.br.BackupRestorePluginVersions;
 import com.triniforce.server.plugins.kernel.recurring.PKEPRecurringTasks;
 import com.triniforce.server.plugins.kernel.recurring.PTRecurringTasks;
 import com.triniforce.server.plugins.kernel.recurring.TRecurringTasks;
-import com.triniforce.server.plugins.kernel.service.PKEPServices;
+import com.triniforce.server.plugins.kernel.services.PKEPServices;
 import com.triniforce.server.plugins.kernel.tables.EntityJournal;
 import com.triniforce.server.plugins.kernel.tables.NextId;
 import com.triniforce.server.plugins.kernel.tables.TNamedDbId;
