@@ -51,11 +51,11 @@ import com.triniforce.server.plugins.kernel.ep.srv_ev.PKEPServerEvents;
 import com.triniforce.server.plugins.kernel.ep.srv_ev.ServerEvent;
 import com.triniforce.server.plugins.kernel.service.EP_IService;
 import com.triniforce.server.plugins.kernel.service.EP_IService.State;
-import com.triniforce.server.plugins.kernel.service.EP_IThreadWatcherRegistrator;
 import com.triniforce.server.plugins.kernel.service.PKEPServices;
 import com.triniforce.server.plugins.kernel.service.PKEPServices.EServiceNotFound;
 import com.triniforce.server.plugins.kernel.tables.EntityJournal;
 import com.triniforce.server.srvapi.DataPreparationProcedure;
+import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IDatabaseInfo;
 import com.triniforce.server.srvapi.IDbQueueFactory;
@@ -1279,11 +1279,11 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	}
 
 	public void startServices() {
-        EP_IThreadWatcherRegistrator itwr = null;
+        IThrdWatcherRegistrator itwr = null;
         
         enterMode(Mode.Running);
         try {
-                itwr = ApiStack.getInterface(EP_IThreadWatcherRegistrator.class);        
+                itwr = ApiStack.getInterface(IThrdWatcherRegistrator.class);        
                 itwr.registerThread(Thread.currentThread(), "Start services");        
             
                 startPeriodicalTasks();
@@ -1340,7 +1340,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	}
 
 
-	public State queryServiceState(long id) {
+	public State queryEPServiceState(long id) {
         enterMode(Mode.Running);
         try {
             PKEPServices ss = getServices();

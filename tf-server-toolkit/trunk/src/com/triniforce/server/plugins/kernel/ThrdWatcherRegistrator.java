@@ -3,17 +3,18 @@
  * All Rights Reserved. 
  * 
  */
-package com.triniforce.server.plugins.kernel.service;
+package com.triniforce.server.plugins.kernel;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ITime;
 import com.triniforce.utils.TFUtils;
 
 
-public class EPThreadWatcherRegistrator implements EP_IThreadWatcherRegistrator {
+public class ThrdWatcherRegistrator implements IThrdWatcherRegistrator {
     
     static class MyTime implements ITime{
         public long currentTimeMillis() {

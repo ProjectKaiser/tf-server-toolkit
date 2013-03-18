@@ -29,9 +29,7 @@ import com.triniforce.server.plugins.kernel.ext.br.BackupRestorePluginVersions;
 import com.triniforce.server.plugins.kernel.recurring.PKEPRecurringTasks;
 import com.triniforce.server.plugins.kernel.recurring.PTRecurringTasks;
 import com.triniforce.server.plugins.kernel.recurring.TRecurringTasks;
-import com.triniforce.server.plugins.kernel.service.EP_IThreadWatcherRegistrator;
 import com.triniforce.server.plugins.kernel.service.PKEPServices;
-import com.triniforce.server.plugins.kernel.service.EPThreadWatcherRegistrator;
 import com.triniforce.server.plugins.kernel.tables.EntityJournal;
 import com.triniforce.server.plugins.kernel.tables.NextId;
 import com.triniforce.server.plugins.kernel.tables.TNamedDbId;
@@ -42,6 +40,7 @@ import com.triniforce.server.plugins.kernel.upg_procedures.Upg_120406_NamedDbIdN
 import com.triniforce.server.srvapi.DataPreparationProcedure;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
+import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.IIdGenerator;
 import com.triniforce.server.srvapi.IMiscIdGenerator;
@@ -170,7 +169,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         
         m_runningApi = api;
         m_runningApi.setIntfImplementor(ITimedLock2.class, new TimedLock2());
-        m_runningApi.setIntfImplementor(EP_IThreadWatcherRegistrator.class, new EPThreadWatcherRegistrator());
+        m_runningApi.setIntfImplementor(IThrdWatcherRegistrator.class, new ThrdWatcherRegistrator());
 
         
         m_tranFactory.registerOuterExtender(new RefCountMapTrnExtender());

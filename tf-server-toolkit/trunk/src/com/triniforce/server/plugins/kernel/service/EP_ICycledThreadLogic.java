@@ -5,6 +5,7 @@
  */
 package com.triniforce.server.plugins.kernel.service;
 
+import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.ICheckInterrupted;
@@ -48,7 +49,7 @@ public interface EP_ICycledThreadLogic {
         public static void runCTL(EP_ICycledThreadLogic ctl) {
             while (true) {
                 try {
-                    EP_IThreadWatcherRegistrator twr = ApiStack.queryInterface(EP_IThreadWatcherRegistrator.class);
+                    IThrdWatcherRegistrator twr = ApiStack.queryInterface(IThrdWatcherRegistrator.class);
                     try {
                         if(null != twr){
                             twr.registerThread(Thread.currentThread(), "ICycledThreadLogic");

@@ -8,11 +8,12 @@ package com.triniforce.server.plugins.kernel.service;
 import java.text.MessageFormat;
 import java.util.Map;
 
-import com.triniforce.server.plugins.kernel.service.EP_IThreadWatcherRegistrator.ThreadInfo;
+import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
+import com.triniforce.server.srvapi.IThrdWatcherRegistrator.ThreadInfo;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 
-public class EPThreadWatcher extends EPService{
+public class ThrdWatcher extends EPService{
 	
 	    @Override
 	    public int getCyclePauseMs() {
@@ -22,8 +23,8 @@ public class EPThreadWatcher extends EPService{
 	    
 	    @Override
 	    public void doCycle() {
-	        EP_IThreadWatcherRegistrator twr = ApiStack
-	                .getInterface(EP_IThreadWatcherRegistrator.class);
+	        IThrdWatcherRegistrator twr = ApiStack
+	                .getInterface(IThrdWatcherRegistrator.class);
 	        
 	        if (!twr.isAnyShortThreadWaiting(twr.getThreshold())){
 	            return;
