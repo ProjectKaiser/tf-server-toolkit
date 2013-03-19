@@ -22,7 +22,7 @@ import com.triniforce.utils.ApiStack;
  * queue wait = 5 minutes
  * 
  */
-public class EP_QueuedService extends EPService {
+public class EP_QueuedService extends Service {
 
     IDbQueue m_queue;
 

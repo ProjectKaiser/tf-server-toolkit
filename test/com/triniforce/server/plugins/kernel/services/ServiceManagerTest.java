@@ -22,7 +22,7 @@ public class ServiceManagerTest extends BasicServerTestCase {
 	
 	static final long SM_ID = 900L;
 	
-	public static class SimpleService extends EPService{
+	public static class SimpleService extends Service{
 		
 	}
 	
@@ -101,40 +101,40 @@ public class ServiceManagerTest extends BasicServerTestCase {
 
         PKEPServices ss = getServices();
 
-        EP_IService srvAR = ss.getService(arName);
-        assertEquals(EP_IService.State.STOPPED, srvAR.getState());
-        EP_IService srvMailer = ss.getService(idMailer);
-        assertEquals(EP_IService.State.STOPPED, srvMailer.getState());        
+        IService srvAR = ss.getService(arName);
+        assertEquals(IService.State.STOPPED, srvAR.getState());
+        IService srvMailer = ss.getService(idMailer);
+        assertEquals(IService.State.STOPPED, srvMailer.getState());        
 
-        EP_IService srvSM = ss.getService(SM_ID);
-        assertEquals(EP_IService.State.STOPPED, srvSM.getState());
+        IService srvSM = ss.getService(SM_ID);
+        assertEquals(IService.State.STOPPED, srvSM.getState());
 
         srvSM.start();
-        assertEquals(EP_IService.State.RUNNING, srvSM.getState());
-        assertEquals(EP_IService.State.STOPPED, srvAR.getState());
+        assertEquals(IService.State.RUNNING, srvSM.getState());
+        assertEquals(IService.State.STOPPED, srvAR.getState());
 
         commitAndStartTran();
         ss.startStopWithSubservices(SM_ID, true);
         int i = 0;
-        while (srvAR.getState() != EP_IService.State.RUNNING) {
+        while (srvAR.getState() != IService.State.RUNNING) {
             ICheckInterrupted.Helper.sleep(100);
             trace("wait1.." + (i++));
         }
-        while (srvMailer.getState() != EP_IService.State.RUNNING) {
+        while (srvMailer.getState() != IService.State.RUNNING) {
             ICheckInterrupted.Helper.sleep(100);
             trace("wait1a.." + (i++));
         }        
         ss.startStopWithSubservices(SM_ID,
                 false);
-        while (srvAR.getState() != EP_IService.State.STOPPED) {
+        while (srvAR.getState() != IService.State.STOPPED) {
             ICheckInterrupted.Helper.sleep(100);
             trace("wait2.." + (i++));
         }
-        while (srvMailer.getState() != EP_IService.State.STOPPED) {
+        while (srvMailer.getState() != IService.State.STOPPED) {
             ICheckInterrupted.Helper.sleep(100);
             trace("wait2a.." + (i++));
         }        
-        while (srvSM.getState() != EP_IService.State.STOPPED) {
+        while (srvSM.getState() != IService.State.STOPPED) {
             ICheckInterrupted.Helper.sleep(100);
             trace("wait3.." + (i++));
         }

@@ -23,7 +23,7 @@ import com.triniforce.utils.IName;
 
 public class ServicesTest extends ServicesTestCase {
 	
-	public static class SimpleService extends EPService{
+	public static class SimpleService extends Service{
 		
 	}
 	
@@ -74,7 +74,7 @@ public class ServicesTest extends ServicesTestCase {
 
     void startStopService(long serviceId) throws EServiceNotFound {
         PKEPServices ss = getServices();
-        EP_IService s = ss.getService(serviceId);
+        IService s = ss.getService(serviceId);
         s.start();
         s.stop();
     }
@@ -95,10 +95,10 @@ public class ServicesTest extends ServicesTestCase {
     public void stopServicesAndWait() throws EServiceNotFound {
         getServer().stopServices();
         PKEPServices ss = getServices();
-        EP_IService s = ss.getService(SM_ID);
+        IService s = ss.getService(SM_ID);
         int cnt = 0;
         int cntThreshold = 120;
-        while (s.getState() != EP_IService.State.STOPPED) {
+        while (s.getState() != IService.State.STOPPED) {
             cnt++;
             if (cnt > cntThreshold) {
                 printStacks();
@@ -108,7 +108,7 @@ public class ServicesTest extends ServicesTestCase {
             ICheckInterrupted.Helper.sleep(1000);
         }
         ICheckInterrupted.Helper.sleep(1000);
-        assertEquals(EP_IService.State.STOPPED, s.getState());
+        assertEquals(IService.State.STOPPED, s.getState());
     }
 
     int m_cnt;
@@ -162,10 +162,10 @@ public class ServicesTest extends ServicesTestCase {
         }
     }
 
-    public void waitForState(long serviceId, EP_IService.State state) throws EServiceNotFound {
+    public void waitForState(long serviceId, IService.State state) throws EServiceNotFound {
         ApiAlgs.getLog(this).trace("waiting service: " + serviceId + ", state: "+ state.toString());
         PKEPServices ss = getServices();
-        EP_IService s = ss.getService(serviceId);
+        IService s = ss.getService(serviceId);
         while (s.getState() != state) {
             ISrvSmartTranFactory.Helper.commitAndStartTran();
             ICheckInterrupted.Helper.sleep(100);
@@ -179,22 +179,22 @@ public class ServicesTest extends ServicesTestCase {
         commitAndStartTran();
         try {
             waitForState(SM_ID,
-                    EP_IService.State.RUNNING);
+                    IService.State.RUNNING);
 
             waitForState(SRVC_IDS[0],
-                    EP_IService.State.RUNNING);
+                    IService.State.RUNNING);
             waitForState(SRVC_IDS[1],
-                    EP_IService.State.RUNNING);
+                    IService.State.RUNNING);
             waitForState(SRVC_IDS[2],
-                    EP_IService.State.RUNNING);
+                    IService.State.RUNNING);
             waitForState(SRVC_IDS[3],
-                    EP_IService.State.RUNNING);
+                    IService.State.RUNNING);
             waitForState(SRVC_IDS[4],
-                    EP_IService.State.RUNNING);
+                    IService.State.RUNNING);
             waitForState(SRVC_IDS[5],
-                    EP_IService.State.RUNNING);
+                    IService.State.RUNNING);
             waitForState(SRVC_IDS[6],
-                    EP_IService.State.RUNNING);            
+                    IService.State.RUNNING);            
 
         } finally {
             this.stopServicesAndWait();
@@ -210,7 +210,7 @@ public class ServicesTest extends ServicesTestCase {
 //        ss.registerServiceManager(new EP_ServiceManager(ReservedKeys.SRV_SERVICE_MANAGER.getKey()));
         EP_ServiceManager sm = (EP_ServiceManager) ss.getService(SM_ID);
         assertNotNull(sm);
-        assertEquals(EP_IService.State.STOPPED, sm.getState());
+        assertEquals(IService.State.STOPPED, sm.getState());
         assertEquals(SM_ID, sm.getId());
 
         {// get non-existing service
@@ -232,10 +232,10 @@ public class ServicesTest extends ServicesTestCase {
         ServiceManagerTest.cleanSMQueue();
 
         {// get service
-            EP_IService srvSM = ss.getService(SM_ID);
-            assertEquals(EP_IService.State.STOPPED, srvSM.getState());
+            IService srvSM = ss.getService(SM_ID);
+            assertEquals(IService.State.STOPPED, srvSM.getState());
             srvSM.start();
-            assertEquals(EP_IService.State.RUNNING, srvSM.getState());
+            assertEquals(IService.State.RUNNING, srvSM.getState());
             // get same service - must be from cache
             assertSame(srvSM, ss.getService(SM_ID));
             srvSM.stop();

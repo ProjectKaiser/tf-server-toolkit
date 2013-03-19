@@ -7,7 +7,7 @@ package com.triniforce.server.plugins.kernel.services;
 
 
 
-public interface EP_IService{  
+public interface IService{  
 
     public enum State {
         STOPPED, STARTING, RUNNING, STOPPING

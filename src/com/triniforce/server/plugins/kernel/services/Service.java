@@ -24,7 +24,7 @@ import com.triniforce.utils.ICheckInterrupted.EInterrupted;
  * <p>
  * exception pause = 60 secs
  */
-public class EPService implements EP_IService, EP_ICycledThreadLogic, Runnable {
+public class Service implements IService, ICycledThreadLogic, Runnable {
 
     protected State m_state = State.STOPPED;
 
@@ -74,7 +74,7 @@ public class EPService implements EP_IService, EP_ICycledThreadLogic, Runnable {
              */
             ICheckInterrupted.Helper.sleep(100);// this just raises an exception
         }
-        waitForAnyState(EnumSet.of(EP_IService.State.STOPPED), true);
+        waitForAnyState(EnumSet.of(IService.State.STOPPED), true);
     }
 
     public int getCyclePauseMs() {
@@ -107,7 +107,7 @@ public class EPService implements EP_IService, EP_ICycledThreadLogic, Runnable {
         }
         setState(State.RUNNING);
         try {
-            EP_ICycledThreadLogic.Runner.runCTL(this);
+            ICycledThreadLogic.Runner.runCTL(this);
         } catch (Throwable t) {
             ApiAlgs.getLog(this).error("CTL.Runner problem", t);//$NON-NLS-1$                        
         }
@@ -192,12 +192,12 @@ public class EPService implements EP_IService, EP_ICycledThreadLogic, Runnable {
     public void start() {
         if (getState() != State.STOPPED)
             return;
-        setState(EP_IService.State.STARTING);
+        setState(IService.State.STARTING);
         m_server = ApiStack.getInterface(IBasicServer.class);
         m_thread = new Thread(this);
         m_thread.start();
-        waitForAnyState(EnumSet.of(EP_IService.State.RUNNING,
-                EP_IService.State.STOPPED), false);
+        waitForAnyState(EnumSet.of(IService.State.RUNNING,
+                IService.State.STOPPED), false);
     }
 
     public State getState() {

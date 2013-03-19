@@ -13,7 +13,7 @@ import com.triniforce.server.srvapi.IThrdWatcherRegistrator.ThreadInfo;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 
-public class ThrdWatcher extends EPService{
+public class ThrdWatcher extends Service{
 	
 	    @Override
 	    public int getCyclePauseMs() {

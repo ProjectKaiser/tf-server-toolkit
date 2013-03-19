@@ -64,7 +64,7 @@ public class EP_ServiceManager extends EP_QueuedService {
 
     public static void doStartStop(String svcName, boolean bStart) {
         PKEPServices ss = getServices();
-        EP_IService svc = ss.getService(svcName);
+        IService svc = ss.getService(svcName);
         ISrvSmartTranFactory.Helper.commitAndStartTran();
         if (bStart) {
             svc.start();
