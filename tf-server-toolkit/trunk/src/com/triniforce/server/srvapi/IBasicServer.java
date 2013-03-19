@@ -13,7 +13,7 @@ import com.triniforce.db.ddl.TableDef.EReferenceError;
 import com.triniforce.extensions.IPKRootExtensionPoint;
 import com.triniforce.server.plugins.kernel.BasicServer.ServerException;
 import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
-import com.triniforce.server.plugins.kernel.services.EP_IService;
+import com.triniforce.server.plugins.kernel.services.IService;
 import com.triniforce.utils.Api;
 import com.triniforce.utils.ApiStack;
 
@@ -126,7 +126,7 @@ public interface IBasicServer extends IPKRootExtensionPoint {
      * @param id
      * @return
      */
-    EP_IService.State queryEPServiceState(long id);
+    IService.State queryEPServiceState(long id);
   
 }
 

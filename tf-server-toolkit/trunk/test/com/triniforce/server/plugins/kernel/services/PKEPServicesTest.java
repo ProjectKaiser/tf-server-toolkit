@@ -14,7 +14,7 @@ public class PKEPServicesTest extends ServicesTestCase {
 	
 	static boolean bComplete = false;
 	
-	public static class TestService extends EPService{
+	public static class TestService extends Service{
 		@Override
 		public void doCycle() throws Throwable {
 			super.doCycle();
@@ -52,10 +52,10 @@ public class PKEPServicesTest extends ServicesTestCase {
 		
 		server.stopServices();
 		Thread.sleep(2000L);
-		assertEquals(EP_IService.State.STOPPED, getService().getState());
+		assertEquals(IService.State.STOPPED, getService().getState());
 	}
 
-	private EP_IService getService() {
+	private IService getService() {
 		return ep.getExtension(TestService.class).getInstance();
 		
 	}

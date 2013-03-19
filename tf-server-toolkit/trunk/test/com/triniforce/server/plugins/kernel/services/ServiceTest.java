@@ -24,7 +24,7 @@ public class ServiceTest extends ServicesTestCase {
         tf.push();
     }    
     
-    class MyCT1 extends EPService {
+    class MyCT1 extends Service {
 
         @Override
         public int getCyclePauseMs() {
@@ -47,7 +47,7 @@ public class ServiceTest extends ServicesTestCase {
 
     }
 
-    class MyCTErrInCycle extends EPService {
+    class MyCTErrInCycle extends Service {
 
         @Override
         public int getCyclePauseMs() {
@@ -74,13 +74,13 @@ public class ServiceTest extends ServicesTestCase {
     
     public void test() throws Exception {
         {// simple
-            EPService ct = new MyCT1();
-            assertEquals(EP_IService.State.STOPPED, ct.getState());
+            Service ct = new MyCT1();
+            assertEquals(IService.State.STOPPED, ct.getState());
             ct.start();
-            assertEquals(EP_IService.State.RUNNING, ct.getState());            
+            assertEquals(IService.State.RUNNING, ct.getState());            
             Thread.sleep(1000);
             ct.stop();
-            assertEquals(EP_IService.State.STOPPED, ct.getState());            
+            assertEquals(IService.State.STOPPED, ct.getState());            
         }
 /*        {// MyCTErrInCycle
             Service ct = new MyCTErrInCycle();

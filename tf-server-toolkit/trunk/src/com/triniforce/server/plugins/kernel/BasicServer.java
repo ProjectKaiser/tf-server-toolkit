@@ -49,9 +49,9 @@ import com.triniforce.extensions.PKRootExtensionPoint;
 import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
 import com.triniforce.server.plugins.kernel.ep.srv_ev.PKEPServerEvents;
 import com.triniforce.server.plugins.kernel.ep.srv_ev.ServerEvent;
-import com.triniforce.server.plugins.kernel.services.EP_IService;
+import com.triniforce.server.plugins.kernel.services.IService;
 import com.triniforce.server.plugins.kernel.services.PKEPServices;
-import com.triniforce.server.plugins.kernel.services.EP_IService.State;
+import com.triniforce.server.plugins.kernel.services.IService.State;
 import com.triniforce.server.plugins.kernel.services.PKEPServices.EServiceNotFound;
 import com.triniforce.server.plugins.kernel.tables.EntityJournal;
 import com.triniforce.server.srvapi.DataPreparationProcedure;
@@ -792,7 +792,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 										String
 												.format(
 														"Data preparation procedure: \"%s\"", proc.getEntityName())); //$NON-NLS-1$
-						if(!m_bNewDb)
+//						if(!m_bNewDb)
 							proc.run(); // DPP only in upgrade mode. Empty Db starts with extension registration
 						
 						((EntityJournal<DataPreparationProcedure>) getEntity(DPP_TABLE))
@@ -1291,10 +1291,10 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
                 PKEPServices ss = getServices();
                 long smId = ss.getServiceManagerId();
                 IDbQueueFactory.Helper.cleanQueue(smId);
-                EP_IService sm = ss.getService(smId);
+                IService sm = ss.getService(smId);
                 ISrvSmartTranFactory.Helper.commitAndStartTran();
                 sm.start();
-                ApiAlgs.assertEquals(EP_IService.State.RUNNING, sm.getState());
+                ApiAlgs.assertEquals(IService.State.RUNNING, sm.getState());
                 ss.startStopWithSubservices(smId, true);
 
         } catch (EServiceNotFound e) {
@@ -1329,8 +1329,8 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 		try{
 	        stopServices();
 	        PKEPServices ss = getServices();
-	        EP_IService s = ss.getService(ss.getServiceManagerId());
-	        while( s.getState() != EP_IService.State.STOPPED){
+	        IService s = ss.getService(ss.getServiceManagerId());
+	        while( s.getState() != IService.State.STOPPED){
 	            ISrvSmartTranFactory.Helper.commitAndStartTran();
 	            ICheckInterrupted.Helper.sleep(100);
 	        }
@@ -1344,7 +1344,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
         enterMode(Mode.Running);
         try {
             PKEPServices ss = getServices();
-            EP_IService sm = ss.getService(ss.getServiceManagerId());
+            IService sm = ss.getService(ss.getServiceManagerId());
             return sm.getState();
 		} catch(EServiceNotFound e){
 			ApiAlgs.rethrowException(e);

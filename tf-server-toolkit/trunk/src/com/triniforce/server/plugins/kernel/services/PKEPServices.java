@@ -24,18 +24,18 @@ public class PKEPServices extends PKExtensionPoint{
 	}
 
     Map<Long, String> m_registeredServices = new HashMap<Long, String>();
-    Map<Long, EP_IService> m_services = new HashMap<Long, EP_IService>();
+    Map<Long, IService> m_services = new HashMap<Long, IService>();
 	private Long m_serviceManagerId;
 
 	
-    public synchronized EP_IService getService(long id) throws EServiceNotFound{
-        EP_IService res = m_services.get(id);
+    public synchronized IService getService(long id) throws EServiceNotFound{
+        IService res = m_services.get(id);
         if (null != res)
             return res;
 
         String svcId = getServiceId(id);
 
-        EPService svc = (EPService) getService(svcId);
+        Service svc = (Service) getService(svcId);
         m_services.put(id, svc);
         return svc;
         
@@ -45,8 +45,8 @@ public class PKEPServices extends PKExtensionPoint{
         return getExtensions().keySet();
     }
     
-    public synchronized EP_IService getService(String svcName){
-        EPService svc = getExtension(svcName).getInstance();
+    public synchronized IService getService(String svcName){
+        Service svc = getExtension(svcName).getInstance();
         return svc;        
     }
     

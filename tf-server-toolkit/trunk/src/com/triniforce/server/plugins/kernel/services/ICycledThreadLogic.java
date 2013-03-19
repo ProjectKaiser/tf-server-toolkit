@@ -10,7 +10,7 @@ import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.ICheckInterrupted;
 
-public interface EP_ICycledThreadLogic {
+public interface ICycledThreadLogic {
 
     int getCycleExceptionPauseMs();
 
@@ -46,7 +46,7 @@ public interface EP_ICycledThreadLogic {
      * Class to play CycledThreadLogicwhich interface
      */
     public static class Runner {
-        public static void runCTL(EP_ICycledThreadLogic ctl) {
+        public static void runCTL(ICycledThreadLogic ctl) {
             while (true) {
                 try {
                     IThrdWatcherRegistrator twr = ApiStack.queryInterface(IThrdWatcherRegistrator.class);
