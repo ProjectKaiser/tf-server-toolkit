@@ -369,7 +369,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	}
 
 	boolean m_pluginRegistrationDone;
-	private boolean m_bNewDb;
+	private boolean m_bRunDPProcedures;
 	
 	public void doPluginsRegistration() {
 	    if(m_pluginRegistrationDone) return;
@@ -511,7 +511,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 		EntityJournal<DataPreparationProcedure> dppDef = (EntityJournal<DataPreparationProcedure>) getEntity(DPP_TABLE);
 		String dbName = getTableDbName(DPP_TABLE);
-		m_bNewDb = dppDef.getActual(connection, dbName).isEmpty();
+		m_bRunDPProcedures = !dppDef.getActual(connection, dbName).isEmpty();
 		m_dppRegList = dppDef.exclude(connection, dbName, dppList);
 
 	}
@@ -792,7 +792,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 										String
 												.format(
 														"Data preparation procedure: \"%s\"", proc.getEntityName())); //$NON-NLS-1$
-//						if(!m_bNewDb)
+						if(m_bRunDPProcedures)
 							proc.run(); // DPP only in upgrade mode. Empty Db starts with extension registration
 						
 						((EntityJournal<DataPreparationProcedure>) getEntity(DPP_TABLE))
@@ -1353,5 +1353,9 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
             leaveMode();
         }
 	} 
+	
+	protected void setRunDPProcedure(boolean v){
+		m_bRunDPProcedures = v;
+	}
 
 }
