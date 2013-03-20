@@ -29,8 +29,8 @@ public class QueuedServiceTest extends ServicesTestCase {
         qSM.put(testObject2);
         assertNotNull(qSM.peek(0));
         ServiceTest.restartTran(true);
-        if (true)
-            return;
+//        if (true)
+//            return;
 
         // Create QueuedService instance and run its initCycle/finitCycle
         // methods
