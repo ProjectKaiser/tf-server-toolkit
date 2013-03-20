@@ -240,8 +240,8 @@ public class ServicesTest extends ServicesTestCase {
             assertSame(srvSM, ss.getService(SM_ID));
             srvSM.stop();
         }
-        if (true)
-            return;
+//        if (true)
+//            return;
 
         {// start
             assertNull(smq.get(0));
