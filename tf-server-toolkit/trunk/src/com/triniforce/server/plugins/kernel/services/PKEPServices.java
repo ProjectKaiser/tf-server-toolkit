@@ -16,6 +16,11 @@ import com.triniforce.utils.ApiAlgs;
 
 public class PKEPServices extends PKExtensionPoint{
 	
+    public PKEPServices() {
+        setExtensionClass(IService.class);
+        setWikiDescription("Services");
+    }
+    
 	public static class EServiceNotFound extends Exception{
 		private static final long serialVersionUID = 5798098277505044559L;
 		public EServiceNotFound(long id) {
