@@ -126,7 +126,7 @@ public interface IBasicServer extends IPKRootExtensionPoint {
      * @param id
      * @return
      */
-    IService.State queryEPServiceState(long id);
+    IService.State queryServiceState(long id);
   
 }
 

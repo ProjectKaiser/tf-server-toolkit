@@ -1340,7 +1340,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	}
 
 
-	public State queryEPServiceState(long id) {
+	public State queryServiceState(long id) {
         enterMode(Mode.Running);
         try {
             PKEPServices ss = getServices();
