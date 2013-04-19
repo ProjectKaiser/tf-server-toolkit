@@ -252,7 +252,7 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
     public static void checkExtensionClass(IPKExtensionPoint ep, List<String> problems) {
 		Class ec = ep.getExtensionClass();
 		if (null == ec){
-			problems.add("Empty exception class for " + ep.getId());
+			problems.add("Empty extension class for " + ep.getId());
 		}
 	}
     
