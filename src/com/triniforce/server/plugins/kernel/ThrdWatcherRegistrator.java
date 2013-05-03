@@ -53,7 +53,6 @@ public class ThrdWatcherRegistrator implements IThrdWatcherRegistrator {
     }
 
     public ThreadInfo queryThreadInfo(Thread thread){
-    	ApiAlgs.getLog(this).trace(">> " + thread.getName());
         ThreadInfo ti = m_threadMap.get(thread);
         return ti;
     }
@@ -65,7 +64,6 @@ public class ThrdWatcherRegistrator implements IThrdWatcherRegistrator {
     }
 
     public synchronized void registerThread(Thread thread, String threadExtraInfo) {
-    	ApiAlgs.getLog(this).trace("<< " + thread.getName());
         ThreadInfo ti = m_threadMap.get(thread);
         if(null == ti){ 
             ti = new ThreadInfo();
