@@ -10,8 +10,6 @@ import java.io.IOException;
 
 import org.apache.log4j.PropertyConfigurator;
 
-
-
 public class TFUtilsLogs {
     
     static final String LOG4J_CONFIG_FILE = "log4j.properties"; 
