@@ -28,7 +28,7 @@ public class TFUtilsLogsTest extends TFTestCase {
             assertTrue(fTest.mkdir());
         }
         {
-            File f = new File(fTest, "logs01");
+            File f = new File(fTest, "pp/logs01");
             String folder = f.getAbsolutePath();
                     
             trace(folder);
@@ -73,7 +73,7 @@ public class TFUtilsLogsTest extends TFTestCase {
             fr.close();
         }
         { // Folder exists but there is no log4j
-            File f = new File(fTest, "logs01");
+            File f = new File(fTest, "pp/logs01");
             String folder = f.getAbsolutePath();
             File flog = new File(f, "log4j.properties");
             assertTrue(flog.delete());
