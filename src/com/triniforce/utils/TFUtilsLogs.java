@@ -42,6 +42,4 @@ public class TFUtilsLogs {
         PropertyConfigurator.configure(flog.getAbsolutePath());
     }
     
-    
-    
 }
