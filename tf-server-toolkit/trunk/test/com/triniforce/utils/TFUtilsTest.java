@@ -5,6 +5,10 @@
  */ 
 package com.triniforce.utils;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
 import com.triniforce.db.test.TFTestCase;
 
 public class TFUtilsTest extends TFTestCase {
@@ -38,6 +42,55 @@ public class TFUtilsTest extends TFTestCase {
         Short s =12120;
         assertEquals(s, TFUtils.asShort(l));
         assertEquals((Short)(short)10, TFUtils.asShort("10"));
+    }
+    
+    public void testFilePrintRead() throws IOException{
+        File tmp = getTmpFolder(this);
+        File txt = new File(tmp, "txt");
+        List<String> res;
+        
+        
+        //empty
+        {
+            txt.delete();
+            txt.createNewFile();
+            res = TFUtils.readLinesFromFile(txt, 0);
+            assertEquals(0, res.size());
+            res = TFUtils.readLinesFromFile(txt, 1);
+            assertEquals(0, res.size());
+        }
+        
+        //single line
+        {
+            txt.delete();
+            TFUtils.printlnToFile(txt, "1");
+            res = TFUtils.readLinesFromFile(txt, 0);
+            assertEquals(0, res.size());
+            res = TFUtils.readLinesFromFile(txt, 1);
+            assertEquals(1, res.size());
+            assertEquals("1", res.get(0));
+        }
+        
+        //two lines
+        {
+            txt.delete();
+            TFUtils.printlnToFile(txt, "1");
+            TFUtils.printlnToFile(txt, "2", true);
+            res = TFUtils.readLinesFromFile(txt, 0);
+            assertEquals(0, res.size());
+            res = TFUtils.readLinesFromFile(txt, 1);
+            assertEquals(1, res.size());
+            assertEquals("1", res.get(0));
+            res = TFUtils.readLinesFromFile(txt, 2);
+            assertEquals(2, res.size());
+            assertEquals("1", res.get(0));
+            assertEquals("2", res.get(1));
+            res = TFUtils.readLinesFromFile(txt, 4);
+            assertEquals(2, res.size());
+            assertEquals("1", res.get(0));
+            assertEquals("2", res.get(1));                        
+        }        
+        
     }
     
 
