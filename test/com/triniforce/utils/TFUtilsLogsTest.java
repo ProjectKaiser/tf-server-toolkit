@@ -16,6 +16,13 @@ import org.apache.commons.logging.LogFactory;
 import com.triniforce.db.test.TFTestCase;
 
 public class TFUtilsLogsTest extends TFTestCase {
+    
+    public void testGetTailAndShitHours(){
+        File tmp = getTmpFolder(this);
+        File log = new File(tmp, "log");
+        log.delete();
+    }
+    
     public void testConfigureLog() throws IOException, InterruptedException{
         try{
             TFUtilsLogs.configureLog("", this.getClass(), "");

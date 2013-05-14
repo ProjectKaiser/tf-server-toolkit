@@ -15,8 +15,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.RandomAccessFile;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -356,6 +359,12 @@ public class TFUtils {
 	    }        
 	}
 
+	/**
+	 * 
+	 * File management utilities 
+	 * 
+	 */
+	
 	public static void delTree(File dir, boolean deleteDirItSelf) {
 	    if (!dir.exists())
 	        return;
@@ -371,10 +380,56 @@ public class TFUtils {
 	    }
 	}
 
+    public static List<String> readLinesFromFile(File f, int n) {
+        TFUtils.assertTrue(n >=0, "Wrong arg:" + n);
+        List<String> res = new ArrayList<String>();
+        try {
+            FileInputStream fis = new FileInputStream(f);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis, "utf8"));
+            String line;
+            while ((line = br.readLine()) != null && res.size() < n) {
+                res.add(line);
+            }
+            return res;
+        } catch (Exception e) {
+            ApiAlgs.rethrowException(e);
+        }
+        return res;
+    }
+    
+    public static List<String> readLastLinesFromFile(File f, int n, int lineSize) {
+        TFUtils.assertTrue(n >=0, "Wrong arg:" + n);
+        TFUtils.assertTrue(lineSize >=0, "Wrong arg:" + lineSize);
+        List<String> res = new ArrayList<String>();
+        try {
+            RandomAccessFile raf = new RandomAccessFile(f, "r");
+            Long endPos = raf.length();
+            int dataSize  = (lineSize*(n + 10)); //10 lines reserved
+            raf.seek(endPos - dataSize);
+            byte data[] = new byte[dataSize];
+            raf.readFully(data);
+            //ByteInputStream fis = new ByteInputStream(data);
+            //BufferedReader br = new BufferedReader(new InputStreamReader(fis, "utf8"));
+//            String line;
+//            while ((line = br.readLine()) != null && res.size() < n) {
+//                res.add(line);
+//            }
+            return res;
+        } catch (Exception e) {
+            ApiAlgs.rethrowException(e);
+        }
+        return res;
+    }
+	
 	public static void printlnToFile(File f, String s) {
+	    printlnToFile(f, s, false);
+	       
+	}
+	
+	public static void printlnToFile(File f, String s, boolean append) {
 	    try {
-	        FileOutputStream fos = new FileOutputStream(f);
-	        PrintStream ps = new PrintStream(fos);
+	        FileOutputStream fos = new FileOutputStream(f, append);
+	        PrintStream ps = new PrintStream(fos, true, "utf8");
 	        try {
 	            ps.println(s);
 	        } finally {
@@ -386,6 +441,8 @@ public class TFUtils {
 	    }
 	}
 
+	//public static String readLinesFromFile(File file, String charset, boolean closeStream){
+	
 	public static String readStringFromStream(InputStream is, String charset, boolean closeStream){
 		StringBuffer res = new StringBuffer();
 		try {

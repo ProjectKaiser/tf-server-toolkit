@@ -10,7 +10,7 @@ import java.io.IOException;
 
 import org.apache.log4j.PropertyConfigurator;
 
-public class TFUtilsLogs {
+public class TFUtilsLogs{
     
     static final String LOG4J_CONFIG_FILE = "log4j.properties"; 
     static final String FOLDER_TAG = "\\$\\{catalina\\.home\\}";
@@ -38,6 +38,10 @@ public class TFUtilsLogs {
             TFUtils.printlnToFile(flog, props);
         }
         PropertyConfigurator.configure(flog.getAbsolutePath());
+    }
+    
+    public String readTailAndShiftHours(File f, int numOfStrings, int numOfHours){
+        return "";
     }
     
 }
