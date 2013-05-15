@@ -7,6 +7,7 @@
 package com.triniforce.utils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,6 +21,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -385,10 +387,14 @@ public class TFUtils {
         List<String> res = new ArrayList<String>();
         try {
             FileInputStream fis = new FileInputStream(f);
-            BufferedReader br = new BufferedReader(new InputStreamReader(fis, "utf8"));
-            String line;
-            while ((line = br.readLine()) != null && res.size() < n) {
-                res.add(line);
+            try{
+                BufferedReader br = new BufferedReader(new InputStreamReader(fis, "utf8"));
+                String line;
+                while ((line = br.readLine()) != null && res.size() < n) {
+                    res.add(line);
+                }
+            }finally{
+                fis.close();
             }
             return res;
         } catch (Exception e) {
@@ -397,27 +403,44 @@ public class TFUtils {
         return res;
     }
     
-    public static List<String> readLastLinesFromFile(File f, int n, int lineSize) {
+    public static List<String> readLastLinesFromFile(File f, int n, int approxLineSize) {
         TFUtils.assertTrue(n >=0, "Wrong arg:" + n);
-        TFUtils.assertTrue(lineSize >=0, "Wrong arg:" + lineSize);
-        List<String> res = new ArrayList<String>();
+        TFUtils.assertTrue(approxLineSize >=0, "Wrong arg:" + approxLineSize);
+        List<String> res1 = new ArrayList<String>();
         try {
             RandomAccessFile raf = new RandomAccessFile(f, "r");
-            Long endPos = raf.length();
-            int dataSize  = (lineSize*(n + 10)); //10 lines reserved
-            raf.seek(endPos - dataSize);
+            try{
+            long endPos = raf.length();
+            int dataSize  = ((approxLineSize + 2)*(n*6/4 + 10)); //space reservation
+            boolean isShort = false;
+            if(dataSize>=endPos){
+                dataSize = (int) endPos;
+                isShort = true;
+            }
+            raf.seek(endPos - dataSize);            
             byte data[] = new byte[dataSize];
             raf.readFully(data);
-            //ByteInputStream fis = new ByteInputStream(data);
-            //BufferedReader br = new BufferedReader(new InputStreamReader(fis, "utf8"));
-//            String line;
-//            while ((line = br.readLine()) != null && res.size() < n) {
-//                res.add(line);
-//            }
-            return res;
+            ByteArrayInputStream bis = new ByteArrayInputStream(data);
+            BufferedReader br = new BufferedReader(new InputStreamReader(bis, "utf8"));
+            String line;
+            while ((line = br.readLine()) != null){
+                res1.add(line);
+            }
+            if(!isShort && res1.size() > 1){
+                res1.remove(0);//since it is not fully read
+            }
+            
+            }finally{
+                raf.close();
+            }
         } catch (Exception e) {
             ApiAlgs.rethrowException(e);
         }
+        ListIterator<String> li = res1.listIterator(res1.size()> n? res1.size()- n: 0);
+        List<String> res = new ArrayList<String>();
+        while (li.hasNext()) {
+            res.add(li.next());
+        }                
         return res;
     }
 	
