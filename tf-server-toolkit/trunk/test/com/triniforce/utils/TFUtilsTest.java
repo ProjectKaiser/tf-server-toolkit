@@ -89,6 +89,80 @@ public class TFUtilsTest extends TFTestCase {
             assertEquals(2, res.size());
             assertEquals("1", res.get(0));
             assertEquals("2", res.get(1));                        
+        }
+    }
+    
+    public void testReadLastLinesFromFile() throws IOException{
+        File tmp = getTmpFolder(this);
+        File txt = new File(tmp, "txt");
+        List<String> res;
+        
+        //empty
+        {
+            txt.delete();
+            txt.createNewFile();
+            res = TFUtils.readLastLinesFromFile(txt, 1, 80);
+            assertEquals(0, res.size());
+            res = TFUtils.readLastLinesFromFile(txt, 0, 80);
+            assertEquals(0, res.size());            
+        }
+        //one line
+        {
+            txt.delete();
+            TFUtils.printlnToFile(txt, "1");
+            res = TFUtils.readLastLinesFromFile(txt, 1, 80);
+            assertEquals(1, res.size());
+            assertEquals("1", res.get(0));
+            
+            res = TFUtils.readLastLinesFromFile(txt, 4, 80);
+            assertEquals(1, res.size());
+            assertEquals("1", res.get(0));            
+            
+            res = TFUtils.readLastLinesFromFile(txt, 0, 80);
+            assertEquals(0, res.size());
+        }
+        //three lines
+        {
+            txt.delete();
+            TFUtils.printlnToFile(txt, "1");
+            TFUtils.printlnToFile(txt, "2", true);
+            TFUtils.printlnToFile(txt, "3", true);
+            res = TFUtils.readLastLinesFromFile(txt, 1, 80);
+            assertEquals(1, res.size());
+            assertEquals("3", res.get(0));
+            
+            res = TFUtils.readLastLinesFromFile(txt, 2, 80);
+            assertEquals(2, res.size());
+            assertEquals("2", res.get(0));
+            assertEquals("3", res.get(1));            
+        }
+        //long first line
+        {
+            txt.delete();
+            TFUtils.printlnToFile(txt, "1-0123456789qweoquwyeoiquwy eoiquweyqowieu oqwue hqklwjeh qlwjkehq lwjkeh");
+            TFUtils.printlnToFile(txt, "2", true);
+            TFUtils.printlnToFile(txt, "3-0123456789", true);
+            
+            res = TFUtils.readLastLinesFromFile(txt, 2, 1);
+            assertEquals(2, res.size());
+            assertEquals("2", res.get(0));
+            
+            res = TFUtils.readLastLinesFromFile(txt, 3, 2);
+            assertEquals(2, res.size());
+            assertEquals("2", res.get(0));
+        }
+        
+        //long last line
+        {
+            txt.delete();
+            TFUtils.printlnToFile(txt, "2", true);
+            TFUtils.printlnToFile(txt, "3-0123456789", true);
+
+            final String longLine = "1-0123456789qweoquwyeoiquwy eoiquweyqowieu oqwue hqklwjeh qlwjkehq lwjkeh"; 
+            TFUtils.printlnToFile(txt, longLine, true);
+            
+            res = TFUtils.readLastLinesFromFile(txt, 1, 1);
+            assertEquals(1, res.size());
         }        
         
     }
