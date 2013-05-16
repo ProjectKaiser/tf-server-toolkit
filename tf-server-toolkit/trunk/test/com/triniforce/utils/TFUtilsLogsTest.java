@@ -17,7 +17,7 @@ import com.triniforce.db.test.TFTestCase;
 
 public class TFUtilsLogsTest extends TFTestCase {
 
-    public void test_addHoursToPrintedDateTime(){
+    public void test_addMinutesToPrintedDateTime(){
         assertEquals("qqq", TFUtilsLogs.addHoursToPrintedDateTime("qqq", 2));
         
         //no changes since no whitespace in the beg
@@ -34,6 +34,9 @@ public class TFUtilsLogsTest extends TFTestCase {
         //second date intact
         
         assertEquals("\t2012-12-07 00:57:28\t2012-12-06 17:57:28", TFUtilsLogs.addHoursToPrintedDateTime("\t2012-12-06 17:57:28\t2012-12-06 17:57:28", 7));
+        
+        //shift -10 minutes
+        assertEquals(" 2012-12-06 17:47:28", TFUtilsLogs.addMinutesToPrintedDateTime(" 2012-12-06 17:57:28", -10));        
         
     }
     
