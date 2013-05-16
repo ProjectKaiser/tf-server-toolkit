@@ -7,8 +7,13 @@ package com.triniforce.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 public class TFUtilsLogs{
     
@@ -42,6 +47,25 @@ public class TFUtilsLogs{
     
     public String readTailAndShiftHours(File f, int numOfStrings, int numOfHours){
         return "";
+    }
+    
+    static final Pattern dtPattern = Pattern.compile("(\\s)(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d) (\\d\\d):(\\d\\d):(\\d\\d)");
+    static final DateTimeFormatter dtFmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+    public static String addHoursToPrintedDateTime(String src, int hoursToAdd){
+        Matcher m = dtPattern.matcher(src);
+        while (m.find()){
+            int year = Integer.parseInt(m.group(2));
+            int month = Integer.parseInt(m.group(3));
+            int day = Integer.parseInt(m.group(4));
+            int hour = Integer.parseInt(m.group(5));
+            int minute = Integer.parseInt(m.group(6));
+            int sec = Integer.parseInt(m.group(7));
+            DateTime start = new DateTime(year, month, day, hour, minute, sec);
+            
+            String newDateStr = m.group(1) + start.plusHours(hoursToAdd).toString(dtFmt);
+            return  m.replaceFirst(newDateStr);
+        }
+        return src;
     }
     
 }

@@ -16,6 +16,26 @@ import org.apache.commons.logging.LogFactory;
 import com.triniforce.db.test.TFTestCase;
 
 public class TFUtilsLogsTest extends TFTestCase {
+
+    public void test_addHoursToPrintedDateTime(){
+        assertEquals("qqq", TFUtilsLogs.addHoursToPrintedDateTime("qqq", 2));
+        
+        //no changes since no whitespace in the beg
+        assertEquals("=2012-12-06 17:57:28", TFUtilsLogs.addHoursToPrintedDateTime("=2012-12-06 17:57:28", 1));
+        
+        //shift one hour
+        assertEquals(" 2012-12-06 18:57:28", TFUtilsLogs.addHoursToPrintedDateTime(" 2012-12-06 17:57:28", 1));
+        //tabulation + shift one hour
+        assertEquals("\t2012-12-06 18:57:28", TFUtilsLogs.addHoursToPrintedDateTime("\t2012-12-06 17:57:28", 1));
+        
+        //tabulation + shift to next day
+        assertEquals("\t2012-12-07 00:57:28", TFUtilsLogs.addHoursToPrintedDateTime("\t2012-12-06 17:57:28", 7));
+        
+        //second date intact
+        
+        assertEquals("\t2012-12-07 00:57:28\t2012-12-06 17:57:28", TFUtilsLogs.addHoursToPrintedDateTime("\t2012-12-06 17:57:28\t2012-12-06 17:57:28", 7));
+        
+    }
     
     public void testGetTailAndShitHours(){
         File tmp = getTmpFolder(this);
