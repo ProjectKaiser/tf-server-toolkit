@@ -51,7 +51,9 @@ public class TFUtilsLogs{
     
     static final Pattern dtPattern = Pattern.compile("(\\s)(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d) (\\d\\d):(\\d\\d):(\\d\\d)");
     static final DateTimeFormatter dtFmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-    public static String addHoursToPrintedDateTime(String src, int hoursToAdd){
+    
+    
+    public static String addMinutesToPrintedDateTime(String src, int minutesToAdd){
         Matcher m = dtPattern.matcher(src);
         while (m.find()){
             int year = Integer.parseInt(m.group(2));
@@ -62,10 +64,14 @@ public class TFUtilsLogs{
             int sec = Integer.parseInt(m.group(7));
             DateTime start = new DateTime(year, month, day, hour, minute, sec);
             
-            String newDateStr = m.group(1) + start.plusHours(hoursToAdd).toString(dtFmt);
+            String newDateStr = m.group(1) + start.plusMinutes(minutesToAdd).toString(dtFmt);
             return  m.replaceFirst(newDateStr);
         }
         return src;
+    }
+    
+    public static String addHoursToPrintedDateTime(String src, int hoursToAdd){
+        return addMinutesToPrintedDateTime(src, hoursToAdd * 60);
     }
     
 }
