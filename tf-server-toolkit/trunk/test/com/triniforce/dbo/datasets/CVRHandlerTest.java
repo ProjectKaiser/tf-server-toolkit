@@ -463,33 +463,33 @@ public class CVRHandlerTest extends TFTestCase {
 		super.tearDown();
 	}
 	
-	public void testHandleRequest(){
-		CVRHandler h = new CVRHandler();
-		CollectionViewRequest req = new CollectionViewRequest();
-		req.setColumns(Arrays.asList("idx","name"));
-		{
-			req.setTarget("TestProvider_01");
-			IResSet res = h.handleRequest(req);
-			assertNotNull(res);
+	public void testProcessRequest(){
+			CVRHandler h = new CVRHandler();
+			CollectionViewRequest req = new CollectionViewRequest();
+			req.setColumns(Arrays.asList("idx","name"));
+			{
+				req.setTarget("TestProvider_01");
+				IResSet res = h.processRequest(req);
+				assertNotNull(res);
+			}
+			
+			{
+				// provider make own filtering
+				FLAGS = DSMetadata.CAN_FILTER;
+				req.getWhere().put("idx", 3);
+				IResSet res = h.processRequest(req);
+				res.next();
+				assertEquals(1, res.getObject(1));
+			}
+			{		
+				FLAGS = DSMetadata.CAN_SORT;
+				req.getWhere().clear();
+				req.getOrderBy().add(new CollectionViewRequest.DescField("name"));			
+				IResSet res = h.processRequest(req);
+				res.next();
+				assertEquals(1, res.getObject(1));
+			}
+	
 		}
-		
-		{
-			// provider make own filtering
-			FLAGS = DSMetadata.CAN_FILTER;
-			req.getWhere().put("idx", 3);
-			IResSet res = h.handleRequest(req);
-			res.next();
-			assertEquals(1, res.getObject(1));
-		}
-		{		
-			FLAGS = DSMetadata.CAN_SORT;
-			req.getWhere().clear();
-			req.getOrderBy().add(new CollectionViewRequest.DescField("name"));			
-			IResSet res = h.handleRequest(req);
-			res.next();
-			assertEquals(1, res.getObject(1));
-		}
-
-	}
 
 }
