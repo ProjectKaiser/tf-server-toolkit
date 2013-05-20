@@ -257,7 +257,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 //	private List<UpgradeProcedure> m_upRegList = null;
 
-	private List<DataPreparationProcedure> m_dppRegList = null;
+//	private List<DataPreparationProcedure> m_dppRegList = null;
 	
 	TimeZone m_defTimeZone;
 
@@ -494,7 +494,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	 * @param connection
 	 * @throws SQLException
 	 */
-	private void loadRegLists(Connection connection) throws SQLException {
+	private List<DataPreparationProcedure> loadRegLists(Connection connection) throws SQLException {
 		List<UpgradeProcedure> upList = getEntities(UpgradeProcedure.class);
 		List<DataPreparationProcedure> dppList = new ArrayList<DataPreparationProcedure>();
 		for (Iterator<UpgradeProcedure> iter = upList.iterator(); iter
@@ -511,8 +511,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 		EntityJournal<DataPreparationProcedure> dppDef = (EntityJournal<DataPreparationProcedure>) getEntity(DPP_TABLE);
 		String dbName = getTableDbName(DPP_TABLE);
-		m_bRunDPProcedures = !dppDef.getActual(connection, dbName).isEmpty();
-		m_dppRegList = dppDef.exclude(connection, dbName, dppList);
+		return dppDef.exclude(connection, dbName, dppList);
 
 	}
 
@@ -716,12 +715,15 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 		}
 
 		m_bDbModNeeded = false;
-
-		// run DataPreparationProcedures
+		
+				// run DataPreparationProcedures
 		enterMode(Mode.Running);
 		try {
-			loadRegLists(ApiStack.getInterface(Connection.class));
-			if (!m_dppRegList.isEmpty()) {
+			Connection connetion = ApiStack.getInterface(Connection.class);
+			m_bRunDPProcedures = isDPPRunNeeded(connetion);
+			
+			List<DataPreparationProcedure> dppList = loadRegLists(connetion);
+			if (!dppList.isEmpty()) {
 				runDataPreparationProcedures();
 			}
 		} finally {
@@ -737,6 +739,13 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 		}
 		
 	}
+
+	private boolean isDPPRunNeeded(Connection connection) throws SQLException {
+		EntityJournal<DataPreparationProcedure> dppDef = (EntityJournal<DataPreparationProcedure>) getEntity(DPP_TABLE);
+		String dbName = getTableDbName(DPP_TABLE);
+		return !dppDef.getActual(connection, dbName).isEmpty();
+	}
+
 
 	private Map<Class, List<IDBObject>> getDBOLists() {
 		HashMap<Class, List<IDBObject>> res = new HashMap<Class, List<IDBObject>>();
@@ -780,9 +789,9 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	protected void runDataPreparationProcedures() throws Exception {
 		runInSingleConnectionMode(new ICallback() {
 			public void call() throws Exception {
-//				Connection connection = ApiStack.getApi().getIntfImplementor(
-//						Connection.class);
-				for (DataPreparationProcedure proc : m_dppRegList) {
+				Connection connection = ApiStack.getApi().getIntfImplementor(
+						Connection.class);
+				for (DataPreparationProcedure proc : loadRegLists(connection)) {
 					PSI psi = ApiAlgs.getProfItem("Server initialization", proc
 							.getEntityName());
 					try {

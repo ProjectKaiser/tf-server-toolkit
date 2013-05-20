@@ -5,6 +5,8 @@
  */ 
 package com.triniforce.db.dml;
 
+import java.util.List;
+
 public interface IResSet {
     boolean next();    
   
@@ -14,5 +16,7 @@ public interface IResSet {
      * @return
      * @throws IndexOutOfBoundsException if column index is wrong
      */
-    public Object getObject(int columnIndex) throws IndexOutOfBoundsException;   
+    public Object getObject(int columnIndex) throws IndexOutOfBoundsException;
+    
+    List<String> getColumns();
 }

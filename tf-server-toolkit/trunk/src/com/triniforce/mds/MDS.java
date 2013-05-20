@@ -78,6 +78,10 @@ public class MDS implements Iterable<IMDSRow>{
             public Object getObject(int columnIndex) throws IndexOutOfBoundsException {
                 return getRows().get(idx).get(columnIndex);
             }
+
+			public List<String> getColumns() {
+				return null;
+			}
         };
     }
 

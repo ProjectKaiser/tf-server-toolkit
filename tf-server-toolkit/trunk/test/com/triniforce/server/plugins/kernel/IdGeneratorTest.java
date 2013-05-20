@@ -35,7 +35,7 @@ public class IdGeneratorTest extends BasicServerTestCase {
 		IIdGenerator gen = ApiStack.getApi().getIntfImplementor(IIdGenerator.class);
 
 		long v = gen.getKey();
-		assertTrue(v >  IdGenerator.MIN_GENERATED_KEY);
+		assertTrue(""+v, v >=  IdGenerator.MIN_GENERATED_KEY);
 		
 		for(int i=0; i<2*IdGenerator.KEY_CACHE_SIZE; i++){
 			assertEquals(v+i+1, gen.getKey());
