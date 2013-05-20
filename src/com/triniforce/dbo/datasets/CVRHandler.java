@@ -202,8 +202,18 @@ public class CVRHandler implements ICVRHandler {
 
 	public FieldFunction initFieldFunction(CollectionViewRequest req,
 			FieldFunctionRequest ffReq) {
+		final String target = req.getTarget();
+		final String field = ffReq.getFieldName();
 		IPKRootExtensionPoint root = ApiStack.getInterface(IBasicServer.class);
 		FieldFunction ff = root.getExtensionPoint(PKEPFieldFunctions.class).getExtension(ffReq.getFunctionName()).getInstance();
+		ff.init(new FieldFunction.IFieldFunctionCtx() {
+			public String getTarget() {
+				return target;
+			}
+			public String getField() {
+				return field;
+			}
+		});
 		return ff;
 	}
 		
@@ -261,16 +271,8 @@ public class CVRHandler implements ICVRHandler {
 	}
 	
 	
-	public IResSet handleRequest(CollectionViewRequest req){
-		IPKRootExtensionPoint root = ApiStack.getInterface(IBasicServer.class);
-		Collection<IPKExtension> providerExtensions = root.getExtensionPoint(PKEPDatasetProviders.class).getExtensions().values();
-		DSMetadata md = null;
-		for (IPKExtension ipkExtension : providerExtensions) {
-			PKEPDatasetProvider provider = ipkExtension.getInstance();
-			md = provider.queryTarget(req.getTarget());
-			if(null != md)
-				break;
-		}
+	public IResSet processRequest(CollectionViewRequest req){
+		DSMetadata md = findProvider(req);
 		
 		if(null == md)
 			throw new EDSException.EDSProviderNotFound(req.getTarget());
@@ -284,6 +286,19 @@ public class CVRHandler implements ICVRHandler {
 		
 		RSFlags rsFlags = new RSFlags(md.m_flags);
 		return process(rs, rsFlags, req, ffs);
+	}
+
+	public DSMetadata findProvider(CollectionViewRequest req) {
+		DSMetadata md = null;
+		IPKRootExtensionPoint root = ApiStack.getInterface(IBasicServer.class);
+		Collection<IPKExtension> providerExtensions = root.getExtensionPoint(PKEPDatasetProviders.class).getExtensions().values();
+		for (IPKExtension ipkExtension : providerExtensions) {
+			PKEPDatasetProvider provider = ipkExtension.getInstance();
+			md = provider.queryTarget(req.getTarget());
+			if(null != md)
+				break;
+		}
+		return md;
 	}
 	
 

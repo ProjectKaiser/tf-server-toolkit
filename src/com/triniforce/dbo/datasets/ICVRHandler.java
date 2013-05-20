@@ -35,7 +35,7 @@ public interface ICVRHandler {
 	 */
 //	IResSet load(CollectionViewRequest req, RSFlags rsFlags);
 	
-	public IResSet handleRequest(CollectionViewRequest req);
+	public IResSet processRequest(CollectionViewRequest req);
 	
 	public List<String> checkRequestMetadata(DSMetadata meta, CollectionViewRequest req);
 	
