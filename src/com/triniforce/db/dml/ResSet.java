@@ -8,6 +8,7 @@ package com.triniforce.db.dml;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.List;
 
 import com.triniforce.utils.ApiAlgs;
 
@@ -130,5 +131,10 @@ public class ResSet implements IResSet {
     	
        	return res.toString();
     }
+
+	public List<String> getColumns() {
+		// TODO Auto-generated method stub
+		return null;
+	}
     
 }
