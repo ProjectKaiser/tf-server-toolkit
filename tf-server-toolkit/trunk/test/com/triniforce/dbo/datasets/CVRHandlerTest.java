@@ -21,6 +21,7 @@ import com.triniforce.dbo.datasets.ICVRHandler.RSFlags;
 import com.triniforce.extensions.PKRootExtensionPoint;
 import com.triniforce.server.soap.CollectionViewRequest;
 import com.triniforce.server.soap.FieldFunctionRequest;
+import com.triniforce.server.soap.LongListResponse;
 import com.triniforce.server.soap.WhereExpr;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.utils.Api;
@@ -253,6 +254,15 @@ public class CVRHandlerTest extends TFTestCase {
 			assertFalse(res.next());
 		}
 		{
+			IResSet res = h.send(getRS(), fields, ffs, ff, 2, 0);
+			assertTrue(res.next());
+			assertEquals("string_04", res.getObject(2));
+			assertTrue(res.next());
+			assertEquals("string_05", res.getObject(2));
+			assertTrue(res.next());
+			
+		}
+		{
 			ffs.add(new FieldFunctionRequest("price", TestFunSale.class.getName(), "sale"));
 			ff.add(new TestFunSale());
 			IResSet res = h.send(getRS(), fields, ffs, ff, 0, 0);
@@ -263,6 +273,22 @@ public class CVRHandlerTest extends TFTestCase {
 			IResSet res = h.send(getRS(), fields, ffs, ff, 0, 0);
 			res.next();
 			assertEquals("50%", res.getObject(3));
+		}
+		{
+			// Default name for FF.result
+			fields.clear();
+			fields.addAll(Arrays.asList("name", "com.triniforce.dbo.datasets.CVRHandlerTest$TestFunSale(price)"));
+			ffs.clear();
+			ff.clear();
+			FieldFunctionRequest ffreq = new FieldFunctionRequest();
+			ffreq.setFunctionName(TestFunSale.class.getName());
+			ffreq.setFieldName("price");
+			ffs.add(ffreq);
+			ff.add(new TestFunSale());
+			IResSet res = h.send(getRS(), fields, ffs, ff, 0, 0);
+			res.next();
+			assertEquals("50%", res.getObject(2));
+			
 		}
 	}
 
@@ -319,8 +345,26 @@ public class CVRHandlerTest extends TFTestCase {
 			while(res.next()) i++;
 			assertEquals(i, counter);
 		}
-		{
-			
+		{// trunc by start/limit
+			CollectionViewRequest req = new CollectionViewRequest();
+			req.setColumns(Arrays.asList("idx", "name", "price"));
+			req.setStartFrom(3);
+			req.setLimit(1);
+			IResSet res = h.process(getRS(), flags, req, ffs);
+			assertTrue(res.next());
+			assertEquals(4, res.getObject(1));
+			assertFalse(res.next());
+		}
+		{// trunc by start
+			CollectionViewRequest req = new CollectionViewRequest();
+			req.setColumns(Arrays.asList("idx", "name", "price"));
+			req.setStartFrom(3);
+			req.setLimit(0);
+			IResSet res = h.process(getRS(), flags, req, ffs);
+			assertTrue(res.next());
+			assertEquals(4, res.getObject(1));
+			assertTrue(res.next());
+			assertEquals(5, res.getObject(1));
 		}
 	}
 	
@@ -419,15 +463,30 @@ public class CVRHandlerTest extends TFTestCase {
 		}
 	}
 	
+	static boolean MD_CHECKED = true;
+	static boolean MD_CLOSED = true;
+	
 	static class MD extends DSMetadata{
 		
 		public MD() {
 			super(FLAGS, COLUMNS);
+			MD_CLOSED = false;
 		}
 		
 		@Override
+		public
 		IResSet load(List<String>reqColumns, CollectionViewRequest req, List<FieldFunction>ffs){
 			return getRS();
+		}
+		
+		@Override
+		public boolean check(CollectionViewRequest req) {
+			return MD_CHECKED;
+		}
+		
+		@Override
+		public void close() {
+			MD_CLOSED = true;
 		}
 		
 	}
@@ -437,12 +496,12 @@ public class CVRHandlerTest extends TFTestCase {
 	
 	public static class TestProvider extends PKEPDatasetProvider{
 		@Override
+		public
 		DSMetadata queryTarget(String target) {
 			if(target.equals("TestProvider_01"))
 				return new MD();
 			return null;
 		}
-		
 	}
 	
 	@Override
@@ -469,7 +528,7 @@ public class CVRHandlerTest extends TFTestCase {
 			req.setColumns(Arrays.asList("idx","name"));
 			{
 				req.setTarget("TestProvider_01");
-				IResSet res = h.processRequest(req);
+				LongListResponse res = h.processRequest(req);
 				assertNotNull(res);
 			}
 			
@@ -477,17 +536,21 @@ public class CVRHandlerTest extends TFTestCase {
 				// provider make own filtering
 				FLAGS = DSMetadata.CAN_FILTER;
 				req.getWhere().put("idx", 3);
-				IResSet res = h.processRequest(req);
-				res.next();
-				assertEquals(1, res.getObject(1));
+				LongListResponse res = h.processRequest(req);
+				assertEquals(1, res.values().get(0));
 			}
 			{		
 				FLAGS = DSMetadata.CAN_SORT;
 				req.getWhere().clear();
 				req.getOrderBy().add(new CollectionViewRequest.DescField("name"));			
-				IResSet res = h.processRequest(req);
-				res.next();
-				assertEquals(1, res.getObject(1));
+				LongListResponse res = h.processRequest(req);
+				assertEquals(1, res.values().get(0));
+				assertTrue(MD_CLOSED);
+			}
+			{
+				MD_CHECKED = false;
+				LongListResponse res = h.processRequest(req);
+				assertTrue(res.values().isEmpty());
 			}
 	
 		}
