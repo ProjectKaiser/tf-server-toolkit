@@ -24,15 +24,23 @@ public class MDSTest extends TFTestCase {
     }
     
     public void testAppendNames(){
-        MDS mds = new MDS();
-        Map<String, Integer> names = new HashMap<String, Integer>();
-        names.put("col1", 2);
-        names.put("col2", 6);
-        names.put("col4", 2);
-        mds.setNamesMap(names);
-        mds.appendNames(Arrays.asList(new String[]{"col3", "col5"}));
-        assertEquals( (Integer)7, mds.getNamesMap().get("col3"));
-        assertEquals( (Integer)8, mds.getNamesMap().get("col5"));
+        {
+            MDS mds = new MDS();
+            mds.appendNames(Arrays.asList(new String[]{"col5", "col3"}));
+            assertEquals(1, mds.getIndexOf("col3"));
+            assertEquals(0, mds.getIndexOf("col5"));
+        }
+        {
+            MDS mds = new MDS();
+            Map<String, Integer> names = new HashMap<String, Integer>();
+            names.put("col1", 2);
+            names.put("col2", 6);
+            names.put("col4", 2);
+            mds.setNamesMap(names);
+            mds.appendNames(Arrays.asList(new String[]{"col3", "col5"}));
+            assertEquals( (Integer)7, mds.getNamesMap().get("col3"));
+            assertEquals( (Integer)8, mds.getNamesMap().get("col5"));
+        }
     }
     
     public void testAppendINames(){
@@ -130,21 +138,22 @@ public class MDSTest extends TFTestCase {
             }
             assertEquals(9, idx);
     }
+
+    class Name implements IName {
+        private String m_name;
+        public Name(String name) {
+            m_name = name;
+        }
+        public String getName() {
+            return m_name;
+        }
+    }
     
     public void testGetCell() {
     	
     	MDS mds = new MDS();
     	IMDSRow row = new MDSRow();
     	//
-    	class Name implements IName {
-			private String m_name;
-    		public Name(String name) {
-				m_name = name;
-			}
-    		public String getName() {
-				return m_name;
-			}
-		}
     	
     	IName name = null; 
     	
@@ -224,6 +233,18 @@ public class MDSTest extends TFTestCase {
     	assertEquals(mds.getRows().get(1).get(1),"AA");
     	assertNull(mds.getRows().get(1).get(2));
        	
+    }
+
+    public void test_setCell(){
+        MDS mds = new MDS();
+        mds.appendNames("col1", "col2");
+        IMDSRow row = mds.appendNullRow();
+        mds.setCell(row, "col1", "col1v");
+        mds.setCell(row, "col2", "col2v");
+        assertEquals("col2v", mds.getCell(row, "col2"));
+        assertEquals("col2v", mds.getCell(row, new Name("col2")));
+        assertEquals("col1v", mds.getCell(row, "col1"));
+        assertEquals("col1v", mds.getCell(row, new Name("col1")));
     }
     
     public void testToString() {
