@@ -6,6 +6,7 @@
 package com.triniforce.mds;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +33,7 @@ public class MDS implements Iterable<IMDSRow>{
      * This operation does NOT append values to rows
      */
     public void appendNames(List<String> names){
-        int idx = 0;
+        int idx = -1;
         for( Entry<String, Integer> e: m_namesMap.entrySet()){
             if(e.getValue() > idx){
                 idx = e.getValue();
@@ -41,6 +42,10 @@ public class MDS implements Iterable<IMDSRow>{
         for(String name: names){
             m_namesMap.put(name, ++idx);
         }
+    }
+    
+    public void appendNames(String... names){
+        appendNames(Arrays.asList(names));        
     }
     
     public void appendINames(IName... names){
@@ -58,6 +63,15 @@ public class MDS implements Iterable<IMDSRow>{
     
     public IMDSRow appendRowAsArray(Object values[]){
         return appendRowAsArray(values, 0, values.length);
+    }
+    
+    public void setCell(IMDSRow row, String name, Object value){
+        int idx = getIndexOf(name);
+        row.set(idx, value);
+    }
+    
+    public void setCell(IMDSRow row, IName name, Object value){
+        setCell(row, name.getName(), value);
     }
     
     public IMDSRow appendRowAsArray(Object values[], int fromIndex, int cnt){
@@ -104,27 +118,50 @@ public class MDS implements Iterable<IMDSRow>{
 			super("Column name: " + s);
 		}
 	}
+
+    public int getIndexOf(String colName){
+        Integer index = m_namesMap.get(colName);
+        if (index == null) {
+            throw new ColumnNotFound(colName);
+        } else {
+            return index;
+        }
+    }
     
     public Object getCell(IMDSRow row, String col) throws IndexOutOfBoundsException {
-
     	if (row == null) throw new NullPointerException("row");
     	if (col == null) throw new NullPointerException("col");
-    	
-    	Integer index = m_namesMap.get(col);
-    	if (index == null) {
-    		throw new ColumnNotFound(col);
-    	} else {
-    		return row.get(index-1);
-    	}
+  		return row.get(getIndexOf(col));
     }
+    
+//    public void setCell(IMDSRow row, String col) throws IndexOutOfBoundsException {
+//
+//        if (row == null) throw new NullPointerException("row");
+//        if (col == null) throw new NullPointerException("col");
+//        
+//        Integer index = m_namesMap.get(col);
+//        if (index == null) {
+//            throw new ColumnNotFound(col);
+//        } else {
+//            return row.get(index-1);
+//        }
+//    }
     
     public Object getCell(IMDSRow row, IName col) throws IndexOutOfBoundsException {
     	if (col == null) throw new NullPointerException("col");
     	return getCell(row, col.getName());
     }
-        
+    
+    public IMDSRow appendNullRow(){
+        final int sz = getNamesMap().size();
+        MDSRow row = new MDSRow(sz);
+        Object vals[] = new Object[sz];
+        row.appendArray(vals);
+        appendRow(row);
+        return row;
+    }
+    
     public IMDSRow appendRow(IMDSRow src){
-        
     	if (src == null) {
         	throw new NullPointerException("src");
         }
@@ -150,10 +187,10 @@ public class MDS implements Iterable<IMDSRow>{
 			for (int i = 0; i < keys.length; i++) {
 				int index = m_namesMap.get(keys[i]);
 				if (i > 0) res.append("\t");
-				if (row.get(index-1) == null) {
+				if (row.get(index) == null) {
 					res.append("null");
 				} else {
-					res.append(row.get(index-1).toString());
+					res.append(row.get(index).toString());
 				}
 				
 			}
