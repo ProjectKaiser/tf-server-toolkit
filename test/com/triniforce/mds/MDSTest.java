@@ -12,6 +12,7 @@ import java.util.Map;
 import com.triniforce.db.dml.IResSet;
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.mds.MDS.ColumnNotFound;
+import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.IName;
 
 public class MDSTest extends TFTestCase {
@@ -30,6 +31,18 @@ public class MDSTest extends TFTestCase {
         names.put("col4", 2);
         mds.setNamesMap(names);
         mds.appendNames(Arrays.asList(new String[]{"col3", "col5"}));
+        assertEquals( (Integer)7, mds.getNamesMap().get("col3"));
+        assertEquals( (Integer)8, mds.getNamesMap().get("col5"));
+    }
+    
+    public void testAppendINames(){
+        MDS mds = new MDS();
+        Map<String, Integer> names = new HashMap<String, Integer>();
+        names.put("col1", 2);
+        names.put("col2", 6);
+        names.put("col4", 2);
+        mds.setNamesMap(names);
+        mds.appendINames(new ApiAlgs.SimpleName("col3"), new ApiAlgs.SimpleName("col5"));
         assertEquals( (Integer)7, mds.getNamesMap().get("col3"));
         assertEquals( (Integer)8, mds.getNamesMap().get("col5"));
     }

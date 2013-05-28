@@ -43,6 +43,15 @@ public class MDS implements Iterable<IMDSRow>{
         }
     }
     
+    public void appendINames(IName... names){
+        List<String> sNames = new ArrayList<String>(names.length);
+        for(IName n: names){
+            sNames.add(n.getName());
+        }
+        appendNames(sNames);
+        
+    }
+    
     public void setNamesMap(Map<String, Integer> namesMap) {
         m_namesMap = namesMap;
     }
