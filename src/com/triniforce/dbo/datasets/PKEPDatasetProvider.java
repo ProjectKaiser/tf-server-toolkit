@@ -7,7 +7,7 @@ package com.triniforce.dbo.datasets;
 
 public class PKEPDatasetProvider {
 	
-	DSMetadata queryTarget(String target){
+	public DSMetadata queryTarget(String target){
 		return null;
 	}
 

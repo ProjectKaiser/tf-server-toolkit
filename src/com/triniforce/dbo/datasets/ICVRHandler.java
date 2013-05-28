@@ -10,6 +10,7 @@ import java.util.List;
 import com.triniforce.db.dml.IResSet;
 import com.triniforce.server.soap.CollectionViewRequest;
 import com.triniforce.server.soap.FieldFunctionRequest;
+import com.triniforce.server.soap.LongListResponse;
 import com.triniforce.server.soap.WhereExpr;
 
 public interface ICVRHandler {
@@ -35,7 +36,7 @@ public interface ICVRHandler {
 	 */
 //	IResSet load(CollectionViewRequest req, RSFlags rsFlags);
 	
-	public IResSet processRequest(CollectionViewRequest req);
+	public LongListResponse processRequest(CollectionViewRequest req);
 	
 	public List<String> checkRequestMetadata(DSMetadata meta, CollectionViewRequest req);
 	

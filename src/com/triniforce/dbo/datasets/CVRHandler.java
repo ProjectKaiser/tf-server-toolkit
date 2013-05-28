@@ -19,9 +19,11 @@ import com.triniforce.extensions.IPKRootExtensionPoint;
 import com.triniforce.server.plugins.kernel.ep.view.PKEPFieldFunctions;
 import com.triniforce.server.soap.CollectionViewRequest;
 import com.triniforce.server.soap.FieldFunctionRequest;
+import com.triniforce.server.soap.LongListResponse;
 import com.triniforce.server.soap.WhereExpr;
 import com.triniforce.server.soap.WhereExpr.ColumnExpr;
 import com.triniforce.server.srvapi.IBasicServer;
+import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 
 public class CVRHandler implements ICVRHandler {
@@ -41,8 +43,9 @@ public class CVRHandler implements ICVRHandler {
 		if(!res.getColumns().contains(column)){
 			//Request FieldFunction
 			int iFfr = getFieldFunctionRequest(ffs, column);
+			ApiAlgs.assertTrue(iFfr>=0, column);
 			FieldFunctionRequest ffr = ffs.get(iFfr);
-			res.addFieldFunction(ffr.getResultName(), ffr.getFieldName(), ff.get(iFfr));
+			res.addFieldFunction(getFFResName(ffr), ffr.getFieldName(), ff.get(iFfr));
 		}
 
 	}
@@ -66,11 +69,19 @@ public class CVRHandler implements ICVRHandler {
 		for (Iterator iterator = ffReqs.iterator(); iterator.hasNext();) {
 			FieldFunctionRequest fieldFunctionRequest = (FieldFunctionRequest) iterator
 					.next();
-			if(fieldFunctionRequest.getResultName().equals(key))
+			String ffResName = getFFResName(fieldFunctionRequest);
+			if(key.equals(ffResName))
 				return i;
 			i++;
 		}
 		return -1;
+	}
+
+	private String getFFResName(FieldFunctionRequest fieldFunctionRequest) {
+		String res = fieldFunctionRequest.getResultName();
+		if(null == res)
+			res = String.format("%s(%s)", fieldFunctionRequest.getFunctionName(), fieldFunctionRequest.getFieldName());
+		return res;
 	}
 
 	public IResSet filterAndSend(IResSet rs, List<WhereExpr> where,
@@ -78,7 +89,7 @@ public class CVRHandler implements ICVRHandler {
 		PipeResSet fltRs = new PipeResSet(rs);
 		Iterator<FieldFunction> iff = ff.iterator();
 		for(FieldFunctionRequest req : ffs){
-			fltRs.addFieldFunction(req.getResultName(), req.getFieldName(), iff.next());
+			fltRs.addFieldFunction(getFFResName(req), req.getFieldName(), iff.next());
 		}
 		setWhereExprs(fltRs, where);
 
@@ -135,8 +146,9 @@ public class CVRHandler implements ICVRHandler {
 			PipeResSet pipe = new PipeResSet(rs);
 			for(String ffColumn : ffColumns){
 				int iReq = getFieldFunctionRequest(ffs, ffColumn);
+				ApiAlgs.assertTrue(iReq>=0, ffColumn);
 				FieldFunctionRequest ffReq = ffs.get(iReq);
-				pipe.addFieldFunction(ffReq.getResultName(), ffReq.getFieldName(), ff.get(iReq));
+				pipe.addFieldFunction(getFFResName(ffReq), ffReq.getFieldName(), ff.get(iReq));
 			}
 			rs = pipe;
 		}
@@ -157,18 +169,19 @@ public class CVRHandler implements ICVRHandler {
 	public IResSet process(IResSet rs, RSFlags flags, CollectionViewRequest req, List<FieldFunction> ffs){
 		List<String> resColumns = new ArrayList<String>(req.getColumns());
 		for (FieldFunctionRequest ffReq : req.getFunctions()) {
-			resColumns.add(ffReq.getResultName());	
+			resColumns.add(getFFResName(ffReq));	
 		}
 		
 		List<WhereExpr> where = (List<WhereExpr>) getWhereExprs(req);
-		if(isFilterNeeded(flags, req.getWhere())){
+		if(isFilterNeeded(flags, where)){
 			rs = filter(rs, where, req.getFunctions(), ffs);
 		}
 		if(isOrderNeeded(flags, req.getOrderBy())){
 			rs = order(rs, req.getOrderBy(), req.getFunctions(), ffs);
 		}
-		if(isTruncNeeded(rs.getColumns(), resColumns)){
-			rs = send(rs, resColumns, req.getFunctions(), ffs, req.getStartFrom(), req.getStartFrom() + req.getLimit());
+		if(isTruncNeeded(rs.getColumns(), resColumns, req)){
+			int to = req.getLimit() == 0 ? 0 : req.getStartFrom() + req.getLimit();
+			rs = send(rs, resColumns, req.getFunctions(), ffs, req.getStartFrom(), to);
 		}
 		return rs;
 	}
@@ -181,12 +194,13 @@ public class CVRHandler implements ICVRHandler {
 		return res;
 	}
 
-	private boolean isFilterNeeded(RSFlags flags, Map<String, Object> where) {
-		return !(flags.m_bFilter | where.isEmpty());
+	private boolean isFilterNeeded(RSFlags flags, List<WhereExpr> where) {
+		return !(flags.m_bFilter || where.isEmpty());
+		
 	}
 
-	private boolean isTruncNeeded(List<String> rsColumns, List<String> reqColumns) {
-		return !rsColumns.equals(reqColumns);
+	private boolean isTruncNeeded(List<String> rsColumns, List<String> reqColumns, CollectionViewRequest req) {
+		return (!rsColumns.equals(reqColumns)) || (0!=req.getStartFrom() || 0!=req.getLimit());
 	}
 
 	private boolean isOrderNeeded(RSFlags flags, List<Object> orderBy) {
@@ -221,7 +235,7 @@ public class CVRHandler implements ICVRHandler {
 		List<String> requestedColumns = new ArrayList<String>();
 		
 		for(String column : req.getColumns()){
-			if(!meta.m_columns.contains(column)){
+			if(!meta.getColumns().contains(column)){
 				throw new EDSException.ECVRColumnException.EWrongColumnName(column);
 			}
 			if(requestedColumns.contains(column)){
@@ -233,59 +247,78 @@ public class CVRHandler implements ICVRHandler {
 		
 		for(FieldFunctionRequest ffReq : req.getFunctions()){
 			String column = ffReq.getFieldName();
-			if(!meta.m_columns.contains(column))
+			if(!meta.getColumns().contains(column))
 				throw new EDSException.ECVRColumnException.EWrongFieldFunctionName(column);
 			if(!requestedColumns.contains(column))
 				requestedColumns.add(column);
 		}
 
 		for(String column : req.getWhere().keySet()){
-			if(!meta.m_columns.contains(column))
+			if(!meta.getColumns().contains(column))
 				throw new EDSException.ECVRColumnException.EWrongNameInWhereClause(column);
 			if(!requestedColumns.contains(column))
 				requestedColumns.add(column);
 		}
-		for(WhereExpr expr: req.getWhereExprs()){
-			if(expr instanceof ColumnExpr){
-				String column = ((ColumnExpr)expr).getColumnName();
-				if(!meta.m_columns.contains(column))
-					throw new EDSException.ECVRColumnException.EWrongNameInWhereClause(column);
-				if(!requestedColumns.contains(column))
-					requestedColumns.add(column);
-			}
+		for(String column : requestedColumns(req.getWhereExprs())){
+			if(!meta.getColumns().contains(column))
+				throw new EDSException.ECVRColumnException.EWrongNameInWhereClause(column);
+			if(!requestedColumns.contains(column))
+				requestedColumns.add(column);
 		}
-		for(Object orderBy: req.getOrderBy()){
-			String column;
-			if(orderBy instanceof CollectionViewRequest.DescField){
-				column = ((CollectionViewRequest.DescField) orderBy).getField();
-			}
-			else
-				column = (String) orderBy;
-			if(!meta.m_columns.contains(column))
+		for(String column: orderColumns(req.getOrderBy())){
+			if(!meta.getColumns().contains(column))
 				throw new EDSException.ECVRColumnException.EWrongNameInOrderClause(column);
 			if(!requestedColumns.contains(column))
 				requestedColumns.add(column);
 		}
+		if(req.getStartFrom() < 0)
+			throw new IllegalArgumentException("startFrom");
+		if(req.getLimit() < 0)
+			throw new IllegalArgumentException("limit");
 		return requestedColumns;
 		
 	}
 	
 	
-	public IResSet processRequest(CollectionViewRequest req){
+	public LongListResponse processRequest(CollectionViewRequest req){
 		DSMetadata md = findProvider(req);
 		
 		if(null == md)
 			throw new EDSException.EDSProviderNotFound(req.getTarget());
 		
-		List<String> providerColumns = checkRequestMetadata(md, req);
-		md.check();
-		
-		List<FieldFunction> ffs = initFieldFunctions(req);
-		IResSet rs = md.load(providerColumns, req, ffs);
-		
-		
-		RSFlags rsFlags = new RSFlags(md.m_flags);
-		return process(rs, rsFlags, req, ffs);
+		try{
+			List<String> providerColumns = checkRequestMetadata(md, req);
+			IResSet resSet;
+			
+			if(!md.check(req)){
+				resSet = new SortResSet(providerColumns); // empty RS
+			}
+			else{
+				List<FieldFunction> ffs = initFieldFunctions(req);
+				IResSet rs = md.load(providerColumns, req, ffs);
+				RSFlags rsFlags = new RSFlags(md.getFlags());
+				resSet = process(rs, rsFlags, req, ffs);
+			}
+			LongListResponse llr = resSet2LLR(resSet);
+			md.setLLRAttrs(llr);
+			return llr;
+		}finally{
+			md.close();
+		}
+	}
+
+	private LongListResponse resSet2LLR(IResSet resSet) {
+		List<String> cols = resSet.getColumns();
+		LongListResponse res = new LongListResponse(cols.toArray(new String[cols.size()]));
+		ArrayList<Object> row = new ArrayList<Object>(cols.size());
+		while(resSet.next()){
+			for (int i = 0; i < cols.size(); i++) {
+				row.add(resSet.getObject(i+1));
+			}
+			res.addRow(row);
+			row.clear();
+		}
+		return res;
 	}
 
 	public DSMetadata findProvider(CollectionViewRequest req) {
