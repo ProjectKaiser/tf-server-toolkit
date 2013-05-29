@@ -41,7 +41,7 @@ public class FieldFunctionCalc {
 	public void addFieldFunction(List<String> columns, String srcColumn, FieldFunction ff) {
 		int idx = columns.indexOf(srcColumn);
 		if(idx < 0)
-			throw new EDSException.ECVRColumnException.EWrongColumnName(srcColumn);
+			throw new EDSException.ECVRColumnException.EColumnNotFound.EWrongColumnName(srcColumn);
 		m_ffCalls.add(new FieldFunctionCall(ff, idx+1));
 	}
 

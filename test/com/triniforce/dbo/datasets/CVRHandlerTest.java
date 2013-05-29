@@ -12,11 +12,8 @@ import java.util.List;
 
 import com.triniforce.db.dml.IResSet;
 import com.triniforce.db.test.TFTestCase;
+import com.triniforce.dbo.datasets.EDSException.ECVRColumnException.EColumnNotFound;
 import com.triniforce.dbo.datasets.EDSException.ECVRColumnException.EColumnRequestedTwice;
-import com.triniforce.dbo.datasets.EDSException.ECVRColumnException.EWrongColumnName;
-import com.triniforce.dbo.datasets.EDSException.ECVRColumnException.EWrongFieldFunctionName;
-import com.triniforce.dbo.datasets.EDSException.ECVRColumnException.EWrongNameInOrderClause;
-import com.triniforce.dbo.datasets.EDSException.ECVRColumnException.EWrongNameInWhereClause;
 import com.triniforce.dbo.datasets.ICVRHandler.RSFlags;
 import com.triniforce.extensions.PKRootExtensionPoint;
 import com.triniforce.server.soap.CollectionViewRequest;
@@ -388,7 +385,7 @@ public class CVRHandlerTest extends TFTestCase {
 			try{
 				h.checkRequestMetadata(meta, req);
 				fail();
-			}catch(EWrongColumnName e){
+			}catch(EColumnNotFound.EWrongColumnName e){
 				assertTrue(e.getMessage().contains("column_787"));
 			}
 		}
@@ -399,7 +396,7 @@ public class CVRHandlerTest extends TFTestCase {
 			try{
 				h.checkRequestMetadata(meta, req);
 				fail();
-			}catch(EWrongFieldFunctionName e){
+			}catch(EColumnNotFound.EWrongFieldFunctionName e){
 				assertTrue(e.getMessage().contains("column_789"));
 			}			
 		}
@@ -412,7 +409,7 @@ public class CVRHandlerTest extends TFTestCase {
 			try{
 				h.checkRequestMetadata(meta, req);
 				fail();
-			}catch(EWrongNameInWhereClause e){
+			}catch(EColumnNotFound.EWrongNameInWhereClause e){
 				assertTrue(e.getMessage().contains("column_774"));
 			}			
 		}
@@ -423,7 +420,7 @@ public class CVRHandlerTest extends TFTestCase {
 			try{
 				h.checkRequestMetadata(meta, req);
 				fail();
-			}catch(EWrongNameInWhereClause e){
+			}catch(EColumnNotFound.EWrongNameInWhereClause e){
 				assertTrue(e.getMessage().contains("column_231"));
 			}	
 		}
@@ -435,7 +432,7 @@ public class CVRHandlerTest extends TFTestCase {
 			try{
 				h.checkRequestMetadata(meta, req);
 				fail();
-			}catch(EWrongNameInOrderClause e){
+			}catch(EColumnNotFound.EWrongNameInOrderClause e){
 				assertTrue(e.getMessage().contains("column_767"));
 			}	
 		}
@@ -446,7 +443,7 @@ public class CVRHandlerTest extends TFTestCase {
 			try{
 				h.checkRequestMetadata(meta, req);
 				fail();
-			}catch(EWrongNameInOrderClause e){
+			}catch(EColumnNotFound.EWrongNameInOrderClause e){
 				assertTrue(e.getMessage().contains("column_711"));
 			}	
 		}
