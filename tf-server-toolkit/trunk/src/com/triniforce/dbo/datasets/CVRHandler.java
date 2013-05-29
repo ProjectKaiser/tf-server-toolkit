@@ -236,7 +236,7 @@ public class CVRHandler implements ICVRHandler {
 		
 		for(String column : req.getColumns()){
 			if(!meta.getColumns().contains(column)){
-				throw new EDSException.ECVRColumnException.EWrongColumnName(column);
+				throw new EDSException.ECVRColumnException.EColumnNotFound.EWrongColumnName(column);
 			}
 			if(requestedColumns.contains(column)){
 				throw new EDSException.ECVRColumnException.EColumnRequestedTwice(req.getColumns().get(0));				
@@ -248,26 +248,26 @@ public class CVRHandler implements ICVRHandler {
 		for(FieldFunctionRequest ffReq : req.getFunctions()){
 			String column = ffReq.getFieldName();
 			if(!meta.getColumns().contains(column))
-				throw new EDSException.ECVRColumnException.EWrongFieldFunctionName(column);
+				throw new EDSException.ECVRColumnException.EColumnNotFound.EWrongFieldFunctionName(column);
 			if(!requestedColumns.contains(column))
 				requestedColumns.add(column);
 		}
 
 		for(String column : req.getWhere().keySet()){
 			if(!meta.getColumns().contains(column))
-				throw new EDSException.ECVRColumnException.EWrongNameInWhereClause(column);
+				throw new EDSException.ECVRColumnException.EColumnNotFound.EWrongNameInWhereClause(column);
 			if(!requestedColumns.contains(column))
 				requestedColumns.add(column);
 		}
 		for(String column : requestedColumns(req.getWhereExprs())){
 			if(!meta.getColumns().contains(column))
-				throw new EDSException.ECVRColumnException.EWrongNameInWhereClause(column);
+				throw new EDSException.ECVRColumnException.EColumnNotFound.EWrongNameInWhereClause(column);
 			if(!requestedColumns.contains(column))
 				requestedColumns.add(column);
 		}
 		for(String column: orderColumns(req.getOrderBy())){
 			if(!meta.getColumns().contains(column))
-				throw new EDSException.ECVRColumnException.EWrongNameInOrderClause(column);
+				throw new EDSException.ECVRColumnException.EColumnNotFound.EWrongNameInOrderClause(column);
 			if(!requestedColumns.contains(column))
 				requestedColumns.add(column);
 		}
