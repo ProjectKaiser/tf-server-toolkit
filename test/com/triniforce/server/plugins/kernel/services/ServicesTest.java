@@ -48,9 +48,14 @@ public class ServicesTest extends ServicesTestCase {
 				PKEPServices ss = (PKEPServices) getRootExtensionPoint().getExtensionPoint(PKEPServices.class);
 
 				for(int i =0; i<SRVC_IDS.length; i++){
-					String srvName = "ServicesTest_Service_"+SRVC_IDS[i];
-					ss.registerService(SRVC_IDS[i], srvName);
-					EP_QueuedService srv = new EP_QueuedService(SRVC_IDS[i]);
+					final String srvName = "ServicesTest_Service_"+SRVC_IDS[i];
+//					ss.registerService(SRVC_IDS[i], srvName);
+					EP_QueuedService srv = new EP_QueuedService(SRVC_IDS[i]){
+						String m_name = srvName;
+						public String getName() {
+							return m_name;
+						};
+					};
 					ss.putExtension(srvName, srv);
 				}
 			}
@@ -207,7 +212,10 @@ public class ServicesTest extends ServicesTestCase {
     public void test() throws Exception {
         IDbQueueFactory.Helper.cleanQueue(SM_ID);
         PKEPServices ss = getServices();
-//        ss.registerServiceManager(new EP_ServiceManager(ReservedKeys.SRV_SERVICE_MANAGER.getKey()));
+        {
+//	        EP_ServiceManager sm = new EP_ServiceManager(SM_ID);
+//	        ss.putExtension(sm.getClass().getName(), sm);
+        }
         EP_ServiceManager sm = (EP_ServiceManager) ss.getService(SM_ID);
         assertNotNull(sm);
         assertEquals(IService.State.STOPPED, sm.getState());

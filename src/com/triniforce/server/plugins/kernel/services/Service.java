@@ -219,7 +219,7 @@ public class Service implements IService, ICycledThreadLogic, Runnable {
     }
 
     public String getName() {
-        return this.getClass().getSimpleName();
+        return this.getClass().getName();
     }
 
 //    protected Long m_id;

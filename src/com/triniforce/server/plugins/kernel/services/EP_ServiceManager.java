@@ -35,19 +35,19 @@ public class EP_ServiceManager extends EP_QueuedService {
         super(queueId);
     }
 
-    public static void doStartStopSubservices(String svc, boolean bStart) {
-        List<String> subServices = getSubservices(svc);
+    public static void doStartStopSubservices(String svc, boolean bStart, String smName) {
+        List<String> subServices = getSubservices(svc, smName);
         for (String subSvcId : subServices) {
-            doStartStop(subSvcId, bStart);
+            doStartStop(subSvcId, bStart, smName);
         }
     }
 
-    private static List<String> getSubservices(String svc) {
-        if(!EP_ServiceManager.class.getName().equals(svc))
+    private static List<String> getSubservices(String svc, String smName) {
+        if(!smName.equals(svc))
             return Collections.EMPTY_LIST;
         PKEPServices ss = getServices();
         ArrayList<String> res = new ArrayList<String>(ss.listRegisteredServices());
-        res.remove(EP_ServiceManager.class.getName());
+        res.remove(smName);
         return res;
     }
 
@@ -56,22 +56,22 @@ public class EP_ServiceManager extends EP_QueuedService {
         return (PKEPServices) rep.getExtensionPoint(PKEPServices.class);
 	}
     
-    public static void doStartStop(long id, boolean bStart) throws EServiceNotFound {
+    public static void doStartStop(long id, boolean bStart, String smName) throws EServiceNotFound {
     	PKEPServices ss = getServices();
         String svc = ss.getServiceId(id);
-        doStartStop(svc, bStart);
+        doStartStop(svc, bStart, smName);
     }
 
-    public static void doStartStop(String svcName, boolean bStart) {
+    public static void doStartStop(String svcName, boolean bStart, String smName) {
         PKEPServices ss = getServices();
         IService svc = ss.getService(svcName);
         ISrvSmartTranFactory.Helper.commitAndStartTran();
         if (bStart) {
             svc.start();
-            doStartStopSubservices(svcName, bStart);
+            doStartStopSubservices(svcName, bStart, smName);
         } else {
-            doStartStopSubservices(svcName, bStart);
-            if (EP_ServiceManager.class.getName().equals(svc)) {
+            doStartStopSubservices(svcName, bStart, smName);
+            if (smName.equals(svc)) {
                 ApiAlgs.getLog(EP_ServiceManager.class).trace(
                         "Stopping Service Manager ..");//$NON-NLS-1$
             }
@@ -84,7 +84,7 @@ public class EP_ServiceManager extends EP_QueuedService {
     public void doCycle() throws Throwable {
         StartStopServiceCmd cmd = (StartStopServiceCmd) m_item;
         ISrvSmartTranFactory.Helper.commitAndStartTran();
-        doStartStop(cmd.id, cmd.start);
+        doStartStop(cmd.id, cmd.start, getName());
     }
 
     @Override
