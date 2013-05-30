@@ -42,8 +42,8 @@ public class ServiceManagerTest extends BasicServerTestCase {
 			@Override
 			public void doRegistration() {
 				PKEPServices ss = (PKEPServices) getRootExtensionPoint().getExtensionPoint(PKEPServices.class);
-				ss.registerServiceManager(new EP_ServiceManager(SM_ID));
-				ss.registerService(SQS_ID, SimpleQueuedService.class.getName());
+				ss.putExtension(new EP_ServiceManager(SM_ID));
+//				ss.registerService(SQS_ID, SimpleQueuedService.class.getName());
 				ss.putExtension(SimpleQueuedService.class);
 				ss.putExtension(SimpleService.class);
 				ss.putExtension(ThrdWatcher.class);

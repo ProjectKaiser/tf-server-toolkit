@@ -7,8 +7,11 @@ package com.triniforce.server.plugins.kernel.services;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
+import com.triniforce.extensions.EExtensionPointNotFound;
+import com.triniforce.extensions.IPKExtension;
 import com.triniforce.extensions.PKExtensionPoint;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
@@ -57,18 +60,34 @@ public class PKEPServices extends PKExtensionPoint{
     
     public String getServiceId(long id) throws EServiceNotFound {
         String res = m_registeredServices.get(id);
-        if(null == res)
-            throw new EServiceNotFound(id);
+        if(null == res){
+        	HashSet<String> keys = new HashSet<String>(getExtensions().keySet());
+        	keys.removeAll(m_registeredServices.values());
+        	for(String key : keys){
+        		IService svc = getExtension(key).getInstance();
+        		if(svc instanceof EP_QueuedService){
+        			long svcId = ((EP_QueuedService)svc).getId();
+        			if(id == svcId){
+        				res = key;
+        				break;
+        			}
+        		}
+        	}
+        	if(null == res)
+        		throw new EServiceNotFound(id);
+        	else
+        		registerService(id, res);
+        }
         return res;
     }
     
-    public void registerServiceManager(EP_ServiceManager sm){
+    private void registerServiceManager(EP_ServiceManager sm){
     	m_serviceManagerId = sm.getId(); 
-    	registerService(m_serviceManagerId, sm.getClass().getName());
-    	putExtension(sm.getClass().getName(), sm);
+//    	registerService(m_serviceManagerId, sm.getClass().getName());
+//    	putExtension(sm.getClass().getName(), sm);
     }
     
-    public void registerService(long id, String svcId){
+    private void registerService(long id, String svcId){
         ApiAlgs.assertTrue(null == m_registeredServices.put(id, svcId), svcId);
     }
     
@@ -89,6 +108,20 @@ public class PKEPServices extends PKExtensionPoint{
 	public long getServiceManagerId(){
 		ApiAlgs.assertNotNull(m_serviceManagerId, "Service manager are not registered");
 		return m_serviceManagerId;
+	}
+	
+	@Override
+	public IPKExtension putExtension(String extensionId, Object obj)
+			throws EExtensionPointNotFound {
+		if(obj instanceof EP_ServiceManager){
+			registerServiceManager((EP_ServiceManager) obj);
+		}
+		if(obj instanceof EP_QueuedService){
+			EP_QueuedService qSrv = (EP_QueuedService)obj;
+			registerService(qSrv.getId(), qSrv.getName());
+		}
+		return super.putExtension(extensionId, obj);
+		
 	}
 	
 }
