@@ -15,6 +15,7 @@ public class ListSplitter implements Iterable<List>{
     private final int m_size;
 
     public ListSplitter(Iterable src, int size){
+    	TFUtils.assertTrue(size>0, "Size should be more than zero: " + size);
         m_src = src;
         m_size = size;
 
