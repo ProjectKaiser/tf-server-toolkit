@@ -24,7 +24,7 @@ public class ListSplitter implements Iterable<List>{
         private Iterator m_iterator;
         List m_cur;
         public Iter(){
-            m_iterator = m_src.iterator();
+            m_iterator = m_src != null? m_src.iterator(): new ArrayList().iterator();
             m_cur = new ArrayList<Object>(m_size);
         }
 
