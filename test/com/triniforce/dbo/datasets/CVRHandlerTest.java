@@ -519,37 +519,37 @@ public class CVRHandlerTest extends TFTestCase {
 		super.tearDown();
 	}
 	
-	public void testProcessRequest(){
-			CVRHandler h = new CVRHandler();
-			CollectionViewRequest req = new CollectionViewRequest();
-			req.setColumns(Arrays.asList("idx","name"));
-			{
-				req.setTarget("TestProvider_01");
-				LongListResponse res = h.processRequest(req);
-				assertNotNull(res);
+	public void testProcessAsLLR(){
+				CVRHandler h = new CVRHandler();
+				CollectionViewRequest req = new CollectionViewRequest();
+				req.setColumns(Arrays.asList("idx","name"));
+				{
+					req.setTarget("TestProvider_01");
+					LongListResponse res = h.processAsLLR(req);
+					assertNotNull(res);
+				}
+				
+				{
+					// provider make own filtering
+					FLAGS = DSMetadata.CAN_FILTER;
+					req.getWhere().put("idx", 3);
+					LongListResponse res = h.processAsLLR(req);
+					assertEquals(1, res.values().get(0));
+				}
+				{		
+					FLAGS = DSMetadata.CAN_SORT;
+					req.getWhere().clear();
+					req.getOrderBy().add(new CollectionViewRequest.DescField("name"));			
+					LongListResponse res = h.processAsLLR(req);
+					assertEquals(1, res.values().get(0));
+					assertTrue(MD_CLOSED);
+				}
+				{
+					MD_CHECKED = false;
+					LongListResponse res = h.processAsLLR(req);
+					assertTrue(res.values().isEmpty());
+				}
+		
 			}
-			
-			{
-				// provider make own filtering
-				FLAGS = DSMetadata.CAN_FILTER;
-				req.getWhere().put("idx", 3);
-				LongListResponse res = h.processRequest(req);
-				assertEquals(1, res.values().get(0));
-			}
-			{		
-				FLAGS = DSMetadata.CAN_SORT;
-				req.getWhere().clear();
-				req.getOrderBy().add(new CollectionViewRequest.DescField("name"));			
-				LongListResponse res = h.processRequest(req);
-				assertEquals(1, res.values().get(0));
-				assertTrue(MD_CLOSED);
-			}
-			{
-				MD_CHECKED = false;
-				LongListResponse res = h.processRequest(req);
-				assertTrue(res.values().isEmpty());
-			}
-	
-		}
 
 }
