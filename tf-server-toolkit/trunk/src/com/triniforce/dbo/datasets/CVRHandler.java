@@ -239,7 +239,7 @@ public class CVRHandler implements ICVRHandler {
 				throw new EDSException.ECVRColumnException.EColumnNotFound.EWrongColumnName(column);
 			}
 			if(requestedColumns.contains(column)){
-				throw new EDSException.ECVRColumnException.EColumnRequestedTwice(req.getColumns().get(0));				
+				throw new EDSException.ECVRColumnException.EColumnRequestedTwice(column);				
 			}
 			requestedColumns.add(column);
 		}
@@ -280,7 +280,7 @@ public class CVRHandler implements ICVRHandler {
 	}
 	
 	
-	public LongListResponse processRequest(CollectionViewRequest req){
+	public LongListResponse processAsLLR(CollectionViewRequest req){
 		DSMetadata md = findProvider(req);
 		
 		if(null == md)

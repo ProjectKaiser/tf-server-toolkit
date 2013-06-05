@@ -36,7 +36,7 @@ public interface ICVRHandler {
 	 */
 //	IResSet load(CollectionViewRequest req, RSFlags rsFlags);
 	
-	public LongListResponse processRequest(CollectionViewRequest req);
+	public LongListResponse processAsLLR(CollectionViewRequest req);
 	
 	public List<String> checkRequestMetadata(DSMetadata meta, CollectionViewRequest req);
 	
