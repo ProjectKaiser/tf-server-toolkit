@@ -501,7 +501,7 @@ public class UpgradeRunner {
                         .getOperation();
                 String dbIndexName = getDbIndexName(dbName, addIdx, true);
                 sql = getCreateIndexOperationString(addIdx.getColumns(), dbName, 
-                		dbIndexName, addIdx.isUnique(), addIdx.isAscending());
+                		dbIndexName, addIdx.isUnique(), addIdx.isAscending(), addIdx.isClustered());
             } else if (op.getOperation() instanceof DeleteColumnOperation) {
                 DeleteColumnOperation delCol = (DeleteColumnOperation) op
                         .getOperation();
@@ -555,7 +555,7 @@ public class UpgradeRunner {
     }
 
     public String getCreateIndexOperationString(List<String> cols, String dbTabName, 
-    		String dbIndexName, boolean bUnique, boolean bAsc) {
+    		String dbIndexName, boolean bUnique, boolean bAsc, boolean bClustered) {
         ArrayList<String> colSpec = new ArrayList<String>();
         for (String col : cols) {
             colSpec
@@ -573,8 +573,9 @@ public class UpgradeRunner {
         else{
             sql = MessageFormat
                     .format(
-                            "CREATE {0} INDEX {1} ON {2} ({3})", 
-                            bUnique ? "UNIQUE" : "", dbIndexName, dbTabName, colList(cols)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                            "CREATE {0} {4} INDEX {1} ON {2} ({3})", 
+                            bUnique ? "UNIQUE" : "", dbIndexName, dbTabName, colList(cols),  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                            m_dbType.equals(DbType.MSSQL) && bClustered ? "CLUSTERED" : "");
         }
 		return sql;
 	}

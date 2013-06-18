@@ -53,12 +53,12 @@ public class DeleteConstraintOperationTest extends TestCase {
         {
             TableDef tab = new TableDef("tab");
             tab.addModification(1, new AddColumnOperation(FieldDef.createScalarField("col1", ColumnType.INT, true)));
-            tab.addModification(2, new AddIndexOperation(IndexDef.createIndex("name", Arrays.asList("col1"), true, false)));
+            tab.addModification(2, new AddIndexOperation(IndexDef.createIndex("name", Arrays.asList("col1"), true, false, false)));
             tab.addModification(3, new DeleteIndexOperation("name", IndexDef.TYPE.INDEX, false));
             TableOperation revOp = tab.getHistory(3).get(0).getReverseOperation();
             assertTrue("Must be AddIndex", revOp.getClass().equals(AddIndexOperation.class));
             AddIndexOperation addOp = (AddIndexOperation)revOp;
-            assertEquals(IndexDef.createIndex("name", Arrays.asList("col1"), true, false), addOp.getIndex());            
+            assertEquals(IndexDef.createIndex("name", Arrays.asList("col1"), true, false, false), addOp.getIndex());            
         }
     }
 }

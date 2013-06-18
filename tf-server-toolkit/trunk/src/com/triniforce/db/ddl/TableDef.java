@@ -496,9 +496,10 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
         boolean m_bActive;        
         String m_parentTable;
         String m_parentIndex;
+        boolean m_bClustered = false;
                 
         private IndexDef(String name, TYPE type, List<String> columns, boolean bUnique, 
-                boolean bAscending, boolean bActive, String parentTab, String parentIndex){
+                boolean bAscending, boolean bActive, String parentTab, String parentIndex, boolean bClustered){
             m_name = name;
             m_type = type;
             m_columns = columns;
@@ -507,6 +508,7 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
             m_bActive = bActive;
             m_parentTable = parentTab;
             m_parentIndex = parentIndex;
+            m_bClustered = bClustered;
         }
 
         public void setType(TYPE type) {
@@ -531,7 +533,7 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
         public static IndexDef primaryKey(String name, List<String> columns){
             if(columns.isEmpty())                
                 throw new TableDef.EInvalidDefinitionArgument("columns"); //$NON-NLS-1$
-            return new IndexDef(name, TYPE.PRIMARY_KEY, columns, true, true, true, null, null);
+            return new IndexDef(name, TYPE.PRIMARY_KEY, columns, true, true, true, null, null, false);
         }
 
         /**
@@ -545,7 +547,7 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
         public static IndexDef foreignKey(String name, List<String> columns, String parentTab, String parentIndex) throws EInvalidDefinitionArgument{
             if(columns.isEmpty())                
                 throw new EInvalidDefinitionArgument("columns"); //$NON-NLS-1$
-            return new IndexDef(name, TYPE.FOREIGN_KEY, columns, false, true, true, parentTab, parentIndex);
+            return new IndexDef(name, TYPE.FOREIGN_KEY, columns, false, true, true, parentTab, parentIndex,false);
         }
         
         /**
@@ -555,10 +557,10 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
          * @return - index definition
          * @throws EInvalidDefinitionArgument 
          */
-        public static IndexDef createIndex(String name, List<String> columns, boolean bUnique, boolean bAsc){
+        public static IndexDef createIndex(String name, List<String> columns, boolean bUnique, boolean bAsc, boolean bClustered){
             if(columns.isEmpty())                
                 throw new TableDef.EInvalidDefinitionArgument("columns"); //$NON-NLS-1$
-            return new IndexDef(name, TYPE.INDEX, columns, bUnique, bAsc, true, null, null);
+            return new IndexDef(name, TYPE.INDEX, columns, bUnique, bAsc, true, null, null, bClustered);
         }
         
         public List<String> getColumns() {
@@ -613,6 +615,10 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
             public boolean is(IndexDef element) {
                 return m_tab.equals(element.m_parentTable) && m_idx.equals(element.m_parentIndex);
             }            
+        }
+        
+        public boolean isClustered(){
+        	return m_bClustered;
         }
 
     }
@@ -892,7 +898,11 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
     }
 
     public TableDef addIndex(int version, String name, String[] columns, boolean bUnique, boolean bAsc) throws EDBObjectException {
-        addModification(version, new AddIndexOperation(IndexDef.createIndex(name, Arrays.asList(columns), bUnique, bAsc)));                        
+        return addIndex(version, name, columns, bUnique, bAsc, false);
+    }
+    
+    public TableDef addIndex(int version, String name, String[] columns, boolean bUnique, boolean bAsc, boolean bClustered) throws EDBObjectException {
+        addModification(version, new AddIndexOperation(IndexDef.createIndex(name, Arrays.asList(columns), bUnique, bAsc, bClustered)));                        
         return this;
     }
 

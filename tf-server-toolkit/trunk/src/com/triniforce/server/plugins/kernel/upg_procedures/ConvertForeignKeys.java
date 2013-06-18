@@ -86,7 +86,7 @@ public class ConvertForeignKeys  extends UpgradeProcedure {
 
     private String getCreateIndexString(UpgradeRunner pl, String dbName, 
             String fkName, List<String> cols) {
-        return pl.getCreateIndexOperationString(cols, dbName, fkName, false, true);
+        return pl.getCreateIndexOperationString(cols, dbName, fkName, false, true, false);
     }
 
     private String getDelForeignKeyString(UpgradeRunner pl, String dbName, String fkName) {
