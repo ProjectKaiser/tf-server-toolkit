@@ -148,7 +148,7 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
                         new AddIndexOperation(
                                 IndexDef
                                         .createIndex(
-                                                "PK2", Arrays.asList(DBNAME), true, true))); //$NON-NLS-1$
+                                                "PK2", Arrays.asList(DBNAME), true, true, false))); //$NON-NLS-1$
         tab.setDbName(ACT_STATE_TABLE);
         return tab;
         

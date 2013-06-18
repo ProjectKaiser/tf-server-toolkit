@@ -78,7 +78,7 @@ public class TableAdapterTest extends DMLTestCase {
             cplxDef.addModification(4, new AddColumnOperation(FieldDef.createScalarField("colSMP1", ColumnType.INT, true, 0)));
             cplxDef.addModification(5, new AddColumnOperation(FieldDef.createScalarField("colSMP2", ColumnType.INT, true, 0)));
             cplxDef.addModification(6, new AddColumnOperation(FieldDef.createScalarField("colSMP3", ColumnType.INT, true, 0)));
-            cplxDef.addModification(7, new AddIndexOperation(IndexDef.createIndex("ui1", Arrays.asList("colUI"), true, true)));
+            cplxDef.addModification(7, new AddIndexOperation(IndexDef.createIndex("ui1", Arrays.asList("colUI"), true, true, false)));
             cplxDef.addModification(8, new AddPrimaryKeyOperation("pk", Arrays.asList("colPK1", "colPK2")));
             {   //search by PK
                 Table t1 = new Table();

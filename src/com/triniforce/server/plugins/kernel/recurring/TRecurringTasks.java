@@ -48,6 +48,7 @@ public class TRecurringTasks extends TableDef {
         addIndex(6, "id_idx", new String[]{f_id.getName()}, true, true);
         deleteIndex(7, "id_idx");
         addIndex(8, "id_extension_idx", new String[]{f_id.getName(), f_extension_id.getName()}, true, true);
+        addPrimaryKey(9, "pk", new String[]{f_id.getName(), f_extension_id.getName()});
     }
     
     public static class BL extends BusinessLogic{

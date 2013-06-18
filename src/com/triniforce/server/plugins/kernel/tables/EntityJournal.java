@@ -62,6 +62,8 @@ public class EntityJournal<T extends IEntity> extends TableDef {
     	
         addStringField(1, ENTITY_NAME_FIELD, strType, strSize, true, ""); //$NON-NLS-1$
         addIndex(2, "pk", new String[]{ENTITY_NAME_FIELD}, true, true); //$NON-NLS-1$
+        deleteIndex(3, "pk");
+        addPrimaryKey(4, "pkn", new String[]{ENTITY_NAME_FIELD});
     }
 
     public void add(Connection conn, String dbName, List<T> entities) throws SQLException {

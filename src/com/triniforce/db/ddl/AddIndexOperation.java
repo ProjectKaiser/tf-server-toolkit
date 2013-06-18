@@ -59,4 +59,8 @@ public class AddIndexOperation extends TableUpdateOperation {
     public void setIsDbIndexName(boolean value){
     	m_bDbName = value;
     }
+
+	public boolean isClustered() {
+		return m_index.m_bClustered;
+	}
 }

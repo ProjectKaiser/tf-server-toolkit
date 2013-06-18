@@ -462,7 +462,7 @@ public class Delta {
 							m_parentKey);
 				else
 					res = IndexDef.createIndex(m_name, m_cols, m_bUnique,
-							m_bAsc);
+							m_bAsc, false);
 				return res;
 			}
 		}

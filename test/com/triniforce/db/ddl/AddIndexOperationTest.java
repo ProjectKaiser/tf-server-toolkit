@@ -19,7 +19,7 @@ public class AddIndexOperationTest extends TestCase {
     }
     
     public void testAddIndexOperation(){
-        new AddIndexOperation(IndexDef.createIndex("index_name", Arrays.asList("index_column"), true, false));        
+        new AddIndexOperation(IndexDef.createIndex("index_name", Arrays.asList("index_column"), true, false, false));        
     }
 
 }

@@ -68,6 +68,7 @@ public class NextId extends TableDef {
 	
     public NextId() throws EDBObjectException {
         addField(1, FieldDef.createScalarField(value, ColumnType.LONG, true));
+        addPrimaryKey(2, "pk", new String[]{"value"});
     }
     
     public NextIdBL getBL(ISmartTran sc){

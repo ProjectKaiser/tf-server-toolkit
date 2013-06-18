@@ -484,7 +484,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
             assertEquals(MessageFormat.format("ALTER TABLE {0} ADD {1}", dbName, m_player.getFieldDefString(f)), sql);
         }
         {
-        	AddIndexOperation op = new AddIndexOperation(IndexDef.createIndex("nuIndex", Arrays.asList("INT_FIELD"), true, true));
+        	AddIndexOperation op = new AddIndexOperation(IndexDef.createIndex("nuIndex", Arrays.asList("INT_FIELD"), true, true, false));
             String sql = m_player.getOperationString(new DBOperation(tabName, op));
             assertEquals(MessageFormat.format("ALTER TABLE {0} ADD CONSTRAINT {1} UNIQUE ({2})", 
             		dbName, m_as.getIndexDbName(m_player.getFullIndexName(dbName, "nuIndex", IndexDef.TYPE.INDEX)), getQuoted("INT_FIELD")), sql);
@@ -1038,6 +1038,21 @@ public class UpgradeRunnerTest extends DDLTestCase {
     	m_player.run(db.getCommandList());
     	assertEquals(true, def1.getFields().findElement("f1").getElement().bNotNull());
 		
+	}
+	
+	public void testClusteredIndex() throws Exception{
+		if(UpgradeRunner.getDbType(getConnection()).equals(DbType.MSSQL)){
+	    	TableDef def1 = new TableDef("testClusteredIndex");
+	    	def1.setDbName("testClusteredIndex");
+	    	FieldDef f = FieldDef.createStringField("f1", ColumnType.NVARCHAR, 60, false, null);
+	    	def1.addField(1, f);
+	    	def1.addIndex(2, "idx",new String[]{"f1"}, false, true, true);
+	    	HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
+	   		desired.put(def1.getEntityName(), def1);
+	       	DBTables db = new DBTables(m_as, desired);
+	    	m_player.run(db.getCommandList());
+	    		
+		}
 	}
     
 }
