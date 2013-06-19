@@ -215,10 +215,8 @@ public class JSONSerializer {
 
 
 		public void startJSON() throws ParseException, IOException {
-			ApiAlgs.getLog(this).trace("startJSON");
 		}
-		public void endJSON() throws ParseException, IOException {
-			ApiAlgs.getLog(this).trace("endJSON");
+		public void endJSON() throws ParseException, IOException {;
 
 		}
 
@@ -234,7 +232,6 @@ public class JSONSerializer {
 		
 		public boolean startObjectEntry(String arg0) throws ParseException,
 				IOException {
-			ApiAlgs.getLog(this).trace("startObjectEntry." + arg0);
 			if(null != m_method){
 				if(PARAMS.m_name.equals(arg0)){
 					m_handler.startElement(m_method, false, null);
@@ -247,7 +244,6 @@ public class JSONSerializer {
 					else{
 						if("value".equals(arg0) && m_handler.getTopObject().getType() instanceof ScalarDef){
 							m_bSetScalarValue = true;
-							ApiAlgs.getLog(this).trace(">>value");
 						}
 						else
 							m_handler.startElement(arg0, false, null);
@@ -278,7 +274,6 @@ public class JSONSerializer {
 				}
 				else{
 					if(m_bSetScalarValue){
-						ApiAlgs.getLog(this).trace("<<value:"+ m_value);
 						m_bSetScalarValue = false;
 //						String vStr = m_value.toString();
 //						m_handler.characters(vStr.toCharArray(), 0, vStr.length());
@@ -328,7 +323,6 @@ public class JSONSerializer {
 			}
 			if(null != element)
 				m_stk.push(element);
-			ApiAlgs.getLog(this).trace(">>" + element);
 			
 		}
 		
@@ -345,13 +339,11 @@ public class JSONSerializer {
 				}
 			}
 			
-			ApiAlgs.getLog(this).trace("<<" + res);
 			return res;
 		}
 		
 		public boolean primitive(Object arg0) throws ParseException,
 				IOException {
-			ApiAlgs.getLog(this).trace("primitive:" + arg0 + ", cls: "+arg0.getClass().getSimpleName());
 			Element top = m_stk.peek();
 			if(State.Arguments.equals(m_state)){
 				if(Element.Type.Array.equals(top.m_type)){
@@ -380,7 +372,6 @@ public class JSONSerializer {
 		private void setPrimitive(Object arg0) {
 			CurrentObject co = m_handler.getTopObject();
 			TypeDef td = co.getType();
-			ApiAlgs.getLog(this).trace("type:" + td.getName());
 			if(td.getName().equals("object")){
 				if(arg0 instanceof Number){
 					co.setType(m_handler.getType(numericType(arg0.getClass()), true));
