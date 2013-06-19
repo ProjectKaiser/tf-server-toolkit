@@ -35,8 +35,8 @@ public class MDSDbTest extends BasicServerTestCase{
             ResultSetMetaData md = rs.getResultSet().getMetaData();
             
             assertEquals(mds.getNamesMap().size(),md.getColumnCount());
-            for (int i = 1; i <= md.getColumnCount(); i++) {
-            	String rsCol = md.getColumnName(i);
+            for (int i = 0; i < md.getColumnCount(); i++) {
+            	String rsCol = md.getColumnName(i+1);
             	Integer index = mds.getNamesMap().get(rsCol);
             	assertNotNull(index);
             	assertEquals(index.intValue(),i);
@@ -56,9 +56,9 @@ public class MDSDbTest extends BasicServerTestCase{
             	int index2 = mds.getNamesMap().get(rs2.getResultSet().getMetaData().getColumnName(2)); 
             	for (IMDSRow row : mds) {
 					
-            		String mds_appName = (String)row.get(index1-1);
+            		String mds_appName = (String)row.get(index1);
 					if (rs_appName.equals(mds_appName)) {
-						String mds_dbName = (String)row.get(index2-1);
+						String mds_dbName = (String)row.get(index2);
 						assertEquals(rs_dbName, mds_dbName);
 						k = k + 1;
 					}
