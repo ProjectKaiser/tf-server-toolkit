@@ -369,7 +369,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	}
 
 	boolean m_pluginRegistrationDone;
-	private boolean m_bRunDPProcedures;
+	private boolean m_bRunDPProcedures=false;
 	
 	public void doPluginsRegistration() {
 	    if(m_pluginRegistrationDone) return;
@@ -720,7 +720,9 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 		enterMode(Mode.Running);
 		try {
 			Connection connetion = ApiStack.getInterface(Connection.class);
-			m_bRunDPProcedures = isDPPRunNeeded(connetion);
+			
+			if(!m_bRunDPProcedures)
+				m_bRunDPProcedures = isDPPRunNeeded(connetion);
 			
 			List<DataPreparationProcedure> dppList = loadRegLists(connetion);
 			if (!dppList.isEmpty()) {
@@ -1363,7 +1365,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
         }
 	} 
 	
-	protected void setRunDPProcedure(boolean v){
+	public void setRunDPProcedure(boolean v){
 		m_bRunDPProcedures = v;
 	}
 
