@@ -45,6 +45,7 @@ public class WsdlDescription {
         static{
         	PRIMITIVE_TIPES.addAll(ScalarDef.BOXES.keySet());
         	PRIMITIVE_TIPES.addAll(ScalarDef.BOXES.values());
+        	PRIMITIVE_TIPES.add(char.class.getName());
         }
         
         public WsdlTypeElement(String name, TypeDef td, boolean bResident, int maxOccur) {
