@@ -463,8 +463,11 @@ public class UpgradeRunnerTest extends DDLTestCase {
             if(getDbType().equals(DbType.MYSQL)){
             	assertEquals(MessageFormat.format("ALTER TABLE {0} MODIFY COLUMN {1} {2} NULL", dbName, "col1", m_player.getTypeString(ColumnType.INT, 0, 0)), sql);
             }
-            else
-            	assertEquals(MessageFormat.format("ALTER TABLE {0} ALTER COLUMN {1} {2} NULL", dbName, "col1", m_player.getTypeString(ColumnType.INT, 0, 0)), sql);                      
+            else if(getDbType().equals(DbType.DERBY)){
+            	assertEquals(MessageFormat.format("ALTER TABLE {0} ALTER COLUMN {1} SET DATA TYPE {2}", dbName, "col1", m_player.getTypeString(ColumnType.INT, 0, 0)), sql);
+            }else{
+            	assertEquals(MessageFormat.format("ALTER TABLE {0} ALTER COLUMN {1} {2} NULL", dbName, "col1", m_player.getTypeString(ColumnType.INT, 0, 0)), sql);
+            }
         }
         {
             DeleteDefaultConstraintOperation op = new DeleteDefaultConstraintOperation("DEFAULT_CONSTRAINT", "COLUMN1", "TEMPLATE");
