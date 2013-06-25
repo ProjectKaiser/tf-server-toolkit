@@ -70,8 +70,12 @@ public class TypeDef extends SimpleName{
         
         
         public ScalarDef(Class type) {
-            super(scalarName(type.getName()), type);
-            m_bNillable = !BOXES.containsKey(type.getSimpleName());
+            this(scalarName(type.getName()), type, !BOXES.containsKey(type.getSimpleName()));
+        }
+        
+        public ScalarDef(String name, Class type, boolean bNill) {
+            super(name, type);
+            m_bNillable = bNill;
         }
 
         public static String scalarName(String typeName) {

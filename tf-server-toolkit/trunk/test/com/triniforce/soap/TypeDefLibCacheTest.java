@@ -211,4 +211,9 @@ public class TypeDefLibCacheTest extends TFTestCase {
         
         
     }
+    
+    public void testExtLib(){
+    	TypeDef.ScalarDef res = (ScalarDef) m_lib.add(char.class);
+    	assertNotNull(res);
+    }
 }

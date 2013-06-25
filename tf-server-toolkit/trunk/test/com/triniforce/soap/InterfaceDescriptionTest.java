@@ -18,6 +18,7 @@ import com.triniforce.soap.InterfaceDescription.MessageDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.WsdlDescription.WsdlType;
+import com.triniforce.soap.WsdlDescription.WsdlType.Restriction;
 import com.triniforce.soap.WsdlDescription.WsdlTypeElement;
 
 public class InterfaceDescriptionTest extends TFTestCase {
@@ -25,6 +26,7 @@ public class InterfaceDescriptionTest extends TFTestCase {
     interface I1{
         void method();
         int method2(int [] in, String in2);
+        char method3();
     } 
 
     @SuppressWarnings("unchecked")
@@ -33,7 +35,7 @@ public class InterfaceDescriptionTest extends TFTestCase {
         WsdlDescription desc = gen.parse(null, I1.class).getWsdlDescription();
         
         Collection<WsdlTypeElement> typeElements = desc.getWsdlTypeElements();
-        assertEquals(4, typeElements.size());
+        assertEquals(6, typeElements.size());
         
         WsdlTypeElement t1 = getElement(desc.getWsdlTypeElements(), "method");
         assertEquals("method", t1.getName());
@@ -69,10 +71,28 @@ public class InterfaceDescriptionTest extends TFTestCase {
         assertEquals(1, e1.getMaxOccur());
         
         Collection<WsdlType> types = desc.getWsdlTypes();
-        assertEquals(1, types.size());
+        assertEquals(2, types.size());
+        
+        
+        WsdlType t  = getType(desc.getWsdlTypes(), "char");
+        assertNotNull(t);
+        Restriction r = t.getResriction();
+        assertEquals(short.class, r.m_base);
+        assertFalse(t.isComplex());
+        
     }
 
-    private WsdlTypeElement getElement(Collection<WsdlTypeElement> wsdlTypeElements, String name) {
+    private WsdlType getType(Collection<WsdlType> wsdlTypes, String name) {
+        for(WsdlType type : wsdlTypes){
+        	trace(type.getTypeDef().getName());
+        	if(name.equals(type.getTypeDef().getName())){
+        		return type;
+        	}
+        }
+        return null;
+	}
+
+	private WsdlTypeElement getElement(Collection<WsdlTypeElement> wsdlTypeElements, String name) {
         for (WsdlTypeElement element : wsdlTypeElements) {
             if(element.getName().equals(name))
                 return element;

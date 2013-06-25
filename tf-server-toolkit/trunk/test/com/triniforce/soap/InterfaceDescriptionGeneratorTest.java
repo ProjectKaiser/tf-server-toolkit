@@ -166,6 +166,8 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         Cls2 run1(Cls1 req);
         
         Long run2();
+        
+        char run3();
     }
     
     static Order DEFAULT_ORDER = null; 
