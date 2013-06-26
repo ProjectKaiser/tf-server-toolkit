@@ -20,12 +20,15 @@ import com.triniforce.dbo.ExDBOATables;
 import com.triniforce.dbo.ExDBOAUpgradeProcedures;
 import com.triniforce.dbo.PKEPDBOActualizers;
 import com.triniforce.dbo.PKEPDBObjects;
+import com.triniforce.extensions.IPKExtension;
 import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.server.TFPlugin;
 import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
 import com.triniforce.server.plugins.kernel.ep.br.PKEPBackupRestore;
 import com.triniforce.server.plugins.kernel.ep.sp.PKEPServerProcedures;
 import com.triniforce.server.plugins.kernel.ep.srv_ev.PKEPServerEvents;
+import com.triniforce.server.plugins.kernel.ep.tr_ext.PKEPTranInners;
+import com.triniforce.server.plugins.kernel.ep.tr_ext.PKEPTranOuters;
 import com.triniforce.server.plugins.kernel.ext.br.BackupRestoreDb;
 import com.triniforce.server.plugins.kernel.ext.br.BackupRestorePluginVersions;
 import com.triniforce.server.plugins.kernel.recurring.PKEPRecurringTasks;
@@ -42,7 +45,6 @@ import com.triniforce.server.plugins.kernel.upg_procedures.Upg_120406_NamedDbIdN
 import com.triniforce.server.srvapi.DataPreparationProcedure;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
-import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.IIdGenerator;
 import com.triniforce.server.srvapi.IMiscIdGenerator;
@@ -62,6 +64,7 @@ import com.triniforce.server.srvapi.ISrvSmartTranExtenders.IRefCountHashMap;
 import com.triniforce.server.srvapi.ISrvSmartTranExtenders.IRefCountHashMap.IFactory;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory.ITranExtender;
+import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.server.srvapi.ITimedLock2;
 import com.triniforce.server.srvapi.ITimedLock2.ITimedLockCB;
 import com.triniforce.server.srvapi.ITransactionWriteLock2;
@@ -126,6 +129,13 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	}
 	
 	public void doRegistration(){
+	    
+	    putExtension(PKEPTranOuters.class, RefCountMapTrnExtender.class);
+	    putExtension(PKEPTranOuters.class, FiniterExtender.class);
+	    putExtension(PKEPTranOuters.class, LockerExtender.class);
+	    putExtension(PKEPTranOuters.class, TranOuterExtender.class);
+	    putExtension(PKEPTranInners.class, TranInnerExtender.class);
+	    
         putExtension(PKEPBackupRestore.class, BackupRestoreDb.class);
         putExtension(PKEPBackupRestore.class, BackupRestorePluginVersions.class);
 	}
@@ -174,12 +184,20 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         m_runningApi.setIntfImplementor(ITimedLock2.class, new TimedLock2());
         m_runningApi.setIntfImplementor(IThrdWatcherRegistrator.class, new ThrdWatcherRegistrator());
 
-        
-        m_tranFactory.registerOuterExtender(new RefCountMapTrnExtender());
-        m_tranFactory.registerOuterExtender(new FiniterExtender());
-        m_tranFactory.registerOuterExtender(new LockerExtender());
-        m_tranFactory.registerInnerExtender(new TranInnerExtender());
-        m_tranFactory.registerOuterExtender(new TranOuterExtender());        
+        //tran inners
+        {
+            IPKExtensionPoint ep = getRootExtensionPoint().getExtensionPoint(PKEPTranInners.class);
+            for( IPKExtension e : ep.getExtensions().values()){
+                m_tranFactory.registerInnerExtender((ITranExtender) e.getInstance());
+            }
+        }
+        //tran outers
+        {
+            IPKExtensionPoint ep = getRootExtensionPoint().getExtensionPoint(PKEPTranOuters.class);
+            for( IPKExtension e : ep.getExtensions().values()){
+                m_tranFactory.registerOuterExtender((ITranExtender) e.getInstance());
+            }            
+        }
         
 	}
 	
@@ -258,7 +276,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	public void popApi(Mode mode, ApiStack stk) {
 	}
 	
-	static class RefCountMapTrnExtender implements ITranExtender{
+	public static class RefCountMapTrnExtender implements ITranExtender{
 		Map<Object, CountedObject> m_serverKeyMap = new HashMap<Object, CountedObject>(); 
 		
 		static class RefCountMap implements IRefCountHashMap{
@@ -353,7 +371,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 		}
 	}
 	
-	static class FiniterExtender implements ITranExtender{
+	public static class FiniterExtender implements ITranExtender{
 
 		static class Finiter implements IFiniter{
 
@@ -404,7 +422,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 		}
 	}
 	
-	static class LockerExtender implements ITranExtender, IFactory{
+	public static class LockerExtender implements ITranExtender, IFactory{
 	
 		static class Locker implements ILocker{
 
@@ -446,7 +464,6 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	}
 
 	public void init() {
-		
 	}
 	
     static class TransactionWriteLock implements ITransactionWriteLock2, ITimedLock2.ITimedLockCB {
@@ -488,7 +505,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         }
     }
 
-    static class TranOuterExtender implements ITranExtender {
+    public static class TranOuterExtender implements ITranExtender {
 
         public void pop(boolean arg0) {
                 ApiStack.popApi();
@@ -511,7 +528,12 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         }
     }    
 
-    static class TranInnerExtender implements ITranExtender {
+    public static class TranInnerExtender implements ITranExtender {
+        
+        public TranInnerExtender(){
+            
+        }
+        
         public void push() {
         }
         public void pop(boolean bCommit) {
@@ -534,6 +556,8 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         putExtensionPoint(actualizers);
         putExtensionPoint(new PKEPDBObjects());
         putExtensionPoint(new PKEPServices());
+        putExtensionPoint(new PKEPTranInners());
+        putExtensionPoint(new PKEPTranOuters());
     }
 
 
