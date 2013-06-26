@@ -77,7 +77,7 @@ public class InterfaceDescriptionTest extends TFTestCase {
         WsdlType t  = getType(desc.getWsdlTypes(), "char");
         assertNotNull(t);
         Restriction r = t.getResriction();
-        assertEquals(short.class, r.m_base);
+        assertEquals("short", r.m_base.getName());
         assertFalse(t.isComplex());
         
     }
