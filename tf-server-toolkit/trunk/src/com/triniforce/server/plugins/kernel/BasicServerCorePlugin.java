@@ -5,8 +5,10 @@
  */
 package com.triniforce.server.plugins.kernel;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -61,6 +63,7 @@ import com.triniforce.server.srvapi.ISrvSmartTranExtenders.IRefCountHashMap.IFac
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory.ITranExtender;
 import com.triniforce.server.srvapi.ITimedLock2;
+import com.triniforce.server.srvapi.ITimedLock2.ITimedLockCB;
 import com.triniforce.server.srvapi.ITransactionWriteLock2;
 import com.triniforce.server.srvapi.UpgradeProcedure;
 import com.triniforce.utils.Api;
@@ -448,12 +451,20 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	
     static class TransactionWriteLock implements ITransactionWriteLock2, ITimedLock2.ITimedLockCB {
 
-        ISrvSmartTran m_tran;        
+        ISrvSmartTran m_tran;
+        private List<ITimedLockCB> m_cb = new ArrayList<ITimedLockCB>();        
         
-        public void lock() {
+        /**
+         * Multiple calls allowed. Each cb will be called back.
+         */
+        public void lock(ITimedLockCB cb) {
             ITimedLock2 tl = ApiStack.queryInterface(ITimedLock2.class);
 
             if(null == tl) return;//registration phase
+            
+            if(null != cb){
+                m_cb.add(cb);
+            }
             m_tran = ApiStack.getInterface(ISrvSmartTran.class);;            
             tl.acquireLock(this);
         }
@@ -463,11 +474,17 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
             if(null == tl) return;//registration phase            
             
             tl.releaseLock(this);
+            for(ITimedLockCB cb: m_cb){
+                cb.unlocked();
+            }
         }        
         public void unlocked() {
             if( null != m_tran){
                 m_tran.doNotCommit();
             }
+        }
+        public void lock() {
+            lock(null);
         }
     }
 
