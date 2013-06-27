@@ -17,6 +17,11 @@ public class ApiAlgs {
         }
     }
     
+    @Deprecated
+    public static Log getDevLog(Object category){
+        return getLog(category.getClass());
+    }
+    
     public static Log getLog(Object category){
         return getLog(category.getClass());
     }    
