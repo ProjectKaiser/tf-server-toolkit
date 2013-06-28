@@ -133,8 +133,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	    putExtension(PKEPTranOuters.class, RefCountMapTrnExtender.class);
 	    putExtension(PKEPTranOuters.class, FiniterExtender.class);
 	    putExtension(PKEPTranOuters.class, LockerExtender.class);
-	    putExtension(PKEPTranOuters.class, TranOuterExtender.class);
-	    putExtension(PKEPTranInners.class, TranInnerExtender.class);
+	    putExtension(PKEPTranOuters.class, TransactionWriteLockExtender.class);
 	    
         putExtension(PKEPBackupRestore.class, BackupRestoreDb.class);
         putExtension(PKEPBackupRestore.class, BackupRestorePluginVersions.class);
@@ -505,10 +504,14 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         }
     }
 
-    public static class TranOuterExtender implements ITranExtender {
+    public static class TransactionWriteLockExtender implements ITranExtender {
 
         public void pop(boolean arg0) {
-                ApiStack.popApi();
+            ITransactionWriteLock2 wl = ApiStack
+                    .getInterface(ITransactionWriteLock2.class);
+            wl.unlock();
+
+            ApiStack.popApi();
         }
         public void push() {
             Api api = new Api();
@@ -527,23 +530,6 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
             tl.checkTimeout();
         }
     }    
-
-    public static class TranInnerExtender implements ITranExtender {
-        
-        public TranInnerExtender(){
-            
-        }
-        
-        public void push() {
-        }
-        public void pop(boolean bCommit) {
-            {
-                ITransactionWriteLock2 wl = ApiStack
-                        .getInterface(ITransactionWriteLock2.class);
-                wl.unlock();
-            }
-        }
-    }
 
     public void doExtensionPointsRegistration() {
         putExtensionPoint(new PKEPServerProcedures());
