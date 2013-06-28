@@ -97,6 +97,12 @@ uploadArchives {
 	}
 }
 
+task jar_lib(type: Copy, dependsOn:[jar]){
+	from "${jar.destinationDir}/${jar.archiveName}"
+	into "K:/Products/triniforce/workspace/tflib/srvdist"
+	rename {String fileName -> 'tf-server-toolkit.jar'}
+}
+
 /*
 task printEnv{
 	props:{
