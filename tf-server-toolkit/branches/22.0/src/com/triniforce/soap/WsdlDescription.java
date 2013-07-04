@@ -16,13 +16,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.triniforce.soap.InterfaceDescription.Operation;
-import com.triniforce.soap.TypeDefLibCache.PropDef;
-import com.triniforce.soap.TypeDef;
 import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.EnumDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
+import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.WsdlDescription.WsdlPort.WsdlOperation;
 
 public class WsdlDescription {
@@ -46,6 +45,7 @@ public class WsdlDescription {
         static{
         	PRIMITIVE_TIPES.addAll(ScalarDef.BOXES.keySet());
         	PRIMITIVE_TIPES.addAll(ScalarDef.BOXES.values());
+        	PRIMITIVE_TIPES.add(char.class.getName());
         }
         
         public WsdlTypeElement(String name, TypeDef td, boolean bResident, int maxOccur) {
@@ -156,19 +156,37 @@ public class WsdlDescription {
             return null == cd.getParentDef() ? null : cd.getParentDef().getName();
         }
         
-        List<String> getResriction(){
+        
+        static class Restriction {
+        	ScalarDef m_base;
+        	List<String> m_vals;
+        }
+        
+        Restriction getResriction(){
+        	if(m_td instanceof ExternalDefLib.CharDef){
+            	Restriction res = new Restriction();
+            	res.m_base = TypeDefLibCache.SCALAR_LIB.get(short.class); 
+            	return res;
+        	}
         	if(!(m_td instanceof EnumDef)){
         		return null;
         	}
         	EnumDef ed = (EnumDef) m_td;
-        	return Arrays.asList(ed.getPossibleValues());
+        	Restriction res = new Restriction();
+        	res.m_vals = Arrays.asList(ed.getPossibleValues());
+        	res.m_base = TypeDefLibCache.SCALAR_LIB.get(String.class);
+        	return res;
         }
         
         boolean isComplex(){
         	return !(m_td instanceof ScalarDef);
         }
 
-        
+        String getNamespace(String tns){
+        	if(TypeDefLibCache.SCALAR_LIB.getDefs().contains(m_td))
+        		return InterfaceDescriptionGenerator.schema;
+        	return tns;
+        }
     }
     
     Collection<WsdlTypeElement> getWsdlTypeElements(){

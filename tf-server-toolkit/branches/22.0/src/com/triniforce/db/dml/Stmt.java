@@ -44,6 +44,7 @@ public class Stmt {
     public ResSet executeQuery(String sql, String profItem) {
     	PSI psi = ApiAlgs.getProfItem(Stmt.class.getName(), profItem);
         try {
+            ApiAlgs.getLog(StmtContainer.class).trace(StmtContainer.ts(profItem, sql, "stmt"));
             return new ResSet(m_statement.executeQuery(sql));
         } catch (Exception e) {
             ApiAlgs.rethrowException(e);
@@ -57,6 +58,7 @@ public class Stmt {
     public boolean execute(String sql, String profItem) {
     	PSI psi = ApiAlgs.getProfItem(Stmt.class.getName(), sql);
         try {
+            ApiAlgs.getLog(StmtContainer.class).trace(StmtContainer.ts(profItem, sql, "stmt"));
             return m_statement.execute(sql);
         } catch (Exception e) {
             ApiAlgs.rethrowException(e);

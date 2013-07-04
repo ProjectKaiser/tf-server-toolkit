@@ -13,11 +13,13 @@ import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.IProfilerStack.PSI;
 
 public class PrepStmt extends Stmt {
-    private String m_sqlItem;
+    private String m_profItem;
+    private final String m_sql;
 
-	public PrepStmt(IStmtContainer parent, PreparedStatement stmt, String sqlItem) {
+	public PrepStmt(IStmtContainer parent, PreparedStatement stmt, String sqlItem, String sql) {
         super(parent, stmt);
-        m_sqlItem = sqlItem;
+        m_profItem = sqlItem;
+        m_sql = sql;
     }
 
     protected PreparedStatement ps() {
@@ -26,8 +28,9 @@ public class PrepStmt extends Stmt {
 
     public void execute() {
     	
-    	PSI psi = ApiAlgs.getProfItem(PrepStmt.class.getName(), m_sqlItem);
+    	PSI psi = ApiAlgs.getProfItem(PrepStmt.class.getName(), m_profItem);
         try {
+            ApiAlgs.getLog(StmtContainer.class).trace(StmtContainer.ts(m_profItem, m_sql, "prepstmt"));
             ps().execute();
         } catch (Exception e) {
             ApiAlgs.rethrowException(e);
@@ -76,8 +79,9 @@ public class PrepStmt extends Stmt {
     }  
     
     public ResSet executeQuery(){
-    	PSI psi = ApiAlgs.getProfItem(PrepStmt.class.getName(), m_sqlItem);
+    	PSI psi = ApiAlgs.getProfItem(PrepStmt.class.getName(), m_profItem);
         try {
+            ApiAlgs.getLog(StmtContainer.class).trace(StmtContainer.ts(m_profItem, m_sql, "prepstmt"));
             return new ResSet(ps().executeQuery());
         } catch (Exception e) {
             ApiAlgs.rethrowException(e);

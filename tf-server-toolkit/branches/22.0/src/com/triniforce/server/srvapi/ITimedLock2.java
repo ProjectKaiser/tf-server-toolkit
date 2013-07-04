@@ -19,6 +19,7 @@ public interface ITimedLock2 {
      * Acquires the lock, wait if needed
      */
     public void acquireLock(ITimedLockCB cb);
+    
     public Thread getLockerThread();
     
     /**
