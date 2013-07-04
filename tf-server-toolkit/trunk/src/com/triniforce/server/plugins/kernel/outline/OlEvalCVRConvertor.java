@@ -110,7 +110,9 @@ public class OlEvalCVRConvertor {
             }
         }
         
-        TFUtils.assertTrue(aExpr instanceof ColumnExpr, aExpr.toString());
+        if(! (aExpr instanceof ColumnExpr)){
+            return;
+        }
         ColumnExpr expr = (ColumnExpr) aExpr;
         
         OlExpr dstExpr = null;
