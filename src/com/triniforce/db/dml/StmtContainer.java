@@ -12,6 +12,7 @@ import java.sql.Statement;
 import java.util.HashSet;
 
 import com.triniforce.utils.ApiAlgs;
+import com.triniforce.utils.TFUtils;
 import com.triniforce.utils.IProfilerStack.PSI;
 
 public class StmtContainer implements IStmtContainer {
@@ -112,11 +113,10 @@ public class StmtContainer implements IStmtContainer {
     
     public PrepStmt prepareStatement(String sql, String profItem) {
         PSI psi = ApiAlgs.getProfItem(PrepStmt.class.getName(), PROF_PREPARE);
-        ApiAlgs.getLog(StmtContainer.class).trace(sql);
         try {
             checkClosed();
             PreparedStatement stmnt = m_conn.prepareStatement(sql);
-            PrepStmt stmt = new PrepStmt(this, stmnt, profItem);
+            PrepStmt stmt = new PrepStmt(this, stmnt, profItem, sql);
             m_statements.add(stmt);
             return stmt;
         } catch (Exception e) {
@@ -132,12 +132,11 @@ public class StmtContainer implements IStmtContainer {
             int resultSetConcurrency) {
         
         PSI psi = ApiAlgs.getProfItem(PrepStmt.class.getName(), PROF_PREPARE);
-        ApiAlgs.getLog(StmtContainer.class).trace(sql);
         try {
             checkClosed();
             PreparedStatement stmnt = m_conn.prepareStatement(sql,
                     resultSetType, resultSetConcurrency);
-            PrepStmt stmt = new PrepStmt(this, stmnt, sql);
+            PrepStmt stmt = new PrepStmt(this, stmnt, sql, sql);
             m_statements.add(stmt);
             return stmt;
         } catch (Exception e) {
@@ -159,19 +158,26 @@ public class StmtContainer implements IStmtContainer {
 
     }
 
+    public static String ts(String profItem, String sql, String stmtType){
+        String res = sql + ": " + stmtType; 
+        if(!TFUtils.equals(profItem, sql) && profItem != null){
+            res += ": " + profItem;
+        }
+        return res;
+    }
+    
     public PrepStmt prepareStatement(Class prepSql) {
         try {
             checkClosed();
             String sql = m_sqlGetter.getSql(prepSql);
             PSI psi = ApiAlgs.getProfItem(PrepStmt.class.getName(), PROF_PREPARE);
-            ApiAlgs.getLog(StmtContainer.class).trace(prepSql.getName() + ": " + sql);
             PreparedStatement stmnt;
             try {
                 stmnt = m_conn.prepareStatement(sql);
             } finally{
                 ApiAlgs.closeProfItem(psi);
             }
-            PrepStmt stmt = new PrepStmt(this, stmnt, prepSql.getName());
+            PrepStmt stmt = new PrepStmt(this, stmnt, prepSql.getName(), sql);
             m_statements.add(stmt);
             return stmt;
         } catch (Exception e) {

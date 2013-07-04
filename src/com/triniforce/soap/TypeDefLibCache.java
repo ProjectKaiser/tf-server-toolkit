@@ -301,17 +301,17 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         }
     }
         
-    static class EnumDefLib implements IDefLibrary{
-
-		public TypeDef add(Type type) {
-			return null;
-		}
-
-		public TypeDef get(Type type) {
-			return null;
-		}
-    	
-    }
+//    static class EnumDefLib implements IDefLibrary{
+//
+//		public TypeDef add(Type type) {
+//			return null;
+//		}
+//
+//		public TypeDef get(Type type) {
+//			return null;
+//		}
+//    	
+//    }
     
     public static class PropDef extends SimpleName implements Serializable{
         private static final long serialVersionUID = -2146710337654704756L;
@@ -397,14 +397,17 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
     List<IDefLibrary> m_libs;
     Map<Type, TypeDef> m_classes;
 	private UniqueNameGenerator m_uniqueNameGen;
+	private ExternalDefLib m_extLib;
 
     public TypeDefLibCache(ClassParser parser) {
         m_libs = new ArrayList<IDefLibrary>();
         m_arrays = new HashMap<TypeDef, ArrayDef>();
         m_classes = new HashMap<Type, TypeDef>();
+        m_extLib = new ExternalDefLib();
         m_libs.add(new ScalarDefLib());
         m_libs.add(new ArrayDefLib(this, m_arrays, this));
         m_libs.add(new MapDefLib(this, m_arrays, this));
+        m_libs.add(m_extLib);
         m_libs.add(new ClassDefLib(parser, this, m_classes, this));
         m_uniqueNameGen = new UniqueNameGenerator();
     }
@@ -457,6 +460,7 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
     public List<TypeDef> getDefs() {
         ArrayList<TypeDef> res = new ArrayList<TypeDef>(m_arrays.values());
         res.addAll(m_classes.values());
+        res.addAll(m_extLib.getDefs());
         return res;
     }
     

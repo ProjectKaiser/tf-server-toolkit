@@ -58,12 +58,12 @@ import com.triniforce.soap.JSONSerializer.JsonRpcError;
 import com.triniforce.soap.JSONSerializer.JsonRpcError.Error;
 import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
-import com.triniforce.soap.TypeDef.EnumDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.WsdlDescription.WsdlMessage;
 import com.triniforce.soap.WsdlDescription.WsdlPort.WsdlOperation;
 import com.triniforce.soap.WsdlDescription.WsdlType;
+import com.triniforce.soap.WsdlDescription.WsdlType.Restriction;
 import com.triniforce.soap.WsdlDescription.WsdlTypeElement;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.IName;
@@ -229,8 +229,10 @@ public class InterfaceDescriptionGenerator {
     
     static class TypeConverter implements IConverter<WsdlType>{
         private boolean m_bShowName;
-        public TypeConverter(boolean bShowName) {
+		private String m_tns;
+        public TypeConverter(boolean bShowName, String tns) {
             m_bShowName = bShowName;   
+            m_tns = tns;
         }
         public void run(Node_S parent, WsdlType val) {
             Node_S t = parent.append(val.isComplex() ? "s:complexType" : "s:simpleType");
@@ -256,7 +258,7 @@ public class InterfaceDescriptionGenerator {
 	                            .attr("maxOccurs", sMaxOccur)
 	                            .attr("name", val.getName());
 	                        if(!val.isResidentType()){
-	                            e.append(val.getType(), new TypeConverter(false));
+	                            e.append(val.getType(), new TypeConverter(false, m_tns));
 	                        }
 	                        else{
 	                            if(!val.getType().getTypeDef().getType().equals(Object.class.getName()))
@@ -269,18 +271,20 @@ public class InterfaceDescriptionGenerator {
 	                .end()
 	            .end();
             }
-            List<String> restrBase = val.getResriction();
+            Restriction restrBase = val.getResriction();
             if(null != restrBase){
-            	Node_S e = t.append("s:restriction").attr("base", "s:string");
-            	for (String value : restrBase) {
-            		e.append("s:enumeration").attr("value", value);
-				}	
+            	WsdlType restrType = new WsdlType(restrBase.m_base);
+            	Node_S e = t.append("s:restriction").attr("base", getTypeName(restrType));
+            	if(null != restrBase.m_vals)
+	            	for (String value : restrBase.m_vals) {
+	            		e.append("s:enumeration").attr("value", value);
+					}	
             }
         }
         private String getTypeName(WsdlType type) {
+        	String ns = type.getNamespace(m_tns);
             String res = type.getTypeDef().getName();
-            if(type.getTypeDef() instanceof ScalarDef && 
-            		(!(type.getTypeDef() instanceof EnumDef))){
+            if(InterfaceDescriptionGenerator.schema.equals(ns)){
                 res = "s:"+ res;
             }
             else{
@@ -316,14 +320,14 @@ public class InterfaceDescriptionGenerator {
                     	.attr("targetNamespace", m_targetNamespace)
                         .append(desc.getWsdlTypeElements(), new IConverter<WsdlTypeElement>(){
                             public void run(Node_S parent, WsdlTypeElement val) {
-                                TypeConverter tc = new TypeConverter(false);
+                                TypeConverter tc = new TypeConverter(false, m_targetNamespace);
                                 parent.append("s:element")
                                     .attr("name", val.getName())
                                     .append(val.getType(), tc)
                                 .end();
                             }
                         })
-                        .append(desc.getWsdlTypes(), new TypeConverter(true))
+                        .append(desc.getWsdlTypes(), new TypeConverter(true, m_targetNamespace))
                     .end()
                 .end()
                 .append(desc.getMessages(), new IConverter<WsdlMessage>(){
