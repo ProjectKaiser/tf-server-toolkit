@@ -123,9 +123,7 @@ public class DBTables {
 		            		break;
 		            	}
 	            	}	
-	            	else{
-	            		registerExternalDBO(m_fstDBO);
-	            	}
+
 	            	m_fstDBO = m_iNext.hasNext() ? m_iNext.next() : null;
 	            }
             } catch(EReferenceError e){
@@ -392,6 +390,8 @@ public class DBTables {
 
     private void setReferences() throws EUnknownReference {
         for (TableDef tab: m_desiredTables.values()) {
+        	if(tab.isExternalTable())
+        		continue;
         	int actVers = Math.min(tab.getVersion(), getActualVersion(tab.getEntityName())+1);
             for (TableUpdateOperation op: tab.getHistory(actVers)) {
                 if(op instanceof AddForeignKeyOperation){
@@ -445,9 +445,9 @@ public class DBTables {
         m_desiredTables.remove(tabName);
     }
     
-    protected void registerExternalDBO(TableDef dbo){
-    	m_actualTables.addTable(dbo.getDbName(), dbo.getEntityName(), dbo.getVersion());
-    }
+//    protected void registerExternalDBO(TableDef dbo){
+//    	m_actualTables.addTable(dbo.getDbName(), dbo.getEntityName(), dbo.getVersion());
+//    }
 
     
 }

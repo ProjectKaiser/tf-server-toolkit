@@ -615,8 +615,16 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	public String getTableDbName(String entityName)
 			throws EServerObjectNotFound {
 		String res = m_actualTabStates.getDBName(entityName);
-		if (res == null)
-			throwESONotFound(entityName);
+		if (res == null){
+			IEntity entity = getEntity(entityName);
+			if(entity instanceof TableDef){
+				TableDef td = (TableDef) entity;
+				if(td.isExternalTable())
+					res = td.getDbName();
+			}
+			else
+				throwESONotFound(entityName);
+		}
 		return res;
 	}
 
