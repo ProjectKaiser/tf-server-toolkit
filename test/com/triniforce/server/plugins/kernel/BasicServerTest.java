@@ -12,20 +12,20 @@ import java.io.PrintWriter;
 import java.util.Set;
 import java.util.TimeZone;
 
-import com.triniforce.db.ddl.TableDef;
-import com.triniforce.db.ddl.TableDef.EDBObjectException;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.test.BasicServerTestCase;
+import com.triniforce.dbo.DBOTableDef;
+import com.triniforce.dbo.PKEPDBObjects;
 import com.triniforce.extensions.IPKExtensionPoint;
+import com.triniforce.extensions.PKPlugin;
 import com.triniforce.server.plugins.kernel.ep.sp.PKEPServerProcedures;
 import com.triniforce.server.plugins.kernel.ep.sp.ServerProcedure;
+import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.IIdDef;
 import com.triniforce.server.srvapi.ISODbInfo;
-import com.triniforce.server.srvapi.ISORegistration;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.ITaskExecutors;
-import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.utils.Api;
 import com.triniforce.utils.ApiStack;
 
@@ -40,7 +40,7 @@ public class BasicServerTest extends BasicServerTestCase {
 		public int execute(int a, int b);
 	}
 	
-	static class TestExtTab  extends TableDef{
+	public static class TestExtTab  extends DBOTableDef{
 		public TestExtTab() {
 			super(TestExtTab.class.getName());
 			setDbName("TEST_EXT_TAB");
@@ -49,12 +49,16 @@ public class BasicServerTest extends BasicServerTestCase {
 		}
 	}
 	
-	static class TestUProc extends DPPProcPlugin{
+	static class TestUProc extends PKPlugin{
+		
 		@Override
-		public void doRegistration(ISORegistration reg)
-				throws EDBObjectException {
-			super.doRegistration(reg);
-			reg.registerTableDef(new TestExtTab());
+		public void doExtensionPointsRegistration() {
+			putExtension(PKEPDBObjects.class, TestExtTab.class);
+		}
+
+		@Override
+		public void doRegistration() {
+			// TODO Auto-generated method stub
 			
 		}
 		
@@ -69,7 +73,8 @@ public class BasicServerTest extends BasicServerTestCase {
 	    assertEquals(gmt, def);
         m_server.enterMode(Mode.Running);
         try{
-            ApiStack.getInterface(TimeZone.class);            
+            ApiStack.getInterface(TimeZone.class); 
+            
         } finally{
             m_server.leaveMode();
         }
@@ -233,6 +238,12 @@ public class BasicServerTest extends BasicServerTestCase {
 		}finally{
 			m_server.leaveMode();
 		}
+	}
+	
+	public void testPluginRegistration(){
+		BasicServer bs = getServer();
+        assertNotNull(bs.getEntity(TestExtTab.class.getName()));
+        assertEquals("TEST_EXT_TAB", bs.getTableDbName(TestExtTab.class.getName()));
 	}
 	
 }

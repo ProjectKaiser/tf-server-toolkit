@@ -319,8 +319,14 @@ public class DBTablesTest extends TestCase {
             tab1.setDbName("external_tab1");
             tab1.setExternalTable(true);
             m_db.add(tab1);
+            TableDef tab2 = new TableDef("tab2");
+            tab2.setDbName("external_tab2");
+            tab2.setExternalTable(true);
+            m_db.add(tab2);
+            
             assertTrue(m_db.getCommandList().isEmpty());
-            assertEquals("external_tab1", testAS.getDBName("tab1"));
+            
+            assertEquals(null, testAS.getDBName("tab1"));
         }
     }
     
