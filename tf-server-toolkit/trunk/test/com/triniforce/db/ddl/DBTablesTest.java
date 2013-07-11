@@ -15,16 +15,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-
 import junit.framework.TestCase;
 
 import com.triniforce.db.ddl.DBTables.DBOperation;
 import com.triniforce.db.ddl.TableDef.ECycleReference;
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
+import com.triniforce.db.ddl.TableDef.EInvalidDefinitionArgument;
 import com.triniforce.db.ddl.TableDef.EUnknownReference;
 import com.triniforce.db.ddl.TableDef.FieldDef;
-import com.triniforce.db.ddl.TableDef.IndexDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
+import com.triniforce.db.ddl.TableDef.IndexDef;
 import com.triniforce.db.ddl.UpgradeRunner.IActualState;
 
 /**
@@ -40,12 +40,14 @@ public class DBTablesTest extends TestCase {
     static class TestAS implements IActualState{
         
         private HashMap<String, Integer> as;
+        private HashMap<String, String> dbNames = new HashMap<String, String>();
 
         public TestAS(HashMap<String, Integer> as) {
             this.as = as;
         }
 
         public void addTable(String dbName, String tabName, int v) {
+        	dbNames.put(tabName, dbName);
         }
 
         public void changeVersion(String tabName, int dv) {
@@ -60,7 +62,7 @@ public class DBTablesTest extends TestCase {
         }
 
         public String getDBName(String appName) {
-            return null;
+            return dbNames.get(appName);
         }
 
         public int getVersion(String appName){
@@ -305,7 +307,20 @@ public class DBTablesTest extends TestCase {
             DBOperation dbOp = m_db.getCommandList().get(0);
             CreateTableOperation createOp = (CreateTableOperation) dbOp.getOperation();
             assertEquals("must_ba_tab1", createOp.getDbName());
-
+            
+        }
+        {
+            m_plugin.clear();
+            m_as.clear();
+            TestAS testAS = new TestAS(m_as);
+            m_db = new DBTables(testAS, m_plugin);
+            TableDef tab1 = new TableDef("tab1");
+            tab1.addModification(1, new AddColumnOperation(FieldDef.createScalarField("col1", ColumnType.INT, true)));
+            tab1.setDbName("external_tab1");
+            tab1.setExternalTable(true);
+            m_db.add(tab1);
+            assertTrue(m_db.getCommandList().isEmpty());
+            assertEquals("external_tab1", testAS.getDBName("tab1"));
         }
     }
     
