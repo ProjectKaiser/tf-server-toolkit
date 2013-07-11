@@ -12,6 +12,8 @@ import java.io.PrintWriter;
 import java.util.Set;
 import java.util.TimeZone;
 
+import com.triniforce.db.ddl.TableDef;
+import com.triniforce.db.ddl.TableDef.EDBObjectException;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.extensions.IPKExtensionPoint;
@@ -19,6 +21,7 @@ import com.triniforce.server.plugins.kernel.ep.sp.PKEPServerProcedures;
 import com.triniforce.server.plugins.kernel.ep.sp.ServerProcedure;
 import com.triniforce.server.srvapi.IIdDef;
 import com.triniforce.server.srvapi.ISODbInfo;
+import com.triniforce.server.srvapi.ISORegistration;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.ITaskExecutors;
@@ -37,7 +40,25 @@ public class BasicServerTest extends BasicServerTestCase {
 		public int execute(int a, int b);
 	}
 	
-	static class TestUProc extends DPPProcPlugin{}  
+	static class TestExtTab  extends TableDef{
+		public TestExtTab() {
+			super(TestExtTab.class.getName());
+			setDbName("TEST_EXT_TAB");
+			addField(1, FieldDef.createScalarField("id", ColumnType.INT, true));
+			setExternalTable(true);
+		}
+	}
+	
+	static class TestUProc extends DPPProcPlugin{
+		@Override
+		public void doRegistration(ISORegistration reg)
+				throws EDBObjectException {
+			super.doRegistration(reg);
+			reg.registerTableDef(new TestExtTab());
+			
+		}
+		
+	}  
 	
 	@Override
 	public void test() throws Exception {

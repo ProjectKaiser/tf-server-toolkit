@@ -105,24 +105,28 @@ public class DBTables {
             try{
             
 	            while(m_fstDBO!=null){
-	            	asDBO = actualDBOVersion(m_fstDBO.getEntityName());
-	            	if(asDBO < m_fstDBO.getVersion()){
-                        TableOperation op=null;
-	            		if(asDBO==0){
-	            			op = createCreateTableOperation(m_fstDBO);
-	            			if(null != op)
-	            				asDBO += op.getVersionIncrease();
-	            		} 
-                        if(op == null){
-	                        List<TableUpdateOperation> histDBO = m_fstDBO.getHistory(++asDBO);
-	                        op = histDBO.get(0);
-	            		}
-                        
-                        pushStack(new DBOperation(m_fstDBO.getEntityName(), op));                     
-	            		break;
-	            	} else{
-	                    m_fstDBO = m_iNext.hasNext() ? m_iNext.next() : null;            		
+	            	if(!m_fstDBO.isExternalTable()){
+		            	asDBO = actualDBOVersion(m_fstDBO.getEntityName());
+		            	if(asDBO < m_fstDBO.getVersion()){
+	                        TableOperation op=null;
+		            		if(asDBO==0){
+		            			op = createCreateTableOperation(m_fstDBO);
+		            			if(null != op)
+		            				asDBO += op.getVersionIncrease();
+		            		} 
+	                        if(op == null){
+		                        List<TableUpdateOperation> histDBO = m_fstDBO.getHistory(++asDBO);
+		                        op = histDBO.get(0);
+		            		}
+	                        
+	                        pushStack(new DBOperation(m_fstDBO.getEntityName(), op));                     
+		            		break;
+		            	}
+	            	}	
+	            	else{
+	            		registerExternalDBO(m_fstDBO);
 	            	}
+	            	m_fstDBO = m_iNext.hasNext() ? m_iNext.next() : null;
 	            }
             } catch(EReferenceError e){
                 m_refError = e;
@@ -440,5 +444,10 @@ public class DBTables {
     public void remove(String tabName) {
         m_desiredTables.remove(tabName);
     }
+    
+    protected void registerExternalDBO(TableDef dbo){
+    	m_actualTables.addTable(dbo.getDbName(), dbo.getEntityName(), dbo.getVersion());
+    }
+
     
 }

@@ -798,6 +798,7 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
 
 	private boolean m_bSupportForeignKeys=false;
 	private boolean m_bSupportNotNullableFields=true;
+	private boolean m_bExternalTable=false;
 	
 	private String m_dbName;
        
@@ -968,6 +969,14 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
 
 	public void setDbName(String dbName) {
 		m_dbName = dbName;
+	}
+
+	public boolean isExternalTable() {
+		return m_bExternalTable;
+	}
+
+	public void setExternalTable(boolean bExternalTable) {
+		m_bExternalTable = bExternalTable;
 	}
 
     
