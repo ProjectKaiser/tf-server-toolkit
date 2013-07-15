@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Stack;
 
 import net.sf.sojo.core.UniqueIdGenerator;
@@ -28,62 +29,71 @@ import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.utils.ApiAlgs;
 
 public class JSONSerializer {
-	static class JsonRpc{
+	static class JsonRpc extends LinkedHashMap<String, Object>{
+		private static final long serialVersionUID = -473423311133694151L;
 		private String m_jsonrpc;
 		Integer m_id;
 		
 		public JsonRpc(String jsonrpc, Integer id) {
 			setJsonrpc(jsonrpc);
-			m_id = id;
+			setId(id);
 		}
 		public String getJsonrpc() {
 			return m_jsonrpc;
 		}
 		public void setJsonrpc(String jsonrpc) {
 			m_jsonrpc = jsonrpc;
+			put("jsonrpc",jsonrpc);
 		}
 		public Integer getId() {
 			return m_id;
 		}
 		public void setId(Integer id) {
 			m_id = id;
+			put("id",id);
 		}
 	}
 	
 	static class JsonRpcMessage extends JsonRpc{
+		private static final long serialVersionUID = 2086146444010066388L;
 		String m_method;
 		Object[] m_params;
 		public JsonRpcMessage(String jsonrpc, String method, Object[] params,
 				Integer id) {
 			super(jsonrpc, id);
-			m_method = method;
-			m_params = params;
+			setParams(params);
+			setMethod(method);
+			remove("id");
+			setId(id);
 		}
 		public String getMethod() {
 			return m_method;
 		}
 		public void setMethod(String method) {
 			m_method = method;
+			put("method", method);
 		}
 		public Object[] getParams() {
 			return m_params;
 		}
 		public void setParams(Object[] params) {
 			m_params = params;
+			put("params", params);
 		}
 	}
 	
 	public static class JsonRpcError extends JsonRpc{
+		private static final long serialVersionUID = -2474959020925509512L;
 		public static class Error{
 			private int m_code;
-			private String m_message;
-			private String m_stackTrace;
+//			private String m_message;
+//			private String m_stackTrace;
 			
 			public Error(){}
 			public Error(int code, String msg, String stackTrace) {
 				setCode(code);
-				setMessage(msg);
-				setStackTrace(stackTrace);
+//				setMessage(msg);
+//				setStackTrace(stackTrace);
 			}
 
 			public int getCode() {
@@ -94,21 +104,21 @@ public class JSONSerializer {
 				m_code = code;
 			}
 
-			public String getMessage() {
-				return m_message;
-			}
-
-			public void setMessage(String message) {
-				m_message = message;
-			}
-
-			public String getStackTrace() {
-				return m_stackTrace;
-			}
-
-			public void setStackTrace(String stackTrace) {
-				m_stackTrace = stackTrace;
-			}
+//			public String getMessage() {
+//				return m_message;
+//			}
+//
+//			public void setMessage(String message) {
+//				m_message = message;
+//			}
+//
+//			public String getStackTrace() {
+//				return m_stackTrace;
+//			}
+//
+//			public void setStackTrace(String stackTrace) {
+//				m_stackTrace = stackTrace;
+//			}
 		}
 		private Error m_error;
 		public JsonRpcError(String jsonrpc, Integer id, Error error) {
@@ -120,6 +130,7 @@ public class JSONSerializer {
 		}
 		public void setError(Error error) {
 			m_error = error;
+			put("error", error);
 		}
 		
 		

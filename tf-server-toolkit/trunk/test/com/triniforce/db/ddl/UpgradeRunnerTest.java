@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import com.triniforce.db.ddl.DBTables.DBOperation;
 import com.triniforce.db.ddl.TableDef.EReferenceError;
@@ -189,9 +190,10 @@ public class UpgradeRunnerTest extends DDLTestCase {
     	}
     }
     
-    public void testRunCreateTable() throws Exception{    	
+    public void testRunCreateTable() throws Exception{
+    	String testTabName = "TestPlayer.testRunCreateTable" + (new Random().nextInt(1000));
     	{
-	    	String tabName = "TestPlayer.testRunCreateTable";
+	    	String tabName = testTabName;
 	    	ArrayList<TableUpdateOperation> nodes = new ArrayList<TableUpdateOperation>();
 	    	nodes.add(new AddColumnOperation(FieldDef.createScalarField("int_field", ColumnType.INT, true)));
 	    	nodes.add(new AddColumnOperation(FieldDef.createStringField("string_field", ColumnType.CHAR, 128, true, "default str")));
@@ -214,16 +216,17 @@ public class UpgradeRunnerTest extends DDLTestCase {
 	        assertNotNull(getPrimaryKey(dbName, m_player.getFullIndexName(dbName, "pk1", IndexDef.TYPE.PRIMARY_KEY)));
     	}
         {	// test DBName set
-        	String tabName = "TestPlayer.testRunCreateTable2";
+        	String tabName = testTabName+ "_2";
         	ArrayList<TableUpdateOperation> nodes = new ArrayList<TableUpdateOperation>();
         	nodes.add(new AddColumnOperation(FieldDef.createScalarField("int_field", ColumnType.INT, true)));
         	CreateTableOperation op = new CreateTableOperation(nodes);
-        	op.setDbName("hardcoded_name");
+        	String hardDbName = "hardcoded_name"+(new Random().nextInt(1000)); 
+        	op.setDbName(hardDbName);
         	ArrayList<DBOperation> cl = new ArrayList<DBOperation>();
         	cl.add(new DBOperation(tabName, op));
         	m_player.run(cl);
-        	assertEquals("hardcoded_name", 
-        			m_player.getActualState().getDBName("TestPlayer.testRunCreateTable2"));
+        	assertEquals(hardDbName, 
+        			m_player.getActualState().getDBName(tabName));
         	
         }
     }
@@ -288,7 +291,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
 	}
     
     public void testRunDropTable() throws Exception{
-    	String tabName = "TestPlayer.testRunDropTable";
+    	String tabName = "TestPlayer.testRunDropTable_"+(new Random().nextInt(1000));
         ArrayList<TableUpdateOperation> nodes = new ArrayList<TableUpdateOperation>();
         nodes.add(new AddColumnOperation(FieldDef.createScalarField("int_field", ColumnType.INT, true)));
         nodes.add(new AddColumnOperation(FieldDef.createStringField("string_field", ColumnType.CHAR, 128, true, "''")));
@@ -300,13 +303,15 @@ public class UpgradeRunnerTest extends DDLTestCase {
         cl.add(new DBOperation(tabName, createOp));
 
         m_player.run(cl);
-    	
+        
+    	String dbName = m_player.getActualState().getDBName(tabName);
+    			
     	cl.clear();
     	cl.add(new DBOperation(tabName, createOp.getReverseOperation()));
     	m_player.run(cl);  
     	
-    	assertFalse("tab in AS", m_player.getActualState().tableExists("testRunDropTable"));
-    	assertFalse("tab in base", containTable("testRunDropTable"));
+    	assertFalse("tab in AS", m_player.getActualState().tableExists(tabName));
+    	assertFalse("tab in base", containTable(dbName));
     }
     
     public void testRunEditTable() throws Exception{
@@ -660,14 +665,19 @@ public class UpgradeRunnerTest extends DDLTestCase {
         };
         
         String tabName = "TestPlayer.testDatabaseTypes";
+        TableDef td = new TableDef(tabName);
         ArrayList<TableUpdateOperation> nodes = new ArrayList<TableUpdateOperation>();
+        int version = 1;
         for (FieldDef fDef : fields) {
             nodes.add(new AddColumnOperation(fDef));
+            td.addField(version++, fDef);
         }
         
-        ArrayList<DBOperation> cl = new ArrayList<DBOperation>();
-        cl.add(new DBOperation(tabName, new CreateTableOperation(nodes)));
-        m_player.run(cl);
+//        ArrayList<DBOperation> cl = new ArrayList<DBOperation>();
+//        cl.add(new DBOperation(tabName, new CreateTableOperation(nodes)));
+//        m_player.run(cl);
+
+        createTableIfNeeded(td);
         getConnection().commit();
         
         String dbName = m_player.getActualState().getDBName(tabName);
