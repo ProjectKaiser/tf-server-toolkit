@@ -27,7 +27,7 @@ void adjustProperty(String propertyName, String defaultValue, boolean required =
 				'as JVM system property "%2$s", as environment variable "%3$s" ' +
 				'or as command line parameter "-P%1$s=<value>".',
 				 propertyName, sysPropName, sysEnvName)
-		setProperty(propertyName, value == null ? defaultValue : value)
+		ext[propertyName] = value == null ? defaultValue : value
 	}
 }
 
