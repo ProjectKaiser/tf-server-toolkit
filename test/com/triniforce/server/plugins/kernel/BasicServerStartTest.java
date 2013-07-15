@@ -110,8 +110,8 @@ public class BasicServerStartTest extends TFTestCase {
 	}
 
 
-	@Override
-	public void test() throws Exception {
+//	@Override
+	public void ntest() throws Exception {
 		BasicDataSource ds = getDataSource();
 		ds.setMaxWait(100L);
 		Pool pool = new BasicServerTestCase.Pool(ds);

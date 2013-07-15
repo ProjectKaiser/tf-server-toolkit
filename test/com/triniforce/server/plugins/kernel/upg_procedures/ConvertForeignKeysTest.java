@@ -13,9 +13,10 @@ import java.util.Random;
 import com.triniforce.db.ddl.TableDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.test.BasicServerTestCase;
+import com.triniforce.server.srvapi.IBasicServer.Mode;
+import com.triniforce.server.srvapi.ISODbInfo;
 import com.triniforce.server.srvapi.ISOQuery;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
-import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.utils.ApiStack;
 
 public class ConvertForeignKeysTest extends BasicServerTestCase {
@@ -62,18 +63,25 @@ public class ConvertForeignKeysTest extends BasicServerTestCase {
     }
     
     public void checkForeignKeys(boolean mustExist) throws Exception {
+//    	ISOQuery soQ = ApiStack.getInterface(ISOQuery.class);
+    	ISODbInfo soDbInfo = ApiStack.getInterface(ISODbInfo.class);
+    	trace(soDbInfo.getDbTableNames());
+    	
         Connection con = ApiStack.getInterface(Connection.class);
         DatabaseMetaData md = con.getMetaData();
         ResultSet rs = md.getTables(null, null, "%", null);
         boolean found = false;
         while(rs.next()){
-            ResultSet rsKeys = md.getExportedKeys(rs.getString(1), rs.getString(2), rs.getString(3));
-            while(rsKeys.next()){
-                trace(rsKeys.getString(3) + "." + rsKeys.getString(4) + "<="
-                + rsKeys.getString(7) + "." + rsKeys.getString(8)        
-                );  
-                found = true;
-            }
+        	String tabDbName = rs.getString(3);
+        	if(soDbInfo.getDbTableNames().contains(tabDbName.toLowerCase())){
+	            ResultSet rsKeys = md.getExportedKeys(rs.getString(1), rs.getString(2), rs.getString(3));
+	            while(rsKeys.next()){
+	            	trace(rsKeys.getString(3) + "." + rsKeys.getString(4) + "<="
+	                + rsKeys.getString(7) + "." + rsKeys.getString(8)        
+	                );  
+	                found = true;
+	            }
+        	}
         }
         assertTrue("Foreign keys exist = NOT " +mustExist + ", see trace", (mustExist && found) || (!mustExist && !found));
     }

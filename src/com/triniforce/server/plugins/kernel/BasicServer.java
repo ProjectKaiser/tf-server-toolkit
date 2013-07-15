@@ -621,6 +621,8 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 				TableDef td = (TableDef) entity;
 				if(td.isExternalTable())
 					res = td.getDbName();
+				else
+					throwESONotFound(entityName);
 			}
 			else
 				throwESONotFound(entityName);

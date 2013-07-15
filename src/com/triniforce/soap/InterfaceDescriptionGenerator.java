@@ -935,7 +935,7 @@ public class InterfaceDescriptionGenerator {
 	}
 	
 	public static class JsonResult extends JsonRpc{
-		
+		private static final long serialVersionUID = -339769101120563001L;
 		private Object m_result;
 
 		public JsonResult() {
@@ -948,6 +948,7 @@ public class InterfaceDescriptionGenerator {
 
 		public void setResult(Object result) {
 			m_result = result;
+			put("result", result);
 		}
 		
 	} 

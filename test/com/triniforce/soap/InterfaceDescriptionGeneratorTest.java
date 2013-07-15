@@ -737,6 +737,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         		fail();
         	} catch(EMethodNotFound e){}
         	
+        	trace(res);
         	assertTrue(res, res.contains("\"error\":{\"code\":-32601"));
         	
         }

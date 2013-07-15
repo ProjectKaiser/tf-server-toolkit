@@ -159,7 +159,7 @@ public class ClassParserTest extends TFTestCase {
 
         cDef = (ClassDef) m_cp.parse(C2.class, m_lib, null);
         assertEquals(2, cDef.getProps().size());
-        PropDef prop = cDef.getProps().get(0);
+        PropDef prop = cDef.getProp("v1");
         assertEquals("v1", prop.getName());
         ScalarDef scDef = (ScalarDef) prop.getType();
         assertEquals(int.class.getName(), scDef.getType());
@@ -178,7 +178,7 @@ public class ClassParserTest extends TFTestCase {
         assertEquals(Collections.emptyList(), cDef.getProps());
 
         cDef = (ClassDef) m_cp.parse(C5.class, m_lib, null);
-        prop = cDef.getProps().get(0);
+        prop = cDef.getProp("v51");
         assertEquals(C5.C51.class.getName(), prop.getRawType());
         
         cDef = (ClassDef) prop.getType();
@@ -368,7 +368,7 @@ public class ClassParserTest extends TFTestCase {
     public void testPropDef(){
         ClassDef cd = (ClassDef) m_lib.add(C11.class);
         C11 obj = new C11();
-        PropDef prop = cd.getProps().get(0); 
+        PropDef prop = cd.getProp("val1"); 
         prop.set(obj, 41);
         assertEquals(41, prop.get(obj));
         
