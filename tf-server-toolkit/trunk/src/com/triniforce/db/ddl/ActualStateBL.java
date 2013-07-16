@@ -20,18 +20,14 @@ import java.util.Set;
 
 import com.triniforce.db.ddl.DBTables.DBOperation;
 import com.triniforce.db.ddl.TableDef.FieldDef;
-import com.triniforce.db.ddl.TableDef.IndexDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
+import com.triniforce.db.ddl.TableDef.IndexDef;
 import com.triniforce.db.ddl.UpgradeRunner.DbType;
-import com.triniforce.db.dml.IStmtContainer;
-import com.triniforce.db.dml.PrepSql;
-import com.triniforce.db.dml.ResSet;
 import com.triniforce.db.dml.Table;
+import com.triniforce.db.dml.Table.Row;
 import com.triniforce.db.dml.Table.Row.State;
 import com.triniforce.db.dml.TableAdapter;
-import com.triniforce.db.dml.Table.Row;
 import com.triniforce.db.qbuilder.QSelect;
-import com.triniforce.db.qbuilder.QStatement;
 import com.triniforce.db.qbuilder.QTable;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.TFUtils;
@@ -63,17 +59,17 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 		}
     }
     
-    public static class PQGetAll extends PrepSql{
-        @Override
-        public QStatement buildSql() {
-            return new QSelect().joinLast(new QTable(ACT_STATE_TABLE, "AS")//$NON-NLS-1$
-            .addCol(APPNAME).addCol(DBNAME).addCol(VERSION));
-        }
-        
-        static ResSet exec(IStmtContainer sc){
-            return sc.prepareStatement(PQGetAll.class).executeQuery();
-        }
-    }
+//    public static class PQGetAll extends PrepSql{
+//        @Override
+//        public QStatement buildSql() {
+//            return new QSelect().joinLast(new QTable(ACT_STATE_TABLE, "AS")//$NON-NLS-1$
+//            .addCol(APPNAME).addCol(DBNAME).addCol(VERSION));
+//        }
+//        
+//        static ResSet exec(IStmtContainer sc){
+//            return sc.prepareStatement(PQGetAll.class).executeQuery();
+//        }
+//    }
     
     HashMap<String, Table.Row> m_state = new HashMap<String, Table.Row>();
     HashSet<String> m_dbNames = new HashSet<String>();

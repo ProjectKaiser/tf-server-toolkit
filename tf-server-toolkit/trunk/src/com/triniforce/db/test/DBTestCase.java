@@ -66,7 +66,7 @@ public class DBTestCase extends TFTestCase {
         }
         
         if(bCleanDB){
-            cleanDatabase(m_conn);
+            cleanDatabase();
 
             UpgradeRunner pl = new UpgradeRunner(m_conn, m_as);
             pl.init();
@@ -204,9 +204,9 @@ public class DBTestCase extends TFTestCase {
         clearConnection();
     }
     
-    private void cleanDatabase(Connection conn) throws Exception{
-    	if(!getDbType().equals(DbType.FIREBIRD))
-    		CleanDatabase.run(conn, ApiAlgs.getLog(this));
+    private void cleanDatabase() throws Exception{
+//    	if(!getDbType().equals(DbType.FIREBIRD))
+    		CleanDatabase.run(this, ApiAlgs.getLog(this), m_conn);
    }
     
     public void clearConnection() throws Exception{
@@ -218,5 +218,18 @@ public class DBTestCase extends TFTestCase {
     }    
     
     public void test() throws Exception{}
+
+	public Connection reopenConnection() throws Exception {
+		clearConnection();
+        DBTestCase.getDataSource().close();
+
+        Connection conn = getNewConnection();
+        conn.setAutoCommit(false);
+        
+        m_conn = conn;
+//        m_as = new ActualStateBL(m_conn); 
+
+		return m_conn;
+	}
     
 }

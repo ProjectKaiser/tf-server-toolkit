@@ -12,17 +12,19 @@ import java.io.PrintWriter;
 import java.util.Set;
 import java.util.TimeZone;
 
+import com.triniforce.db.ddl.TableDef.EDBObjectException;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.dbo.DBOTableDef;
 import com.triniforce.dbo.PKEPDBObjects;
 import com.triniforce.extensions.IPKExtensionPoint;
-import com.triniforce.extensions.PKPlugin;
 import com.triniforce.server.plugins.kernel.ep.sp.PKEPServerProcedures;
 import com.triniforce.server.plugins.kernel.ep.sp.ServerProcedure;
+import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.IIdDef;
 import com.triniforce.server.srvapi.ISODbInfo;
+import com.triniforce.server.srvapi.ISORegistration;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.ITaskExecutors;
@@ -49,11 +51,19 @@ public class BasicServerTest extends BasicServerTestCase {
 		}
 	}
 	
-	static class TestUProc extends PKPlugin{
+	static class TestUProc extends DPPProcPlugin{
+		
+		@Override
+		public void doRegistration(ISORegistration reg)
+				throws EDBObjectException {
+			super.doRegistration(reg);
+			doExtensionPointsRegistration();
+		}
 		
 		@Override
 		public void doExtensionPointsRegistration() {
-			putExtension(PKEPDBObjects.class, TestExtTab.class);
+			IBasicServer rep = ApiStack.getInterface(IBasicServer.class);
+			rep.getExtensionPoint(PKEPDBObjects.class).putExtension(TestExtTab.class);
 		}
 
 		@Override

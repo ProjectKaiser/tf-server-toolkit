@@ -406,7 +406,7 @@ public class UpgradeRunner {
             }
             
             int vInc = op.getVersionIncrease();
-            if (op instanceof DropTableOperation && !bForward)
+            if (op instanceof DropTableOperation)// && !bForward)
                 m_actualState.removeTable(dbOp.getDBOName());
             else
                 m_actualState.changeVersion(dbOp.getDBOName(), bForward ? vInc
