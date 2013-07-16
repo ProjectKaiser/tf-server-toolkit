@@ -123,11 +123,11 @@ public class CleanDatabase {
 		                }
 		                catch(Exception e2){
 		                	log.trace("unresolved drop : " + dbName);
-		                	PreparedStatement ps = conn.prepareStatement("select * from MON$ATTACHMENTS");
-		                	ResultSet rs = ps.executeQuery();
-		                	while(rs.next()){
-		                		log.trace("conn: " + rs.getTimestamp("MON$TIMESTAMP"));
-		                	}
+//		                	PreparedStatement ps = conn.prepareStatement("select * from MON$ATTACHMENTS");
+//		                	ResultSet rs = ps.executeQuery();
+//		                	while(rs.next()){
+//		                		log.trace("conn: " + rs.getTimestamp("MON$TIMESTAMP"));
+//		                	}
 //		                	throw e2;
 		                	
 		                }
