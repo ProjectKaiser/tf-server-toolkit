@@ -211,7 +211,8 @@ public class DBTestCase extends TFTestCase {
     
     public void clearConnection() throws Exception{
         if( null != m_conn){
-            m_conn.rollback();
+        	if(!m_conn.getAutoCommit())
+        		m_conn.rollback();
             m_conn.close();
             m_conn = null;
         }
