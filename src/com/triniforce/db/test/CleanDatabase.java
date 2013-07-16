@@ -11,9 +11,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.apache.commons.dbcp.SQLNestedException;
 import org.apache.commons.logging.Log;
 
+import com.triniforce.db.ddl.ActualStateBL;
 import com.triniforce.db.ddl.UpgradeRunner.DbType;
 import com.triniforce.utils.ApiAlgs;
 
@@ -27,47 +31,58 @@ public class CleanDatabase {
 
             test.trace("Database clean.");
 
+//            test.getConnection().commit();
+            DBTestCase.getDataSource().setMaxActive(0);
+            DBTestCase.getDataSource().setMaxIdle(1);
+            DBTestCase.getDataSource().setMaxActive(1);
             run(test);
 
             test.trace("Ok. Done.");
         } finally {
-            test.tearDown();
+//            test.tearDown();
         }
 
     }
 
     public static void run(DBTestCase test) throws Exception {
-        Connection conn = test.getNewConnection();
+        Connection conn = test.getConnection();
         try {
-        	run(conn, ApiAlgs.getLog(test));
+        	run(test, ApiAlgs.getLog(test), conn);
         } finally {
-            conn.close();
+//            conn.close();
         }
     }
     
-    public static void run(Connection conn, Log log) throws Exception {
+    public static void run(DBTestCase test, Log log, Connection conn) throws Exception {
     	
-    	String schem = null;
+//    	String schem = null;
     	DbType dbType = DBTestCase.getDbType();
     	boolean autoCommmit = conn.getAutoCommit();
     	try{
 	        if (dbType.equals(DbType.MSSQL)){
 	            conn.setAutoCommit(true);
-	            schem = "dbo";
+//	            schem = "dbo";
 	        }
 	        else
 	            conn.setAutoCommit(false);
-	        DatabaseMetaData md = conn.getMetaData();
 	
-	        ResultSet rs = md.getTables(conn.getCatalog(), schem, "%",
-	                new String[] { "TABLE", "VIEW" });
-	        while (rs.next()) {
-	            String dbName = rs.getString("TABLE_NAME");
-	            if("VIEW".equals(rs.getString("TABLE_TYPE").toUpperCase())){
-		            log.trace(String.format("Delete view %s.", dbName));
-		        	conn.createStatement().execute("DROP VIEW "+dbName);            	
-	            }
-	            else{
+	        ActualStateBL as = new ActualStateBL(conn);
+	        Set<String> dbnames = new HashSet<String>(as.getDbTableNames());
+//	        dbnames.remove(ActualStateBL.ACT_STATE_TABLE);
+//	        dbnames.remove(as.getDBName(TIndexNames.class.getName()));
+	        conn = test.reopenConnection();
+	        conn.setAutoCommit(false);
+	        DatabaseMetaData md = conn.getMetaData();
+//	        conn.commit();
+//	        ResultSet rs = md.getTables(conn.getCatalog(), schem, "%",
+//	                new String[] { "TABLE", "VIEW" });
+	        for (String dbName  : dbnames) {
+//	            String dbName = rs.getString("TABLE_NAME");
+//	            if("VIEW".equals(rs.getString("TABLE_TYPE").toUpperCase())){
+//		            log.trace(String.format("Delete view %s.", dbName));
+//		        	conn.createStatement().execute("DROP VIEW "+dbName);            	
+//	            }
+//	            else{
 		            
 		            log.trace(String.format("Delete table %s.", dbName));
 		
@@ -100,16 +115,34 @@ public class CleanDatabase {
 		                    oldFkTab = fkTab;
 		                    oldFkName = fkName;
 		                }
-		                dropTable(conn, dbName);
+		                try{
+		                	dropTable(conn, dbName);
+		                }catch(SQLNestedException e2){
+		                	log.trace(String.format("Drop table  failed %s.", dbName));
+//		                	log.trace("cause", e2);
+		                }
+		                catch(Exception e2){
+		                	log.trace("unresolved drop : " + dbName);
+		                	PreparedStatement ps = conn.prepareStatement("select * from MON$ATTACHMENTS");
+		                	ResultSet rs = ps.executeQuery();
+		                	while(rs.next()){
+		                		log.trace("conn: " + rs.getTimestamp("MON$TIMESTAMP"));
+		                	}
+//		                	throw e2;
+		                	
+		                }
+//		                as.removeTable(as.getAppName(dbName));
 		            }
-	            }
+//	            }
 	        }
-	        rs.close();
+//	        as.flush(conn);
+	        conn.commit();
+//	        rs.close();
 	        // if database is firebird
 	        // drop all client generators
 	        if(DbType.FIREBIRD.equals(dbType)){
 	        	Statement st = conn.createStatement();
-	        	rs = st.executeQuery("select RDB$GENERATOR_NAME from RDB$GENERATORS where RDB$SYSTEM_FLAG is null");
+	        	ResultSet rs = st.executeQuery("select RDB$GENERATOR_NAME from RDB$GENERATORS where RDB$SYSTEM_FLAG is null");
 	        	while(rs.next()){
 	        		Statement st2 = conn.createStatement();
 	        		st2.execute("DROP GENERATOR "+rs.getString(1));

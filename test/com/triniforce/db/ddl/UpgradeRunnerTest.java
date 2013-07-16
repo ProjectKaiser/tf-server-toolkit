@@ -7,6 +7,8 @@
 package com.triniforce.db.ddl;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
@@ -23,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.InvalidPropertiesFormatException;
 import java.util.List;
 import java.util.Random;
 
@@ -315,7 +318,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
     }
     
     public void testRunEditTable() throws Exception{
-		String tabName = "TestPlayer.testRunEdit";
+		String tabName = "TestPlayer.testRunEdit_" + (new Random().nextInt(1000));
 		String dbName = m_as.generateTabName(tabName);
         ArrayList<TableUpdateOperation> nodes = new ArrayList<TableUpdateOperation>();
         nodes.add(new AddColumnOperation(FieldDef.createScalarField("int_field", ColumnType.INT, true)));
@@ -676,11 +679,19 @@ public class UpgradeRunnerTest extends DDLTestCase {
 //        ArrayList<DBOperation> cl = new ArrayList<DBOperation>();
 //        cl.add(new DBOperation(tabName, new CreateTableOperation(nodes)));
 //        m_player.run(cl);
+        
+        DBTables ts = new DBTables();
+        ts.add(td);
+        ts.setActualState(m_player.getActualState());
+        m_player.run(ts.getCommandList());
 
-        createTableIfNeeded(td);
         getConnection().commit();
         
         String dbName = m_player.getActualState().getDBName(tabName);
+        
+        assertNotNull(dbName);
+        
+        long tst = System.currentTimeMillis();
         
         PreparedStatement ps = getConnection().prepareStatement("insert into "+dbName+" " +
                 "(fINT, fSMALLINT, fFLOAT, fTIMESTAMP, fDECIMAL_10_2, fCHAR_5, fNCHAR_10," +
@@ -708,7 +719,11 @@ public class UpgradeRunnerTest extends DDLTestCase {
         ps.execute();
         getConnection().commit();
         
-        ResultSet rs = getConnection().createStatement().executeQuery("select * from "+dbName);
+        
+        ps = getConnection().prepareStatement("select * from "+dbName + " where fTIMESTAMP >= ?");
+        ps.setTimestamp(1, new Timestamp(tst));
+        
+        ResultSet rs = ps.executeQuery();
         
         assertTrue(rs.next());
         for (int i = 0; i < vals.length; i++) {
@@ -763,6 +778,8 @@ public class UpgradeRunnerTest extends DDLTestCase {
                 break;
             }
         }
+        rs.close();
+        ps.close();
         
     }
     
@@ -866,12 +883,13 @@ public class UpgradeRunnerTest extends DDLTestCase {
 		Connection con = getConnection();
 		Statement st = con.createStatement();
 		
-		st.execute("create table table_01 (f1 integer, f2 varchar(10))");
+		String dbname = "testUnQuotedTable" + (new Random().nextInt(1000));
+		st.execute("create table "+dbname+" (f1 integer, f2 varchar(10))");
 		
 		con.commit();
 		
 		PreparedStatement ps = con.prepareStatement(
-				new QInsert(new QTable("table_01").addCol("f1").addCol("f2")).toString());
+				new QInsert(new QTable(dbname).addCol("f1").addCol("f2")).toString());
 		
 		ps.setInt(1, 123);
 		ps.setString(2, "str111");
@@ -881,7 +899,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
 		ps.addBatch();
 		ps.executeBatch();
 		
-		ps = con.prepareStatement(new QSelect().joinLast(new QTable("table_01").addCol("f2"))
+		ps = con.prepareStatement(new QSelect().joinLast(new QTable(dbname).addCol("f2"))
 				.where(new WhereClause().andCompare("", "f1", "=")).toString());
 		ps.setInt(1, 125);
 		ResultSet rs = ps.executeQuery();
@@ -928,7 +946,14 @@ public class UpgradeRunnerTest extends DDLTestCase {
 	}
 	
 	public void testAutoIncField() throws Exception{
-	    
+		if(getDbType().equals(DbType.FIREBIRD)){
+			Connection con = getConnection();
+			Statement st = con.createStatement();
+			ResultSet rs = st.executeQuery("select * from RDB$GENERATORS where RDB$GENERATOR_NAME = \'GEN_TES_F1\'");
+			if(rs.next())
+				st.execute("drop generator GEN_TES_F1");
+			con.commit();
+		}
 	    
     	TableDef def1 = new TableDef("testAutoIncField");
     	FieldDef fd = FieldDef.createScalarField("f1", ColumnType.INT, true);
@@ -1029,7 +1054,10 @@ public class UpgradeRunnerTest extends DDLTestCase {
     	
 	}
 	
-	public void testAlterColumn() throws EReferenceError, SQLException{
+	public void testAlterColumn() throws EReferenceError, SQLException, InvalidPropertiesFormatException, FileNotFoundException, IOException{
+		if(getDbType().equals(DbType.FIREBIRD)){
+			return;
+		}
     	TableDef def1 = new TableDef("testAlterColumn");
     	def1.setDbName("testAlterColumn");
     	FieldDef oldF = FieldDef.createStringField("f1", ColumnType.NVARCHAR, 60, false, null);
