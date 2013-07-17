@@ -72,8 +72,8 @@ public class DBTestCase extends TFTestCase {
             pl.init();
             if(!m_conn.getAutoCommit())
             	m_conn.commit();        
-        	
             bCleanDB = false;
+        	
             m_as = new ActualStateBL(m_conn);
         }
         
@@ -206,7 +206,7 @@ public class DBTestCase extends TFTestCase {
     
     private void cleanDatabase() throws Exception{
 //    	if(!getDbType().equals(DbType.FIREBIRD))
-    		CleanDatabase.run(this, ApiAlgs.getLog(this), m_conn);
+    		CleanDatabase.run(this, ApiAlgs.getLog(this));
    }
     
     public void clearConnection() throws Exception{
@@ -218,7 +218,8 @@ public class DBTestCase extends TFTestCase {
         }
     }    
     
-    public void test() throws Exception{}
+    public void test() throws Exception{
+    }
 
 	public Connection reopenConnection() throws Exception {
 		clearConnection();
@@ -231,6 +232,10 @@ public class DBTestCase extends TFTestCase {
 //        m_as = new ActualStateBL(m_conn); 
 
 		return m_conn;
+	}
+	
+	public ActualStateBL getAS(){
+		return m_as;
 	}
     
 }
