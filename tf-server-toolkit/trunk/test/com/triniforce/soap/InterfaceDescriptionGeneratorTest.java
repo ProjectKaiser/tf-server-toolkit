@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
@@ -212,8 +213,8 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
             op = sd.getOperation("run1");
             assertNotNull(op.getRequestType());
             ClassDef cd = (ClassDef) op.getRequestType().getProps().get(0).getType();
-            assertEquals("v1", cd.getProps().get(0).getName());
-            ArrayDef ad = (ArrayDef) cd.getProps().get(0).getType();
+            assertEquals("v1", cd.getProp("v1").getName());
+            ArrayDef ad = (ArrayDef) cd.getProp("v1").getType();
             ad = (ArrayDef) ad.getComponentType();
             scd = (ScalarDef) ad.getComponentType();
             assertEquals(int.class.getName(), scd.getType());
@@ -741,6 +742,30 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         	assertTrue(res, res.contains("\"error\":{\"code\":-32601"));
         	
         }
+    }
+    
+    public void testSerialize(){
+        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        InterfaceDescription desc = gen.parse(null, TestSrv2.class);
+        SOAPDocument soapDoc = new InterfaceDescriptionGenerator.SOAPDocument();
+        soapDoc.m_method = "method3";
+        soapDoc.m_args = new Object[]{};
+        soapDoc.m_bIn = false;
+        soapDoc.m_soap = "http://schemas.xmlsoap.org/soap/envelope/";
+        
+        try{
+        	gen.serialize(desc, soapDoc);
+        } catch(NoSuchElementException e){
+        	assertEquals("method3Result", e.getMessage());
+        }
+        
+        soapDoc.m_bIn = true;
+        try{
+        	gen.serialize(desc, soapDoc);
+        } catch(NoSuchElementException e){
+        	assertEquals("arg0", e.getMessage());
+        }
+
     }
 
 }

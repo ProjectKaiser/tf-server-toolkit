@@ -10,6 +10,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 
 import com.triniforce.soap.TypeDef;
 import com.triniforce.soap.TypeDef.ClassDef;
@@ -49,12 +50,19 @@ public class InterfaceDescription implements Serializable{
             
             private int m_index;
 
-            public MsgPropGetSet(int index) {
+			private String m_prop;
+
+            public MsgPropGetSet(String name, int index) {
                 m_index = index;
+                m_prop = name;
             }
             
             public Object get(Object obj) {
-                return Array.get(obj, m_index);
+            	try{
+            		return Array.get(obj, m_index);
+            	} catch(IndexOutOfBoundsException e){
+            		throw new NoSuchElementException(m_prop);  
+            	}
             }
 
             public void set(Object obj, Object value) {
@@ -69,7 +77,7 @@ public class InterfaceDescription implements Serializable{
         
         void addParameter(String name, Class rawType, TypeDef typeDef){
             List<PropDef> props = getOwnProps(); 
-            props.add(new PropDef(name, typeDef, rawType.getName(), new MsgPropGetSet(props.size())));            
+            props.add(new PropDef(name, typeDef, rawType.getName(), new MsgPropGetSet(name, props.size())));            
         }
         
     }
