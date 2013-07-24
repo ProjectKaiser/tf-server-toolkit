@@ -377,7 +377,7 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 		Row row = m_asIndexTable.newRow();
 		row.setField(0, appName);
 		row.setField(1, dbName);
-		ApiAlgs.getLog(this).trace("ADD NAME: "+appName + "("+dbName+")");
+		ApiAlgs.getLog(this).info("ADD NAME: "+appName + "("+dbName+")");
 		
 	}
 
@@ -419,7 +419,7 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 					&& 
 					upperName.equals(appVal.toUpperCase())){
 				
-				ApiAlgs.getLog(this).trace("DROP NAME: "+appVal);
+				ApiAlgs.getLog(this).info("DROP NAME: "+appVal);
 				String dbVal = (String) row.getField(1);
 				TFUtils.assertNotNull(m_appIndexNames.remove(appVal), appVal);
 				TFUtils.assertNotNull(m_dbIndexNames.remove(dbVal), dbVal);
