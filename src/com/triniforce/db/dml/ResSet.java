@@ -12,7 +12,7 @@ import java.util.List;
 
 import com.triniforce.utils.ApiAlgs;
 
-public class ResSet implements IResSet {
+public class ResSet extends BasicResSet implements IResSet {
     protected final ResultSet m_resultSet;
 
     public ResultSet getResultSet() {

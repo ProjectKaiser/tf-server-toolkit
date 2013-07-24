@@ -18,5 +18,12 @@ public interface IResSet {
      */
     public Object getObject(int columnIndex) throws IndexOutOfBoundsException;
     
+    /**
+     * 
+     * Converts values to be used for SOAP deserialization. E.g. Timestamp is converted to Calendar and stuff like this
+     *  
+     */
+    public Object getSoapObject(int columnIndex) throws IndexOutOfBoundsException;
+    
     List<String> getColumns();
 }

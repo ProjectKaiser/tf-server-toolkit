@@ -104,6 +104,11 @@ public class TruncResSetTest extends TFTestCase {
 			public List<String> getColumns() {
 				return Arrays.asList("col");
 			}
+
+            public Object getSoapObject(int columnIndex){
+                return getObject(columnIndex);
+
+            }
 		};
 	}
 

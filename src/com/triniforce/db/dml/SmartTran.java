@@ -12,8 +12,10 @@ package com.triniforce.db.dml;
 
 import java.lang.reflect.Array;
 import java.sql.Connection;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -123,7 +125,7 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         		ps.setNull(col, FieldDef.sqlType(fd.getType()));
         	}
         	else
-        		ps.setObject(col, arg);
+        		ps.setObject(col, convertArg(arg));
             col++;
         }
         ps.execute();
@@ -186,19 +188,19 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         		continue;
         	if(arg.getClass().isArray()){
         		for(int i=0; i<Array.getLength(arg); i++)
-        			ps.setObject(col++, Array.get(arg, i));
+        			ps.setObject(col++, convertArg(Array.get(arg, i)));
         	}
         	else if(arg instanceof Collection){
                 for(Object o: (Collection) arg)
-                    ps.setObject(col++, o);
+                    ps.setObject(col++, convertArg(o));
             }
             else if(arg instanceof ISmartTran.Between){
                 ISmartTran.Between data = (Between) arg;
-                ps.setObject(col++, data.getLeftValue());
-                ps.setObject(col++, data.getRightValue());
+                ps.setObject(col++, convertArg(data.getLeftValue()));
+                ps.setObject(col++, convertArg(data.getRightValue()));
             }           
         	else{
-        		ps.setObject(col++, arg);
+        		ps.setObject(col++, convertArg(arg));
         	}
         }
         return ps.executeQuery();
@@ -237,7 +239,7 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         PrepStmt ps = sc.prepareStatement(q.toString());
         int col = 1;
         for (Object arg : lookUpValues) {
-            ps.setObject(col++, arg);
+            ps.setObject(col++, convertArg(arg));
         }        
         ps.execute();
         ps.close();
@@ -272,6 +274,15 @@ public class SmartTran extends StmtContainer implements ISmartTran {
 		update(table, fv.m_names, fv.m_values, lu.m_names, lu.m_values);
 	}
 
+	public static Object convertArg(Object arg){
+	    if(arg instanceof  Calendar){
+	        Timestamp ts = new Timestamp(((Calendar)arg).getTimeInMillis());
+	        return ts;
+	    }else{
+	        return arg;
+	    }
+	}
+	
 	public void update(Class table, List<IName> fields, List<Object> values,
 			List<IName> lookUpFields, List<Object> lookUpValues) {
 		
@@ -294,11 +305,11 @@ public class SmartTran extends StmtContainer implements ISmartTran {
         	if(null == arg)
         		ps.setNull(col, FieldDef.sqlType(td.getFields().findElement(fields.get(col-1).getName()).getElement().getType()));
         	else
-        		ps.setObject(col, arg);
+        		ps.setObject(col, convertArg(arg));
             col++;
         }
         for (Object arg : lookUpValues) {
-            ps.setObject(col++, arg);
+            ps.setObject(col++, convertArg(arg));
         }        
         ps.execute();
         ps.close();
