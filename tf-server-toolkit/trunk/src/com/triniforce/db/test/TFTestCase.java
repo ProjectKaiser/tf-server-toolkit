@@ -177,9 +177,13 @@ public class TFTestCase extends TestCase {
 	}
 
     public final static String TF_TEST_FOLDER = "TRINIFORCE_TEST_FOLDER";
+    public final static String TOOLKIT_TEST_FOLDER = "TF_SERVER_TOOLKIT_TEST_FOLDER";
     
     public static String getTfTestFolder(){
-    	return System.getenv(TFTestCase.TF_TEST_FOLDER);
+        String res = System.getenv(TOOLKIT_TEST_FOLDER);
+        Object res2 = System.getenv(TFTestCase.TF_TEST_FOLDER);
+        assertNotNull("Environment variable " + TOOLKIT_TEST_FOLDER +  " is not set" + (res2==null?"":". Rename " +TF_TEST_FOLDER+" variable"), res);
+    	return res;
     }
     
     public static File getTmpFolder(){
