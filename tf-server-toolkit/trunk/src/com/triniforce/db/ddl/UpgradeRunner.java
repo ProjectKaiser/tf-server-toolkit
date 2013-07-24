@@ -328,7 +328,7 @@ public class UpgradeRunner {
             }
         }
         String sql = getOperationString(new DBOperation(tabName, delCol));
-        ApiAlgs.getLog(this).trace(sql);
+        ApiAlgs.getLog(this).info(sql);
         m_connection.prepareStatement(sql).execute();
     }
 
@@ -341,7 +341,7 @@ public class UpgradeRunner {
             if(null == dbName)
             	dbName = m_actualState.generateTabName(dbOp.getDBOName());
             String sql = getCreateOperationString(dbName, createOp);
-            ApiAlgs.getLog(this).trace(dbName + ": "+sql);//$NON-NLS-1$
+            ApiAlgs.getLog(this).info(dbName + ": "+sql);//$NON-NLS-1$
             try{
                 m_connection.prepareStatement(sql).execute();
             } catch (SQLException e){
@@ -389,19 +389,19 @@ public class UpgradeRunner {
                 		delCnstr.getType()));
             	
                 String sql = getOperationString(dbOp);
-                ApiAlgs.getLog(this).trace(sql);//$NON-NLS-1$                
+                ApiAlgs.getLog(this).info(sql);//$NON-NLS-1$                
                 m_connection.prepareStatement(sql).execute();
                 
                 try{
 	                sql = MessageFormat.format("DROP INDEX {0} ON {1}", dbIndexName, dbName);
-	                ApiAlgs.getLog(this).trace(sql);//$NON-NLS-1$                
+	                ApiAlgs.getLog(this).info(sql);//$NON-NLS-1$                
 	                m_connection.createStatement().execute(sql);
                 } catch(SQLException e){}
             }
             else{
             	
                 String sql = getOperationString(dbOp);
-                ApiAlgs.getLog(this).trace(sql);//$NON-NLS-1$                
+                ApiAlgs.getLog(this).info(sql);//$NON-NLS-1$                
                 m_connection.prepareStatement(sql).execute();
             }
             
