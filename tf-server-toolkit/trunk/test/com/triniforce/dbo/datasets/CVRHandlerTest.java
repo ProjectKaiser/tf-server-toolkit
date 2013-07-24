@@ -134,6 +134,9 @@ public class CVRHandlerTest extends TFTestCase {
 			public List<String> getColumns() {
 				return Arrays.asList("idx", "name", "price");
 			}
+            public Object getSoapObject(int columnIndex){
+                return getObject(columnIndex);
+            }
 			
 		};
 	}

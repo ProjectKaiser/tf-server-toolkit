@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.triniforce.db.dml.BasicResSet;
 import com.triniforce.db.dml.IResSet;
 import com.triniforce.utils.IName;
 
@@ -90,22 +91,25 @@ public class MDS implements Iterable<IMDSRow>{
         return r;
     }
     
-    public IResSet getIResSet(){
-        return new IResSet() {
-            int idx = -1;
-            public boolean next() {
-                idx++;
-                return idx < m_rows.size();
-            }
-            
-            public Object getObject(int columnIndex) throws IndexOutOfBoundsException {
-                return getRows().get(idx).get(columnIndex);
-            }
+    class MyResSet extends BasicResSet implements IResSet{
+        int idx = -1;
+        public boolean next() {
+            idx++;
+            return idx < m_rows.size();
+        }
+        
+        public Object getObject(int columnIndex) throws IndexOutOfBoundsException {
+            return getRows().get(idx).get(columnIndex);
+        }
 
-			public List<String> getColumns() {
-				return null;
-			}
-        };
+        public List<String> getColumns() {
+            return null;
+        }
+        
+    }
+    
+    public IResSet getIResSet(){
+        return this.new MyResSet();
     }
 
     public Iterator<IMDSRow> iterator() {

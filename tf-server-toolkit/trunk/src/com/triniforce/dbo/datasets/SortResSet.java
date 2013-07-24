@@ -9,10 +9,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.triniforce.db.dml.BasicResSet;
 import com.triniforce.db.dml.IResSet;
 import com.triniforce.server.soap.CollectionViewRequest.DescField;
 
-public class SortResSet implements IResSet {
+public class SortResSet extends BasicResSet implements IResSet {
 	
 	private List<String> m_columns;
 	private int m_rowPointer=0;

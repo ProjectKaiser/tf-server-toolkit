@@ -8,9 +8,10 @@ package com.triniforce.dbo.datasets;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.triniforce.db.dml.BasicResSet;
 import com.triniforce.db.dml.IResSet;
 
-public class TruncResSet implements IResSet {
+public class TruncResSet extends BasicResSet implements IResSet {
 	
 	public static class EColumnNotFound extends RuntimeException{
 		private static final long serialVersionUID = 529066088613886774L;

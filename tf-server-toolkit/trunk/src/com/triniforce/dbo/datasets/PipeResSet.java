@@ -8,10 +8,11 @@ package com.triniforce.dbo.datasets;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.triniforce.db.dml.BasicResSet;
 import com.triniforce.db.dml.IResSet;
 import com.triniforce.server.soap.WhereExpr;
 
-public class PipeResSet implements IResSet, IRow{
+public class PipeResSet extends BasicResSet implements IResSet, IRow{
 	
 	private IResSet m_src;
 	private int m_srcSize;
