@@ -9,14 +9,10 @@ public class ResSetTest extends DMLTestCase {
 	public void testToString() throws SQLException, Exception {
 		
 		//
-		ResSet resSet = new ResSet(null);
-	    assertTrue(resSet.toString().equals("\n"));
-		
-		//
 	    Statement stmnt = getConnection().createStatement();        
 	    ResultSet rs = stmnt.executeQuery("SELECT * FROM "+getDbName()+" ORDER BY ID");
 	    
-	    resSet = new ResSet(rs);
+	    ResSet resSet = new ResSet(rs);
 	    String s = resSet.toString();
 	    assertNotNull(s);
 	    trace(s);

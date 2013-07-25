@@ -27,6 +27,11 @@ public class PipeResSet extends BasicResSet implements IResSet, IRow{
 		m_srcSize = m_columns.size();
 		
 	}
+	
+	@Override
+	public boolean first() {
+	    return m_src.first();
+	}
 
 	public boolean next() {
 		while(m_src.next()){

@@ -8,7 +8,8 @@ package com.triniforce.db.dml;
 import java.util.List;
 
 public interface IResSet {
-    boolean next();    
+    boolean next();  
+    boolean first();
   
     
     /**

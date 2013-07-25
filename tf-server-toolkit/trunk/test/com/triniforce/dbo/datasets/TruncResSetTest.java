@@ -109,6 +109,10 @@ public class TruncResSetTest extends TFTestCase {
                 return getObject(columnIndex);
 
             }
+
+            public boolean first() {
+                return false;
+            }
 		};
 	}
 
