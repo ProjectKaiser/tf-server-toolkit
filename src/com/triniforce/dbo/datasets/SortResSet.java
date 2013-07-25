@@ -57,6 +57,12 @@ public class SortResSet extends BasicResSet implements IResSet {
         return res;
     }
 	
+    @Override
+    public boolean first() {
+        m_rowPointer = 0;
+        return true;
+    }
+    
 	public boolean next() {
 		if(m_rowPointer == m_rows.size())
 			return false;

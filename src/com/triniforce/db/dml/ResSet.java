@@ -8,6 +8,7 @@ package com.triniforce.db.dml;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.triniforce.utils.ApiAlgs;
@@ -95,46 +96,35 @@ public class ResSet extends BasicResSet implements IResSet {
         return false;
     }
     
-    @Override
-    public String toString() {
-    	
-    	StringBuffer res = new StringBuffer("\n");
-    	
-    	if (m_resultSet != null) {
-    		ResultSetMetaData md;
-			try {
-				md = m_resultSet.getMetaData();
-				int columnCount = md.getColumnCount();
-	    		
-	    		for (int i = 1; i <= columnCount; i++) {
-					if (i > 1) res.append("\t");
-					res.append(md.getColumnName(i));
-				}
-	    		res.append("\n");
-	        	        	
-	        	while(m_resultSet.next()){
-	            	for(int i = 1; i <= columnCount; i++){
-	            		if(i > 1) res.append('\t');
-	                    if (m_resultSet.getObject(i) == null) {
-	                    	res.append("null");
-	                    } else {
-	                    	res.append(m_resultSet.getObject(i).toString());
-	                    }
-	            	}
-	                res.append('\n');
-	            }
-    		
-			} catch (SQLException e) {
-				ApiAlgs.rethrowException(e);
-			}
-    	}
-    	
-       	return res.toString();
-    }
-
 	public List<String> getColumns() {
-		// TODO Auto-generated method stub
-		return null;
+	    List<String> res = new ArrayList<String>();
+	    if(m_resultSet == null) {
+	        return res;
+	    }
+        ResultSetMetaData md;
+        try {
+            md = m_resultSet.getMetaData();
+            int columnCount = md.getColumnCount();
+            
+            for (int i = 1; i <= columnCount; i++) {
+                res.add(md.getColumnName(i));
+            }
+        } catch (SQLException e) {
+            ApiAlgs.rethrowException(e);
+        }
+		return res;
+	}
+	
+	public boolean first(){
+        if(m_resultSet == null) {
+            return false;
+        }	    
+        try {
+            return m_resultSet.first();
+        } catch (Exception e) {
+            ApiAlgs.rethrowException(e);
+        }
+        return false;
 	}
     
 }

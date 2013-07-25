@@ -49,7 +49,12 @@ public class TruncResSet extends BasicResSet implements IResSet {
 		m_to = to;
 	}
 	
-
+    @Override
+    public boolean first() {
+        m_lineNo = -1;
+        return m_src.first();
+    }
+	
 	public boolean next() {
 		do{
 			m_lineNo++;

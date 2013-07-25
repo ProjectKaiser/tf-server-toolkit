@@ -105,6 +105,12 @@ public class MDS implements Iterable<IMDSRow>{
         public List<String> getColumns() {
             return null;
         }
+
+        @Override
+        public boolean first() {
+            idx = -1;
+            return true;
+        }
         
     }
     
