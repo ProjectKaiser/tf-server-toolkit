@@ -176,18 +176,18 @@ public class TFTestCase extends TestCase {
 		
 	}
 
-    public final static String TF_TEST_FOLDER = "TRINIFORCE_TEST_FOLDER";
+    public final static String TF_TEST_FOLDER_EX = "TRINIFORCE_TEST_FOLDER";
     public final static String TOOLKIT_TEST_FOLDER = "TF_SERVER_TOOLKIT_TEST_FOLDER";
     
     public static String getTfTestFolder(){
         String res = System.getenv(TOOLKIT_TEST_FOLDER);
-        Object res2 = System.getenv(TFTestCase.TF_TEST_FOLDER);
-        assertNotNull("Environment variable " + TOOLKIT_TEST_FOLDER +  " is not set" + (res2==null?"":". Rename " +TF_TEST_FOLDER+" variable"), res);
+        Object res2 = System.getenv(TFTestCase.TF_TEST_FOLDER_EX);
+        assertNotNull("Environment variable " + TOOLKIT_TEST_FOLDER +  " is not set" + (res2==null?"":". Rename " +TF_TEST_FOLDER_EX+" variable"), res);
     	return res;
     }
     
     public static File getTmpFolder(){
-        File res = new File(System.getenv(TFTestCase.TF_TEST_FOLDER), "tmp");
+        File res = new File(getTfTestFolder(), "tmp");
         res.mkdirs();
         return res;
     }
@@ -222,7 +222,7 @@ public class TFTestCase extends TestCase {
     static File TEST_LOG_FILE = null;
 
     public static String getTestPropFile() {
-        return new File(System.getenv(TFTestCase.TF_TEST_FOLDER),
+        return new File(TFTestCase.getTfTestFolder(),
                 TFTestCase.DB_CONNECTION_FILE).toString();
     }
 
@@ -249,7 +249,7 @@ public class TFTestCase extends TestCase {
 	private TestLogFactory m_testLF;    
 
     {
-        PropertyConfigurator.configure(new File(System.getenv(TF_TEST_FOLDER),
+        PropertyConfigurator.configure(new File(TFTestCase.getTfTestFolder(),
                 LOG4J_FILE).toString());
     }
     
@@ -281,7 +281,7 @@ public class TFTestCase extends TestCase {
 		if(bInitLogFile){
 			String fname = getTestProperty("testSeqFile");
 			if(null != fname){
-				TEST_LOG_FILE = new File(System.getenv(TF_TEST_FOLDER), fname);
+				TEST_LOG_FILE = new File(TFTestCase.getTfTestFolder(), fname);
 				try {
 					TEST_LOG_FILE.createNewFile();
 				} catch (IOException e) {
