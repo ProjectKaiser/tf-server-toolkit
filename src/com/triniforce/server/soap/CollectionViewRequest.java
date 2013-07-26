@@ -125,6 +125,10 @@ public class CollectionViewRequest extends LongListRequest {
         getWhere().put(col, value);
     }
 
+    public void setTargetClass(Class cls) {
+        m_target = cls.getName();
+    }
+    
     public void setTarget(String target) {
         m_target = target;
     }
