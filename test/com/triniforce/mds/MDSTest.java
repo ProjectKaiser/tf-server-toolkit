@@ -9,9 +9,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.triniforce.db.dml.EColumnNotFound;
 import com.triniforce.db.dml.IResSet;
 import com.triniforce.db.test.TFTestCase;
-import com.triniforce.mds.MDS.ColumnNotFound;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.IName;
 
@@ -187,7 +187,7 @@ public class MDSTest extends TFTestCase {
     	try {
     		mds.getCell(row, name);
     		fail();
-    	} catch (ColumnNotFound e) {
+    	} catch (EColumnNotFound e) {
 			assertEquals(e.getMessage(),"Column name: col1");
 		}
     	
