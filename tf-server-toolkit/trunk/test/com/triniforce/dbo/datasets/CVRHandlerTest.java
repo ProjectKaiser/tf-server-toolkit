@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.triniforce.db.dml.BasicResSet;
 import com.triniforce.db.dml.IResSet;
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.dbo.datasets.EDSException.ECVRColumnException.EColumnNotFound;
@@ -118,7 +119,7 @@ public class CVRHandlerTest extends TFTestCase {
 			{7, "string_06", 59.99}};
 
 	public static  IResSet getRS() {
-		return new IResSet(){
+		return new BasicResSet(){
 			int row = -1;
 			
 			public Object getObject(int i) {

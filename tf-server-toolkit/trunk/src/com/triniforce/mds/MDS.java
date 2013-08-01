@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.triniforce.db.dml.BasicResSet;
+import com.triniforce.db.dml.EColumnNotFound;
 import com.triniforce.db.dml.IResSet;
 import com.triniforce.utils.IName;
 
@@ -122,17 +123,11 @@ public class MDS implements Iterable<IMDSRow>{
         return m_rows.iterator();
     }
     
-    @SuppressWarnings("serial")
-	public static class ColumnNotFound extends RuntimeException{
-		public ColumnNotFound(String s) {
-			super("Column name: " + s);
-		}
-	}
 
     public int getIndexOf(String colName){
         Integer index = m_namesMap.get(colName);
         if (index == null) {
-            throw new ColumnNotFound(colName);
+            throw new EColumnNotFound(colName);
         } else {
             return index;
         }

@@ -7,9 +7,13 @@ package com.triniforce.db.dml;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public abstract class BasicResSet {
+import com.triniforce.utils.IName;
+
+public abstract class BasicResSet implements IResSet {
     public abstract Object getObject(int columnIndex) throws IndexOutOfBoundsException;
     
     /**
@@ -27,9 +31,38 @@ public abstract class BasicResSet {
         return res;        
     }
     
+    Map<String, Integer> m_idx ;
+    
     public abstract List<String> getColumns();
     public abstract boolean first();
     public abstract boolean next();
+    public int getIndexOf(String colName) throws EColumnNotFound{
+        if(m_idx == null){
+            m_idx = new HashMap<String, Integer>();
+            for (int i = 0; i < getColumns().size(); i++) {
+                m_idx.put(getColumns().get(i), i+1);//1 - based               
+            }
+        }
+        Object res = m_idx.get(colName);
+        if(null == res){
+            throw new EColumnNotFound(colName);
+        }
+        return (Integer) res;
+    }
+    
+    public Object getObject(String colName){
+        return getObject(getIndexOf(colName));
+    }
+    public Object getObject(IName colName){
+        return getObject(getIndexOf(colName.getName()));
+    }
+    
+    public Object getSoapObject(String colName){
+        return getSoapObject(getIndexOf(colName));
+    }
+    public Object getSoapObject(IName colName){
+        return getSoapObject(getIndexOf(colName.getName()));
+    }
     
     
     @Override
