@@ -33,7 +33,7 @@ public class TruncResSet extends BasicResSet implements IResSet {
 		m_src = src;
 	}
 	
-	void addColumn(String column){
+	public void addColumn(String column){
 		int idx;
 		if((idx = m_src.getColumns().indexOf(column)) < 0)
 			throw new EColumnNotFound(column);
