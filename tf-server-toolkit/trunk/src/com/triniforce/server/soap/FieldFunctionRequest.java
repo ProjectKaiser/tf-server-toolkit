@@ -6,6 +6,7 @@
 package com.triniforce.server.soap;
 
 import com.triniforce.soap.PropertiesSequence;
+import com.triniforce.utils.IName;
 
 /**
  * This class is used by CollectionViewRequest
@@ -23,6 +24,11 @@ public class FieldFunctionRequest {
         m_functionName = functionName;
         m_resultName = resultName;
     }
+    public FieldFunctionRequest(IName field, Class function, String resultName) {
+    	this(field.getName(), function.getName(), resultName);
+    }
+    
+    
     public FieldFunctionRequest(String fieldName, Class cls) {
         this(fieldName, cls.getName(), cls.getSimpleName());
     }

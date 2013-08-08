@@ -244,6 +244,8 @@ public class CVRHandler implements ICVRHandler {
 			requestedColumns.add(column);
 		}
 		
+		//FIXME ias: костыль. Проверяются ли имена функций на уникальность?
+		List<String> ffs = new ArrayList<String>();
 		
 		for(FieldFunctionRequest ffReq : req.getFunctions()){
 			String column = ffReq.getFieldName();
@@ -251,6 +253,7 @@ public class CVRHandler implements ICVRHandler {
 				throw new EDSException.ECVRColumnException.EColumnNotFound.EWrongFieldFunctionName(column);
 			if(!requestedColumns.contains(column))
 				requestedColumns.add(column);
+			ffs.add(ffReq.getResultName());
 		}
 
 		for(String column : req.getWhere().keySet()){
@@ -260,9 +263,9 @@ public class CVRHandler implements ICVRHandler {
 				requestedColumns.add(column);
 		}
 		for(String column : requestedColumns(req.getWhereExprs())){
-			if(!meta.getColumns().contains(column))
+			if(!ffs.contains(column) && !meta.getColumns().contains(column))
 				throw new EDSException.ECVRColumnException.EColumnNotFound.EWrongNameInWhereClause(column);
-			if(!requestedColumns.contains(column))
+			if(!ffs.contains(column) && !requestedColumns.contains(column))
 				requestedColumns.add(column);
 		}
 		for(String column: orderColumns(req.getOrderBy())){
