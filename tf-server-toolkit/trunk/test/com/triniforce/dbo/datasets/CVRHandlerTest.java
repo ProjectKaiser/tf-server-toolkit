@@ -465,6 +465,22 @@ public class CVRHandlerTest extends TFTestCase {
 			assertEquals(Arrays.asList("column_784","column_785", "column_903", "column_902", "column_901"), res);
 			
 		}
+		
+		{
+			CollectionViewRequest req = new CollectionViewRequest();
+			req.setColumns(Arrays.asList("column_784","column_785"));
+			req.getWhere().put("result_101", "");
+			req.getFunctions().add(new FieldFunctionRequest("column_903", "fun_01","result_101"));
+			assertEquals(Arrays.asList("column_784","column_785", "column_903"), h.checkRequestMetadata(meta, req));
+		}
+		{
+			CollectionViewRequest req = new CollectionViewRequest();
+			req.setColumns(Arrays.asList("column_784","column_785"));
+			req.getOrderBy().add(new CollectionViewRequest.DescField("result_101"));
+			req.getFunctions().add(new FieldFunctionRequest("column_903", "fun_01","result_101"));
+			assertEquals(Arrays.asList("column_784","column_785", "column_903"), h.checkRequestMetadata(meta, req));
+		}
+
 	}
 	
 	static boolean MD_CHECKED = true;

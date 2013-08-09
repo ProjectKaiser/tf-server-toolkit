@@ -244,7 +244,7 @@ public class CVRHandler implements ICVRHandler {
 			requestedColumns.add(column);
 		}
 		
-		//FIXME ias: костыль. Проверяются ли имена функций на уникальность?
+		//FIXME ias: костыль. Проверяются ли имена функций на уникальность? SameAsPreviousTest
 		List<String> ffs = new ArrayList<String>();
 		
 		for(FieldFunctionRequest ffReq : req.getFunctions()){
@@ -255,24 +255,31 @@ public class CVRHandler implements ICVRHandler {
 				requestedColumns.add(column);
 			ffs.add(ffReq.getResultName());
 		}
+		
 
-		for(String column : req.getWhere().keySet()){
-			if(!meta.getColumns().contains(column))
-				throw new EDSException.ECVRColumnException.EColumnNotFound.EWrongNameInWhereClause(column);
-			if(!requestedColumns.contains(column))
-				requestedColumns.add(column);
+		HashSet<String> whereColumns = new HashSet<String>(req.getWhere().keySet());
+		whereColumns.addAll(requestedColumns(req.getWhereExprs()));
+
+		for(String column : whereColumns){
+			if(!(meta.getColumns().contains(column))){
+				if(!ffs.contains(column))
+					throw new EDSException.ECVRColumnException.EColumnNotFound.EWrongNameInWhereClause(column);
+			}
+			else{
+				if(!requestedColumns.contains(column))
+					requestedColumns.add(column);
+			}
 		}
-		for(String column : requestedColumns(req.getWhereExprs())){
-			if(!ffs.contains(column) && !meta.getColumns().contains(column))
-				throw new EDSException.ECVRColumnException.EColumnNotFound.EWrongNameInWhereClause(column);
-			if(!ffs.contains(column) && !requestedColumns.contains(column))
-				requestedColumns.add(column);
-		}
+		
 		for(String column: orderColumns(req.getOrderBy())){
-			if(!meta.getColumns().contains(column))
-				throw new EDSException.ECVRColumnException.EColumnNotFound.EWrongNameInOrderClause(column);
-			if(!requestedColumns.contains(column))
-				requestedColumns.add(column);
+			if(!meta.getColumns().contains(column)){
+				if(!ffs.contains(column))
+					throw new EDSException.ECVRColumnException.EColumnNotFound.EWrongNameInOrderClause(column);
+			}
+			else{
+				if(!requestedColumns.contains(column))
+					requestedColumns.add(column);
+			}
 		}
 		if(req.getStartFrom() < 0)
 			throw new IllegalArgumentException("startFrom");
