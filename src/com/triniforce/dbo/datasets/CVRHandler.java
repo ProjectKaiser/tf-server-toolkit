@@ -244,7 +244,6 @@ public class CVRHandler implements ICVRHandler {
 			requestedColumns.add(column);
 		}
 		
-		//FIXME ias: костыль. Проверяются ли имена функций на уникальность? SameAsPreviousTest
 		List<String> ffs = new ArrayList<String>();
 		
 		for(FieldFunctionRequest ffReq : req.getFunctions()){
