@@ -44,6 +44,26 @@ public class LongListRequest extends SessionRequest{
     public List<Object> getArgs() {
         return m_args;
     }
+
+    /**
+     * @return args[idx] if it exists and of given class, def otherwise. 
+     * Throws IllegalArgumentException(argName) if cls is specified and argument does not match it
+     */
+
+    public static <T> T getArg(List args, int idx, String argName, Class<? extends T> cls, Object def){
+        if(idx <0) throw new IllegalArgumentException("idx must be ge zero");
+        if(args.size()<=idx) return (T)def;
+        Object res = args.get(idx);
+        if( null == res) return null;
+        if(null != cls && !cls.isAssignableFrom(res.getClass())){
+            throw new IllegalArgumentException("Incompatible type for argument '" + argName +"'. Expected " + cls.getName() + " but " + res.getClass());
+        }
+        return (T)res;
+    }
+    
+    public static Object getArg3(){
+    	return null;
+    }
     
     /**
      * @return arg[idx] if it exists and of given class, def otherwise. 
@@ -51,14 +71,7 @@ public class LongListRequest extends SessionRequest{
      */
     @SuppressWarnings("unchecked")
     public <T> T getArg(int idx, String argName, Class<? extends T> cls, Object def){
-        if(idx <0) throw new IllegalArgumentException("idx must be ge zero");
-        if(m_args.size()<=idx) return (T) def;
-        Object res = m_args.get(idx);
-        if( null == res) return null;
-        if(null != cls && !cls.isAssignableFrom(res.getClass())){
-            throw new IllegalArgumentException("Incompatible type for argument '" + argName +"'. Expected " + cls.getName() + " but " + res.getClass());
-        }
-        return (T) res;
+    	return (T) getArg(m_args, idx, argName, cls, def);
     }
     
     public void setArgs(List<Object> args) {
