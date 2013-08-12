@@ -8,12 +8,14 @@ package com.triniforce.soap;
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Random;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
@@ -34,6 +36,7 @@ import org.xml.sax.SAXException;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.ESoap.EMethodNotFound;
+import com.triniforce.soap.ESoap.InvalidTypeName;
 import com.triniforce.soap.InterfaceDescription.Operation;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
 import com.triniforce.soap.InterfaceDescriptionGeneratorTest.Cls2.InnerObject;
@@ -41,6 +44,10 @@ import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
+import com.triniforce.soap.testpkg_01.Hand;
+import com.triniforce.soap.testpkg_01.ITestHorse;
+import com.triniforce.soap.testpkg_02.ITestBird;
+import com.triniforce.soap.testpkg_02.ITestCow;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.IName;
 
@@ -766,6 +773,80 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         	assertEquals("arg0", e.getMessage());
         }
 
+    }
+    
+    interface ITest_01{
+    	void method_01();
+    }
+    
+    public void testParseInterfaces() throws IntrospectionException{
+        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        {
+	        InterfaceDescription res = gen.parse(null, new ArrayList<Class>());
+	        assertNotNull(res);
+        }
+        {
+	        InterfaceDescription res = gen.parse(null, new ArrayList<Class>(Arrays.asList(ITest_01.class)));
+	        assertNotNull(res);
+	        assertFalse(res.getOperations().isEmpty());
+	        Operation op = res.getOperation("soap_method_01");
+	        assertNotNull(res.getOperations().toString(), op);
+        }
+        {
+        	InterfaceDescription res = gen.parse(null, new ArrayList<Class>(Arrays.asList(ITestHorse.class, ITestBird.class)));
+        	assertFalse(res.getOperations().isEmpty());
+        	
+        	Operation op;
+        	op = res.getOperation("testpkg_01_run");
+	        assertNotNull(res.getOperations().toString(), op);
+	        
+        	op = res.getOperation("testpkg_02_fly");
+	        assertNotNull(res.getOperations().toString(), op);
+	        
+	        TypeDef type = res.getType(Hand.class);
+	        assertNotNull(type);
+        }
+        
+        {
+        	try{
+        		gen.parse(null, new ArrayList<Class>(Arrays.asList(ITestHorse.class, ITestCow.class)));
+            	fail();
+        	} catch(InvalidTypeName e){
+        		assertEquals("Hand", e.getMessage());
+        	}
+        }
+    	
+    }
+    
+    static class CEmpty{}
+    
+    static class COutter{
+    	public void method_01() {
+		} 
+    }
+    
+    static class CInner extends COutter{
+    }
+    
+    static class CRandom extends Random{
+		private static final long serialVersionUID = -1607781444558231654L;}
+    
+    public void testListInterfaceOps() throws IntrospectionException{
+        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+    	
+        {
+	        List<InterfaceOperationDescription> res = gen.listInterfaceOperations(CEmpty.class, false);
+	        assertTrue(res.toString(), res.isEmpty());
+        }
+        {        
+        	List<InterfaceOperationDescription> res = gen.listInterfaceOperations(CInner.class, false);	
+        	assertEquals(1, res.size());
+        	assertEquals("method_01", res.get(0).getName());
+        }
+        {        
+        	List<InterfaceOperationDescription> res = gen.listInterfaceOperations(CRandom.class, false);	
+        	assertTrue(res.toString(), res.isEmpty());
+        }
     }
 
 }

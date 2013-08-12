@@ -164,6 +164,9 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
     public static class FieldDef implements IElementDef, com.triniforce.utils.IName, Cloneable, Serializable{
         private static final long serialVersionUID = -5431378065902561984L;
         
+        // Ans: Ищется первое соответствие, и берется значение из противоположного массива
+        // Так для всех типов TIMESTAMP, TIME, DATE соответествует один тип DATETIME
+        // и наоборот для типов библиотеки CHAR и NCHAR соответствует один тип SQL.CHAR 
 		private static final int[] SQL_TYPES= {Types.INTEGER,Types.SMALLINT,
             Types.REAL,Types.TIMESTAMP,Types.BLOB,Types.DECIMAL,
             Types.CHAR,Types.CHAR, Types.VARCHAR, Types.VARCHAR, Types.BIGINT, 

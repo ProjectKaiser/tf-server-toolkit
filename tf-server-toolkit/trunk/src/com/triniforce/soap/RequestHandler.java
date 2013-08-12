@@ -34,14 +34,23 @@ public class RequestHandler {
 		}
 		public Object invokeService(String method, Object... args) {
 			try {
-				Method m = getMethod(method);
+				return invokeService(getMethod(method), args);
+			} catch (IntrospectionException e) {
+				ApiAlgs.rethrowException(e);
+				return null;
+			}
+		}
+
+		public Object invokeService(Method m, Object... args) {
+			try {
 	            return m.invoke(service, args);
 			} catch (Exception e) {
 				ApiAlgs.rethrowException(e);
 				return null;
 			}
 		}
-	    private Method getMethod(String name) throws IntrospectionException {
+		
+	    public Method getMethod(String name) throws IntrospectionException {
 	        BeanInfo info = Introspector.getBeanInfo(service.getClass());
 	        for (MethodDescriptor mDesc : info.getMethodDescriptors()) {
 	            if(mDesc.getName().equals(name)){

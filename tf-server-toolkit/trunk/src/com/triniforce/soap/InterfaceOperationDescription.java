@@ -6,6 +6,7 @@
 package com.triniforce.soap;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 public class InterfaceOperationDescription {
@@ -35,10 +36,12 @@ public class InterfaceOperationDescription {
 	
 	public InterfaceOperationDescription(String name, List<NamedArg> args, NamedArg res) {
 		m_name = name;
-		m_args = args;
+		m_args = new ArrayList<NamedArg>(args);
 		m_result = res;
 	}
 	
+	private String m_interface;
+	private String m_pkgPrefix;
 	private String m_name;
 	private List<NamedArg> m_args;
 	private NamedArg m_result;
@@ -52,7 +55,7 @@ public class InterfaceOperationDescription {
 		return m_args;
 	}
 	public void setArgs(List<NamedArg> args) {
-		m_args = args;
+		m_args = new ArrayList<NamedArg>(args);
 	}
 	public NamedArg getResult() {
 		return m_result;
@@ -60,6 +63,30 @@ public class InterfaceOperationDescription {
 	public void setResult(NamedArg result) {
 		m_result = result;
 	}
+
+	public String getInterface() {
+		return m_interface;
+	}
+
+	public void setInterface(String interface1) {
+		m_interface = interface1;
+	}
+
+	public String getPkgPrefix() {
+		return m_pkgPrefix;
+	}
+
+	public void setPkgPrefix(String pkgPrefix) {
+		m_pkgPrefix = pkgPrefix;
+	}
 	
+	public void addNamedArg(int pos, String name, Type type){
+		m_args.add(Math.min(pos, m_args.size()), new NamedArg(name, type));
+	}
+	
+	@Override
+	public String toString() {
+		return m_name;
+	}
 	
 }

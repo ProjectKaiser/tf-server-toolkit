@@ -114,17 +114,24 @@ public class InterfaceDescriptionGenerator {
      */
     public InterfaceDescription parse(InterfaceDescription oldDesc, Class<?> cls, Package pkg){
         try{
-	    	return parse(oldDesc, listInterfaceOperations(cls), pkg, cls.getAnnotation(SoapInclude.class));
+	    	return parse(oldDesc, listInterfaceOperations(cls, false), pkg, cls.getAnnotation(SoapInclude.class));
         } catch (IntrospectionException e) {
             ApiAlgs.rethrowException(e);
             return null;
         }
     }
     
-    private List<InterfaceOperationDescription> listInterfaceOperations(Class<?> cls) throws IntrospectionException {
+    public List<InterfaceOperationDescription> listInterfaceOperations(Class<?> cls, boolean bMultiClass) throws IntrospectionException {
+    	String pkgPrefix = null;
+    	if(bMultiClass){
+    		pkgPrefix = classPrefix(cls);
+    	}
+    	
     	BeanInfo info = Introspector.getBeanInfo(cls);
         List<InterfaceOperationDescription> methods = new ArrayList<InterfaceOperationDescription>();
         for (MethodDescriptor mDesc : info.getMethodDescriptors()) {
+        	if(!mDesc.getMethod().getDeclaringClass().getPackage().equals(cls.getPackage()))
+        		continue;
         	InterfaceOperationDescription opDesc = new InterfaceOperationDescription();
         	opDesc.setName(mDesc.getName());
         	ArrayList<NamedArg> args = new ArrayList<NamedArg>();
@@ -134,9 +141,16 @@ public class InterfaceDescriptionGenerator {
             }
         	opDesc.setArgs(args);
         	opDesc.setResult(new NamedArg(mDesc.getName()+"Result", mDesc.getMethod().getGenericReturnType()));
+        	opDesc.setPkgPrefix(pkgPrefix);
         	methods.add(opDesc);
         }
         return methods;
+	}
+
+	public String classPrefix(Class<?> cls) {
+		String pkgName = cls.getPackage().getName();
+		int idx = pkgName.lastIndexOf('.');
+		return idx < 0 ? pkgName : pkgName.substring(idx + 1);
 	}
 
 //    private Operation parseOperation(String mName, Method method, TypeDefLibCache lib) {
@@ -169,7 +183,9 @@ public class InterfaceDescriptionGenerator {
             outMsgType.addParameter(opDesc.getResult().getName(), TypeDefLibCache.toClass(retType), lib.add(retType));
         }
         
-        return new Operation(opDesc.getName(), inMsgType, outMsgType);
+        String opName = null == opDesc.getPkgPrefix() ? opDesc.getName() : String.format("%s_%s", opDesc.getPkgPrefix(), opDesc.getName()); 
+        
+        return new Operation(opName, inMsgType, outMsgType);
     }
 
     static String wsdl = "http://schemas.xmlsoap.org/wsdl/";
@@ -780,6 +796,14 @@ public class InterfaceDescriptionGenerator {
     public void writeDocument(OutputStream output, Document doc) throws TransformerException {
         getTransformer().transform(new DOMSource(doc), new StreamResult(output));
     }
+    
+    public InterfaceDescription parse(InterfaceDescription oldDesc, List<Class> interfaces) throws IntrospectionException {
+    	ArrayList<InterfaceOperationDescription> ops = new ArrayList<InterfaceOperationDescription>();
+    	for(Class cls : interfaces){
+    		ops.addAll(listInterfaceOperations(cls, true));
+    	}
+    	return parse(oldDesc, ops, getClass().getPackage(), null);
+    }
 
 	public InterfaceDescription parse(InterfaceDescription oldDesc, 
 			List<InterfaceOperationDescription> operationDescs, Package pkg, SoapInclude soapInc) {
@@ -893,7 +917,7 @@ public class InterfaceDescriptionGenerator {
 	}
 	
 	public List<ValErrItem> validateInterface(Class key) throws IntrospectionException{
-		return validateInterface(listInterfaceOperations(key), key.getPackage(), (SoapInclude) key.getAnnotation(SoapInclude.class));
+		return validateInterface(listInterfaceOperations(key, false), key.getPackage(), (SoapInclude) key.getAnnotation(SoapInclude.class));
 	}
 	
 	public List<ValErrItem> validateInterface(List<InterfaceOperationDescription> ops, Package pkg, SoapInclude soapInc){

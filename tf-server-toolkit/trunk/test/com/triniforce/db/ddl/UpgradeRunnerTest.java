@@ -1095,5 +1095,18 @@ public class UpgradeRunnerTest extends DDLTestCase {
 	    		
 		}
 	}
+	
+	public void testEmptyCommand() throws EReferenceError, SQLException{
+    	TableDef def1 = new TableDef("testEmptyCommand");
+    	def1.setDbName("testEmptyCommand");
+    	def1.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
+    	def1.addModification(2, new EmptyCommand());
+    	HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
+   		desired.put(def1.getEntityName(), def1);
+       	DBTables db = new DBTables(m_as, desired);
+    	m_player.run(db.getCommandList());
+
+    	assertEquals(2, m_player.getActualState().getVersion("testEmptyCommand"));
+	}
     
 }
