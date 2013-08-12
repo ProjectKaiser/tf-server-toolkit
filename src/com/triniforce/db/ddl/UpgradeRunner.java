@@ -398,6 +398,9 @@ public class UpgradeRunner {
 	                m_connection.createStatement().execute(sql);
                 } catch(SQLException e){}
             }
+            else if (op instanceof EmptyCommand){
+            	ApiAlgs.getLog(this).trace("empty command");//$NON-NLS-1$
+            }
             else{
             	
                 String sql = getOperationString(dbOp);
