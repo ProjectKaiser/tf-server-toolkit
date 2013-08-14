@@ -5,20 +5,10 @@
  */ 
 package com.triniforce.eventbus;
 
-import java.util.ArrayList;
-import java.util.List;
 
-public class EventBus{
-    List<IBusElementStoppable> m_stoppable = new ArrayList<IBusElementStoppable>();
-    
-    synchronized BusAddressId add(IBusElement e){
-        return null;
-    }
-    
-    /**
-     * Calls all elements which implement {@link IBusElementStoppable}
-     */
-    void stop(){
-    }
+//https://code.google.com/p/guava-libraries/source/browse/guava/src/com/google/common/eventbus/EventBus.java
+
+public class EventBus extends EventBusNamespace{
+
     
 }
