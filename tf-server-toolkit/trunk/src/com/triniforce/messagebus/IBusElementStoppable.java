@@ -4,7 +4,7 @@
  * 
  */ 
 
-package com.triniforce.eventbus;
+package com.triniforce.messagebus;
 
 public interface IBusElementStoppable extends IBusElement{
 
