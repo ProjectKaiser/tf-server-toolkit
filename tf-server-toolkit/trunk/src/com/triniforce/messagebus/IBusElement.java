@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface IBusElement {
     
-    void handleMessage(BusMessage msg, List<BusCmd> out);
+    void handleMessage(BusEvent msg, List<BusMsg> out);
 
 }

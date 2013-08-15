@@ -11,41 +11,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class BusNamespace {
+public class BusNamespace{
+	
+	static class ElementWrapper{
+		protected final IBusElement m_e;
+		public ElementWrapper(IBusElement e){
+			m_e = e;
+		}
+	}
+	
     List<IBusElementStoppable> m_stoppable = new ArrayList<IBusElementStoppable>();
     List<BusNamespace> m_childs = new ArrayList<BusNamespace>();
-    Map<BusAddressId, IBusElement> m_ids = new ConcurrentHashMap<BusAddressId, IBusElement>();
-    Map<String, BusAddressId> m_urls = new ConcurrentHashMap<String, BusAddressId>();
+    Map<String, ElementWrapper> m_urls = new ConcurrentHashMap<String, ElementWrapper>();
+
+	BusNamespace m_parent;
 	
-    synchronized public BusAddressId register(IBusElement e){
-        return null;
+	void setParent(BusNamespace ns){
+		m_parent = ns;
+	}
+	
+	
+    synchronized public void register(IBusElement e){
     }
     
-    /**
-     * 
-     * Removes an element from a bus
-     * @param e
-     */
+    synchronized public void register(IBusElement e, String name){
+    }
+    
     synchronized void unregister(IBusElement e){
     }
     
-    void giveURL(BusAddressId id, String URL){
-    	m_urls.put(URL, id);   	
+    public void subscribe(String publisher, String subscriber){
     }
-    
-    public BusAddressId queryByURL(String URL){
-    	return m_urls.get(URL); 
+    public void subscribe(Class publisher, Class subscriber){
     }
-    
-    public IBusElement queryById(BusAddressId id){
-    	return m_ids.get(id);
-    	
-    }
-    
-    void subscribe(BusAddressId publisher, BusAddressId subscriber){
-    	
-    }
-    
     
     /**
      * Calls all elements in all namespaces which implements {@link IBusElementStoppable}
@@ -57,6 +55,11 @@ public class BusNamespace {
     	
     }
     void removeNamespace(BusNamespace ns){
+    }
+    
+    
+    boolean tryHandleMessage(String name, BusMsg cmd, List<BusMsg> out){
+    	return false;
     }
 
 }

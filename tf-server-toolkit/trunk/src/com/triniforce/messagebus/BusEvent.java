@@ -5,6 +5,8 @@
  */ 
 package com.triniforce.messagebus;
 
-public class BusAddressURL {
-
+public class BusEvent extends BusMsg{
+    public BusEvent(Object data){
+    	super(data);
+    }
 }
