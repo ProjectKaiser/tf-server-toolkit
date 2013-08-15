@@ -3,7 +3,7 @@
  * All Rights Reserved.
  *
  */ 
-package com.triniforce.eventbus;
+package com.triniforce.messagebus;
 
 import java.util.List;
 
