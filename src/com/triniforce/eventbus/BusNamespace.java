@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class EventBusNamespace {
+public class BusNamespace {
     List<IBusElementStoppable> m_stoppable = new ArrayList<IBusElementStoppable>();
-    List<EventBusNamespace> m_childs = new ArrayList<EventBusNamespace>();
+    List<BusNamespace> m_childs = new ArrayList<BusNamespace>();
     Map<BusAddressId, IBusElement> m_ids = new ConcurrentHashMap<BusAddressId, IBusElement>();
     Map<String, BusAddressId> m_urls = new ConcurrentHashMap<String, BusAddressId>();
 	
@@ -53,10 +53,10 @@ public class EventBusNamespace {
     void stop(){
     }
     
-    void addNamespace(EventBusNamespace ns){
+    void addNamespace(BusNamespace ns){
     	
     }
-    void removeNamespace(EventBusNamespace ns){
+    void removeNamespace(BusNamespace ns){
     }
 
 }
