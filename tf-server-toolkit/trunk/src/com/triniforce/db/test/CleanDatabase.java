@@ -14,7 +14,6 @@ import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.dbcp.SQLNestedException;
 import org.apache.commons.logging.Log;
 
 import com.triniforce.db.ddl.ActualStateBL;
@@ -123,7 +122,7 @@ public class CleanDatabase {
 			                }
 			                try{
 			                	dropTable(conn, dbName);
-			                }catch(SQLNestedException e2){
+			                }catch(SQLException e2){
 			                	log.trace(String.format("Drop table  failed %s.", dbName));
 	//		                	log.trace("cause", e2);
 			                }

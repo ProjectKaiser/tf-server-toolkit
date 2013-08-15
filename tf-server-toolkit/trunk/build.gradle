@@ -51,7 +51,8 @@ processResources {
 dependencies {
 
 	compile(group: 'commons-pool', name: 'commons-pool', version: '1.5.6')
-	compile 'commons-dbcp:commons-dbcp:1.2.2' // (latest: 1.4)
+//	compile 'commons-dbcp:commons-dbcp:1.2.2' // (latest: 1.4)
+	compile 'commons-dbcp:commons-dbcp:1.4' // (latest: 1.4)
 	compile 'commons-logging:commons-logging:1.1.1'
 
 	compile(group: 'log4j', name: 'log4j', version: '1.2.16')

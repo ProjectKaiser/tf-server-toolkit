@@ -3,6 +3,7 @@ package com.triniforce.soap;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 import javax.servlet.ServletConfig;
@@ -15,6 +16,10 @@ import javax.xml.transform.TransformerException;
 
 import org.w3c.dom.Document;
 
+import com.triniforce.soap.InterfaceDescription;
+import com.triniforce.soap.InterfaceDescriptionGenerator;
+import com.triniforce.soap.InterfaceOperationDescription;
+import com.triniforce.soap.RequestHandler;
 import com.triniforce.soap.RequestHandler.IServiceInvoker;
 import com.triniforce.utils.ApiAlgs;
 
@@ -26,9 +31,9 @@ import com.triniforce.utils.ApiAlgs;
 	private static final long serialVersionUID = -3007557683958849944L;
 	
 
-	InterfaceDescriptionGenerator m_gen;
-	InterfaceDescription m_desc;
-	Object m_service;
+	protected InterfaceDescriptionGenerator m_gen;
+	protected InterfaceDescription m_desc;
+	protected Object m_service;
 
 	private String m_ns;
 	private String m_name;
@@ -62,11 +67,11 @@ import com.triniforce.utils.ApiAlgs;
 //			}finally{
 //				itfRs.close();
 //			}
+			m_service = createService();
 			m_desc = generateInterfaceDescription(oldDesc);
 		} catch (Exception e) {
 			ApiAlgs.rethrowException(e);
 		}
-		m_service = createService();
 		
 		super.init(arg0);
 	}
@@ -93,11 +98,12 @@ import com.triniforce.utils.ApiAlgs;
 	}   
 	
 	protected void doRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		ServletOutputStream out = response.getOutputStream();
 				
 		if("wsdl".equals(request.getQueryString())){
+			ApiAlgs.getLog(this).trace("GEN WSDL");
 			Document wsdl = m_gen.generateWSDL(m_desc.getWsdlDescription(), request.getRequestURL().toString());
 			try {
+				OutputStream out = response.getOutputStream();
 				response.setContentType("text/xml; charset=utf-8");
 				m_gen.writeDocument(out, wsdl);
 			} catch (TransformerException e) {
@@ -128,7 +134,8 @@ import com.triniforce.utils.ApiAlgs;
 			ByteArrayOutputStream outBuf = new ByteArrayOutputStream();
 			reqHandler.exec(in, outBuf);
 			byte[] ba = outBuf.toByteArray();
-			response.getOutputStream().write(ba, 0, ba.length);
+			ServletOutputStream out = response.getOutputStream(); 
+			out.write(ba, 0, ba.length);
 			response.setContentLength(ba.length);
 			outBuf.close();
 			response.setStatus(HttpServletResponse.SC_OK);
@@ -197,5 +204,17 @@ import com.triniforce.utils.ApiAlgs;
 	
 	public Package getInterfacePackage(){
 		return m_pkg;
+	}
+
+	public InterfaceDescriptionGenerator getInterfaceGenerator() {
+		return m_gen;
+	}
+
+	public InterfaceDescription getInterfaceDescription() {
+		return m_desc;
+	}
+
+	public Object getService() {
+		return m_service;
 	}
 }
