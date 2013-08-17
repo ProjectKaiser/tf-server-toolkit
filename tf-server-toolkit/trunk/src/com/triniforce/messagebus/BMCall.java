@@ -6,9 +6,9 @@
 
 package com.triniforce.messagebus;
 
-public class BusCall extends BusMsg{
+public class BMCall extends BMMsg{
 
-	public BusCall(String url, Object data){
+	public BMCall(String url, Object data){
 		super(data);
 	}
 

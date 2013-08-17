@@ -6,12 +6,12 @@
 
 package com.triniforce.messagebus;
 
-public class BusResult extends BusMsg{
+public class BMResult extends BMMsg{
 
-	public BusResult(BusCall call, Object data) {
+	public BMResult(BMCall call, Object data) {
 		super(data);
 	}
-	public BusResult(BusResult result, Object data) {
+	public BMResult(BMResult result, Object data) {
 		super(data);
 	}
 

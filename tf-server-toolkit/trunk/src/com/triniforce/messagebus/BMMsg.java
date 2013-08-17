@@ -5,10 +5,10 @@
  */ 
 package com.triniforce.messagebus;
 
-public abstract class BusMsg {
+public abstract class BMMsg {
 	private final Object m_data;
 
-	public BusMsg(Object data) {
+	public BMMsg(Object data) {
 		m_data = data;
 	}
 	
