@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface IBusElement {
     
-    void handleMessage(BMEvent msg, List<BMMsg> out);
+    void handleMessage(BM msg, List<BMMsg> out);
 
 }

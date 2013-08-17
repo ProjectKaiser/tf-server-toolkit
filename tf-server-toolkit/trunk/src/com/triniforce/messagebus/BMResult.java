@@ -6,7 +6,7 @@
 
 package com.triniforce.messagebus;
 
-public class BMResult extends BMMsg{
+public class BMResult extends BM{
 
 	public BMResult(BMCall call, Object data) {
 		super(data);

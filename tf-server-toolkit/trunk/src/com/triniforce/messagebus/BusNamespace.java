@@ -21,7 +21,6 @@ public class BusNamespace{
 		}
 	}
 	
-    List<IBusElementStoppable> m_stoppable = new ArrayList<IBusElementStoppable>();
     List<BusNamespace> m_childs = new ArrayList<BusNamespace>();
     Map<String, BE> m_urls = new ConcurrentHashMap<String, BE>();
     ConcurrentLinkedQueue<BM> m_pendinq;
