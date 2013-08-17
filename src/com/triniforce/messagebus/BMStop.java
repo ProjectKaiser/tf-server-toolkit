@@ -6,6 +6,10 @@
 
 package com.triniforce.messagebus;
 
-public interface IBusElementStoppable extends IBusElement{
+public class BMStop extends BM{
+
+	public BMStop() {
+		super(null);
+	}
 
 }

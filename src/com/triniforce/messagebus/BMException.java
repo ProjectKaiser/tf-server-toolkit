@@ -6,17 +6,16 @@
 
 package com.triniforce.messagebus;
 
-public class BMException {
+public class BMException extends BM{
 	private final BMCall m_call;
-	private final Exception m_e;
 
 	public BMException(BMCall call, Exception e){
+		super(e);
 		m_call = call;
-		m_e = e;
 	}
 
 	public Exception getException() {
-		return m_e;
+		return (Exception) getData();
 	}
 
 	public BMCall getCall() {

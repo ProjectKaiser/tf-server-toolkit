@@ -6,10 +6,10 @@
 
 package com.triniforce.messagebus;
 
-public class BMCall extends BM{
+public class BMStart extends BM{
 
-	public BMCall(String url, Object data){
-		super(data);
+	public BMStart(Object data) {
+		super(null);
 	}
 
 }
