@@ -5,8 +5,8 @@
  */ 
 package com.triniforce.messagebus;
 
-public class BusEvent extends BusMsg{
-    public BusEvent(Object data){
+public class BMEvent extends BMMsg{
+    public BMEvent(Object data){
     	super(data);
     }
 }

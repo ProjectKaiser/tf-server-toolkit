@@ -10,23 +10,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BusNamespace{
 	
-	static class ElementWrapper{
+	static class BE{
 		protected final IBusElement m_e;
-		public ElementWrapper(IBusElement e){
+		public BE(IBusElement e){
 			m_e = e;
 		}
 	}
 	
     List<IBusElementStoppable> m_stoppable = new ArrayList<IBusElementStoppable>();
     List<BusNamespace> m_childs = new ArrayList<BusNamespace>();
-    Map<String, ElementWrapper> m_urls = new ConcurrentHashMap<String, ElementWrapper>();
+    Map<String, BE> m_urls = new ConcurrentHashMap<String, BE>();
+    ConcurrentLinkedQueue<BM> m_pendinq;
 
 	BusNamespace m_parent;
 	
-	void setParent(BusNamespace ns){
+	public void setParent(BusNamespace ns){
 		m_parent = ns;
 	}
 	
@@ -57,8 +59,7 @@ public class BusNamespace{
     void removeNamespace(BusNamespace ns){
     }
     
-    
-    boolean tryHandleMessage(String name, BusMsg cmd, List<BusMsg> out){
+    boolean tryHandleMessage(String name, BMMsg cmd, List<BMMsg> out){
     	return false;
     }
 
