@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Properties;
 
 import junit.framework.TestCase;
@@ -358,6 +359,14 @@ public class TFTestCase extends TestCase {
 	        	DATA_SOURCE.setPassword(dbPassword);
 		}
 		return DATA_SOURCE;
+	}
+	
+	
+	public static void closeDataSource() throws SQLException {
+		if(null != DATA_SOURCE){
+			DATA_SOURCE.close();
+			DATA_SOURCE = null;
+		}
 	}
 
 }
