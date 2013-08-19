@@ -223,8 +223,8 @@ public class DBTestCase extends TFTestCase {
 
 	public Connection reopenConnection() throws Exception {
 		clearConnection();
-        DBTestCase.getDataSource().close();
-
+		DBTestCase.closeDataSource();
+		
         Connection conn = getNewConnection();
         conn.setAutoCommit(false);
         
@@ -233,7 +233,8 @@ public class DBTestCase extends TFTestCase {
 
 		return m_conn;
 	}
-	
+
+
 	public ActualStateBL getAS(){
 		return m_as;
 	}
