@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -30,15 +30,21 @@ public class BusNamespace{
 	
     private List<BusNamespace> m_childs = new ArrayList<BusNamespace>();
     Map<String, BusComponent> m_urls = new ConcurrentHashMap<String, BusComponent>();
-    ConcurrentLinkedQueue<BM> m_pendinq;
 
-	BusNamespace m_parent;
+	private BusNamespace m_parent;
 	
-	protected void connectRecursively(BusNamespace parent, boolean connect){
-        m_rootLock = parent.getRootLock();
-        m_IEnqueueBM = parent.getIEnqueueBM();
+	protected void setRootRecursively(BusNamespace root){
+		//this comes as a root during disconect()
+        if(null !=root && root != this){
+        	m_rootLock = root.getRootLock();
+            m_IEnqueueBM = root.getIEnqueueBM();
+        }else{
+        	m_rootLock = new ReentrantReadWriteLock();
+            m_IEnqueueBM = null;
+        	
+        }
         for (BusNamespace ns : m_childs){
-            ns.connectRecursively(this, connect);
+            ns.setRootRecursively(root);
         }
 	}
 	
@@ -52,10 +58,22 @@ public class BusNamespace{
 	public void connect(BusNamespace parent){
 	    parent.getRootLock().writeLock().lock();
 	    try{
-	        connectRecursively(parent, true);
+	    	m_parent = parent;
+	        setRootRecursively(parent);
 	        parent.m_childs.add(this);
 	    }finally{
 	        parent.getRootLock().writeLock().unlock();
+	    }
+	}
+	
+	public void disconnect(){
+		Lock lock = getRootLock().writeLock();
+		lock.lock();
+	    try{
+	    	m_parent = null;
+	        setRootRecursively(this);
+	    }finally{
+	        lock.unlock();
 	    }
 	}
 	
@@ -108,5 +126,9 @@ public class BusNamespace{
     public List<BusNamespace> getChilds() {
         return m_childs;
     }
+
+	public BusNamespace getParent() {
+		return m_parent;
+	}
 
 }
