@@ -83,7 +83,7 @@ public class BusNamespace{
         }
 	}
 	
-	public vokuid disconnect(){
+	public void disconnect(){
 		Lock lock = getRootLock().writeLock();
 		lock.lock();
 	    try{
