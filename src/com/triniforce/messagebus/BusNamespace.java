@@ -13,6 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.triniforce.utils.InSeparateThreadExecutor.IRunnable;
+
 /**
  *
  */
@@ -32,6 +34,20 @@ public class BusNamespace{
     Map<String, BusComponent> m_urls = new ConcurrentHashMap<String, BusComponent>();
 
 	private BusNamespace m_parent;
+	
+	protected void runWriteLocked(IRunnable run){
+	    Lock lock = getRootLock().writeLock(); 
+	    lock.lock();
+	    try{
+            try {
+                run.run();
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage(),e);
+            }
+	    }finally{
+	        lock.unlock();    
+	    }
+	}
 	
 	protected void setRootRecursively(BusNamespace root){
 		//this comes as a root during disconect()
@@ -55,18 +71,19 @@ public class BusNamespace{
      * 
      * @param parent
      */
-	public void connect(BusNamespace parent){
-	    parent.getRootLock().writeLock().lock();
-	    try{
-	    	m_parent = parent;
-	        setRootRecursively(parent);
-	        parent.m_childs.add(this);
-	    }finally{
-	        parent.getRootLock().writeLock().unlock();
-	    }
+	public void connect(final BusNamespace parent){
+
+        parent.getRootLock().writeLock().lock();
+        try{
+            m_parent = parent;
+            setRootRecursively(parent);
+            parent.m_childs.add(this);
+        }finally{
+            parent.getRootLock().writeLock().unlock();
+        }
 	}
 	
-	public void disconnect(){
+	public vokuid disconnect(){
 		Lock lock = getRootLock().writeLock();
 		lock.lock();
 	    try{
@@ -77,13 +94,13 @@ public class BusNamespace{
 	    }
 	}
 	
-    synchronized public void register(IBusElement e){
+    synchronized public void register(IBusComponent e){
     }
     
-    synchronized public void register(IBusElement e, String name){
+    synchronized public void register(IBusComponent e, String name){
     }
     
-    synchronized void unregister(IBusElement e){
+    synchronized void unregister(IBusComponent e){
     }
     
     public void subscribe(String publisher, String subscriber){
