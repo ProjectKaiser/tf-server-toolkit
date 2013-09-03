@@ -18,7 +18,7 @@ import com.triniforce.utils.InSeparateThreadExecutor.IRunnable;
 /**
  *
  */
-public class MessageBus{
+public class MessageBus implements IMessageBus{
     
     public enum BusStatus{NOT_STARTED, STARTING, STARTED, STOPPING, STOPPED};
     
@@ -28,7 +28,7 @@ public class MessageBus{
     /**
      * Comes from parent 
      */
-    protected IEnqueueBM m_IEnqueueBM;
+    protected IPostMaster m_postMaster;
 	
     private List<MessageBus> m_childs = new ArrayList<MessageBus>();
     Map<String, BusComponent> m_urls = new ConcurrentHashMap<String, BusComponent>();
@@ -53,10 +53,10 @@ public class MessageBus{
 		//this comes as a root during disconect()
         if(null !=root && root != this){
         	m_rootLock = root.getRootLock();
-            m_IEnqueueBM = root.getIEnqueueBM();
+            m_postMaster = root.getPostMaster();
         }else{
         	m_rootLock = new ReentrantReadWriteLock();
-            m_IEnqueueBM = null;
+            m_postMaster = null;
         	
         }
         for (MessageBus ns : m_childs){
@@ -71,7 +71,7 @@ public class MessageBus{
      * 
      * @param parent
      */
-	public void connect(final MessageBus parent){
+	public void connectToParentBus(final MessageBus parent){
 
         parent.getRootLock().writeLock().lock();
         try{
@@ -83,7 +83,7 @@ public class MessageBus{
         }
 	}
 	
-	public void disconnect(){
+	public void disconnectFromParentBus(){
 		Lock lock = getRootLock().writeLock();
 		lock.lock();
 	    try{
@@ -94,30 +94,18 @@ public class MessageBus{
 	    }
 	}
 	
-    synchronized public void register(IBusComponent e){
+    synchronized public void registerComponent(IBusComponent e){
     }
     
-    synchronized public void register(IBusComponent e, String name){
+    synchronized public void registerComponent(IBusComponent e, String name){
     }
     
-    synchronized void unregister(IBusComponent e){
+    synchronized public void unregisterComponent(IBusComponent e){
     }
     
     public void subscribe(String publisher, String subscriber){
     }
     public void subscribe(Class publisher, Class subscriber){
-    }
-    
-    /**
-     * Calls all elements in all namespaces which implements {@link IBusElementStoppable}
-     */
-    void stop(){
-    }
-    
-    void addNamespace(MessageBus ns){
-    	
-    }
-    void removeNamespace(MessageBus ns){
     }
     
     boolean tryHandleMessage(String name, BMMsg cmd, List<BMMsg> out){
@@ -130,8 +118,8 @@ public class MessageBus{
     }
 
 
-    public IEnqueueBM getIEnqueueBM() {
-        return m_IEnqueueBM;
+    public IPostMaster getPostMaster() {
+        return m_postMaster;
     }
 
 
@@ -147,5 +135,10 @@ public class MessageBus{
 	public MessageBus getParent() {
 		return m_parent;
 	}
+
+    public void deliverMessage(MessageBus srcBus, BusComponent srcComponent,
+            BM bm) {
+        
+    }
 
 }

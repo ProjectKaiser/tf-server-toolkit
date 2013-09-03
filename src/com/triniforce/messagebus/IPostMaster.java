@@ -5,6 +5,6 @@
  */ 
 package com.triniforce.messagebus;
 
-public interface IEnqueueBM {
-    void enqueue(MessageBus srcNS, BusComponent srcComponent, BM bm);
+public interface IPostMaster {
+    void enqueue(MessageBus srcBus, BusComponent srcComponent, BM bm);
 }
