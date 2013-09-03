@@ -130,9 +130,17 @@ import com.triniforce.utils.ApiAlgs;
 			IServiceInvoker serviceInvoker = m_service instanceof IServiceInvoker ? (IServiceInvoker) m_service 
 					: new RequestHandler.ReflectServiceInvoker(m_service);
 			RequestHandler reqHandler = new RequestHandler(m_gen, m_desc, serviceInvoker);
-			response.setContentType("text/xml; charset=utf-8");
 			ByteArrayOutputStream outBuf = new ByteArrayOutputStream();
-			reqHandler.exec(in, outBuf);
+			
+			if("text/json".equals(request.getContentType().toLowerCase())){
+	            response.setContentType("text/json; charset=utf-8");
+	            reqHandler.execJson(in, outBuf);
+			}
+			else{
+	            response.setContentType("text/xml; charset=utf-8");
+	            reqHandler.exec(in, outBuf);
+			}
+			
 			byte[] ba = outBuf.toByteArray();
 			ServletOutputStream out = response.getOutputStream(); 
 			out.write(ba, 0, ba.length);
