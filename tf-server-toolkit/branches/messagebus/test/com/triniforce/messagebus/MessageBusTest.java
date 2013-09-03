@@ -18,11 +18,11 @@ public class MessageBusTest extends TestCase{
     	if(connected){
     		assertSame(parent.getRootLock(), child.getRootLock());
     		assertSame(parent, child.getParent());
-    		assertSame(parent.getIEnqueueBM(), child.getIEnqueueBM());
+    		assertSame(parent.getPostMaster(), child.getPostMaster());
     	}else{
     		assertNotSame(parent.getRootLock(), child.getRootLock());
     		assertNotSame(parent, child.getParent());
-    		assertNull(child.getIEnqueueBM());
+    		assertNull(child.getPostMaster());
     	}
     }
     
@@ -31,22 +31,22 @@ public class MessageBusTest extends TestCase{
         MessageBus ns = new MessageBus();
         assertNull(ns.getParent());
         assertNotNull(ns.getRootLock());
-        assertNull(ns.getIEnqueueBM());
+        assertNull(ns.getPostMaster());
 
         assertEquals(MessageBus.BusStatus.NOT_STARTED, ns.getStatus());
         
-        IEnqueueBM tempE = new IEnqueueBM() {
+        IPostMaster tempE = new IPostMaster() {
             public void enqueue(MessageBus srcNS, BusComponent srcComponent, BM bm) {
             	throw new IllegalArgumentException("Not supported");
             }
         };
-        ns.m_IEnqueueBM = tempE;
+        ns.m_postMaster = tempE;
 
         MessageBus ns1 = new MessageBus();
         //connect single namespace
         {
             assertNotSame(ns.getRootLock(), ns1.getRootLock());
-            ns1.connect(ns);
+            ns1.connectToParentBus(ns);
             checkLockCounts(ns);
             assertSame(ns.getRootLock(), ns1.getRootLock());
             assertSame(ns, ns1.getParent());
@@ -61,9 +61,9 @@ public class MessageBusTest extends TestCase{
             checkConnected(ns2, ns21, false);
             checkConnected(ns2, ns22, false);
             
-            ns21.connect(ns2);
-            ns22.connect(ns2);
-            ns2.connect(ns);
+            ns21.connectToParentBus(ns2);
+            ns22.connectToParentBus(ns2);
+            ns2.connectToParentBus(ns);
             
             checkConnected(ns, ns2, true);
             checkConnected(ns2, ns21, true);
@@ -72,7 +72,7 @@ public class MessageBusTest extends TestCase{
         }
         //disconnect tree
         {
-        	ns2.disconnect();
+        	ns2.disconnectFromParentBus();
         	
             checkConnected(ns, ns2, false);
             checkConnected(ns2, ns21, true);
