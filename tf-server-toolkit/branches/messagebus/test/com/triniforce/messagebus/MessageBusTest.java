@@ -7,14 +7,14 @@ package com.triniforce.messagebus;
 
 import junit.framework.TestCase;
 
-public class BusNamespaceTest extends TestCase{
+public class MessageBusTest extends TestCase{
     
-    void checkLockCounts(BusNamespace ns){
+    void checkLockCounts(MessageBus ns){
         assertEquals(0, ns.getRootLock().getWriteHoldCount());
         assertEquals(0, ns.getRootLock().getReadLockCount());
     }
 
-    void checkConnected(BusNamespace parent, BusNamespace child, boolean connected){
+    void checkConnected(MessageBus parent, MessageBus child, boolean connected){
     	if(connected){
     		assertSame(parent.getRootLock(), child.getRootLock());
     		assertSame(parent, child.getParent());
@@ -28,21 +28,21 @@ public class BusNamespaceTest extends TestCase{
     
     
     public void testBusConfigurationFields() throws Exception {
-        BusNamespace ns = new BusNamespace();
+        MessageBus ns = new MessageBus();
         assertNull(ns.getParent());
         assertNotNull(ns.getRootLock());
         assertNull(ns.getIEnqueueBM());
 
-        assertEquals(BusNamespace.BusStatus.NOT_STARTED, ns.getStatus());
+        assertEquals(MessageBus.BusStatus.NOT_STARTED, ns.getStatus());
         
         IEnqueueBM tempE = new IEnqueueBM() {
-            public void enqueue(BusNamespace srcNS, BusComponent srcComponent, BM bm) {
+            public void enqueue(MessageBus srcNS, BusComponent srcComponent, BM bm) {
             	throw new IllegalArgumentException("Not supported");
             }
         };
         ns.m_IEnqueueBM = tempE;
 
-        BusNamespace ns1 = new BusNamespace();
+        MessageBus ns1 = new MessageBus();
         //connect single namespace
         {
             assertNotSame(ns.getRootLock(), ns1.getRootLock());
@@ -52,9 +52,9 @@ public class BusNamespaceTest extends TestCase{
             assertSame(ns, ns1.getParent());
         }
 
-        BusNamespace ns2 = new BusNamespace();
-        BusNamespace ns21 = new BusNamespace();
-        BusNamespace ns22 = new BusNamespace();
+        MessageBus ns2 = new MessageBus();
+        MessageBus ns21 = new MessageBus();
+        MessageBus ns22 = new MessageBus();
         //connect tree
         {
             checkConnected(ns, ns2, false);
