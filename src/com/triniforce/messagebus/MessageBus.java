@@ -18,7 +18,7 @@ import com.triniforce.utils.InSeparateThreadExecutor.IRunnable;
 /**
  *
  */
-public class BusNamespace{
+public class MessageBus{
     
     public enum BusStatus{NOT_STARTED, STARTING, STARTED, STOPPING, STOPPED};
     
@@ -30,10 +30,10 @@ public class BusNamespace{
      */
     protected IEnqueueBM m_IEnqueueBM;
 	
-    private List<BusNamespace> m_childs = new ArrayList<BusNamespace>();
+    private List<MessageBus> m_childs = new ArrayList<MessageBus>();
     Map<String, BusComponent> m_urls = new ConcurrentHashMap<String, BusComponent>();
 
-	private BusNamespace m_parent;
+	private MessageBus m_parent;
 	
 	protected void runWriteLocked(IRunnable run){
 	    Lock lock = getRootLock().writeLock(); 
@@ -49,7 +49,7 @@ public class BusNamespace{
 	    }
 	}
 	
-	protected void setRootRecursively(BusNamespace root){
+	protected void setRootRecursively(MessageBus root){
 		//this comes as a root during disconect()
         if(null !=root && root != this){
         	m_rootLock = root.getRootLock();
@@ -59,7 +59,7 @@ public class BusNamespace{
             m_IEnqueueBM = null;
         	
         }
-        for (BusNamespace ns : m_childs){
+        for (MessageBus ns : m_childs){
             ns.setRootRecursively(root);
         }
 	}
@@ -71,7 +71,7 @@ public class BusNamespace{
      * 
      * @param parent
      */
-	public void connect(final BusNamespace parent){
+	public void connect(final MessageBus parent){
 
         parent.getRootLock().writeLock().lock();
         try{
@@ -114,10 +114,10 @@ public class BusNamespace{
     void stop(){
     }
     
-    void addNamespace(BusNamespace ns){
+    void addNamespace(MessageBus ns){
     	
     }
-    void removeNamespace(BusNamespace ns){
+    void removeNamespace(MessageBus ns){
     }
     
     boolean tryHandleMessage(String name, BMMsg cmd, List<BMMsg> out){
@@ -140,11 +140,11 @@ public class BusNamespace{
     }
 
 
-    public List<BusNamespace> getChilds() {
+    public List<MessageBus> getChilds() {
         return m_childs;
     }
 
-	public BusNamespace getParent() {
+	public MessageBus getParent() {
 		return m_parent;
 	}
 

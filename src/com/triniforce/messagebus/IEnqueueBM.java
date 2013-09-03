@@ -6,5 +6,5 @@
 package com.triniforce.messagebus;
 
 public interface IEnqueueBM {
-    void enqueue(BusNamespace srcNS, BusComponent srcComponent, BM bm);
+    void enqueue(MessageBus srcNS, BusComponent srcComponent, BM bm);
 }
