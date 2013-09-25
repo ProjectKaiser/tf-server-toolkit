@@ -44,7 +44,7 @@ public class WsdlDescription {
         static HashSet<String> PRIMITIVE_TIPES = new HashSet<String>();
         static{
         	PRIMITIVE_TIPES.addAll(ScalarDef.BOXES.keySet());
-        	PRIMITIVE_TIPES.addAll(ScalarDef.BOXES.values());
+//        	PRIMITIVE_TIPES.addAll(ScalarDef.BOXES.values());
         	PRIMITIVE_TIPES.add(char.class.getName());
         }
         
