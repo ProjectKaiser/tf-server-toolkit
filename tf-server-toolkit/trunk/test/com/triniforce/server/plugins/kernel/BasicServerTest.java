@@ -9,6 +9,7 @@ package com.triniforce.server.plugins.kernel;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -29,6 +30,7 @@ import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.ITaskExecutors;
 import com.triniforce.utils.Api;
+import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 
 public class BasicServerTest extends BasicServerTestCase {
@@ -83,7 +85,9 @@ public class BasicServerTest extends BasicServerTestCase {
 	    assertEquals(gmt, def);
         m_server.enterMode(Mode.Running);
         try{
-            ApiStack.getInterface(TimeZone.class); 
+            ApiStack.getInterface(TimeZone.class);
+            
+            ApiAlgs.getLog(this).trace(new Date());
             
         } finally{
             m_server.leaveMode();

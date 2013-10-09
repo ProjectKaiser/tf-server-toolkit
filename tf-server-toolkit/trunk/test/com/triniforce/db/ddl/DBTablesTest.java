@@ -328,6 +328,41 @@ public class DBTablesTest extends TestCase {
             
             assertEquals(null, testAS.getDBName("tab1"));
         }
+        
+        {
+        	{ //maxKeySize test
+	            TableDef tab = new TableDef("table1");
+	            tab.addStringField(1, "f1", ColumnType.CHAR, 257, true, null);
+	            tab.addIndex(2, "pk", new String[]{"f1"}, false, true);
+	            m_db.add(tab);
+	            m_db.setMaxIndexSize(200);
+	            List<DBOperation> cl = m_db.getCommandList();
+	            DBOperation op = cl.get(1);
+	            assertTrue(op.getOperation() instanceof EmptyCommand);
+	            
+	            tab.deleteIndex(3, "pk");
+	            cl = m_db.getCommandList();
+	            op = cl.get(2);
+	            assertTrue(op.getOperation().getClass().getSimpleName(), op.getOperation() instanceof EmptyCommand);
+        	}
+        	{
+        		m_plugin.clear();
+                m_as.clear();
+                TestAS testAS = new TestAS(m_as);
+                m_db = new DBTables(testAS, m_plugin);
+	            TableDef tab = new TableDef("table1");
+	            tab.addStringField(1, "f1", ColumnType.CHAR, 257, true, null);
+	            tab.addPrimaryKey(2, "pk", new String[]{"f1"});
+	            m_db.add(tab);
+	            m_db.setMaxIndexSize(200);
+	            List<DBOperation> cl = m_db.getCommandList();
+	            DBOperation op = cl.get(0);
+	            CreateTableOperation createOp = (CreateTableOperation) op.getOperation();
+	            assertEquals(2, createOp.getElements().size()); // no primary key
+	            assertTrue(createOp.getElements().get(1) instanceof EmptyCommand);
+        	}
+        	
+        }
     }
     
     public void testDBTables(){
