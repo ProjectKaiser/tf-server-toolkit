@@ -18,14 +18,14 @@ public interface IOutbox {
      * @param callBack
      *            if null default caller interface will be used
      */
-    void post(Object addr, Object data, IRecipient callBack);
+    void post(Object addr, Object data, IPOBox callBack);
 
     /**
      * 
-     * Same as {@link IOutbox#post(Object, Object, IRecipient)} but sender's envelope is
+     * Same as {@link IOutbox#post(Object, Object, IPOBox)} but sender's envelope is
      * used to locate recipient
      * 
      */
-    void post(IEnvelope sender, Object data, IRecipient callBack);
+    void post(IEnvelope sender, Object data, IPOBox callBack);
 
 }
