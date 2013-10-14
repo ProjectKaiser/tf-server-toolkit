@@ -11,7 +11,7 @@ public class Envelope {
     /**
      * Is called instead of default methods when {@link IOutbox#postBack(Envelope, Object)} is used. 
      */
-    public IRecipient callback;
+    public IPOBox callback;
     public Envelope(String addrTo) {
         m_addrTo = addrTo;
 

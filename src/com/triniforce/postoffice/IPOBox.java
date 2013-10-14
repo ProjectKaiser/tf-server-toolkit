@@ -5,7 +5,7 @@
  */ 
 package com.triniforce.postoffice;
 
-public interface IRecipient {
+public interface IPOBox {
 
     void process(IEnvelope env, Object data, IOutbox out);
     void processShutdown(IEnvelope env, Object data, IOutbox out);
