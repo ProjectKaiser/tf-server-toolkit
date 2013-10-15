@@ -5,11 +5,11 @@
  */ 
 package com.triniforce.postoffice;
 
-import java.util.List;
+import java.util.Map;
 
 public interface IPostMaster {
     INamespace createNamespace();
-    INamespace createNamespace(List<IPOBox> recs);
+    INamespace createNamespace(Map<String, IPOBox> boxes);
 
     
     
