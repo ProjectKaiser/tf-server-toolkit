@@ -5,9 +5,8 @@
  */ 
 package com.triniforce.postoffice;
 
-public interface IPOBox {
-
-    void process(IEnvelope env, Object data, IOutbox out);
-    void processShutdown(IEnvelope env, Object data, IOutbox out);
-
+public interface IPOBox extends IEnvelopeHandler{
+    void shutdown(int pauseMs);
+    void connect();
+    void disconnect();
 }
