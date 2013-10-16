@@ -238,6 +238,8 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 		}
 	}
 
+	public static final int FIREBIRD_MAX_INDEX_SIZE = 128;
+
 	public static String DPP_TABLE = "com.triniforce.server.plugins.kernel.tables.DataPrepProcedures"; //$NON-NLS-1$
 	public static String UP_TABLE = "com.triniforce.server.plugins.kernel.tables.UpgradeProcedures"; //$NON-NLS-1$
 
@@ -286,9 +288,9 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
         // install ISOQuery interface
         serverApi.setIntfImplementor(ISOQuery.class, this);
 
-        serverApi.setIntfImplementor(IDatabaseInfo.class,
-                getDbInfo((IPooledConnection) baseApi
-                        .getIntfImplementor(IPooledConnection.class)));
+        IDatabaseInfo dbInfo = getDbInfo((IPooledConnection) baseApi
+                .getIntfImplementor(IPooledConnection.class));
+        serverApi.setIntfImplementor(IDatabaseInfo.class, dbInfo);
         
         serverApi.setIntfImplementor(IBasicServer.class, this);
         serverApi.setIntfImplementor(IPKExtensionPoint.class, this);
@@ -302,6 +304,9 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 //        m_bDbModNeeded = false;
 
         m_desiredTables = new DBTables();
+        if(DbType.FIREBIRD.equals(dbInfo.getDbType())){
+        	m_desiredTables.setMaxIndexSize(FIREBIRD_MAX_INDEX_SIZE);
+        }
 
         this.m_entities = new LinkedHashMap<String, IEntity>();
 

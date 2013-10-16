@@ -119,7 +119,8 @@ public class DBTables {
 		                        op = histDBO.get(0);
 		            		}
 	                        
-	                        pushStack(new DBOperation(m_fstDBO.getEntityName(), op));                     
+	                        op = createDatabaseOperation(m_fstDBO, op);
+	                        pushStack(new DBOperation(m_fstDBO.getEntityName(), op));
 		            		break;
 		            	}
 	            	}	
@@ -134,7 +135,32 @@ public class DBTables {
             return m_fstDBO!=null;            
         }
         
-        /* (non-Javadoc)
+        private TableOperation createDatabaseOperation(TableDef td,
+				TableOperation op) {
+        	IndexDef idx = null;
+        	if(op instanceof AddIndexOperation){
+        		idx = ((AddIndexOperation)op).getIndex();
+        	} else if (op instanceof DeleteIndexOperation){
+        		TableOperation revOp = op.getReverseOperation();
+        		idx = ((AddIndexOperation)revOp).getIndex();
+        	}
+        	if(null != idx){
+        		if(null != m_maxIndexSize && m_maxIndexSize < indexSize(td, idx))
+        			op = new EmptyCommand();
+        	}
+        	return op;
+		}
+
+		private int indexSize(TableDef td, IndexDef idx) {
+			int res = 0;
+			for(String column : idx.getColumns()){
+				FieldDef fd = td.getFields().findElement(column).getElement();
+				res += fd.getSize();
+			}
+			return res;
+		}
+
+		/* (non-Javadoc)
          * @see java.util.Iterator#next()
          */
         public DBOperation next() {
@@ -173,6 +199,7 @@ public class DBTables {
                 	addColumnOperation(tabDef.getEntityName(), addCol);
                 	operation = getRealAddColumnOperation(tabDef, addCol);
                 }
+                operation = (TableUpdateOperation) createDatabaseOperation(tabDef, operation);
                 resList.add(operation);
             }
             
@@ -354,6 +381,8 @@ public class DBTables {
     
     private LinkedHashMap<String, TableDef>  m_desiredTables;
     private IActualState  m_actualTables;
+	private Integer m_maxIndexSize;
+
         
     public DBTables(IActualState as, HashMap<String, TableDef> desiredTables){
         m_desiredTables = new LinkedHashMap<String, TableDef>(desiredTables);
@@ -444,10 +473,11 @@ public class DBTables {
     public void remove(String tabName) {
         m_desiredTables.remove(tabName);
     }
+
+	public void setMaxIndexSize(int v) {
+		m_maxIndexSize = v;
+	}
     
-//    protected void registerExternalDBO(TableDef dbo){
-//    	m_actualTables.addTable(dbo.getDbName(), dbo.getEntityName(), dbo.getVersion());
-//    }
 
     
 }

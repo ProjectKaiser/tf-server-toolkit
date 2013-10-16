@@ -10,7 +10,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -145,17 +144,17 @@ public class CleanDatabase {
 	//	        rs.close();
 		        // if database is firebird
 		        // drop all client generators
-		        if(DbType.FIREBIRD.equals(dbType)){
-		        	Statement st = conn.createStatement();
-		        	ResultSet rs = st.executeQuery("select RDB$GENERATOR_NAME from RDB$GENERATORS where RDB$SYSTEM_FLAG is null");
-		        	while(rs.next()){
-		        		Statement st2 = conn.createStatement();
-		        		st2.execute("DROP GENERATOR "+rs.getString(1));
-		        		st2.close();
-		        	}
-		        	rs.close();
-		        	st.close();
-		        }
+//		        if(DbType.FIREBIRD.equals(dbType)){
+//		        	Statement st = conn.createStatement();
+//		        	ResultSet rs = st.executeQuery("select RDB$GENERATOR_NAME from RDB$GENERATORS where RDB$SYSTEM_FLAG is null");
+//		        	while(rs.next()){
+//		        		Statement st2 = conn.createStatement();
+//		        		st2.execute("DROP GENERATOR "+rs.getString(1));
+//		        		st2.close();
+//		        	}
+//		        	rs.close();
+//		        	st.close();
+//		        }
 		        if (!conn.getAutoCommit())
 		            conn.commit();
 	    	} finally{

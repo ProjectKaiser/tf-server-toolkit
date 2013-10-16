@@ -1006,6 +1006,19 @@ public class UpgradeRunnerTest extends DDLTestCase {
 
 	}
 	
+	public void testCreateIndex() throws EReferenceError, SQLException{
+    	TableDef def1 = new TableDef("testCreateIndex");
+    	def1.setDbName("testCreateIndex");
+    	def1.addField(1, FieldDef.createStringField("f1", ColumnType.VARCHAR, 250,  true, null));
+    	def1.addIndex(2, "idx1",new String[]{"f1"}, false, true);
+    	HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
+   		desired.put(def1.getEntityName(), def1);
+       	DBTables db = new DBTables(m_as, desired);
+       	db.setMaxIndexSize(64);
+    	m_player.run(db.getCommandList());
+		
+	}
+	
 	public void testDropIndex() throws Exception{
 		{ // unique index
 	    	TableDef def1 = new TableDef("testDropUniqueIndex");
@@ -1097,16 +1110,33 @@ public class UpgradeRunnerTest extends DDLTestCase {
 	}
 	
 	public void testEmptyCommand() throws EReferenceError, SQLException{
-    	TableDef def1 = new TableDef("testEmptyCommand");
-    	def1.setDbName("testEmptyCommand");
-    	def1.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
-    	def1.addModification(2, new EmptyCommand());
-    	HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
-   		desired.put(def1.getEntityName(), def1);
-       	DBTables db = new DBTables(m_as, desired);
-    	m_player.run(db.getCommandList());
+		{
+	    	TableDef def1 = new TableDef("testEmptyCommand");
+	    	def1.setDbName("testEmptyCommand");
+	    	def1.addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
+	    	def1.addModification(2, new EmptyCommand());
+	    	HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
+	   		desired.put(def1.getEntityName(), def1);
+	       	DBTables db = new DBTables(m_as, desired);
+	    	m_player.run(db.getCommandList());
+	
+	    	assertEquals(2, m_player.getActualState().getVersion("testEmptyCommand"));
+		}
+		
+		{
+	    	TableDef def1 = new TableDef("testEmptyCommand_2");
+	    	def1.setDbName("testEmptyCommand_2");
+	    	def1.addField(1, FieldDef.createStringField("f1", ColumnType.CHAR, 40, true, null));
+	    	def1.addPrimaryKey(2, "pk", new String[]{"f1"});
+	    	HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
+	   		desired.put(def1.getEntityName(), def1);
+	       	DBTables db = new DBTables(m_as, desired);
+	       	db.setMaxIndexSize(20);
+	    	m_player.run(db.getCommandList());
 
-    	assertEquals(2, m_player.getActualState().getVersion("testEmptyCommand"));
+	    	assertEquals(2, m_player.getActualState().getVersion("testEmptyCommand"));
+
+		}
 	}
     
 }
