@@ -22,8 +22,8 @@ import java.util.ListIterator;
 import com.triniforce.db.ddl.DBTables.DBOperation;
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
 import com.triniforce.db.ddl.TableDef.FieldDef;
-import com.triniforce.db.ddl.TableDef.IndexDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
+import com.triniforce.db.ddl.TableDef.IndexDef;
 import com.triniforce.db.ddl.TableDef.IndexDef.TYPE;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.IProfilerStack.PSI;
@@ -275,7 +275,17 @@ public class UpgradeRunner {
             CreateTableOperation createOp) throws SQLException {
         String sql = MessageFormat.format("CREATE TABLE {0} (", dbName); //$NON-NLS-1$
 
+        ArrayList<TableUpdateOperation> elements = new ArrayList<TableUpdateOperation>(createOp.getElements().size());
+        //remove all EmptyCommands
         Iterator<TableUpdateOperation> iter = createOp.getElements().iterator();
+        while(iter.hasNext()){
+        	TableUpdateOperation cmd = iter.next();
+        	if(cmd instanceof EmptyCommand)
+        		continue;
+        	elements.add(cmd);
+        }
+        
+        iter = elements.iterator();
         boolean condition = iter.hasNext();
         while (condition) {
             TableUpdateOperation node = iter.next();
@@ -416,8 +426,8 @@ public class UpgradeRunner {
                         : -vInc);
         }
     }
-
-    public TableOperation getReverseOperation(TableOperation op) {
+    
+	public TableOperation getReverseOperation(TableOperation op) {
         if (op instanceof DeleteColumnOperation && !m_bSupportDropColumn) {
             DeleteColumnOperation delOp = (DeleteColumnOperation) op;
             FieldDef newField = delOp.getDeletedField();

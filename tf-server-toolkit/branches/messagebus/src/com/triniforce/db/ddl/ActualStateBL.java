@@ -29,6 +29,7 @@ import com.triniforce.db.dml.Table.Row.State;
 import com.triniforce.db.dml.TableAdapter;
 import com.triniforce.db.qbuilder.QSelect;
 import com.triniforce.db.qbuilder.QTable;
+import com.triniforce.server.plugins.kernel.BasicServer;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.TFUtils;
 
@@ -169,6 +170,9 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
             tabs.add(m_asDef);
             tabs.add(m_asIndexDef);
             tabs.setActualState(this);
+            if(DbType.FIREBIRD.equals(UpgradeRunner.getDbType(conn))){
+            	tabs.setMaxIndexSize(BasicServer.FIREBIRD_MAX_INDEX_SIZE);
+            }
             List<DBOperation> cl = tabs.getCommandList();
             
             UpgradeRunner ur = new UpgradeRunner(conn, this); 
