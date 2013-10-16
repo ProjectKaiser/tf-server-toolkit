@@ -5,6 +5,15 @@
  */ 
 package com.triniforce.postoffice;
 
-public class POBoxes {
+import java.util.HashMap;
 
+public class POBoxes extends HashMap<String, IPOBox>{
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    void put(IPOBox box){
+        put(box.getClass().getName(), box);
+    }
 }
