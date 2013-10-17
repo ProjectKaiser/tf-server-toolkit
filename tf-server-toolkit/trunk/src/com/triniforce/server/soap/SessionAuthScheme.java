@@ -12,6 +12,13 @@ import com.triniforce.soap.PropertiesSequence;
 public class SessionAuthScheme extends AuthScheme{
     String session;
 
+    public SessionAuthScheme() {
+    }
+    
+    public SessionAuthScheme(String session){
+        this.session = session;
+    }
+    
     public String getSession() {
         return session;
     }
