@@ -948,7 +948,8 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	 * Leave mode
 	 * 
 	 */
-	public void leaveMode() {
+	@SuppressWarnings("deprecation")
+    public void leaveMode() {
 
 		IServerMode srvMode = ApiStack.getApi().getIntfImplementor(
 				IServerMode.class);
