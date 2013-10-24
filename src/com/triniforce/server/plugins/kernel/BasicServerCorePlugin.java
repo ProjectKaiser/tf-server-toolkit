@@ -183,6 +183,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         m_runningApi.setIntfImplementor(ITimedLock2.class, new TimedLock2());
         m_runningApi.setIntfImplementor(IThrdWatcherRegistrator.class, new ThrdWatcherRegistrator());
 
+        //TODO: почему здесь а не в doRegistration() ?
         //tran inners
         {
             IPKExtensionPoint ep = getRootExtensionPoint().getExtensionPoint(PKEPTranInners.class);
