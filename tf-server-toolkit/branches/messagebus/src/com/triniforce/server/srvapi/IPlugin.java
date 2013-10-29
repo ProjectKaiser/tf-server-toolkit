@@ -57,10 +57,11 @@ public interface IPlugin {
     void pushApi(final IBasicServer.Mode mode, ApiStack apiStack);
 
     /**
-     * Called each time server leaves given mode
+     * Is not used and should be deleted
      * 
-     * @param stk
+     * @param stk is null for some reason.
      */
+    @Deprecated
     void popApi(final IBasicServer.Mode mode, ApiStack stk);
 
     public void finit();
