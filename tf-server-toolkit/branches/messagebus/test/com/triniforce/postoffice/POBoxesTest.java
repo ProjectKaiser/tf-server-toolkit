@@ -10,10 +10,10 @@ import com.triniforce.db.test.TFTestCase;
 public class POBoxesTest extends TFTestCase {
 
     static class MyPOBox implements IPOBox {
-        public void process(IEnvelope env, Object data, IOutbox out) {
+        public void process(Envelope env, Object data, IOutbox out) {
         }
 
-        public void processShutdown(IEnvelope env, Object data, IOutbox out) {
+        public void processShutdown(Envelope env, Object data, IOutbox out) {
         }
 
         public void shutdown(int pauseMs) {
@@ -25,6 +25,21 @@ public class POBoxesTest extends TFTestCase {
         }
 
         public void disconnect() {
+        }
+
+        public void process(IEnvelopeCtx ctx, Object data, IOutbox out) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void onShutdown(int intervalMs) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void onStop() {
+            // TODO Auto-generated method stub
+            
         }
     }
 

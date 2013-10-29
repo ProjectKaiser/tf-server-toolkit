@@ -8,25 +8,27 @@ package com.triniforce.postoffice;
 import java.util.Map;
 
 public interface IPostMaster {
-    String createNamespace();
-    String createNamespace(Map<String, IPOBox> boxes);
     
-    void connectPOBox(String nsKey, IPOBox box);
+    void createStreet(String parentStreet,  String street, Map<String, IPOBox> boxes);
+    
+    void connectPOBox(String street, IPOBox box);
     /**
-     * @param nsKey
-     * @param boxKey
+     * @param street
+     * @param box
      * @param pauseMs Just an info which is passed to POBox
      */
-    void shutdownPOBox(String nsKey, String boxKey, int pauseMs);
+    
+    void shutdownPOBox(String street, String box, int pauseMs);
     /**
      * 
-     * If not called yet Calls shutdownPOBox with zero pause, .
+     * If not called yet Calls shutdownPOBox with zero pause,
      * 
      * */
-    void disconnectPOBox(String nsKey, String boxKey);
     
-    void shutdownNamespace(String nsKey, int pauseMs);
-    void disconnectNamespace(String nsKey);
+    void disconnectPOBox(String street, String boxKey);
+    
+    void shutdownStreet(String street, int pauseMs);
+    void disconnectStreet(String street);
     
     
 }

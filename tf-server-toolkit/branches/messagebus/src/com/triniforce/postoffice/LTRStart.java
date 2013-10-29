@@ -5,6 +5,6 @@
  */ 
 package com.triniforce.postoffice;
 
-public interface IEnvelope {
+public class LTRStart {
 
 }

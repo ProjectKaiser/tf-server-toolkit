@@ -6,6 +6,5 @@
 package com.triniforce.postoffice;
 
 public interface IEnvelopeHandler {
-    void process(IEnvelope env, Object data, IOutbox out);
-    void processShutdown(IEnvelope env, Object data, IOutbox out);
+    void process(IEnvelopeCtx ctx, Object data, IOutbox out);
 }
