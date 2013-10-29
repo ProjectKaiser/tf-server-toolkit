@@ -122,6 +122,7 @@ public class ServerImplTest extends ServerTest {
         }
     }
     
+    @SuppressWarnings("deprecation")
     public void  testServerRegistration() throws Exception{
     	Mockery ctx = new Mockery();
     	final IPlugin pl = ctx.mock(IPlugin.class);
@@ -669,6 +670,7 @@ public class ServerImplTest extends ServerTest {
     	//assertNull(ApiStack.queryInterface(IPooledConnection.class));
     }
     
+    @SuppressWarnings("deprecation")
     public void testFinit() throws Exception{
     	{
 	    	BasicServer srv = new BasicServer(m_coreApi);
