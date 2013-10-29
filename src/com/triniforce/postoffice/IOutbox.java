@@ -10,22 +10,6 @@ public interface IOutbox {
     void post(String addr, Object data);
     void post(Class addr, Object data);
     
-    /**
-     * @param addr
-     *            If Class addr.getName() will be used.
-     *            <p>Otherwise addr.toString() is used
-     * @param data
-     * @param callBack
-     *            if null default caller interface will be used
-     */
-    void post(Object addr, Object data, IPOBox callBack);
-
-    /**
-     * 
-     * Same as {@link IOutbox#post(Object, Object, IPOBox)} but sender's envelope is
-     * used to locate recipient
-     * 
-     */
-    void post(IEnvelope sender, Object data, IPOBox callBack);
+    void post(Envelope envelope, Object data);
 
 }

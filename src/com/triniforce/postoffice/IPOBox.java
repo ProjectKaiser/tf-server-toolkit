@@ -6,7 +6,12 @@
 package com.triniforce.postoffice;
 
 public interface IPOBox extends IEnvelopeHandler{
-    void shutdown(int pauseMs);
-    void connect();
-    void disconnect();
+    /**
+     * Called asynchronously, should return immediately
+     */
+    void onShutdown(int intervalMs);
+    /**
+     * Called asynchronously, should return immediately
+     */
+    void onStop();
 }
