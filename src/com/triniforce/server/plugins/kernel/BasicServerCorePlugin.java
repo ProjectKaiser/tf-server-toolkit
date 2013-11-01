@@ -24,6 +24,8 @@ import com.triniforce.extensions.IPKExtension;
 import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.server.TFPlugin;
 import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
+import com.triniforce.server.plugins.kernel.ep.api.IPKEPAPI;
+import com.triniforce.server.plugins.kernel.ep.api.PKEPAPIs;
 import com.triniforce.server.plugins.kernel.ep.br.PKEPBackupRestore;
 import com.triniforce.server.plugins.kernel.ep.sp.PKEPServerProcedures;
 import com.triniforce.server.plugins.kernel.ep.srv_ev.PKEPServerEvents;
@@ -64,7 +66,6 @@ import com.triniforce.server.srvapi.ISrvSmartTranExtenders.IRefCountHashMap;
 import com.triniforce.server.srvapi.ISrvSmartTranExtenders.IRefCountHashMap.IFactory;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory.ITranExtender;
-import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.server.srvapi.ITimedLock2;
 import com.triniforce.server.srvapi.ITimedLock2.ITimedLockCB;
 import com.triniforce.server.srvapi.ITransactionWriteLock2;
@@ -137,6 +138,9 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	    
         putExtension(PKEPBackupRestore.class, BackupRestoreDb.class);
         putExtension(PKEPBackupRestore.class, BackupRestorePluginVersions.class);
+        
+        putExtension(PKEPAPIs.class, ThrdWatcherRegistrator.class);
+        putExtension(PKEPAPIs.class, TimedLock2.class);
 	}
 
 	public String[] getDependencies() {
@@ -147,6 +151,9 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 		return "Core Server Functionality";
 	}
 
+	/* (non-Javadoc)
+	 * @see com.triniforce.extensions.PKPlugin#prepareApi()
+	 */
 	public void prepareApi() {
         Api api = new Api();
         api.setIntfImplementor(ISOQuery.class, getBasicServer());
@@ -180,8 +187,15 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         api.setIntfImplementor(INamedDbId.class, namedIds);
         
         m_runningApi = api;
-        m_runningApi.setIntfImplementor(ITimedLock2.class, new TimedLock2());
-        m_runningApi.setIntfImplementor(IThrdWatcherRegistrator.class, new ThrdWatcherRegistrator());
+
+        // instantiate APIs
+        {
+            IPKExtensionPoint ep = getRootExtensionPoint().getExtensionPoint(PKEPAPIs.class);
+            for(IPKExtension e:ep.getExtensions().values()){
+                IPKEPAPI epApi = e.getInstance();
+                m_runningApi.setIntfImplementor(epApi.getImplementedInterface(), epApi);
+            }
+        }
 
         //TODO: почему здесь а не в doRegistration() ?
         //tran inners
@@ -545,6 +559,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         putExtensionPoint(new PKEPServices());
         putExtensionPoint(new PKEPTranInners());
         putExtensionPoint(new PKEPTranOuters());
+        putExtensionPoint(new PKEPAPIs());
     }
 
 

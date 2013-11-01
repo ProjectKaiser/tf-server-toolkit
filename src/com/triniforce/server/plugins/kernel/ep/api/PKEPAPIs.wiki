@@ -1,6 +1,6 @@
 * PKEPAPI instances are created in BasicCorePlugin.prepareApi()
 * During BasicCorePlugin.pushApi() they are added into Stack
 
-ШPKEPAPI.getImplementedInterface() method is used to install implementation into ApiStack in RUNNING mode.
+PKEPAPI.getImplementedInterface() method is used to install implementation into ApiStack in RUNNING mode.
 
  

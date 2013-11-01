@@ -8,13 +8,14 @@ package com.triniforce.server.plugins.kernel;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.triniforce.server.plugins.kernel.ep.api.IPKEPAPI;
 import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ITime;
 import com.triniforce.utils.TFUtils;
 
 
-public class ThrdWatcherRegistrator implements IThrdWatcherRegistrator {
+public class ThrdWatcherRegistrator implements IThrdWatcherRegistrator, IPKEPAPI {
     
     static class MyTime implements ITime{
         public long currentTimeMillis() {
@@ -108,6 +109,10 @@ public class ThrdWatcherRegistrator implements IThrdWatcherRegistrator {
 
     public ITime getITime() {
         return m_ITime;
+    }
+
+    public Class getImplementedInterface(){
+        return IThrdWatcherRegistrator.class;
     }
 
 }
