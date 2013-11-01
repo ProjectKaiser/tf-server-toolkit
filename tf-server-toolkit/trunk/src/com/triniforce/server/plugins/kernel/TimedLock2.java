@@ -8,13 +8,14 @@ import java.text.MessageFormat;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import com.triniforce.server.plugins.kernel.ep.api.IPKEPAPI;
 import com.triniforce.server.srvapi.ITimedLock2;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.ITime;
 import com.triniforce.utils.Utils;
 
-public class TimedLock2 implements ITimedLock2{
+public class TimedLock2 implements ITimedLock2, IPKEPAPI{
 
     protected Semaphore m_s = new Semaphore(1);
     protected long m_timeout = 10000;
@@ -97,5 +98,9 @@ public class TimedLock2 implements ITimedLock2{
 
     public Thread getLockerThread() {
         return m_lockerThread;
+    }
+
+    public Class getImplementedInterface() {
+        return ITimedLock2.class;
     }
 }
