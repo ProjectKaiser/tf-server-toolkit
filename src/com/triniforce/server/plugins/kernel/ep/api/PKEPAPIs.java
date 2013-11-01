@@ -10,6 +10,7 @@ import com.triniforce.extensions.PKExtensionPoint;
 public class PKEPAPIs  extends PKExtensionPoint{
     public PKEPAPIs() {
         setExtensionClass(IPKEPAPI.class);
+        setSingleExtensionInstances(true);
     }
 
 }
