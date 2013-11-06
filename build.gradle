@@ -9,8 +9,8 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
 
-sourceCompatibility = 1.5
-targetCompatibility = 1.5
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 // Project configuration is used for Maven deploy:
@@ -93,7 +93,7 @@ eclipse {
 	classpath {
 		containers.clear()
 		containers.add 'org.eclipse.jdt.launching.JRE_CONTAINER' +
-				'/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk' + sourceCompatibility
+				'/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre' + sourceCompatibility
 		downloadJavadoc = true
 	}
 }
