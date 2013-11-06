@@ -25,11 +25,16 @@ public class InitTest extends DBTestCase {
 		
 		st.execute("create table testInit (column1 integer)");
 		con.commit();
-		st.execute("insert into testInit (column1) values(12)");
-		ResultSet rs = st.executeQuery("select COLUMN1 from testInit");
-		
-		assertTrue(rs.next());
-		assertEquals(12, rs.getInt(1));
+		try{
+			st.execute("insert into testInit (column1) values(12)");
+			ResultSet rs = st.executeQuery("select COLUMN1 from testInit");
+			
+			assertTrue(rs.next());
+			assertEquals(12, rs.getInt(1));
+		} finally{
+            st.execute("drop table testInit");
+            con.commit();			
+		}
 		
 	}
 }
