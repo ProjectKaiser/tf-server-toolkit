@@ -100,7 +100,7 @@ public class CleanDatabase {
 				            log.trace(String.format("Delete table %s. Excepted, cause: %s", dbName, e.toString()));
 			
 			                // Search for exported foreign keys on table being deleted
-			                ResultSet fkRs = md.getExportedKeys(conn.getCatalog(), null, dbName);
+			                ResultSet fkRs = md.getExportedKeys(conn.getCatalog(), schem, dbName);
 			                String oldFkTab = null, oldFkName = null;
 			                while (fkRs.next()) {
 			                    String fkTab = fkRs.getString("FKTABLE_NAME");
