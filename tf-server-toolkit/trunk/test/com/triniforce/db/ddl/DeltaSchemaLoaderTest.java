@@ -5,6 +5,7 @@
  */
 package com.triniforce.db.ddl;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,6 +31,7 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		Connection con = getConnection();
 		m_as = new ActualStateBL(getConnection());
 		
         DBTables ts = new DBTables();
@@ -60,6 +62,7 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 		
         UpgradeRunner pl = new UpgradeRunner(getConnection(), m_as);
         pl.run(ts.getCommandList());
+        con.commit();
 	}
 	
 	public void test() throws Exception{
