@@ -58,7 +58,7 @@ dependencies {
 	compile(group: 'log4j', name: 'log4j', version: '1.2.16')
 	compile(group: 'net.sourceforge.jtds', name: 'jtds', version: '1.2.4')
 	compile(group: 'org.beanshell', name: 'bsh', version: '2.0b4')
-	compile(group: 'org.dbunit', name: 'dbunit', version: '2.4.8')
+	compile(group: 'org.dbunit', name: 'dbunit', version: '2.4.9')
 	compile(group: 'org.slf4j', name: 'slf4j-api', version: '1.6.1')
 	compile(group: 'net.sf.sojo', name: 'sojo', version: '1.0.0') //NOTE: this is a copy from tflib
 
