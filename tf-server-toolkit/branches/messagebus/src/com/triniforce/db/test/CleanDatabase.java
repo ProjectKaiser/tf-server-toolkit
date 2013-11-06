@@ -59,20 +59,20 @@ public class CleanDatabase {
     public static void run(DBTestCase test, Log log) throws Exception {
 
     		Connection conn = test.reopenConnection();
-	//    	String schem = null;
+	    	String schem = null;
 	    	DbType dbType = DBTestCase.getDbType();
 	    	boolean autoCommmit = conn.getAutoCommit();
 	    	try{
 		        if (dbType.equals(DbType.MSSQL)){
 		            conn.setAutoCommit(true);
-	//	            schem = "dbo";
+		            schem = "dbo";
 		        }
 		        else
 		            conn.setAutoCommit(false);
 		
 		        ActualStateBL as = new ActualStateBL(conn);
 		        Set<String> dbnames = new HashSet<String>(as.getDbTableNames());
-	//	        dbnames.remove(ActualStateBL.ACT_STATE_TABLE);
+		        dbnames.remove(ActualStateBL.ACT_STATE_TABLE);
 	//	        dbnames.remove(as.getDBName(TIndexNames.class.getName()));
 		        conn = test.reopenConnection();
 		        conn.setAutoCommit(false);
@@ -88,14 +88,15 @@ public class CleanDatabase {
 	//	            }
 	//	            else{
 			            
-			            log.trace(String.format("Delete table %s.", dbName));
 			
 			            try {
 			                dropTable(conn, dbName);
+				            log.trace(String.format("Delete table %s. COMPLETED", dbName));
 			            } catch (SQLException e) {
+				            log.trace(String.format("Delete table %s. Excepted, cause: %s", dbName, e.toString()));
 			
 			                // Search for exported foreign keys on table being deleted
-			                ResultSet fkRs = md.getExportedKeys(null, null,dbName);
+			                ResultSet fkRs = md.getExportedKeys(null, schem, dbName);
 			                String oldFkTab = null, oldFkName = null;
 			                while (fkRs.next()) {
 			                    String fkTab = fkRs.getString("FKTABLE_NAME");
@@ -121,8 +122,9 @@ public class CleanDatabase {
 			                }
 			                try{
 			                	dropTable(conn, dbName);
+					            log.trace(String.format("Delete table %s. COMPLETED", dbName));
 			                }catch(SQLException e2){
-			                	log.trace(String.format("Drop table  failed %s.", dbName));
+			                	log.trace(String.format("Drop table  FAILED %s.", dbName));
 	//		                	log.trace("cause", e2);
 			                }
 			                catch(Exception e2){
@@ -140,6 +142,7 @@ public class CleanDatabase {
 	//	            }
 		        }
 	//	        as.flush(conn);
+		        dropTable(conn, ActualStateBL.ACT_STATE_TABLE);
 		        conn.commit();
 	//	        rs.close();
 		        // if database is firebird
@@ -167,6 +170,14 @@ public class CleanDatabase {
         PreparedStatement ps = conn.prepareStatement("DROP TABLE " + dbName);
         ps.execute();
         ps.close();
+        conn.commit();
+        
+        if(!dbName.equals(ActualStateBL.ACT_STATE_TABLE)){
+	        ps = conn.prepareStatement("delete from ACTUAL_TABLE_STATES where DBNAME = \'" + dbName+"\'");
+	        ps.execute();
+	        ps.close();
+	        conn.commit();
+        }
     }
     
     
