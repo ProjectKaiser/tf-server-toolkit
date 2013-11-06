@@ -67,6 +67,11 @@ public class NextId extends TableDef {
     public static final String value = "value";
 	
     public NextId() throws EDBObjectException {
+    	this(NextId.class.getName());
+    }
+
+    public NextId(String name) throws EDBObjectException {
+    	super(name);
         addField(1, FieldDef.createScalarField(value, ColumnType.LONG, true));
         addPrimaryKey(2, "pk", new String[]{"value"});
     }

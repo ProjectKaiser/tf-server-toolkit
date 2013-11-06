@@ -887,24 +887,29 @@ public class UpgradeRunnerTest extends DDLTestCase {
 		st.execute("create table "+dbname+" (f1 integer, f2 varchar(10))");
 		
 		con.commit();
-		
-		PreparedStatement ps = con.prepareStatement(
-				new QInsert(new QTable(dbname).addCol("f1").addCol("f2")).toString());
-		
-		ps.setInt(1, 123);
-		ps.setString(2, "str111");
-		ps.addBatch();
-		ps.setInt(1, 125);
-		ps.setString(2, "str112");
-		ps.addBatch();
-		ps.executeBatch();
-		
-		ps = con.prepareStatement(new QSelect().joinLast(new QTable(dbname).addCol("f2"))
-				.where(new WhereClause().andCompare("", "f1", "=")).toString());
-		ps.setInt(1, 125);
-		ResultSet rs = ps.executeQuery();
-		assertTrue(rs.next());
-		assertEquals("str112", rs.getString(1));
+		try{
+			
+			PreparedStatement ps = con.prepareStatement(
+					new QInsert(new QTable(dbname).addCol("f1").addCol("f2")).toString());
+			
+			ps.setInt(1, 123);
+			ps.setString(2, "str111");
+			ps.addBatch();
+			ps.setInt(1, 125);
+			ps.setString(2, "str112");
+			ps.addBatch();
+			ps.executeBatch();
+			
+			ps = con.prepareStatement(new QSelect().joinLast(new QTable(dbname).addCol("f2"))
+					.where(new WhereClause().andCompare("", "f1", "=")).toString());
+			ps.setInt(1, 125);
+			ResultSet rs = ps.executeQuery();
+			assertTrue(rs.next());
+			assertEquals("str112", rs.getString(1));
+		}finally{
+			st.execute("drop table "+dbname);
+			con.commit();
+		}
 		
 	}
 	
