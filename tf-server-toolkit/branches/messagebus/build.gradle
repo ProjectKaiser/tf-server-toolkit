@@ -9,8 +9,8 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
 
-sourceCompatibility = 1.5
-targetCompatibility = 1.5
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 // Project configuration is used for Maven deploy:
@@ -58,7 +58,7 @@ dependencies {
 	compile(group: 'log4j', name: 'log4j', version: '1.2.16')
 	compile(group: 'net.sourceforge.jtds', name: 'jtds', version: '1.2.4')
 	compile(group: 'org.beanshell', name: 'bsh', version: '2.0b4')
-	compile(group: 'org.dbunit', name: 'dbunit', version: '2.4.8')
+	compile(group: 'org.dbunit', name: 'dbunit', version: '2.4.9')
 	compile(group: 'org.slf4j', name: 'slf4j-api', version: '1.6.1')
 	compile(group: 'net.sf.sojo', name: 'sojo', version: '1.0.0') //NOTE: this is a copy from tflib
 
@@ -93,7 +93,7 @@ eclipse {
 	classpath {
 		containers.clear()
 		containers.add 'org.eclipse.jdt.launching.JRE_CONTAINER' +
-				'/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk' + sourceCompatibility
+				'/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre' + sourceCompatibility
 		downloadJavadoc = true
 	}
 }

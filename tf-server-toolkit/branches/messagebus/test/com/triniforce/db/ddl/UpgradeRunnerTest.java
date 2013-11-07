@@ -906,6 +906,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
 			ResultSet rs = ps.executeQuery();
 			assertTrue(rs.next());
 			assertEquals("str112", rs.getString(1));
+			rs.close();
 		}finally{
 			st.execute("drop table "+dbname);
 			con.commit();

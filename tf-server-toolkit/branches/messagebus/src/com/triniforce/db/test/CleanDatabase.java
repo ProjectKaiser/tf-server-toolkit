@@ -67,6 +67,9 @@ public class CleanDatabase {
 		            conn.setAutoCommit(true);
 		            schem = "dbo";
 		        }
+		        else if(dbType.equals(DbType.DERBY)){
+		        	schem = "APP";
+		        }
 		        else
 		            conn.setAutoCommit(false);
 		
@@ -77,7 +80,8 @@ public class CleanDatabase {
 		        conn = test.reopenConnection();
 		        conn.setAutoCommit(false);
 		        DatabaseMetaData md = conn.getMetaData();
-	//	        conn.commit();
+		        boolean bFail= false;
+				//	        conn.commit();
 	//	        ResultSet rs = md.getTables(conn.getCatalog(), schem, "%",
 	//	                new String[] { "TABLE", "VIEW" });
 		        for (String dbName  : dbnames) {
@@ -96,7 +100,7 @@ public class CleanDatabase {
 				            log.trace(String.format("Delete table %s. Excepted, cause: %s", dbName, e.toString()));
 			
 			                // Search for exported foreign keys on table being deleted
-			                ResultSet fkRs = md.getExportedKeys(null, schem, dbName);
+			                ResultSet fkRs = md.getExportedKeys(conn.getCatalog(), schem, dbName);
 			                String oldFkTab = null, oldFkName = null;
 			                while (fkRs.next()) {
 			                    String fkTab = fkRs.getString("FKTABLE_NAME");
@@ -106,14 +110,16 @@ public class CleanDatabase {
 			                    if (!(fkTab.equals(oldFkTab) && fkName
 			                            .equals(oldFkName))) {
 			                        PreparedStatement ps = null;
+			                        String sql; 
 			                        if (DBTestCase.getDbType().equals(DbType.MYSQL))
-			                            ps = conn
-			                                    .prepareStatement("ALTER TABLE "
+			                            sql = "ALTER TABLE "
 			                                            + fkTab + " DROP FOREIGN KEY "
-			                                            + fkName);
+			                                            + fkName;
 			                        else
-			                            ps = conn.prepareStatement("ALTER TABLE "
-			                                    + fkTab + " DROP CONSTRAINT " + fkName);
+			                            sql = "ALTER TABLE " + fkTab + " DROP CONSTRAINT " + fkName;
+			                        
+			                        log.trace(sql);
+			                        ps = conn.prepareStatement(sql);
 			                        ps.execute();
 			                        ps.close();
 			                    }
@@ -125,6 +131,7 @@ public class CleanDatabase {
 					            log.trace(String.format("Delete table %s. COMPLETED", dbName));
 			                }catch(SQLException e2){
 			                	log.trace(String.format("Drop table  FAILED %s.", dbName));
+			                	bFail = true;
 	//		                	log.trace("cause", e2);
 			                }
 			                catch(Exception e2){
@@ -142,7 +149,9 @@ public class CleanDatabase {
 	//	            }
 		        }
 	//	        as.flush(conn);
-		        dropTable(conn, ActualStateBL.ACT_STATE_TABLE);
+		        if(!bFail){
+			        dropTable(conn, ActualStateBL.ACT_STATE_TABLE);
+		        }
 		        conn.commit();
 	//	        rs.close();
 		        // if database is firebird
