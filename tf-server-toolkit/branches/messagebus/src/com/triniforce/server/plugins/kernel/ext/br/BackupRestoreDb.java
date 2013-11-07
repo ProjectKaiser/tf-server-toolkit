@@ -23,6 +23,8 @@ import org.dbunit.dataset.xml.FlatXmlDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 
+import com.triniforce.db.ddl.UpgradeRunner;
+import com.triniforce.db.ddl.UpgradeRunner.DbType;
 import com.triniforce.db.export.MappedDataSet;
 import com.triniforce.server.plugins.kernel.ep.br.IBackupStorage;
 import com.triniforce.server.plugins.kernel.ep.br.IRestoreStorage;
@@ -61,7 +63,10 @@ public class BackupRestoreDb extends PKEPBackupRestoreEntry{
         try {
             Connection con = pc.getPooledConnection();
             try {
-                IDatabaseConnection srcConnection = new DatabaseConnection(con);
+            	String scheme = null;
+            	if(DbType.MSSQL.equals(UpgradeRunner.getDbType(con)))
+            		scheme = "dbo";
+                IDatabaseConnection srcConnection = new DatabaseConnection(con, scheme);
                 config(srcConnection);
                 IDataSet fullDataSet = srcConnection.createDataSet();
                 File tmpFolder = stg.getTempFolder();
@@ -97,7 +102,10 @@ public class BackupRestoreDb extends PKEPBackupRestoreEntry{
         try {
             Connection con = pc.getPooledConnection();
             try {
-                IDatabaseConnection dstConnection = new DatabaseConnection(con);
+            	String scheme = null;
+            	if(DbType.MSSQL.equals(UpgradeRunner.getDbType(con)))
+            		scheme = "dbo";
+                IDatabaseConnection dstConnection = new DatabaseConnection(con, scheme);
                 config(dstConnection);
                 HashMap<String, String> dbNames = new HashMap<String, String>();
                 {
