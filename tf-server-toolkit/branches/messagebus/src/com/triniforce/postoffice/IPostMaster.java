@@ -9,5 +9,6 @@ import java.util.concurrent.Future;
 
 
 public interface IPostMaster {
-    Future post(Object data);
+    Future post(String addr, Object data);
+    Future post(Class addr, Object data);
 }
