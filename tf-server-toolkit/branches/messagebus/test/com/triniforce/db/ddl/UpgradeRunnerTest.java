@@ -1144,5 +1144,44 @@ public class UpgradeRunnerTest extends DDLTestCase {
 
 		}
 	}
+	
+	public void testRollbackError() throws Exception{
+		Connection con = getConnection();
+		con.createStatement().execute("create table testRollbackError_exist (F0 INT)");
+		try{
+			
+	    	TableDef def1 = new TableDef("testRollbackError");
+	    	def1.setDbName("testRollbackError");
+	    	FieldDef f = FieldDef.createStringField("f1", ColumnType.NVARCHAR, 60, true, null);
+	    	def1.addField(1, f);
+	    	HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
+	   		desired.put(def1.getEntityName(), def1);
+	       	DBTables db = new DBTables(m_as, desired);
+	    	m_player.run(db.getCommandList());
+	
+	    	def1.addField(2, FieldDef.createStringField("f2", ColumnType.NVARCHAR, 60, false, null)); // Field should be rollbacked
+	    	def1.addPrimaryKey(3, "pk", new String[]{"f1"});
+	    	TableDef def2 = new TableDef("testRollbackError_exist");
+	    	def2.setDbName("testRollbackError_exist"); // Table with this name already exists in base
+	    	def2.addField(1, FieldDef.createStringField("f1", ColumnType.NVARCHAR, 60, false, null));
+	    	def2.addForeignKey(2, "fk", new String[]{"f1"}, "testRollbackError", "pk", false);
+
+	    	desired.put(def2.getEntityName(), def2);
+	       	db = new DBTables(m_as, desired);
+	       	try{
+	       		m_player.run(db.getCommandList());
+	       		fail();
+	       	}catch (SQLException  e) {}
+	    	
+	    	try{
+	    		con.createStatement().execute("select f2 from testRollbackError"); // check F2 rollbacked
+	    		fail();
+	    	}catch(SQLException e){}
+	    	
+		} finally{
+			con.createStatement().execute("drop table testRollbackError_exist");
+			con.commit();
+		}
+	}
     
 }
