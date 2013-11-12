@@ -5,22 +5,32 @@
  */ 
 package com.triniforce.postoffice;
 
-import java.util.Collection;
 import java.util.Map;
 
 /**
  * Creates a street with given name on a given path with given boxes
  */
 public class LTRAddStreet {
-    private Collection<String> m_streetPath;
+    private StreetPath m_streetPath;
     private String m_streetName;
-    private Map<String, IPOBox> m_boxes;
+    private POBoxes m_boxes;
 
-    public Collection<String> getStreetPath(){
+    public LTRAddStreet() {
+
+    }
+    
+    public LTRAddStreet(StreetPath streetPath, String streetName, POBoxes boxes) {
+        m_streetPath = streetPath;
+        m_streetName = streetName;
+        m_boxes = boxes;
+
+    }
+    
+    public StreetPath getStreetPath(){
         return m_streetPath;
     }
 
-    public void setStreetPath(Collection<String> streetPath) {
+    public void setStreetPath(StreetPath streetPath) {
         m_streetPath = streetPath;
     }
 
@@ -36,7 +46,7 @@ public class LTRAddStreet {
         return m_boxes;
     }
 
-    public void setBoxes(Map<String, IPOBox> boxes) {
+    public void setBoxes(POBoxes boxes) {
         m_boxes = boxes;
     }
 

@@ -5,16 +5,20 @@
  */ 
 package com.triniforce.postoffice;
 
-import java.util.Collection;
 
 public class LTRDisconnectStreet {
-    private Collection<String> m_streetPath;
+    private StreetPath m_streetPath;
+    
+    public LTRDisconnectStreet(){
+        
+    }
+    
+    public LTRDisconnectStreet(StreetPath streetPath){
+        m_streetPath = streetPath;
+    }
 
-    public Collection<String> getStreetPath() {
+    public StreetPath getStreetPath() {
         return m_streetPath;
     }
 
-    public void setStreetPath(Collection<String> streetPath) {
-        m_streetPath = streetPath;
-    }
 }

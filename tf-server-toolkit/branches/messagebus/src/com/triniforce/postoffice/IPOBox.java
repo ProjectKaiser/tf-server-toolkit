@@ -9,9 +9,9 @@ public interface IPOBox extends IEnvelopeHandler{
     /**
      * Called asynchronously, should return immediately
      */
-    void onShutdown(int intervalMs);
+    void beforeDisconnect(int intervalMs);
     /**
      * Called asynchronously, should return immediately
      */
-    void onStop();
+    void onDisconnect();
 }

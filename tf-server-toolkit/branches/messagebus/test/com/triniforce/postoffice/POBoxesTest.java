@@ -32,12 +32,12 @@ public class POBoxesTest extends TFTestCase {
             
         }
 
-        public void onShutdown(int intervalMs) {
+        public void beforeDisconnect(int intervalMs) {
             // TODO Auto-generated method stub
             
         }
 
-        public void onStop() {
+        public void onDisconnect() {
             // TODO Auto-generated method stub
             
         }
