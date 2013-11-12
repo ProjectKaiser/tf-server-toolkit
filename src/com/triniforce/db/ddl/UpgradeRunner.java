@@ -352,11 +352,12 @@ public class UpgradeRunner {
             	dbName = m_actualState.generateTabName(dbOp.getDBOName());
             String sql = getCreateOperationString(dbName, createOp);
             ApiAlgs.getLog(this).info(dbName + ": "+sql);//$NON-NLS-1$
-            try{
+//            try{
                 m_connection.prepareStatement(sql).execute();
-            } catch (SQLException e){
-                ApiAlgs.rethrowException(e);
-            }
+//            } catch (SQLException e){
+            	
+//            	ApiAlgs.rethrowException(e);
+//            }
             m_actualState.addTable(dbName, dbOp.getDBOName(), createOp
                     .getVersionIncrease());
         } else {
