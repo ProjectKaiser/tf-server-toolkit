@@ -5,6 +5,6 @@
  */ 
 package com.triniforce.postoffice;
 
-public class LTRStart {
+public class LTRStart{
 
 }

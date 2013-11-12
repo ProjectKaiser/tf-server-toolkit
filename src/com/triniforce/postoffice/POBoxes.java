@@ -19,4 +19,5 @@ public class POBoxes extends HashMap<String, IPOBox>{
     void put(IPOBox box){
         put(box.getClass().getName(), box);
     }
+    
 }
