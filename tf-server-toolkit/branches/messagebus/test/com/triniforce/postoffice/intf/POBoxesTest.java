@@ -3,9 +3,14 @@
  * All Rights Reserved.
  *
  */
-package com.triniforce.postoffice.core;
+package com.triniforce.postoffice.intf;
 
 import com.triniforce.db.test.TFTestCase;
+import com.triniforce.postoffice.intf.Envelope;
+import com.triniforce.postoffice.intf.IEnvelopeCtx;
+import com.triniforce.postoffice.intf.IOutbox;
+import com.triniforce.postoffice.intf.IPOBox;
+import com.triniforce.postoffice.intf.POBoxes;
 
 public class POBoxesTest extends TFTestCase {
 
