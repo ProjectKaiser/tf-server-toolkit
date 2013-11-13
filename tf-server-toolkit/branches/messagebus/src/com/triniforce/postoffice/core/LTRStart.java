@@ -3,8 +3,8 @@
  * All Rights Reserved.
  *
  */ 
-package com.triniforce.postoffice;
+package com.triniforce.postoffice.core;
 
-public interface INamedPOBox {
+public class LTRStart{
 
 }

@@ -3,7 +3,7 @@
  * All Rights Reserved.
  *
  */
-package com.triniforce.postoffice;
+package com.triniforce.postoffice.core;
 
 import com.triniforce.db.test.TFTestCase;
 
