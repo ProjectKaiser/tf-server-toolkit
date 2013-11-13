@@ -6,24 +6,20 @@
 package com.triniforce.postoffice.intf;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
-public class StreetPath {
+public class StreetPath extends ArrayList<String>{
     
-    Collection<String> m_path = new ArrayList<String>();
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    public StreetPath() {
+    }
     
     public StreetPath(String... names) {
         for (String name: names){
-            m_path.add(name);
+            add(name);
         }
     }
-    
-    public StreetPath(Collection<String> names) {
-        m_path = names;
-    }
-    
-    Collection<String> getPath(){
-        return m_path;
-    }
-    
 }

@@ -19,6 +19,11 @@ public class LTRAddStreet {
 
     }
     
+    /**
+     * @param streetPath null means root
+     * @param streetName
+     * @param boxes null means no boxes
+     */
     public LTRAddStreet(StreetPath streetPath, String streetName, POBoxes boxes) {
         m_streetPath = streetPath;
         m_streetName = streetName;
