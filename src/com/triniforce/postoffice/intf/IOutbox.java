@@ -3,7 +3,7 @@
  * All Rights Reserved.
  *
  */ 
-package com.triniforce.postoffice.core;
+package com.triniforce.postoffice.intf;
 
 public interface IOutbox {
     
