@@ -5,56 +5,47 @@
  */ 
 package com.triniforce.postoffice.impl;
 
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
-import com.triniforce.postoffice.intf.IEnvelopeHandler;
 import com.triniforce.postoffice.intf.IPostMaster;
+import com.triniforce.postoffice.intf.LTRGetStreets;
 import com.triniforce.postoffice.intf.StreetPath;
 
 public class PostMaster implements IPostMaster{
     
+    Streets m_rootStreets = new Streets();
+    ExecutorService m_es;
     
-    protected class PostTask implements Runnable{
-        private final Object m_data;
-        private final IEnvelopeHandler m_replyHandler;
-        private final StreetPath m_streetPath;
-        private final String m_box;
-
-        public PostTask(StreetPath streetPath, String box, Object data, IEnvelopeHandler replyHandler) {
-            m_streetPath = streetPath;
-            m_box = box;
-            m_data = data;
-            m_replyHandler = replyHandler;
-        }
-
-
-        public Object getData() {
-            return m_data;
-        }
-
-        public IEnvelopeHandler getReplyHandler() {
-            return m_replyHandler;
-        }
-
-        public void run(){
-            
-        }
-        public StreetPath getStreetPath() {
-            return m_streetPath;
-        }
-        public String getBox() {
-            return m_box;
-        }
-        
+    
+    public PostMaster() {
+        m_es = Executors.newFixedThreadPool(20);
     }
-    
+    public PostMaster(ExecutorService es) {
+        m_es = es;
+    }
     
     public Future post(StreetPath streetPath, String box, Object data){
-        return null;
+        PostTask ft = new PostTask(this, null, streetPath, box, data, null);
+        return m_es.submit(ft);
     }
 
-    public Future post(StreetPath streetPath, Class addr, Object data) {
-        return post(streetPath, addr.getName(), data);
+    Object process(Object data){
+        Object res = null;
+        if( data instanceof LTRGetStreets){
+            res = new ArrayList<String>(m_rootStreets.keySet());
+        }
+        return res;
+    }
+    public void stop(int waitMilliseconds) {
+        m_es.shutdown();
+        try{
+            m_es.awaitTermination(waitMilliseconds, TimeUnit.MILLISECONDS);
+        }catch(Exception e){
+        }
     }
 
 }
