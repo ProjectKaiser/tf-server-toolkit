@@ -3,7 +3,7 @@
  * All Rights Reserved.
  *
  */ 
-package com.triniforce.postoffice.intf;
+package com.triniforce.postoffice.impl;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

@@ -3,9 +3,13 @@
  * All Rights Reserved.
  *
  */ 
-package com.triniforce.postoffice.intf;
+package com.triniforce.postoffice.impl;
 
 import java.util.concurrent.Future;
+
+import com.triniforce.postoffice.intf.IEnvelopeHandler;
+import com.triniforce.postoffice.intf.IPostMaster;
+import com.triniforce.postoffice.intf.StreetPath;
 
 public class PostMaster implements IPostMaster{
     
