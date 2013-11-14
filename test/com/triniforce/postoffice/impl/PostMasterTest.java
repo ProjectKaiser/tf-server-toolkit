@@ -16,6 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.postoffice.intf.IPostMaster;
+import com.triniforce.postoffice.intf.LTRAddStreet;
 import com.triniforce.postoffice.intf.LTRGetStreets;
 
 public class PostMasterTest extends TFTestCase {
@@ -46,9 +47,28 @@ public class PostMasterTest extends TFTestCase {
         
         //add empty street
         {
-            Future f = pm.post(null, null, new LTRGetStreets());
-            List<String> res = (List<String>) f.get();
-            assertEquals(0, res.size());
+            
+            //add street1
+            
+            assertNull(pm.post(null, null, new LTRAddStreet(null, "street1", null)).get());
+            
+            List<String> res = (List<String>) pm.post(null, null, new LTRGetStreets()).get();
+            assertEquals(1, res.size());
+            assertTrue(res.contains("street1"));
+            
+            //add street2
+            
+            assertNull(pm.post(null, null, new LTRAddStreet(null, "street2", null)).get());
+            
+            List<String> res2 = (List<String>) pm.post(null, null, new LTRGetStreets()).get();
+            assertEquals(2, res2.size());
+            assertTrue(res2.contains("street1"));
+            assertTrue(res2.contains("street2"));
+            
+            //first result should not be changes since its a copy
+            assertEquals(1, res.size());
+            assertTrue(res.contains("street1"));            
+            
         }
         
     }

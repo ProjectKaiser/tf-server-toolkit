@@ -34,7 +34,7 @@ public class PostTask implements Callable{
         EnvelopeCtx ctx = new EnvelopeCtx(new Envelope(m_sender, m_replyHandler));
         
         if(null == m_streetPath){
-            return m_pm.process(m_data);
+            return m_pm.process(ctx, m_data);
         }
         
         return null;

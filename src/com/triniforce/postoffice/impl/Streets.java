@@ -11,15 +11,19 @@ import com.triniforce.postoffice.intf.StreetPath;
 
 public class Streets extends ConcurrentHashMap<String, Street> {
     private static final long serialVersionUID = 1L;
-    public Street queryByPath(StreetPath streetPath){
+    /**
+     * @param path
+     * @return null if not found
+     */
+    public Street queryPath(StreetPath path){
         Street res = null;
         Streets streets = this;
-        for(String street: streetPath){
+        for(String street: path){
             res = streets.get(street);
             if(null == res){
                 return null;
             }
-            streets = res.getChilds();
+            streets = res.getStreets();
         }
         return res;
     }

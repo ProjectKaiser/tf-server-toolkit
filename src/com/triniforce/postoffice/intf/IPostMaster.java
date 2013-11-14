@@ -9,6 +9,9 @@ import java.util.concurrent.Future;
 
 
 public interface IPostMaster {
+    
+    public static final String ROOT_STREET = "root"; 
+    
     Future post(StreetPath streetPath, String box, Object data);
     void stop(int waitMilliseconds);
 }
