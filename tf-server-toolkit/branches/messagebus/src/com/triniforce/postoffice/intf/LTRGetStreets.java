@@ -5,10 +5,12 @@
  */ 
 package com.triniforce.postoffice.intf;
 
+import java.util.List;
+
 /**
  * Expects copy of street names in List<String>  
  */
-public class LTRGetStreets {
+public class LTRGetStreets extends LTRGet<List<String>>{
     private StreetPath m_streetPath;
     public LTRGetStreets(){
     }

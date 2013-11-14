@@ -5,7 +5,6 @@
  */ 
 package com.triniforce.postoffice.intf;
 
-import java.util.Map;
 
 /**
  * Creates a street with given name on a given path with given boxes
@@ -47,7 +46,7 @@ public class LTRAddStreet {
         m_streetName = streetName;
     }
 
-    public Map<String, IPOBox> getBoxes() {
+    public POBoxes getBoxes() {
         return m_boxes;
     }
 

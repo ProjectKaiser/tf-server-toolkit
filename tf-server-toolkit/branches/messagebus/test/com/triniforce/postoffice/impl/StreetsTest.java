@@ -15,9 +15,9 @@ public class StreetsTest extends TFTestCase {
         //empty
         {
             Streets sts = new Streets();
-            assertNull(sts.queryByPath(new StreetPath()));
-            assertNull(sts.queryByPath(new StreetPath("")));
-            assertNull(sts.queryByPath(new StreetPath("q", "qqq")));
+            assertNull(sts.queryPath(new StreetPath()));
+            assertNull(sts.queryPath(new StreetPath("")));
+            assertNull(sts.queryPath(new StreetPath("q", "qqq")));
         }
         
         //one level
@@ -25,9 +25,9 @@ public class StreetsTest extends TFTestCase {
             Streets sts = new Streets();
             Street root = new Street();
             sts.put("root", root);
-            assertNull(sts.queryByPath(new StreetPath()));
-            assertSame(root, sts.queryByPath(new StreetPath("root")));
-            assertNull(sts.queryByPath(new StreetPath("root1")));
+            assertNull(sts.queryPath(new StreetPath()));
+            assertSame(root, sts.queryPath(new StreetPath("root")));
+            assertNull(sts.queryPath(new StreetPath("root1")));
         }
         //few levels
         {
@@ -36,16 +36,16 @@ public class StreetsTest extends TFTestCase {
             Street st11 = new Street();
             Street st12 = new Street();
             Street st121 = new Street();
-            root.getChilds().put("st11", st11);
-            root.getChilds().put("st12", st12);
-            st12.getChilds().put("st121", st121);
+            root.getStreets().put("st11", st11);
+            root.getStreets().put("st12", st12);
+            st12.getStreets().put("st121", st121);
             sts.put("root", root);
-            assertNull(sts.queryByPath(new StreetPath()));
-            assertSame(root, sts.queryByPath(new StreetPath("root")));
-            assertNull(sts.queryByPath(new StreetPath("root1")));
-            assertSame(st11, sts.queryByPath(new StreetPath("root", "st11")));
-            assertSame(st12, sts.queryByPath(new StreetPath("root", "st12")));
-            assertSame(st121, sts.queryByPath(new StreetPath("root", "st12", "st121")));
+            assertNull(sts.queryPath(new StreetPath()));
+            assertSame(root, sts.queryPath(new StreetPath("root")));
+            assertNull(sts.queryPath(new StreetPath("root1")));
+            assertSame(st11, sts.queryPath(new StreetPath("root", "st11")));
+            assertSame(st12, sts.queryPath(new StreetPath("root", "st12")));
+            assertSame(st121, sts.queryPath(new StreetPath("root", "st12", "st121")));
         }
 
 

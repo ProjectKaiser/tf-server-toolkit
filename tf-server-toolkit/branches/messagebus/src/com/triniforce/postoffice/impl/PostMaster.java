@@ -12,20 +12,23 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.triniforce.postoffice.intf.IPostMaster;
+import com.triniforce.postoffice.intf.LTRAddStreet;
 import com.triniforce.postoffice.intf.LTRGetStreets;
 import com.triniforce.postoffice.intf.StreetPath;
 
 public class PostMaster implements IPostMaster{
     
     Streets m_rootStreets = new Streets();
+    Street m_rootStreet = new Street();
     ExecutorService m_es;
     
     
     public PostMaster() {
-        m_es = Executors.newFixedThreadPool(20);
+        this(Executors.newFixedThreadPool(20));
     }
     public PostMaster(ExecutorService es) {
         m_es = es;
+        m_rootStreets.put(IPostMaster.ROOT_STREET, m_rootStreet);
     }
     
     public Future post(StreetPath streetPath, String box, Object data){
@@ -33,10 +36,31 @@ public class PostMaster implements IPostMaster{
         return m_es.submit(ft);
     }
 
-    Object process(Object data){
+    
+    Object process(EnvelopeCtx ctx, Object data){
         Object res = null;
         if( data instanceof LTRGetStreets){
-            res = new ArrayList<String>(m_rootStreets.keySet());
+            LTRGetStreets cmd = (LTRGetStreets) data;
+            Street ws = m_rootStreet.queryPath(cmd.getStreetPath());
+            res = new ArrayList<String>(ws.getStreets().keySet());
+
+        }
+        if( data instanceof LTRAddStreet){
+            LTRAddStreet cmd = (LTRAddStreet) data;
+            
+            cmd.getStreetPath();
+            
+            Street ws = m_rootStreet;
+            
+            Street parentStreet = ws.queryPath(cmd.getStreetPath());
+            if(null == parentStreet){
+                return null;
+            }
+            
+            Street newStreet = new Street(cmd.getBoxes());
+            
+            parentStreet.getStreets().put(cmd.getStreetName(), newStreet);
+            
         }
         return res;
     }
