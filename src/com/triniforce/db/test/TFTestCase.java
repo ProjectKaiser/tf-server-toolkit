@@ -220,6 +220,8 @@ public class TFTestCase extends TestCase {
     public static BasicDataSource DATA_SOURCE = null;
     
     static boolean bInitLogFile = true;
+    public static boolean bWriteToInitLogFile = true;
+    
     static File TEST_LOG_FILE = null;
 
     public static String getTestPropFile() {
@@ -270,7 +272,7 @@ public class TFTestCase extends TestCase {
         Thread.currentThread().setName(this.getClass().getSimpleName());
         
         File testLog;
-        if(null != (testLog = getTestsLogFile())){
+        if(bWriteToInitLogFile &&  null != (testLog = getTestsLogFile())){
         	FileOutputStream out = new FileOutputStream(testLog, true);
         	out.write(String.format("%s %s\n", getClass().getName(), getName()).getBytes("utf-8"));
         	out.flush();
