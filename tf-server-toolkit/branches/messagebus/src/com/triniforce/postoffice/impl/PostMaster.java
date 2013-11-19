@@ -71,5 +71,13 @@ public class PostMaster implements IPostMaster{
         }catch(Exception e){
         }
     }
+    @SuppressWarnings("unchecked")
+    public <T> T call(StreetPath streetPath, String box, Object data) {
+        try {
+            return (T)post(streetPath, box, data).get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

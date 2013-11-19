@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -40,8 +39,7 @@ public class PostMasterTest extends TFTestCase {
 
         //empty root
         {
-            Future f = pm.post(null, null, new LTRGetStreets());
-            List<String> res = (List<String>) f.get();
+            List<String> res = pm.call(null, null, new LTRGetStreets());
             assertEquals(0, res.size());
         }
         
@@ -50,17 +48,17 @@ public class PostMasterTest extends TFTestCase {
             
             //add street1
             
-            assertNull(pm.post(null, null, new LTRAddStreet(null, "street1", null)).get());
+            assertNull(pm.call(null, null, new LTRAddStreet(null, "street1", null)));
             
-            List<String> res = (List<String>) pm.post(null, null, new LTRGetStreets()).get();
+            List<String> res = pm.call(null, null, new LTRGetStreets());
             assertEquals(1, res.size());
             assertTrue(res.contains("street1"));
             
             //add street2
             
-            assertNull(pm.post(null, null, new LTRAddStreet(null, "street2", null)).get());
+            assertNull(pm.call(null, null, new LTRAddStreet(null, "street2", null)));
             
-            List<String> res2 = (List<String>) pm.post(null, null, new LTRGetStreets()).get();
+            List<String> res2 = (List<String>) pm.call(null, null, new LTRGetStreets());
             assertEquals(2, res2.size());
             assertTrue(res2.contains("street1"));
             assertTrue(res2.contains("street2"));
