@@ -82,6 +82,16 @@ public class CleanDatabase {
 		        DatabaseMetaData md = conn.getMetaData();
 		        boolean bFail= false;
 				//	        conn.commit();
+		        //Drop Views 
+				ResultSet rs = md.getTables(conn.getCatalog(), schem, "%",
+						new String[] { "VIEW" });
+				while (rs.next()) {
+					String dbName = rs.getString("TABLE_NAME");
+					log.trace(String.format("Delete view %s.", dbName));
+					conn.createStatement().execute("DROP VIEW " + dbName);
+				}
+				conn.commit();
+		        
 	//	        ResultSet rs = md.getTables(conn.getCatalog(), schem, "%",
 	//	                new String[] { "TABLE", "VIEW" });
 		        for (String dbName  : dbnames) {
