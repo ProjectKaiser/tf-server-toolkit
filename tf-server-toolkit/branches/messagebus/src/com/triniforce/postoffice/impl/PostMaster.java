@@ -6,6 +6,9 @@
 package com.triniforce.postoffice.impl;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -18,9 +21,14 @@ import com.triniforce.postoffice.intf.StreetPath;
 
 public class PostMaster implements IPostMaster{
     
-    Streets m_rootStreets = new Streets();
+    NamedStreets m_rootStreets = new NamedStreets();
     Street m_rootStreet = new Street();
     ExecutorService m_es;
+    
+    /**
+     *  UUID to POBoxWrapper
+     */
+    Map<UUID, POBoxWrapper> m_boxWrappers = new ConcurrentHashMap();
     
     
     public PostMaster() {
@@ -46,21 +54,7 @@ public class PostMaster implements IPostMaster{
 
         }
         if( data instanceof LTRAddStreet){
-            LTRAddStreet cmd = (LTRAddStreet) data;
-            
-            cmd.getStreetPath();
-            
-            Street ws = m_rootStreet;
-            
-            Street parentStreet = ws.queryPath(cmd.getStreetPath());
-            if(null == parentStreet){
-                return null;
-            }
-            
-            Street newStreet = new Street(cmd.getBoxes());
-            
-            parentStreet.getStreets().put(cmd.getStreetName(), newStreet);
-            
+            return LTRAddStreet_handler.process(this, ctx, data);
         }
         return res;
     }

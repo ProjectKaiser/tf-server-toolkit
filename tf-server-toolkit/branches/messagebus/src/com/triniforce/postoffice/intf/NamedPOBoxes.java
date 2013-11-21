@@ -8,9 +8,9 @@ package com.triniforce.postoffice.intf;
 import java.util.HashMap;
 
 /**
- * Puts POBox to a map using class name as a key
+ * Purpose is to put a POBox to a map using class name as a key
  */
-public class POBoxes extends HashMap<String, IPOBox>{
+public class NamedPOBoxes extends HashMap<String, IPOBox>{
     private static final long serialVersionUID = 1L;
 
     /**

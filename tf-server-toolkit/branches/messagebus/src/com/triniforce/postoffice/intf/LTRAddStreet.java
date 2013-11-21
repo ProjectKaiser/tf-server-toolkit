@@ -12,7 +12,7 @@ package com.triniforce.postoffice.intf;
 public class LTRAddStreet {
     private StreetPath m_streetPath;
     private String m_streetName;
-    private POBoxes m_boxes;
+    private NamedPOBoxes m_boxes;
 
     public LTRAddStreet() {
 
@@ -23,7 +23,7 @@ public class LTRAddStreet {
      * @param streetName
      * @param boxes null means no boxes
      */
-    public LTRAddStreet(StreetPath streetPath, String streetName, POBoxes boxes) {
+    public LTRAddStreet(StreetPath streetPath, String streetName, NamedPOBoxes boxes) {
         m_streetPath = streetPath;
         m_streetName = streetName;
         m_boxes = boxes;
@@ -46,11 +46,11 @@ public class LTRAddStreet {
         m_streetName = streetName;
     }
 
-    public POBoxes getBoxes() {
+    public NamedPOBoxes getBoxes() {
         return m_boxes;
     }
 
-    public void setBoxes(POBoxes boxes) {
+    public void setBoxes(NamedPOBoxes boxes) {
         m_boxes = boxes;
     }
 

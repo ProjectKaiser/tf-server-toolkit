@@ -10,9 +10,9 @@ import com.triniforce.postoffice.intf.Envelope;
 import com.triniforce.postoffice.intf.IEnvelopeCtx;
 import com.triniforce.postoffice.intf.IOutbox;
 import com.triniforce.postoffice.intf.IPOBox;
-import com.triniforce.postoffice.intf.POBoxes;
+import com.triniforce.postoffice.intf.NamedPOBoxes;
 
-public class POBoxesTest extends TFTestCase {
+public class NamedPOBoxesTest extends TFTestCase {
 
     static class MyPOBox implements IPOBox {
         public void process(Envelope env, Object data, IOutbox out) {
@@ -50,7 +50,7 @@ public class POBoxesTest extends TFTestCase {
 
     @Override
     public void test() throws Exception {
-        POBoxes boxes = new POBoxes();
+        NamedPOBoxes boxes = new NamedPOBoxes();
         IPOBox box1 = new MyPOBox();
         IPOBox box2 = new MyPOBox();
         boxes.put("box1", box1);

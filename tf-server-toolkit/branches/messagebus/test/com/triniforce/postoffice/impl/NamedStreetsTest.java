@@ -8,13 +8,13 @@ package com.triniforce.postoffice.impl;
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.postoffice.intf.StreetPath;
 
-public class StreetsTest extends TFTestCase {
+public class NamedStreetsTest extends TFTestCase {
     
     @Override
     public void test() throws Exception {
         //empty
         {
-            Streets sts = new Streets();
+            NamedStreets sts = new NamedStreets();
             assertNull(sts.queryPath(new StreetPath()));
             assertNull(sts.queryPath(new StreetPath("")));
             assertNull(sts.queryPath(new StreetPath("q", "qqq")));
@@ -22,7 +22,7 @@ public class StreetsTest extends TFTestCase {
         
         //one level
         {
-            Streets sts = new Streets();
+            NamedStreets sts = new NamedStreets();
             Street root = new Street();
             sts.put("root", root);
             assertNull(sts.queryPath(new StreetPath()));
@@ -31,7 +31,7 @@ public class StreetsTest extends TFTestCase {
         }
         //few levels
         {
-            Streets sts = new Streets();
+            NamedStreets sts = new NamedStreets();
             Street root = new Street();
             Street st11 = new Street();
             Street st12 = new Street();
