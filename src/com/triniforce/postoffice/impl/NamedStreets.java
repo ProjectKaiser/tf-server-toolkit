@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.triniforce.postoffice.intf.StreetPath;
 
-public class Streets extends ConcurrentHashMap<String, Street> {
+public class NamedStreets extends ConcurrentHashMap<String, Street> {
     private static final long serialVersionUID = 1L;
     /**
      * @param path
@@ -17,7 +17,7 @@ public class Streets extends ConcurrentHashMap<String, Street> {
      */
     public Street queryPath(StreetPath path){
         Street res = null;
-        Streets streets = this;
+        NamedStreets streets = this;
         for(String street: path){
             res = streets.get(street);
             if(null == res){

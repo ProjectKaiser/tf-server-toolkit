@@ -24,5 +24,5 @@ public abstract class OutboxItem {
     public IEnvelopeHandler getReplyHandler() {
         return m_replyHandler;
     }
-
+    
 }

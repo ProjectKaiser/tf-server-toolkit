@@ -8,11 +8,11 @@ package com.triniforce.postoffice.impl;
 import com.triniforce.postoffice.intf.Envelope;
 import com.triniforce.postoffice.intf.IEnvelopeHandler;
 
-public class OutboxItemReturn extends OutboxItem {
+public class OutboxItemReply extends OutboxItem {
 
     private final Envelope m_envelope;
 
-    public OutboxItemReturn(Envelope envelope, Object data, IEnvelopeHandler replyHandler) {
+    public OutboxItemReply(Envelope envelope, Object data, IEnvelopeHandler replyHandler) {
         super(data, replyHandler);
         // TODO Auto-generated constructor stub
         m_envelope = envelope;
