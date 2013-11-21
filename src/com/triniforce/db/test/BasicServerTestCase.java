@@ -148,19 +148,24 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
 
     protected void setUp() throws Exception {
         super.setUp();
-        m_startNumActive = getPool().m_ds.getNumActive();        
-
-        m_coreApi = new Api();
-
-        setCoreApiInteraces(m_coreApi);
-        
-        m_server = createServer(m_coreApi, getPlugins());
-        m_server.doRegistration();
-        if(m_server.isDbModificationNeeded()){
-            m_wasDbModificationNeeded = true;
-        	m_server.doDbModification();
-        }
-        m_server.init();
+        try{
+	        m_startNumActive = getPool().m_ds.getNumActive();        
+	
+	        m_coreApi = new Api();
+	
+	        setCoreApiInteraces(m_coreApi);
+	        
+	        m_server = createServer(m_coreApi, getPlugins());
+	        m_server.doRegistration();
+	        if(m_server.isDbModificationNeeded()){
+	            m_wasDbModificationNeeded = true;
+	        	m_server.doDbModification();
+	        }
+	        m_server.init();
+        } catch (Exception e) {
+			super.tearDown();
+			throw e;
+		}
     }
 
     protected BasicServer createServer(Api api, List<IPlugin> plugins) throws Exception {
