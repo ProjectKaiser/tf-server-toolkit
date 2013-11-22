@@ -54,7 +54,7 @@ public class NamedPOBoxesTest extends TFTestCase {
         IPOBox box1 = new MyPOBox();
         IPOBox box2 = new MyPOBox();
         boxes.put("box1", box1);
-        boxes.put(box2);
+        boxes.putByClass(box2);
         assertSame(box1, boxes.get("box1"));
         assertSame(box2, boxes.get(box2.getClass().getName()));
     }
