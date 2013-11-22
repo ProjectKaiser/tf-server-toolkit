@@ -11,12 +11,16 @@ import com.triniforce.postoffice.intf.IPOBox;
 
 public class POBoxWrapper {
     
-    private UUID m_uuid;
+    final private UUID m_uuid;
     
-    private final IPOBox m_box;
+    final private IPOBox m_box;
+    
+    final private Street m_parent;
 
-    public POBoxWrapper(IPOBox box) {
+    public POBoxWrapper(Street parent, IPOBox box, UUID uuid) {
         m_box = box;
+        m_parent = parent;
+        m_uuid = uuid;
 
     }
 
@@ -28,8 +32,8 @@ public class POBoxWrapper {
         return m_uuid;
     }
 
-    public void setUuid(UUID uuid) {
-        m_uuid = uuid;
+    public Street getParent() {
+        return m_parent;
     }
 
 }

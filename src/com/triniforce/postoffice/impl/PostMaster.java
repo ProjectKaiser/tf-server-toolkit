@@ -15,8 +15,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.triniforce.postoffice.intf.IPostMaster;
-import com.triniforce.postoffice.intf.LTRAddStreet;
-import com.triniforce.postoffice.intf.LTRGetStreets;
+import com.triniforce.postoffice.intf.LTRAddStreetOrBoxes;
+import com.triniforce.postoffice.intf.LTRListBoxes;
+import com.triniforce.postoffice.intf.LTRListStreets;
 import com.triniforce.postoffice.intf.StreetPath;
 
 public class PostMaster implements IPostMaster{
@@ -45,19 +46,23 @@ public class PostMaster implements IPostMaster{
     }
 
     
-    Object process(EnvelopeCtx ctx, Object data){
+    Object dispatch(EnvelopeCtx ctx, Object data){
         Object res = null;
-        if( data instanceof LTRGetStreets){
-            LTRGetStreets cmd = (LTRGetStreets) data;
+        if( data instanceof LTRListStreets){
+            LTRListStreets cmd = (LTRListStreets) data;
             Street ws = m_rootStreet.queryPath(cmd.getStreetPath());
             res = new ArrayList<String>(ws.getStreets().keySet());
 
         }
-        if( data instanceof LTRAddStreet){
-            return LTRAddStreet_handler.process(this, ctx, data);
+        if( data instanceof LTRAddStreetOrBoxes){
+            return LTRAddStreetOrBoxes_handler.process(this, ctx, data);
+        }
+        if( data instanceof LTRListBoxes){
+            return LTRListBoxes_handler.process(this, ctx, data);
         }
         return res;
     }
+    
     public void stop(int waitMilliseconds) {
         m_es.shutdown();
         try{

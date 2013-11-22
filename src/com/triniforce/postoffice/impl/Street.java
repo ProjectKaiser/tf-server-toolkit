@@ -5,36 +5,27 @@
  */ 
 package com.triniforce.postoffice.impl;
 
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.triniforce.postoffice.intf.NamedPOBoxes;
 import com.triniforce.postoffice.intf.StreetPath;
 
 public class Street {
-    private Street m_parent;
-    private NamedStreets m_streets = new NamedStreets();
-    private NamedPOBoxWrappers m_boxes = new NamedPOBoxWrappers();
+    final private Street m_parent;
+    final private NamedStreets m_streets = new NamedStreets();
+    final private NamedPOBoxWrappers m_boxes = new NamedPOBoxWrappers();
 
-    
-    public Street(){
+    public Street() {
+        this(null);
     }
     
-    public Street(NamedPOBoxes boxes) {
-        if(null == boxes){
-            return;
-        }
-        for(String key: boxes.keySet()){
-            m_boxes.put(key,  new POBoxWrapper(boxes.get(key)));
-        }
+    
+    public Street(Street parent) {
+        m_parent = parent;
+        
     }
     
     public NamedStreets getStreets() {
         return m_streets;
     }
 
-    public void setChilds(NamedStreets childs) {
-        m_streets = childs;
-    }
     
     /**
      * @param path null or empty means this
@@ -52,16 +43,12 @@ public class Street {
         
     }
 
-    public ConcurrentHashMap<String, POBoxWrapper> getBoxes() {
+    public NamedPOBoxWrappers getBoxes(){
         return m_boxes;
     }
 
     public Street getParent() {
         return m_parent;
-    }
-
-    public void setParent(Street parent) {
-        m_parent = parent;
     }
 
 }

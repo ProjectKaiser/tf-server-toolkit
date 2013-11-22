@@ -16,7 +16,7 @@ public class NamedPOBoxes extends HashMap<String, IPOBox>{
     /**
      *  Puts POBox to a map using class name as a key
      */
-    void put(IPOBox box){
+    public void putByClass(IPOBox box){
         put(box.getClass().getName(), box);
     }
     

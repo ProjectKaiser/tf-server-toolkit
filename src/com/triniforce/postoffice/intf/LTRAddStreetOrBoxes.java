@@ -7,14 +7,18 @@ package com.triniforce.postoffice.intf;
 
 
 /**
- * Creates a street with given name on a given path with given boxes
+ * 
+ * If m_streetName is not null, creates a street with given name on a given path with given boxes.
+ * If m_streeName is null, adds boxes to given street.
+ * 
  */
-public class LTRAddStreet {
+public class LTRAddStreetOrBoxes {
+    
     private StreetPath m_streetPath;
-    private String m_streetName;
+    private String m_newStreetName;
     private NamedPOBoxes m_boxes;
 
-    public LTRAddStreet() {
+    public LTRAddStreetOrBoxes() {
 
     }
     
@@ -23,9 +27,9 @@ public class LTRAddStreet {
      * @param streetName
      * @param boxes null means no boxes
      */
-    public LTRAddStreet(StreetPath streetPath, String streetName, NamedPOBoxes boxes) {
+    public LTRAddStreetOrBoxes(StreetPath streetPath, String streetName, NamedPOBoxes boxes) {
         m_streetPath = streetPath;
-        m_streetName = streetName;
+        m_newStreetName = streetName;
         m_boxes = boxes;
 
     }
@@ -38,12 +42,12 @@ public class LTRAddStreet {
         m_streetPath = streetPath;
     }
 
-    public String getStreetName() {
-        return m_streetName;
+    public String getNewStreetName() {
+        return m_newStreetName;
     }
 
-    public void setStreetName(String streetName) {
-        m_streetName = streetName;
+    public void setNewStreetName(String streetName) {
+        m_newStreetName = streetName;
     }
 
     public NamedPOBoxes getBoxes() {
