@@ -21,4 +21,7 @@ public class TestPOBox implements IPOBox{
     public void onDisconnect() {
     }
 
+    public void priorProcess(IOutbox out) {
+    }
+
 }

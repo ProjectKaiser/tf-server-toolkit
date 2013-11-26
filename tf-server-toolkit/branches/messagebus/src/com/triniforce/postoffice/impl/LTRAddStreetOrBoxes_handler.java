@@ -44,6 +44,7 @@ public class LTRAddStreetOrBoxes_handler{
 
         //Initialize boxes
         {
+            //Outbox ob = new Outbox();
             
         }
         

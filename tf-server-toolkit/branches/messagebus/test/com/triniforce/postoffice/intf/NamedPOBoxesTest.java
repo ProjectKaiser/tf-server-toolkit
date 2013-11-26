@@ -6,45 +6,24 @@
 package com.triniforce.postoffice.intf;
 
 import com.triniforce.db.test.TFTestCase;
-import com.triniforce.postoffice.intf.Envelope;
-import com.triniforce.postoffice.intf.IEnvelopeCtx;
-import com.triniforce.postoffice.intf.IOutbox;
-import com.triniforce.postoffice.intf.IPOBox;
-import com.triniforce.postoffice.intf.NamedPOBoxes;
 
 public class NamedPOBoxesTest extends TFTestCase {
 
     static class MyPOBox implements IPOBox {
-        public void process(Envelope env, Object data, IOutbox out) {
-        }
-
-        public void processShutdown(Envelope env, Object data, IOutbox out) {
-        }
-
-        public void shutdown(int pauseMs) {
-            
-        }
-
-        public void connect() {
-            
-        }
-
-        public void disconnect() {
-        }
 
         public void process(IEnvelopeCtx ctx, Object data, IOutbox out) {
-            // TODO Auto-generated method stub
             
         }
 
         public void beforeDisconnect(int intervalMs) {
-            // TODO Auto-generated method stub
             
         }
 
         public void onDisconnect() {
-            // TODO Auto-generated method stub
             
+        }
+
+        public void priorProcess(IOutbox out) {
         }
     }
 
