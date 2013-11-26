@@ -20,23 +20,30 @@ public class PostTask implements Callable{
     private final String m_box;
     private final PostMaster m_pm;
     private final UUID m_sender;
+    private final IEnvelopeHandler m_targetHandler;
 
-    public PostTask(PostMaster pm, UUID sender, StreetPath streetPath, String box, Object data, IEnvelopeHandler replyHandler) {
+    public PostTask(PostMaster pm, UUID sender, IEnvelopeHandler replyHandler, StreetPath targetStreetPath, String targetBox, Object data, IEnvelopeHandler targetHandler){
         m_pm = pm;
         m_sender = sender;
-        m_streetPath = streetPath;
-        m_box = box;
+        m_streetPath = targetStreetPath;
+        m_box = targetBox;
         m_data = data;
         m_replyHandler = replyHandler;
+        m_targetHandler = targetHandler;
     }
     public Object call(){
         
         EnvelopeCtx ctx = new EnvelopeCtx(new Envelope(m_sender, m_replyHandler));
+
+        Outboxes outs = new Outboxes();
+        Object res = null;
         
         if(null == m_streetPath){
-            return m_pm.dispatch(ctx, m_data);
+            res =  m_pm.process(ctx, m_data, outs);
+        }else{
+            
         }
         
-        return null;
+        return res;
     }
 }
