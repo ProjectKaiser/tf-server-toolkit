@@ -49,15 +49,16 @@ public class LTRAddStreetOrBoxes_handlerTest extends TestCase {
             NamedPOBoxes nboxes3 = new NamedPOBoxes();
             nboxes3.putByClass(new Box3());
             
-            pm.call(null, null, new LTRAddStreetOrBoxes(null, "street1", nboxes3));
+            pm.call(null, null, new LTRAddStreetOrBoxes(new StreetPath("street1"), null, nboxes3));
             
             Map<String, UUID> res3 = pm.call(null, null, new LTRListBoxes(new StreetPath("street1")));
+            
             assertEquals(3, res3.size());
             
         }
     }
     
-    public void test(){
+    public void testStreets(){
         
         IPostMaster pm = new PostMaster();
         
