@@ -5,7 +5,6 @@
  */ 
 package com.triniforce.postoffice.impl;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,6 +19,9 @@ import com.triniforce.postoffice.intf.LTRListBoxes;
 import com.triniforce.postoffice.intf.LTRListStreets;
 import com.triniforce.postoffice.intf.StreetPath;
 
+/**
+ * https://docs.google.com/drawings/d/1dnYlLayiyt1PGgCImpt86lBIBvA7LKQAjQbIiOozjBE/edit
+ */
 public class PostMaster implements IPostMaster{
     
     NamedStreets m_rootStreets = new NamedStreets();
@@ -31,6 +33,12 @@ public class PostMaster implements IPostMaster{
      */
     Map<UUID, POBoxWrapper> m_boxWrappers = new ConcurrentHashMap();
     
+    /*
+     * 
+     *  PUBLIC METHODS
+     * 
+     * 
+     */
     
     public PostMaster() {
         this(Executors.newFixedThreadPool(20));
@@ -41,28 +49,10 @@ public class PostMaster implements IPostMaster{
     }
     
     public Future post(StreetPath streetPath, String box, Object data){
-        PostTask ft = new PostTask(this, null, streetPath, box, data, null);
+        PostTask ft = new PostTask(this, null, null, streetPath, box, data, null);
         return m_es.submit(ft);
     }
 
-    
-    Object dispatch(EnvelopeCtx ctx, Object data){
-        Object res = null;
-        if( data instanceof LTRListStreets){
-            LTRListStreets cmd = (LTRListStreets) data;
-            Street ws = m_rootStreet.queryPath(cmd.getStreetPath());
-            res = new ArrayList<String>(ws.getStreets().keySet());
-
-        }
-        if( data instanceof LTRAddStreetOrBoxes){
-            return LTRAddStreetOrBoxes_handler.process(this, ctx, data);
-        }
-        if( data instanceof LTRListBoxes){
-            return LTRListBoxes_handler.process(this, ctx, data);
-        }
-        return res;
-    }
-    
     public void stop(int waitMilliseconds) {
         m_es.shutdown();
         try{
@@ -77,6 +67,55 @@ public class PostMaster implements IPostMaster{
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }    
+    
+    
+    /*
+     * 
+     * HELPERS
+     * 
+     * 
+     */
+    
+    public POBoxWrapper queryTargetBox(POBoxWrapper sender, StreetPath targetStreetPath, String targetBox){
+        Street ws = null == sender? m_rootStreet: sender.getParent();
+        
+        if(null == targetStreetPath){
+            POBoxWrapper res = null;
+            Street parentStreet = sender.getParent();
+            while(null != parentStreet){
+                res = parentStreet.getBoxes().get(targetBox);
+                if(null != res){
+                    return res;
+                }else{
+                    parentStreet = parentStreet.getParent();
+                    return res;
+                }
+            }
+            return null;
+        }else{
+            Street targetStreet =  ws.queryPath(targetStreetPath);
+            if(null == targetStreet){
+                return null;
+            }
+            return targetStreet.getBoxes().get(targetBox);
+        }
     }
+    
+    protected Object process(EnvelopeCtx ctx, Object data, Outboxes outs){
+        Object res = null;
+        if( data instanceof LTRListStreets){
+            return LTRListStreets_handler.process(this, ctx, (LTRListStreets) data);
+        }
+        if( data instanceof LTRListBoxes){
+            return LTRListBoxes_handler.process(this, ctx, (LTRListBoxes) data);
+        }
+        if( data instanceof LTRAddStreetOrBoxes){
+            return LTRAddStreetOrBoxes_handler.process(this, ctx, (LTRAddStreetOrBoxes) data, outs);
+        }
+        return res;
+    }
+    
+
 
 }

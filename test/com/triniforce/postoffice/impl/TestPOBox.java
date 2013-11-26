@@ -2,17 +2,18 @@
  * Copyright(C) Triniforce
  * All Rights Reserved.
  *
- */ 
+ */
 package com.triniforce.postoffice.impl;
 
 import com.triniforce.postoffice.intf.IEnvelopeCtx;
 import com.triniforce.postoffice.intf.IOutbox;
 import com.triniforce.postoffice.intf.IPOBox;
 
-public class TestPOBox implements IPOBox{
+public class TestPOBox implements IPOBox {
+
+    boolean priorProcessCalled;
 
     public void process(IEnvelopeCtx ctx, Object data, IOutbox out) {
-        
     }
 
     public void beforeDisconnect(int intervalMs) {
@@ -22,6 +23,7 @@ public class TestPOBox implements IPOBox{
     }
 
     public void priorProcess(IOutbox out) {
+        priorProcessCalled = true;
     }
 
 }

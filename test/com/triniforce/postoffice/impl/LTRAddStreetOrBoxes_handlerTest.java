@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import junit.framework.TestCase;
 
+import com.triniforce.postoffice.intf.IPOBox;
 import com.triniforce.postoffice.intf.IPostMaster;
 import com.triniforce.postoffice.intf.LTRAddStreetOrBoxes;
 import com.triniforce.postoffice.intf.LTRListBoxes;
@@ -54,6 +55,12 @@ public class LTRAddStreetOrBoxes_handlerTest extends TestCase {
             Map<String, UUID> res3 = pm.call(null, null, new LTRListBoxes(new StreetPath("street1")));
             
             assertEquals(3, res3.size());
+            assertNotSame(res1_2, res3);
+            
+            for( IPOBox box: nboxes1_2.values()){
+                TestPOBox tbox = (TestPOBox) box;
+                assertTrue(tbox.priorProcessCalled);
+            }
             
         }
     }

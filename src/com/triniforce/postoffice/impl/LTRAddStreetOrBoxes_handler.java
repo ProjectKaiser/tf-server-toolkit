@@ -11,20 +11,18 @@ import com.triniforce.postoffice.intf.LTRAddStreetOrBoxes;
 import com.triniforce.postoffice.intf.NamedPOBoxes;
 
 public class LTRAddStreetOrBoxes_handler{
-    static Object process(PostMaster pm, EnvelopeCtx ctx, Object data){
+    static Object process(PostMaster pm, EnvelopeCtx ctx, LTRAddStreetOrBoxes data, Outboxes outs){
 
-        LTRAddStreetOrBoxes ltr = (LTRAddStreetOrBoxes) data;
-        
         Street ws = pm.m_rootStreet;
         
-        Street targetBoxStreet = ws.queryPath(ltr.getStreetPath());
+        Street targetBoxStreet = ws.queryPath(data.getStreetPath());
         if(null == targetBoxStreet){
             return null;
         }
         
         //Create new street if needed
         {
-            if(null != ltr.getNewStreetName()){
+            if(null != data.getNewStreetName()){
                 targetBoxStreet = new Street(targetBoxStreet);
             }
         }
@@ -32,7 +30,7 @@ public class LTRAddStreetOrBoxes_handler{
         //Create box wrappers list
         NamedPOBoxWrappers newBoxesw = new NamedPOBoxWrappers();        
         {
-            NamedPOBoxes requestedBoxes = ltr.getBoxes(); 
+            NamedPOBoxes requestedBoxes = data.getBoxes(); 
             if( null != requestedBoxes){
                 for(String boxName :requestedBoxes.keySet()){
                     POBoxWrapper boxw = new POBoxWrapper(targetBoxStreet, requestedBoxes.get(boxName), UUID.randomUUID());
@@ -44,8 +42,11 @@ public class LTRAddStreetOrBoxes_handler{
 
         //Initialize boxes
         {
-            //Outbox ob = new Outbox();
-            
+            for(POBoxWrapper boxw: newBoxesw.values()){
+                Outbox out = new Outbox();
+                boxw.getBox().priorProcess(out);
+                outs.put(boxw, out);
+            }
         }
         
         //Connect boxes to targetStreet and root map
@@ -58,14 +59,9 @@ public class LTRAddStreetOrBoxes_handler{
             }
 
             //connect street to parent street
-            if(null != ltr.getNewStreetName()){
-                targetBoxStreet.getParent().getStreets().put(ltr.getNewStreetName(), targetBoxStreet);
+            if(null != data.getNewStreetName()){
+                targetBoxStreet.getParent().getStreets().put(data.getNewStreetName(), targetBoxStreet);
             }
-            
-        }
-        
-        //Send initialization messages
-        {
             
         }
         

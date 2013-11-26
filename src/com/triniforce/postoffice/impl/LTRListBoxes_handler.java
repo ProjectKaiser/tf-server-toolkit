@@ -12,11 +12,10 @@ import java.util.UUID;
 import com.triniforce.postoffice.intf.LTRListBoxes;
 
 
-public class LTRListBoxes_handler {
-    static Object process(PostMaster pm, EnvelopeCtx ctx, Object data){
+public class LTRListBoxes_handler{
+    static Object process(PostMaster pm, EnvelopeCtx ctx, LTRListBoxes data){
         
-        LTRListBoxes ltr = (LTRListBoxes) data;
-        Street ws = pm.m_rootStreet.queryPath(ltr.getStreetPath());
+        Street ws = pm.m_rootStreet.queryPath(data.getStreetPath());
         if( null == ws){
             return null;
         }
