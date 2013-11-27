@@ -25,4 +25,7 @@ public abstract class OutboxItem {
         return m_replyHandler;
     }
     
+    public abstract boolean isEmptyRecipient();
+    public abstract POBoxWrapper queryTargetBox(PostMaster pm, POBoxWrapper sender);
+    
 }

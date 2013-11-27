@@ -10,5 +10,10 @@ public interface IOutbox {
     void post(String addr, Object data, IEnvelopeHandler replyHandler);
     void post(Class addr, Object data, IEnvelopeHandler replyHandler);
     void reply(Envelope envelope, Object data, IEnvelopeHandler replyHandler);
+    /**
+     * Just a helper for {@link IOutbox#reply(Envelope, Object, IEnvelopeHandler)}
+     * 
+     */
+    void reply(IEnvelopeCtx envCtx, Object data, IEnvelopeHandler replyHandler);
 
 }
