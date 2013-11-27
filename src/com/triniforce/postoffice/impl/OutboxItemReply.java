@@ -22,6 +22,18 @@ public class OutboxItemReply extends OutboxItem {
     public Object getRecipient() {
         return m_envelope;
     }
+
+    @Override
+    public boolean isEmptyRecipient() {
+        return null == m_envelope.getSender();
+    }
+
+    @Override
+    public POBoxWrapper queryTargetBox(PostMaster pm, POBoxWrapper sender) {
+        
+        return pm.m_boxWrappers.get(m_envelope.getSender());
+        
+    }
     
 
 }

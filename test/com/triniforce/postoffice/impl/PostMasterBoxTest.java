@@ -19,7 +19,7 @@ import com.triniforce.postoffice.intf.LTRListStreets;
 import com.triniforce.postoffice.intf.NamedPOBoxes;
 import com.triniforce.postoffice.intf.StreetPath;
 
-public class LTRAddStreetOrBoxes_handlerTest extends TestCase {
+public class PostMasterBoxTest extends TestCase {
     
     static class Box1 extends TestPOBox{};
     static class Box2 extends TestPOBox{};
@@ -28,10 +28,11 @@ public class LTRAddStreetOrBoxes_handlerTest extends TestCase {
     public void testBoxes(){
         IPostMaster pm = new PostMaster();
         
-        //empty
+        //empty, IPostMaster.class
         {
             Map<String, UUID> res = pm.call(null, null, new LTRListBoxes());
-            assertEquals(0, res.size());
+            assertEquals(1, res.size());
+            assertNotNull(res.get(IPostMaster.class.getName()));
         }
  
         

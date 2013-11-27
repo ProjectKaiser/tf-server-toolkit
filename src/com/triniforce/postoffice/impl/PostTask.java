@@ -16,32 +16,47 @@ import com.triniforce.postoffice.intf.StreetPath;
 public class PostTask implements Callable{
     private final Object m_data;
     private final IEnvelopeHandler m_replyHandler;
-    private final StreetPath m_streetPath;
-    private final String m_box;
     private final PostMaster m_pm;
     private final UUID m_sender;
-    private final IEnvelopeHandler m_targetHandler;
+    private final IEnvelopeHandler m_recipientHandler;
+    private final UUID m_recipient;
 
-    public PostTask(PostMaster pm, UUID sender, IEnvelopeHandler replyHandler, StreetPath targetStreetPath, String targetBox, Object data, IEnvelopeHandler targetHandler){
+    public PostTask(PostMaster pm, UUID sender, IEnvelopeHandler replyHandler, UUID recipient, Object data, IEnvelopeHandler recipientHandler){
         m_pm = pm;
         m_sender = sender;
-        m_streetPath = targetStreetPath;
-        m_box = targetBox;
+        m_recipient = recipient;
         m_data = data;
         m_replyHandler = replyHandler;
-        m_targetHandler = targetHandler;
+        m_recipientHandler = recipientHandler;
     }
+    
     public Object call(){
         
         EnvelopeCtx ctx = new EnvelopeCtx(new Envelope(m_sender, m_replyHandler));
 
-        Outboxes outs = new Outboxes();
+        Outbox out = new Outbox(m_sender);
         Object res = null;
         
-        if(null == m_streetPath){
-            res =  m_pm.process(ctx, m_data, outs);
-        }else{
-            
+        if(null == m_recipient){
+            return null;
+        }
+        
+        POBoxWrapper boxwRecipient = m_pm.m_boxWrappers.get(m_recipient);
+        if( null == boxwRecipient){
+            return null;
+        }
+        
+        boxwRecipient.getBox().process(ctx, m_data, out);
+        
+        //process Outboxes
+        
+        for(OutboxItem oi: out.getItems()){
+            if( oi.isEmptyRecipient()){
+                res = oi.getData();
+            }else{
+                
+                //m_pm.queryTargetBox(boxw, nulltargetStreetPath, targetBox);
+            }
         }
         
         return res;

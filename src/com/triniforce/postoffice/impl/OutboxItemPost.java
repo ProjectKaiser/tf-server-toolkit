@@ -21,4 +21,14 @@ public class OutboxItemPost extends OutboxItem {
         return m_addr;
     }
 
+    @Override
+    public boolean isEmptyRecipient() {
+        return null == m_addr || m_addr.length() == 0;
+    }
+
+    @Override
+    public POBoxWrapper queryTargetBox(PostMaster pm, POBoxWrapper sender) {
+        return pm.queryTargetBox(sender.getParent(), null, m_addr);
+    }
+
 }
