@@ -50,12 +50,11 @@ import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodi
 import com.triniforce.server.plugins.kernel.ep.srv_ev.PKEPServerEvents;
 import com.triniforce.server.plugins.kernel.ep.srv_ev.ServerEvent;
 import com.triniforce.server.plugins.kernel.services.IService;
-import com.triniforce.server.plugins.kernel.services.PKEPServices;
 import com.triniforce.server.plugins.kernel.services.IService.State;
+import com.triniforce.server.plugins.kernel.services.PKEPServices;
 import com.triniforce.server.plugins.kernel.services.PKEPServices.EServiceNotFound;
 import com.triniforce.server.plugins.kernel.tables.EntityJournal;
 import com.triniforce.server.srvapi.DataPreparationProcedure;
-import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IDatabaseInfo;
 import com.triniforce.server.srvapi.IDbQueueFactory;
@@ -69,6 +68,7 @@ import com.triniforce.server.srvapi.IServerMode;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.ITaskExecutors;
+import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.server.srvapi.UpgradeProcedure;
 import com.triniforce.utils.Api;
@@ -1095,6 +1095,16 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 			m_ptExecutor.scheduleWithFixedDelay(task, task.initialDelay,
 					task.delay, task.unit);
 		}
+		
+//		PKEPAPIs apis = (PKEPAPIs) getExtensionPoint(PKEPAPIs.class);
+//		for(IPKExtension ex: apis.getExtensions().values()){
+//		    if(ex instanceof IPKEPAPIPeriodical){
+//		        IPKEPAPIPeriodical p = (IPKEPAPIPeriodical) ex;
+//		        
+//		    }
+//		    
+//		}
+		
 	}
 
 	public void stopPeriodicalTasks() {
