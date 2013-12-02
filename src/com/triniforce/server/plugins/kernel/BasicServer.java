@@ -47,6 +47,7 @@ import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.extensions.PKPlugin;
 import com.triniforce.extensions.PKRootExtensionPoint;
 import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
+import com.triniforce.server.plugins.kernel.ep.api.PKEPAPIs;
 import com.triniforce.server.plugins.kernel.ep.srv_ev.PKEPServerEvents;
 import com.triniforce.server.plugins.kernel.ep.srv_ev.ServerEvent;
 import com.triniforce.server.plugins.kernel.services.IService;
@@ -1090,20 +1091,15 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	PeriodicalTasksExecutor m_ptExecutor = new PeriodicalTasksExecutor();
 	private RegistrationThread m_registratorThread;
 
-	public void startPeriodicalTasks() {
-		for (BasicPeriodicalTask task : m_tasks) {
+	public void startPeriodicalTasks(){
+	    
+	    PKEPAPIs apis = (PKEPAPIs) getExtensionPoint(PKEPAPIs.class);
+	    apis.scheduleTasks(m_ptExecutor);
+
+		for(BasicPeriodicalTask task : m_tasks){
 			m_ptExecutor.scheduleWithFixedDelay(task, task.initialDelay,
 					task.delay, task.unit);
 		}
-		
-//		PKEPAPIs apis = (PKEPAPIs) getExtensionPoint(PKEPAPIs.class);
-//		for(IPKExtension ex: apis.getExtensions().values()){
-//		    if(ex instanceof IPKEPAPIPeriodical){
-//		        IPKEPAPIPeriodical p = (IPKEPAPIPeriodical) ex;
-//		        
-//		    }
-//		    
-//		}
 		
 	}
 

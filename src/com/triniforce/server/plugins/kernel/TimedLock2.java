@@ -9,24 +9,29 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import com.triniforce.server.plugins.kernel.ep.api.IPKEPAPI;
+import com.triniforce.server.plugins.kernel.ep.api.PKEPAPIPeriodicalTask;
 import com.triniforce.server.srvapi.ITimedLock2;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.ITime;
 import com.triniforce.utils.Utils;
 
-public class TimedLock2 implements ITimedLock2, IPKEPAPI{
+public class TimedLock2 extends PKEPAPIPeriodicalTask implements ITimedLock2, IPKEPAPI{
 
     protected Semaphore m_s = new Semaphore(1);
     protected long m_timeout = 10000;
     protected long m_timestamp;
     protected String m_lockerThreadName;
     ITimedLock2.ITimedLockCB m_cb;    
-    ITimedLockCB m_dummy = new ITimedLockCB(){
-        public void unlocked() {
-        }};
+    ITimedLockCB m_dummy = new ITimedLockCB(){public void unlocked() {}};
+    
+    public TimedLock2() {
+        delay = 10000;
+        initialDelay = 10000;
+    }
     
     
+        
     protected Thread m_lockerThread;
         
     protected void acquireWithLog(){
@@ -102,5 +107,10 @@ public class TimedLock2 implements ITimedLock2, IPKEPAPI{
 
     public Class getImplementedInterface() {
         return ITimedLock2.class;
+    }
+
+    @Override
+    public void run() {
+        checkTimeout();        
     }
 }

@@ -23,7 +23,6 @@ import com.triniforce.dbo.PKEPDBObjects;
 import com.triniforce.extensions.IPKExtension;
 import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.server.TFPlugin;
-import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
 import com.triniforce.server.plugins.kernel.ep.api.IPKEPAPI;
 import com.triniforce.server.plugins.kernel.ep.api.PKEPAPIs;
 import com.triniforce.server.plugins.kernel.ep.br.PKEPBackupRestore;
@@ -31,10 +30,10 @@ import com.triniforce.server.plugins.kernel.ep.sp.PKEPServerProcedures;
 import com.triniforce.server.plugins.kernel.ep.srv_ev.PKEPServerEvents;
 import com.triniforce.server.plugins.kernel.ep.tr_ext.PKEPTranInners;
 import com.triniforce.server.plugins.kernel.ep.tr_ext.PKEPTranOuters;
+import com.triniforce.server.plugins.kernel.ext.api.PTRecurringTasks;
 import com.triniforce.server.plugins.kernel.ext.br.BackupRestoreDb;
 import com.triniforce.server.plugins.kernel.ext.br.BackupRestorePluginVersions;
 import com.triniforce.server.plugins.kernel.recurring.PKEPRecurringTasks;
-import com.triniforce.server.plugins.kernel.recurring.PTRecurringTasks;
 import com.triniforce.server.plugins.kernel.recurring.TRecurringTasks;
 import com.triniforce.server.plugins.kernel.services.PKEPServices;
 import com.triniforce.server.plugins.kernel.tables.EntityJournal;
@@ -122,15 +121,12 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         putExtension(PKEPDBObjects.class, BreakIdGenerator.class.getName() + ".queue", 
         		new DBOUpgProcedure(new BreakIdGenerator(m_miscIdGenerator)));
         
-        getBasicServer().addPeriodicalTask(new TimedLockTicker());
-        getBasicServer().addPeriodicalTask(new PTRecurringTasks());
-        
         putExtension(PKEPDBObjects.class, DBOVersion.class.getName(), new DBOVersion());
         
 	}
 	
 	public void doRegistration(){
-	    
+    
 	    putExtension(PKEPTranOuters.class, RefCountMapTrnExtender.class);
 	    putExtension(PKEPTranOuters.class, FiniterExtender.class);
 	    putExtension(PKEPTranOuters.class, LockerExtender.class);
@@ -141,6 +137,9 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         
         putExtension(PKEPAPIs.class, ThrdWatcherRegistrator.class);
         putExtension(PKEPAPIs.class, TimedLock2.class);
+        
+        putExtension(PKEPAPIs.class, PTRecurringTasks.class);
+
 	}
 
 	public String[] getDependencies() {
@@ -193,7 +192,9 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
             IPKExtensionPoint ep = getRootExtensionPoint().getExtensionPoint(PKEPAPIs.class);
             for(IPKExtension e:ep.getExtensions().values()){
                 IPKEPAPI epApi = e.getInstance();
-                m_runningApi.setIntfImplementor(epApi.getImplementedInterface(), epApi);
+                if(null != epApi.getImplementedInterface()){
+                    m_runningApi.setIntfImplementor(epApi.getImplementedInterface(), epApi);
+                }
             }
         }
 
@@ -536,16 +537,6 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         }       
     }
     
-    public static class TimedLockTicker  extends BasicPeriodicalTask {
-        public TimedLockTicker() {
-            delay = 10000;
-        }
-        public void run() {
-            ITimedLock2 tl = ApiStack.getInterface(ITimedLock2.class);
-            tl.checkTimeout();
-        }
-    }    
-
     public void doExtensionPointsRegistration() {
         putExtensionPoint(new PKEPServerProcedures());
         putExtensionPoint(new PKEPBackupRestore());

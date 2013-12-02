@@ -5,6 +5,9 @@
  */ 
 package com.triniforce.server.plugins.kernel.ep.api;
 
-public class PKEPAPIPeriodicalTask {
+import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
+
+public abstract class PKEPAPIPeriodicalTask extends BasicPeriodicalTask{
+
 
 }
