@@ -7,13 +7,26 @@ package com.triniforce.server.plugins.kernel;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 
-import com.triniforce.db.test.TFTestCase;
+import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.server.srvapi.ITimedLock2;
+import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.ITime;
 
-public class TimedLock2Test extends TFTestCase {
+public class TimedLock2Test extends BasicServerTestCase {
 
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        m_server.enterMode(Mode.Running);
+        
+    }
+    
+    @Override
+    protected void tearDown() throws Exception {
+        m_server.leaveMode();
+        super.tearDown();
+    }
     /*
      * Test constructor
      */
