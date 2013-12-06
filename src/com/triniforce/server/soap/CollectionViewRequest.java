@@ -92,7 +92,10 @@ public class CollectionViewRequest extends LongListRequest {
     
     public void addOrderBy(IName name){
     	getOrderBy().add(name.getName());
-    	
+    }
+    
+    public void addOrderBy(String name){
+    	getOrderBy().add(name);
     }
 
     public void setOrderBy(List<Object> orderBy) {
