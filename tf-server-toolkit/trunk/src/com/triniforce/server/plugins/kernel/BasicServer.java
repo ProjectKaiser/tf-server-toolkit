@@ -296,7 +296,9 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
         serverApi.setIntfImplementor(IBasicServer.class, this);
         serverApi.setIntfImplementor(IPKExtensionPoint.class, this);
         serverApi.setIntfImplementor(ITaskExecutors.class, m_ptExecutor.getTe());
-        serverApi.setIntfImplementor(TimeZone.class, m_defTimeZone);
+        
+        if (null == baseApi.queryIntfImplementor(TimeZone.class))
+        	serverApi.setIntfImplementor(TimeZone.class, m_defTimeZone);
         
         m_coreApi.pushApiIntoStack(serverApi);      
 

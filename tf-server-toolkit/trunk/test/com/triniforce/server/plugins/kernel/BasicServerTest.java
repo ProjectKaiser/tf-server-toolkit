@@ -9,6 +9,7 @@ package com.triniforce.server.plugins.kernel;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
 import java.util.TimeZone;
@@ -85,7 +86,8 @@ public class BasicServerTest extends BasicServerTestCase {
 	    assertEquals(gmt, def);
         m_server.enterMode(Mode.Running);
         try{
-            ApiStack.getInterface(TimeZone.class);
+            TimeZone tz = ApiStack.getInterface(TimeZone.class);
+            assertEquals("Europe/Helsinki", tz.getID());
             
             ApiAlgs.getLog(this).trace(new Date());
             
@@ -219,9 +221,12 @@ public class BasicServerTest extends BasicServerTestCase {
 	protected void setCoreApiInteraces(Api api) {
 		super.setCoreApiInteraces(api);
 		api.setIntfImplementor(IIdDef.class, null);
+		TimeZone tz = TimeZone.getTimeZone("Europe/Helsinki");
+		api.setIntfImplementor(TimeZone.class, tz);
 	}
 	
 	public void testInterfaces(){
+		trace(Arrays.asList(TimeZone.getAvailableIDs()));
 		m_server.enterMode(Mode.Running);
 		try{
 		    ApiStack.getInterface(ITaskExecutors.class);		    
