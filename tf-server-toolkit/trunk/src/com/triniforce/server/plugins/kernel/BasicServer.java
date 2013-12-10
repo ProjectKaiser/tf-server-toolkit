@@ -214,7 +214,9 @@ import com.triniforce.utils.Profiler;
 
 public class BasicServer extends PKRootExtensionPoint implements IBasicServer, ISORegistration, ISOQuery,
 		ISODbInfo, ITime {
-
+	
+	@Deprecated static final String last = "LATEST"; 	
+	
 	public static class EInvalidServerState extends ServerException {
 		private static final long serialVersionUID = -5675131699476728467L;
 
