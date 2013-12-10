@@ -204,8 +204,8 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
     protected void checkResourcesConnections(){
         if (m_startNumActive != m_pool.m_ds.getNumActive()) {
             int m_newNumActive = m_pool.m_ds.getNumActive();
+            String s = "";
             for (StackTraceElement[] trace : getPool().m_conStack.values()) {
-                String s = "";
                 for (StackTraceElement tr : trace) {
                     s = s + tr.toString() + "\n";
                 }
@@ -213,7 +213,7 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
             }
             m_pool = null;
             fail("Number of active connections changed from "
-                    + m_startNumActive + " to " + m_newNumActive);
+                    + m_startNumActive + " to " + m_newNumActive+", caused by:\n" + s);
         }
         
     }
