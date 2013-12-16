@@ -7,6 +7,7 @@
 package com.triniforce.server.srvapi;
 
 import com.triniforce.utils.ApiAlgs;
+import com.triniforce.utils.ICommitable;
 
 public class InitFinitTaskWrapper implements Runnable  {
 
@@ -27,6 +28,9 @@ public class InitFinitTaskWrapper implements Runnable  {
             }
             try {
                 m_command.run();
+                if(m_command instanceof ICommitable){
+                    ((ICommitable) m_command).commit();
+                }
             } catch (Throwable e) {
                 ApiAlgs.getLog(this).error(
                         "Run error:" + m_command.toString(), e);//$NON-NLS-1$
