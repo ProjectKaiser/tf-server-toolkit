@@ -10,6 +10,7 @@ import com.triniforce.server.srvapi.ISrvSmartTranFactory.ITranExtender;
 
 public class PKEPTranInners extends PKExtensionPoint{
     public PKEPTranInners() {
+        //TODO why single?
         setSingleExtensionInstances(true);
         setExtensionClass(ITranExtender.class);
     }
