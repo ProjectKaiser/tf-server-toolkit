@@ -170,7 +170,6 @@ public class DBTestCase extends TFTestCase {
 			}
 
 			public boolean isNewDb() {
-				// TODO Auto-generated method stub
 				return false;
 			}
 		});

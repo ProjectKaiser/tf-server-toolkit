@@ -51,7 +51,6 @@ public class ServiceManagerTest extends BasicServerTestCase {
 			
 			@Override
 			public void doExtensionPointsRegistration() {
-				// TODO Auto-generated method stub
 				
 			}
 		});
