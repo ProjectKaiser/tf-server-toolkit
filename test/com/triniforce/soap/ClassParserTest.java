@@ -253,19 +253,6 @@ public class ClassParserTest extends TFTestCase {
         //test caching
         assertSame(arr, m_lib.add(int[].class));      
         
-        //UNKNOWN: Nullabe array
-//        ArrayDef nullableArr = (ArrayDef)m_lib.add(Integer[].class);
-        //test arrays
-//        assertNotSame(arr, nullableArr);
-        
-//        t1 = IL1.class.getMethod("fun1", (Class[])null).getGenericReturnType();
-//        assertTrue(t1 instanceof ParameterizedType);
-//        assertSame(nullableArr, m_lib.add(t1));
-        
-//        arr = (ArrayDef) m_lib.add(Integer[].class);
-//        sc = (ScalarDef) arr.getComponentType();
-//        assertEquals(Integer.class.getName(), sc.getType());
-
         int sz = m_lib.getDefs().size();
         TypeDef td = m_lib.add(Object.class);
         assertEquals(Object.class.getName(), td.getType());

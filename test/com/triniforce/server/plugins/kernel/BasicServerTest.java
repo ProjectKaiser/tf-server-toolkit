@@ -71,8 +71,6 @@ public class BasicServerTest extends BasicServerTestCase {
 
 		@Override
 		public void doRegistration() {
-			// TODO Auto-generated method stub
-			
 		}
 		
 	}  
