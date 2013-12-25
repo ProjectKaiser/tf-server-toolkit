@@ -45,14 +45,6 @@ public class LongListRequest extends SessionRequest{
         return m_args;
     }
 
-    @SuppressWarnings("serial")
-    public static class EArgumentMustHaveValue extends RuntimeException{
-        public EArgumentMustHaveValue(String argName) {
-            super("Argument \"" + argName + "\" must have value");
-        }
-    }
-
-    
     public static Object MustHaveValueMarker = new Object();
     
 

@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.triniforce.db.test.TFTestCase;
-import com.triniforce.server.soap.LongListRequest.EArgumentMustHaveValue;
 
 public class LongListRequestTest extends TFTestCase {
 
