@@ -146,8 +146,13 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
     
     protected boolean m_wasDbModificationNeeded = false; 
 
+    public void setCurrentTimeMillis(long time){
+        m_bemu.setCurrentTimeMillis(time);
+    }
+    
     protected void setUp() throws Exception {
-        super.setUp();
+        super.setUp();  
+        m_bemu.setTimeSeq(BasicServerApiEmu.START_TIME, BasicServerApiEmu.TIME_OFFSETS);
         try{
 	        m_startNumActive = getPool().m_ds.getNumActive();        
 	

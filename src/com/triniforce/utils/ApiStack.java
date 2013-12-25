@@ -133,6 +133,10 @@ public class ApiStack implements IApi, IFinitable{
         return res;
 	}
 	
+	public static String _toString(){
+	    return getThreadApiContainer().toString();
+	}
+	
 	@Override
 	public String toString() {
 		String res = "";
