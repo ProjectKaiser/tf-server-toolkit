@@ -45,24 +45,42 @@ public class LongListRequest extends SessionRequest{
         return m_args;
     }
 
+    @SuppressWarnings("serial")
+    public static class EArgumentMustHaveValue extends RuntimeException{
+        public EArgumentMustHaveValue(String argName) {
+            super("Argument \"" + argName + "\" must have value");
+        }
+    }
+
+    
+    public static Object MustHaveValueMarker = new Object();
+    
+
     /**
-     * @return args[idx] if it exists and of given class, def otherwise. 
-     * Throws IllegalArgumentException(argName) if cls is specified and argument does not match it
+     * @return args[idx] if it exists and of given class, def otherwise.
+     * <p>Throws IllegalArgumentException(argName) if cls is specified and argument does not match it
+     * <p>If def is {@link LongListRequest#MustHaveValueMarker} and argument does not exist or null then {@link EArgumentMustHaveValue} is thrown. 
      */
 
     public static <T> T getArg(List args, int idx, String argName, Class<? extends T> cls, Object def){
-        if(idx <0) throw new IllegalArgumentException("idx must be ge zero");
-        if(args.size()<=idx) return (T)def;
+        if(idx <0) throw new IllegalArgumentException("idx must be GE zero");
+        if(args.size()<=idx){
+            if( def == MustHaveValueMarker){
+                throw new EArgumentMustHaveValue(argName);
+            }
+            return (T)def;
+        }
         Object res = args.get(idx);
-        if( null == res) return null;
+        if( null == res) {
+            if( def == MustHaveValueMarker ){
+                throw new EArgumentMustHaveValue(argName);
+            }
+            return null;
+        }
         if(null != cls && !cls.isAssignableFrom(res.getClass())){
             throw new IllegalArgumentException("Incompatible type for argument '" + argName +"'. Expected " + cls.getName() + " but " + res.getClass());
         }
         return (T)res;
-    }
-    
-    public static Object getArg3(){
-    	return null;
     }
     
     /**
