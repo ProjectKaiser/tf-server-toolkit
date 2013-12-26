@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.joda.time.DateTimeZone;
+
 import bsh.Interpreter;
 
 import com.triniforce.db.ddl.ActualStateBL;
@@ -268,6 +270,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	    m_defTimeZone = TimeZone.getDefault();
 	    TimeZone gmt = TimeZone.getTimeZone("GMT");
 	    TimeZone.setDefault(gmt);
+	    DateTimeZone.setDefault(DateTimeZone.forID("GMT"));
         addPlugin(new BasicServerCorePlugin());
 	}
 	
