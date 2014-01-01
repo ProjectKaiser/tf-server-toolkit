@@ -40,7 +40,7 @@ public abstract class BasicResSet implements IResSet {
         if(m_idx == null){
             m_idx = new HashMap<String, Integer>();
             for (int i = 0; i < getColumns().size(); i++) {
-                m_idx.put(getColumns().get(i), i+1);//1 - based               
+                m_idx.put(getColumns().get(i).toLowerCase(), i+1);//1 - based               
             }
         }
         Object res = m_idx.get(colName);
