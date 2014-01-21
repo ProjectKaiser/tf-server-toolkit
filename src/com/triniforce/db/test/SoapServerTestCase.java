@@ -21,6 +21,7 @@ import com.triniforce.soap.InterfaceDescription;
 import com.triniforce.soap.InterfaceDescriptionGenerator;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
 import com.triniforce.soap.SOAPServlet;
+import com.triniforce.utils.ApiAlgs;
 
 public abstract class SoapServerTestCase extends TFTestCase {
 	
@@ -80,8 +81,8 @@ public abstract class SoapServerTestCase extends TFTestCase {
 	}
 	
 	private String exec(URL url, String msg, String req) throws Exception  {
-		System.out.println(msg);
-		System.out.println(req);
+		ApiAlgs.getLog(this).trace(msg);
+		ApiAlgs.getLog(this).trace(req);
 		
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
@@ -103,7 +104,7 @@ public abstract class SoapServerTestCase extends TFTestCase {
 			strBuf.append(r.readLine());
 			strBuf.append('\n');
 		}
-		System.out.println(strBuf.toString());
+		ApiAlgs.getLog(this).trace(strBuf.toString());
 		return strBuf.toString();
 	}	
 
