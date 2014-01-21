@@ -154,7 +154,10 @@ public class DBTables {
 		private int indexSize(TableDef td, IndexDef idx) {
 			int res = 0;
 			for(String column : idx.getColumns()){
-				FieldDef fd = td.getFields().findElement(column).getElement();
+				ElementVerStored<FieldDef> e = td.getFields().findElement(column);
+				if(null == e)
+					ApiAlgs.assertNotNull(e, td.getEntityName() + "." + column);
+				FieldDef fd = e.getElement();
 				res += fd.getSize();
 			}
 			return res;
