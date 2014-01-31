@@ -13,7 +13,6 @@ import com.triniforce.extensions.IPKExtension;
 import com.triniforce.extensions.PKExtensionPoint;
 import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor;
 import com.triniforce.utils.ApiAlgs;
-import com.triniforce.utils.IFinitable;
 
 public class PKEPAPIs  extends PKExtensionPoint{
     public PKEPAPIs(){
@@ -38,10 +37,10 @@ public class PKEPAPIs  extends PKExtensionPoint{
         
         for(IPKExtension ex: exs){
             Object api = ex.getInstance();
-            if(api instanceof IFinitable){
-                IFinitable f = (IFinitable) api;
+            if(api instanceof IFinitApi){
+                IFinitApi f = (IFinitApi) api;
                 try{
-                    f.finit();
+                    f.finitApi();
                 }catch(Exception e){
                     ApiAlgs.getLog(this).error("Finalization errror", e);                    
                 }

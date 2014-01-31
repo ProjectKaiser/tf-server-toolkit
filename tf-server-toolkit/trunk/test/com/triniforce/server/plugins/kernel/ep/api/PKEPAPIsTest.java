@@ -6,7 +6,6 @@
 package com.triniforce.server.plugins.kernel.ep.api;
 
 import com.triniforce.db.test.TFTestCase;
-import com.triniforce.utils.IFinitable;
 
 public class PKEPAPIsTest extends TFTestCase {
     
@@ -17,13 +16,13 @@ public class PKEPAPIsTest extends TFTestCase {
             return null;
         }        
     }
-    class MyAPI2 implements IPKEPAPI, IFinitable{
+    class MyAPI2 implements IPKEPAPI, IFinitApi{
         int fcnt;
         public Class getImplementedInterface() {
             return null;
         }
 
-        public void finit() {
+        public void finitApi() {
             fcnt = cnt++;
             
         }        
