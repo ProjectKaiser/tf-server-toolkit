@@ -1038,12 +1038,19 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 	public void initOrFinit(boolean isInit) {
 
+	    if(!isInit){
+	        PKEPAPIs apis = (PKEPAPIs) getExtensionPoint(PKEPAPIs.class);
+	        apis.finit();
+	    }
+
+	    
 		ListIterator<IPlugin> i;
 		if (!isInit) {
 			i = m_plugins.listIterator(m_plugins.size());
 		} else {
 			i = m_plugins.listIterator();
 		}
+		
 		while (isInit ? i.hasNext() : i.hasPrevious()) {
 			IPlugin plugin = isInit ? i.next() : i.previous();
 			enterMode(Mode.Running);
