@@ -8,6 +8,7 @@ package com.triniforce.server.plugins.kernel;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -69,6 +70,10 @@ public class KeyTaskExecutor extends ThreadPoolExecutor{
 	@Override
 	public void execute(final Runnable task) {
 		super.execute(new KeyTask(task));
+	}
+	
+	public Future submit(final Runnable task) {
+	    return super.submit(new KeyTask(task));
 	}
 	
 	public int getRejectedCount() {

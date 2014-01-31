@@ -9,8 +9,9 @@ package com.triniforce.server.plugins.kernel;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -31,12 +32,13 @@ public class TaskExecutors implements ITaskExecutors{
 	Integer m_executed = 0;
 	
 	public TaskExecutors() {
-        addExecutor(new LongTaskExecutorKey(), new KeyTaskExecutor(80));
-        addExecutor(new ShortTaskExecutorKey(), new KeyTaskExecutor(10));
-        addExecutor(new PeriodicalTaskExecutorKey(), new ScheduledThreadPoolExecutor(4));
-    }
+	    addExecutor(ITaskExecutors.longTaskExecutorKey, new KeyTaskExecutor(80));
+        addExecutor(ITaskExecutors.shortTaskExecutorKey, new KeyTaskExecutor(10));
+        addExecutor(ITaskExecutors.periodicalTaskExecutorKey, new ScheduledThreadPoolExecutor(4));
+        addExecutor(ITaskExecutors.normalTaskExecutorKey, (ThreadPoolExecutor) Executors.newFixedThreadPool(DEFAULT_FIXED_THREAD_POOL_SIZE));
+	}
 	
-	public ThreadPoolExecutor addExecutor(ExecutorKey executorKey,
+	ThreadPoolExecutor addExecutor(ExecutorKey executorKey,
 	        ThreadPoolExecutor executor) {
 	    m_executors.put(executorKey, executor);
 	    return executor;
@@ -64,16 +66,17 @@ public class TaskExecutors implements ITaskExecutors{
         }
     }
 
-    public void execute(ExecutorKey executorKey, InitFinitTask task) throws EExecutorNotFound{
-        Executor executor = m_executors.get(executorKey);
+    public Future execute(ExecutorKey executorKey, InitFinitTask task) throws EExecutorNotFound{
+        ThreadPoolExecutor executor = m_executors.get(executorKey);
         if(null == executor){
             throw new EExecutorNotFound(executorKey);
         }
         InitFinitTaskWrapper w = new InitFinitTaskWrapper(task); 
-        executor.execute(w);
+        Future res = executor.submit(w);
         synchronized (m_executed) {
             m_executed++;
         }
+        return res;
     }
 
     public ThreadPoolExecutor getExecutor(ExecutorKey key) {
