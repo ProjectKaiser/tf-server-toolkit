@@ -5,10 +5,16 @@
  */ 
 package com.triniforce.server.plugins.kernel;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.server.srvapi.ITaskExecutors;
@@ -21,6 +27,47 @@ import com.triniforce.utils.ICheckInterrupted;
 
 public class TaskExecutorsTest extends TFTestCase {
     
+    public void testNormalTasks() throws InterruptedException, ExecutionException {
+        
+        //run a lot of tasks which are waiting for lock and then starts
+        
+        ITaskExecutors te = new TaskExecutors();
+
+        List<InitFinitTask> tasks = new ArrayList<InitFinitTask>();
+
+        final Lock lock = new ReentrantLock();
+        lock.lock();
+
+        for (int i = 0; i < ITaskExecutors.DEFAULT_FIXED_THREAD_POOL_SIZE * 10; i++) {
+
+            final Integer cnt = new Integer(i);
+            InitFinitTask task = new InitFinitTask() {
+
+                public void run() {
+                    trace("trying...:" + cnt);
+                    lock.lock();
+                    lock.unlock();
+                    trace("ok:" + cnt);
+                }
+            };
+            tasks.add(task);
+        }
+        List<Future> futures = new ArrayList<Future>();
+        for(InitFinitTask task: tasks){
+            futures.add(te.execute(ITaskExecutors.normalTaskExecutorKey, task));            
+        }
+        ICheckInterrupted.Helper.sleep(1000);
+        lock.unlock();
+        for(Future f: futures){
+            f.get();
+        }
+        te.shutdownNow();
+        te.awatTermination(10000);
+
+    }
+        
+        
+
     public void testKeys(){
         assertEquals(new LongTaskExecutorKey(), ITaskExecutors.longTaskExecutorKey);
         assertEquals(new ShortTaskExecutorKey(), ITaskExecutors.shortTaskExecutorKey);
@@ -40,6 +87,7 @@ public class TaskExecutorsTest extends TFTestCase {
         assertTrue(te.executorKeys().contains(new LongTaskExecutorKey()));
         assertTrue(te.executorKeys().contains(new ShortTaskExecutorKey()));
         assertTrue(te.executorKeys().contains(new PeriodicalTaskExecutorKey()));
+        assertTrue(te.executorKeys().contains(new ITaskExecutors.NormalTaskExecutorKey()));
         
         final SynchronousQueue<String> q1 = new SynchronousQueue();
         
