@@ -1319,7 +1319,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 
 	public boolean isNewDb() {
-		// TODO ias: Auto-generated method stub
+		// FIXME ias: Auto-generated method stub
 		return false;
 	}
 
