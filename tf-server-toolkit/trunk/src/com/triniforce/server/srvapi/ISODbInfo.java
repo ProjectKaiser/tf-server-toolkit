@@ -67,5 +67,4 @@ public interface ISODbInfo extends IModeRunning {
     
     Set<String> getCompletedUpgradeProcedures();
     Set<String> getCompletedDataPreparationProcedures();
-    boolean isNewDb();
 }

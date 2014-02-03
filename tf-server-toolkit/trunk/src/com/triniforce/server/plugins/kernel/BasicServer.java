@@ -1321,13 +1321,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 			ApiAlgs.rethrowException(e);
 		}
 	}
-
-
-	public boolean isNewDb() {
-		// FIXME ias: Auto-generated method stub
-		return false;
-	}
-
+	
 	public void startServices() {
         IThrdWatcherRegistrator itwr = null;
         
