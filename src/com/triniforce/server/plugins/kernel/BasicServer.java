@@ -916,10 +916,15 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 		}
 		ApiStack.pushApi(newApiStack);
 
-		if (mode.equals(Mode.Running)) {
-			ISrvSmartTranFactory trnFact = ApiStack.getApi()
-					.getIntfImplementor(ISrvSmartTranFactory.class);
-			trnFact.push();
+		try{
+			if (mode.equals(Mode.Running)) {
+				ISrvSmartTranFactory trnFact = ApiStack.getApi()
+						.getIntfImplementor(ISrvSmartTranFactory.class);
+				trnFact.push();
+			}
+		}catch(RuntimeException e){
+			ApiStack.popApi(); // Finalize stack
+			throw e;
 		}
 
 		/*
