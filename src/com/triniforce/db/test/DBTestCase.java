@@ -168,10 +168,10 @@ public class DBTestCase extends TFTestCase {
 				fail("unimplemented");
 				return null;
 			}
-
-			public boolean isNewDb() {
-				return false;
-			}
+//
+//			public boolean isNewDb() {
+//				return false;
+//			}
 		});
         ApiStack.pushApi(api);
         
