@@ -168,6 +168,7 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
 	        }
 	        m_server.init();
         } catch (Exception e) {
+        	trace(e);
 			super.tearDown();
 			throw e;
 		}
