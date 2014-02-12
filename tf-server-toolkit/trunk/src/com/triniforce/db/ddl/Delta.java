@@ -774,6 +774,8 @@ public class Delta {
 				else
 					return ICmdFactory.Action.EDIT;
 			}
+			if(srcElement.getSize() != dstElement.getSize())
+				return ICmdFactory.Action.EDIT;
 			return ICmdFactory.Action.NONE;
 		}
 

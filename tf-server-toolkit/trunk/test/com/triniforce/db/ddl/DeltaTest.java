@@ -123,7 +123,7 @@ public class DeltaTest extends TFTestCase {
 		AlterColumnOperation op  = (AlterColumnOperation) res.get(0).getOperation();
 		assertNotNull(op);
 		assertEquals(ColumnType.VARCHAR, op.getNewField().getType());
-		
 	}
+	
 
 }
