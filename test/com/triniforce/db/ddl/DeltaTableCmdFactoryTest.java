@@ -89,6 +89,14 @@ public class DeltaTableCmdFactoryTest extends TFTestCase {
 		assertEquals(ICmdFactory.Action.EDIT, f.getEqKeyAction(
 				FieldDef.createScalarField("F1", ColumnType.LONG, false), 
 				FieldDef.createScalarField("F1", ColumnType.INT, false)));
+		
+		{ // Test change size for string and decimal fields
+			FieldDef 
+				src = FieldDef.createStringField("f1", ColumnType.CHAR, 10, true, null),
+				dst = FieldDef.createStringField("f1", ColumnType.CHAR, 20, true, null);
+			
+			assertEquals(ICmdFactory.Action.EDIT, f.getEqKeyAction(src, dst));
+		}
 	}
 
 	public void testEditCmd() {
