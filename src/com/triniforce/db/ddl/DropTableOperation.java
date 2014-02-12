@@ -18,9 +18,9 @@ public class DropTableOperation extends TableOperation {
 		m_elements = elements;
 	}
 
-	public DropTableOperation() {
-		m_elements = null;
-	}
+//	public DropTableOperation() {
+//		m_elements = null;
+//	}
 
 	@Override
 	public String getName() {
@@ -40,6 +40,10 @@ public class DropTableOperation extends TableOperation {
 	@Override
 	public void apply(TableDef table) throws EMetadataException {
 		throw new EMetadataException(table.getEntityName(), getName());		 //$NON-NLS-1$
+	}
+	
+	public List<TableUpdateOperation> getElements(){
+		return m_elements;
 	}
 
 }
