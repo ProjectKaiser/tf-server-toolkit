@@ -420,8 +420,23 @@ public class UpgradeRunner {
             }
             
             int vInc = op.getVersionIncrease();
-            if (op instanceof DropTableOperation)// && !bForward)
+            if (op instanceof DropTableOperation){// && !bForward)
+            	String dbName = m_actualState.getDBName(dbOp.getDBOName()); 
                 m_actualState.removeTable(dbOp.getDBOName());
+                
+                //Remove index names
+                DropTableOperation dropOp = (DropTableOperation) op;
+                for(TableUpdateOperation teOp : dropOp.getElements()){
+                	if(teOp instanceof AddIndexOperation){
+                		AddIndexOperation idxOp = (AddIndexOperation) teOp;
+                		
+                		DeleteIndexOperation delIdx = idxOp.getReverseOperation();
+                        String appIndexName = getFullIndexName(dbName, delIdx.getName(),
+                                delIdx.getType()); 
+                        m_actualState.deleteIndexName(appIndexName);
+                	}
+                }
+            }
             else
                 m_actualState.changeVersion(dbOp.getDBOName(), bForward ? vInc
                         : -vInc);

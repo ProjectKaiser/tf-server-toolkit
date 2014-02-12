@@ -36,6 +36,7 @@ import com.triniforce.db.ddl.TableDef.IElementDef;
 import com.triniforce.db.ddl.TableDef.IndexDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.ddl.UpgradeRunner.DbType;
+import com.triniforce.db.ddl.UpgradeRunner.IActualState;
 import com.triniforce.db.qbuilder.QInsert;
 import com.triniforce.db.qbuilder.QSelect;
 import com.triniforce.db.qbuilder.QTable;
@@ -313,8 +314,13 @@ public class UpgradeRunnerTest extends DDLTestCase {
     	cl.add(new DBOperation(tabName, createOp.getReverseOperation()));
     	m_player.run(cl);  
     	
-    	assertFalse("tab in AS", m_player.getActualState().tableExists(tabName));
+    	IActualState as = m_player.getActualState();
+    	assertFalse("tab in AS", as.tableExists(tabName));
     	assertFalse("tab in base", containTable(dbName));
+    	
+    	//Remove index names
+    	String idxName = dbName+"_pk1";
+    	as.addIndexName(idxName, "anything"); // Allow, value
     }
     
     public void testRunEditTable() throws Exception{
@@ -446,12 +452,12 @@ public class UpgradeRunnerTest extends DDLTestCase {
         		assertEquals(MessageFormat.format("ALTER TABLE {0} DROP CONSTRAINT {0}_{1}",dbName, fkName), sql);
             }
     	}
+        ArrayList<TableUpdateOperation> nodes = new ArrayList<TableUpdateOperation>();
+        nodes.add(new AddColumnOperation(FieldDef.createScalarField("int_field", ColumnType.INT, true)));
+        nodes.add(new AddColumnOperation(FieldDef.createStringField("string_field", ColumnType.CHAR, 128, true, "''")));
+        nodes.add(new AddColumnOperation(FieldDef.createDecimalField("dec_field", 4, 2, false, null)));
+        nodes.add(new AddPrimaryKeyOperation("pk1", Arrays.asList("int_field, string_field")));
     	{
-            ArrayList<TableUpdateOperation> nodes = new ArrayList<TableUpdateOperation>();
-            nodes.add(new AddColumnOperation(FieldDef.createScalarField("int_field", ColumnType.INT, true)));
-            nodes.add(new AddColumnOperation(FieldDef.createStringField("string_field", ColumnType.CHAR, 128, true, "''")));
-            nodes.add(new AddColumnOperation(FieldDef.createDecimalField("dec_field", 4, 2, false, null)));
-            nodes.add(new AddPrimaryKeyOperation("pk1", Arrays.asList("int_field, string_field")));
             
             CreateTableOperation op = new CreateTableOperation(nodes);
             
@@ -459,7 +465,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
         	assertEquals(null, sql);    		
     	}
     	{
-        	DropTableOperation op = new DropTableOperation();
+        	DropTableOperation op = new DropTableOperation(nodes);
         	String sql = m_player.getOperationString(new DBOperation(tabName, op));
         	assertEquals(MessageFormat.format("DROP TABLE {0}", dbName), sql);    		    		
     	}
@@ -1182,6 +1188,11 @@ public class UpgradeRunnerTest extends DDLTestCase {
 			con.createStatement().execute("drop table testRollbackError_exist");
 			con.commit();
 		}
+	}
+
+	public void testRunOperation()
+	 throws Exception {
+	
 	}
     
 }
