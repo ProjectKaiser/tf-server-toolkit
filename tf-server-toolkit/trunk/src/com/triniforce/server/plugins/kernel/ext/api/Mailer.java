@@ -34,7 +34,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
         initialDelay = 5000;
 	}
 	
-	@Override
+	
 	public Class getImplementedInterface() {
 		return IMailer.class;
 	}
@@ -100,7 +100,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 		}
 	}
 		
-	@Override
+	
 	public void send(String from, String to, String subject, String body) {
 		
 		IMailerSettings mailerSettings  = ApiStack.queryInterface(IMailerSettings.class);
