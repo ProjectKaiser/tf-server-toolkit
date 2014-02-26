@@ -47,17 +47,17 @@ public class MailerTest extends ServicesTestCase {
 			m_useTLS = useTLS;
 		}
 
-		@Override
+		
 		public void loadSettings() {}
-		@Override
+		
 		public String getSmtpHost() { return m_smtpHost; }
-		@Override
+		
 		public int getSmtpPort() { return m_smtpPort; }
-		@Override
+		
 		public String getSmtpUser() { return m_smtpUser; }
-		@Override
+		
 		public String getSmtpPassword() { return m_smtpPassword; }
-		@Override
+		
 		public boolean useTLS() { return m_useTLS; }
 		
 	}
