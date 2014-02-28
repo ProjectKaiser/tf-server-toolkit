@@ -437,6 +437,12 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 		TableAdapter ta = new TableAdapter();
 		ta.flush(con, m_asTable, m_asDef, ACT_STATE_TABLE);
 		ta.flush(con, m_asIndexTable, m_asIndexDef, getDBName(TIndexNames.class.getName()));
+		
+		// Reload rows because references became invalid
+		for(int i=0; i<m_asTable.getSize(); i++){
+			Row row = m_asTable.getRow(i);
+            m_state.put((String)row.getField(0), row);
+		}
 	}
 	
 	public Set<String> getDbTableNames(){
