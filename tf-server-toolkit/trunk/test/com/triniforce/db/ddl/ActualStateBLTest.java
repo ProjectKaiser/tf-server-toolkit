@@ -95,11 +95,24 @@ public class ActualStateBLTest extends DDLTestCase {
    }
 
     public void testRemoveTable() throws Exception {
-        m_as.addTable("testRemoveTable", PKG_NAME+"testRemoveTable", 12);
-        m_as.removeTable(PKG_NAME+"testRemoveTable");
-
-        assertEquals(null, m_as.getDBName(PKG_NAME+"testRemoveTable"));
-        assertEquals(0, m_as.getVersion(PKG_NAME+"testRemoveTable"));
+    	{
+	        m_as.addTable("testRemoveTable", PKG_NAME+"testRemoveTable", 12);
+	        m_as.removeTable(PKG_NAME+"testRemoveTable");
+	
+	        assertEquals(null, m_as.getDBName(PKG_NAME+"testRemoveTable"));
+	        assertEquals(0, m_as.getVersion(PKG_NAME+"testRemoveTable"));
+    	}
+    	{
+    		m_as.addTable("test_rem1", "app.test_rem1", 5);
+    		m_as.addTable("test_rem2", "app.test_rem2", 5);
+    		m_as.addTable("test_rem3", "app.test_rem3", 5);
+    		
+    		m_as.removeTable("app.test_rem2");
+    		m_as.flush(getConnection());
+    		
+    		assertEquals("test_rem1", m_as.getDBName("app.test_rem1"));
+    		assertEquals("test_rem3", m_as.getDBName("app.test_rem3"));
+    	}
     }
 
     public void testChangeVersion() throws Exception {
