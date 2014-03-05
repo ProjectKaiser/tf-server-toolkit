@@ -27,11 +27,18 @@ public abstract class BasicServerTask extends InitFinitTask{
         Thread.currentThread().setName(m_threadName);
         m_basicServer.enterMode(IBasicServer.Mode.Running);
         b_modeEntered = true;
+                
+        IThrdWatcherRegistrator twr = ApiStack.getInterface(IThrdWatcherRegistrator.class);
+        twr.registerThread(Thread.currentThread(), null);
+        
         ApiAlgs.getLog(this).trace("Task started: " + getThreadName());
+        
     };
 
     public void finit() {
         if (b_modeEntered) {
+            IThrdWatcherRegistrator twr = ApiStack.getInterface(IThrdWatcherRegistrator.class);
+            twr.unregisterThread(Thread.currentThread());
             m_basicServer.leaveMode();
             b_modeEntered = false;
         }
