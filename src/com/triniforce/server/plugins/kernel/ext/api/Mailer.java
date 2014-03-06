@@ -16,7 +16,7 @@ import com.triniforce.server.plugins.kernel.ep.api.PKEPAPIPeriodicalTask;
 import com.triniforce.server.srvapi.IDbQueue;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.INamedDbId;
-//import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
+import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiAlgs.RethrownException;
 import com.triniforce.utils.ApiStack;
@@ -137,10 +137,10 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
         	props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         }
         
-        //IThrdWatcherRegistrator twr = ApiStack
-        //        .getInterface(IThrdWatcherRegistrator.class);
+        IThrdWatcherRegistrator twr = ApiStack
+                .getInterface(IThrdWatcherRegistrator.class);
 
-        //twr.registerLongTermOp(Thread.currentThread());
+        twr.registerLongTermOp(Thread.currentThread());
         
         try{
         	Session session = null;
@@ -187,7 +187,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
                 ApiAlgs.getLog(this).error("Error sending mail, mail is skipped", e.getCause());
             }
         }finally{
-        	//twr.unregisterLongTermOp(Thread.currentThread());
+        	twr.unregisterLongTermOp(Thread.currentThread());
         }
 	
 	}
