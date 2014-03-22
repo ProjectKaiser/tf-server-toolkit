@@ -245,6 +245,13 @@ public class TFTestCase extends TestCase {
     public static String getTestProperty(String key) {
         return getTestProperties().getProperty(key);
     }
+    
+    public static String getMustHaveTestProperty(String key) {
+        String res = getTestProperties().getProperty(key);
+        TFUtils.assertNotNull(res, "tes.properties must have property:" + key);
+        return res;
+    }
+    
     public static String getTestProperty(String key, String def) {
         return getTestProperties().getProperty(key, def);
     }
