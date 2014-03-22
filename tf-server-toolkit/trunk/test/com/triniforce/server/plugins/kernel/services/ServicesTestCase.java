@@ -16,6 +16,7 @@ import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.utils.ApiStack;
 
+//TODO: ias: не очень понятно, что это такое
 public class ServicesTestCase extends BasicServerTestCase {
 	
 	static final long SM_ID = 900L;
