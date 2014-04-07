@@ -805,6 +805,9 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 	        
 	        TypeDef type = res.getType(Hand.class);
 	        assertNotNull(type);
+	        
+	        //SoapInclude annotation classes
+	        assertNotNull(res.getType(ITestHorse.CTail.class));
         }
         
         {
@@ -815,6 +818,13 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         		assertEquals("Hand", e.getMessage());
         	}
         }
+        
+//        {
+//        	List<InterfaceOperationDescription> operationDescs;
+//        	SoapInclude[] soapInc;
+//        	operationDescs = gen.listInterfaceOperations(cls, bMultiClass)
+//        	gen.parse(null, operationDescs, getClass().getPackage(), soapInc);
+//        }
     	
     }
     

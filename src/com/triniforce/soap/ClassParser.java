@@ -31,7 +31,7 @@ public class ClassParser {
         
         ClassDef parentDef = null;
         Class superclass = key.getSuperclass(); 
-        if(null != superclass && superclass.getPackage().equals(m_pkg))
+        if(null != superclass && (superclass.getPackage().equals(m_pkg) || superclass.getPackage().equals(cls.getPackage())))
             parentDef = (ClassDef) lib.add(superclass);
         
         ClassDef res = new TypeDef.ClassDef(typeName, key, parentDef);
