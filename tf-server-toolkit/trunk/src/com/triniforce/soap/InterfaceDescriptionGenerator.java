@@ -22,6 +22,7 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -114,7 +115,9 @@ public class InterfaceDescriptionGenerator {
      */
     public InterfaceDescription parse(InterfaceDescription oldDesc, Class<?> cls, Package pkg){
         try{
-	    	return parse(oldDesc, listInterfaceOperations(cls, false), pkg, cls.getAnnotation(SoapInclude.class));
+        	SoapInclude anno = cls.getAnnotation(SoapInclude.class);
+        	List<SoapInclude> incs = null == anno ? Collections.EMPTY_LIST : Arrays.asList(anno);
+	    	return parse(oldDesc, listInterfaceOperations(cls, false), pkg, incs);
         } catch (IntrospectionException e) {
             ApiAlgs.rethrowException(e);
             return null;
@@ -799,21 +802,28 @@ public class InterfaceDescriptionGenerator {
     
     public InterfaceDescription parse(InterfaceDescription oldDesc, List<Class> interfaces) throws IntrospectionException {
     	ArrayList<InterfaceOperationDescription> ops = new ArrayList<InterfaceOperationDescription>();
+    	List<SoapInclude> soapIncs = new ArrayList<SoapInclude>();
     	for(Class cls : interfaces){
     		ops.addAll(listInterfaceOperations(cls, true));
+    		SoapInclude anno = (SoapInclude) cls.getAnnotation(SoapInclude.class);
+    		if(null != anno){
+    			soapIncs.add(anno);
+    		}
+    		
     	}
-    	return parse(oldDesc, ops, getClass().getPackage(), null);
+    	return parse(oldDesc, ops, getClass().getPackage(), soapIncs);
     }
 
 	public InterfaceDescription parse(InterfaceDescription oldDesc, 
-			List<InterfaceOperationDescription> operationDescs, Package pkg, SoapInclude soapInc) {
+			List<InterfaceOperationDescription> operationDescs, Package pkg, List<SoapInclude> soapIncs) {
     	
         InterfaceDescription res = new InterfaceDescription();
         TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(pkg));
         for (InterfaceOperationDescription opDesc : operationDescs) {
             res.getOperations().add(parseOperation(opDesc, lib));
         }
-        if(null != soapInc){
+        
+        for(SoapInclude soapInc : soapIncs){
             for(Class extraCls : soapInc.extraClasses()){
                 lib.add(extraCls);
             }
@@ -922,7 +932,9 @@ public class InterfaceDescriptionGenerator {
 	
 	public List<ValErrItem> validateInterface(List<InterfaceOperationDescription> ops, Package pkg, SoapInclude soapInc){
 		ArrayList<ValErrItem> res = new ArrayList<ValErrItem>();
-		InterfaceDescription desc = parse(null, ops, pkg, soapInc);
+
+		List<SoapInclude> incs = null == soapInc ? Collections.EMPTY_LIST : Arrays.asList(soapInc);
+		InterfaceDescription desc = parse(null, ops, pkg, incs);
 		for(TypeDef td : desc.getTypes()){
 			if(td instanceof ClassDef){
 				ClassDef cd = (ClassDef) td;

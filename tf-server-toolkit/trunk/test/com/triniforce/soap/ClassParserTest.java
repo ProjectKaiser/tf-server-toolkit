@@ -21,6 +21,8 @@ import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
+import com.triniforce.soap.testpkg_01.CChild1;
+import com.triniforce.soap.testpkg_02.CChild2;
 import com.triniforce.utils.ApiAlgs;
 
 public class ClassParserTest extends TFTestCase {
@@ -414,5 +416,13 @@ public class ClassParserTest extends TFTestCase {
     
     public void testInnerClss(){
     	m_lib.add(COut.class);
+    }
+    
+    public void testExtending(){
+    	ClassDef def1 = (ClassDef) m_lib.add(CChild1.class);
+    	assertEquals("CParent", def1.getParentDef().getName());
+    	
+    	ClassDef def2 = (ClassDef) m_lib.add(CChild2.class);
+    	assertEquals(null, def2.getParentDef());
     }
 }
