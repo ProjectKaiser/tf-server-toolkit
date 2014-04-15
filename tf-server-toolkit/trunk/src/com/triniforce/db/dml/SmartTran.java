@@ -157,7 +157,10 @@ public class SmartTran extends StmtContainer implements ISmartTran {
 	        		wc.and(new Expr.In("", name.getName(), Array.getLength(lookUpValues[i])));
 	        	}
 	        	else if(lookUpValues[i] instanceof Collection){
-                    wc.and(new Expr.In("", name.getName(), ((Collection)(lookUpValues[i])).size()));
+	        	    Collection c = (Collection) lookUpValues[i];
+	        	    if(c.size() > 0){
+	        	        wc.and(new Expr.In("", name.getName(), ((Collection)(lookUpValues[i])).size()));
+	        	    }
                 }
                 else if(lookUpValues[i] instanceof ISmartTran.Between){
                     wc.and(new Expr.Between("", name.getName()));
