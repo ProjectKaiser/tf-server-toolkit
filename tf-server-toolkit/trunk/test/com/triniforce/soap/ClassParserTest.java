@@ -290,6 +290,10 @@ public class ClassParserTest extends TFTestCase {
         assertNotNull(mapDef);
         
         assertSame(m_lib.add(int.class), m_lib.get(int.class));
+        
+        
+        ClassDef td1 = (ClassDef) m_lib.add(StackTraceElement.class);
+        assertNull(td1.getParentDef());
     }
     
     static class Cls1{}
