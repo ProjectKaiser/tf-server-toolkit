@@ -31,8 +31,14 @@ public class ClassParser {
         
         ClassDef parentDef = null;
         Class superclass = key.getSuperclass(); 
-        if(null != superclass && (superclass.getPackage().equals(m_pkg) || superclass.getPackage().equals(cls.getPackage())))
-            parentDef = (ClassDef) lib.add(superclass);
+        if(null != superclass && (superclass.getPackage().equals(m_pkg) || superclass.getPackage().equals(cls.getPackage()))){
+        	TypeDef def = lib.add(superclass);
+        	if(def instanceof ClassDef)
+        		parentDef = (ClassDef) def;
+        	else{
+        		//throw new ESoap.InvalidTypeName(typeName);
+        	}
+        }
         
         ClassDef res = new TypeDef.ClassDef(typeName, key, parentDef);
         
