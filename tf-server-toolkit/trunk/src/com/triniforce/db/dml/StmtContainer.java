@@ -120,6 +120,7 @@ public class StmtContainer implements IStmtContainer {
             m_statements.add(stmt);
             return stmt;
         } catch (Exception e) {
+            ApiAlgs.getLog(this).error("Error preparing sql:" + profItem + ": " + sql);
             ApiAlgs.rethrowException(e);
         }
         finally{
