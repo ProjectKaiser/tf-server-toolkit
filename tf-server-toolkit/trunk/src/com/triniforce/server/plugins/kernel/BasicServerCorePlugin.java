@@ -83,6 +83,7 @@ import com.triniforce.utils.Profiler.INanoTimer;
 import com.triniforce.utils.Profiler.ProfilerStack;
 import com.triniforce.utils.TFUtils;
 
+@SuppressWarnings("unused")
 public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	
 	private Api m_runningApi;
@@ -140,7 +141,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         putExtension(PKEPAPIs.class, TimedLock2.class);
         
         putExtension(PKEPAPIs.class, PTRecurringTasks.class);
-        putExtension(PKEPAPIs.class, Mailer.class);
+        //putExtension(PKEPAPIs.class, Mailer.class);
 
 	}
 
