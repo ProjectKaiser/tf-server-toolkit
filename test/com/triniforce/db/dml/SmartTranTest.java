@@ -277,6 +277,42 @@ public class SmartTranTest extends DBTestCase {
     	
     }
     
+    
+    public void testSelectIn() throws Exception{
+        createTableIfNeeded(new TestDef());
+        SmartTran tr2 = new SmartTran(getConnection());
+        tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{1,"v_1", 100});
+        tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{2,"v_2", 100});
+        tr2.insert(TestDef.class, new IName[]{TestDef.f1,TestDef.f2,TestDef.f3}, new Object[]{3,"v_3", 101});
+        //empty in
+        {
+            List emptyList = new ArrayList();
+            ResSet res = tr2.select(TestDef.class
+                , new IName[]{TestDef.f1}
+                , new IName[]{TestDef.f1}, new Object[]{emptyList}
+                , new IName[]{TestDef.f1}
+                    );
+            assertFalse(res.next());
+        }
+        //two elements
+        {
+            List inValues = new ArrayList();
+            inValues.add("v_1");
+            inValues.add("v_3");
+            ResSet res = tr2.select(TestDef.class
+                    , new IName[]{TestDef.f2}
+                    , new IName[]{TestDef.f2}, new Object[]{inValues}
+                    , new IName[]{TestDef.f2}
+                        );
+            
+            //two records
+            assertTrue(res.next());
+            assertTrue(res.next());
+            assertFalse(res.next());
+
+        }
+    
+    }
     public void testSelectBetween() throws Exception{
         createTableIfNeeded(new TestDef());
         SmartTran tr2 = new SmartTran(getConnection());
