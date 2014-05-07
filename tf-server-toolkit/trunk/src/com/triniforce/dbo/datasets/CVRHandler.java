@@ -25,6 +25,7 @@ import com.triniforce.server.soap.WhereExpr.ColumnExpr;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
+import com.triniforce.utils.TFUtils;
 
 public class CVRHandler implements ICVRHandler {
 	
@@ -334,6 +335,7 @@ public class CVRHandler implements ICVRHandler {
 		DSMetadata md = null;
 		IPKRootExtensionPoint root = ApiStack.getInterface(IBasicServer.class);
 		Collection<IPKExtension> providerExtensions = root.getExtensionPoint(PKEPDatasetProviders.class).getExtensions().values();
+		TFUtils.assertNotNull(req.getTarget(), "CollectionViewRequest.target");
 		for (IPKExtension ipkExtension : providerExtensions) {
 			PKEPDatasetProvider provider = ipkExtension.getInstance();
 			md = provider.queryTarget(req.getTarget());
