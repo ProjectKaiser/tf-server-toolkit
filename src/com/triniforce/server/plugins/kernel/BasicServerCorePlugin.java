@@ -30,8 +30,6 @@ import com.triniforce.server.plugins.kernel.ep.sp.PKEPServerProcedures;
 import com.triniforce.server.plugins.kernel.ep.srv_ev.PKEPServerEvents;
 import com.triniforce.server.plugins.kernel.ep.tr_ext.PKEPTranInners;
 import com.triniforce.server.plugins.kernel.ep.tr_ext.PKEPTranOuters;
-import com.triniforce.server.plugins.kernel.ext.api.Mailer;
-import com.triniforce.server.plugins.kernel.ext.api.PTRecurringTasks;
 import com.triniforce.server.plugins.kernel.ext.br.BackupRestoreDb;
 import com.triniforce.server.plugins.kernel.ext.br.BackupRestorePluginVersions;
 import com.triniforce.server.plugins.kernel.recurring.PKEPRecurringTasks;
@@ -83,7 +81,6 @@ import com.triniforce.utils.Profiler.INanoTimer;
 import com.triniforce.utils.Profiler.ProfilerStack;
 import com.triniforce.utils.TFUtils;
 
-@SuppressWarnings("unused")
 public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	
 	private Api m_runningApi;
@@ -127,7 +124,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         
 	}
 	
-	public void doRegistration(){
+    public void doRegistration(){
     
 	    putExtension(PKEPTranOuters.class, RefCountMapTrnExtender.class);
 	    putExtension(PKEPTranOuters.class, FiniterExtender.class);
@@ -140,7 +137,6 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         putExtension(PKEPAPIs.class, ThrdWatcherRegistrator.class);
         putExtension(PKEPAPIs.class, TimedLock2.class);
         
-        putExtension(PKEPAPIs.class, PTRecurringTasks.class);
         //putExtension(PKEPAPIs.class, Mailer.class);
 
 	}
