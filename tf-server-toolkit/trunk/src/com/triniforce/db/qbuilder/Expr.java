@@ -244,6 +244,27 @@ public class Expr {
         }
     }
 
+    public static class IntegralConstant extends Expr{
+        String m_str;
+        void init(Number num){
+            if(null == num){
+                m_str = "null";
+            }
+            m_str = num.toString();
+        }
+        public IntegralConstant(Long num) {
+            init(num);
+        }
+        public IntegralConstant(Integer num) {
+            init(num);
+        }
+        @Override
+        public String toString() {
+            return m_str;
+        }
+        
+    }
+    
     public static class IsNull extends Expr {
         String m_str;
 
