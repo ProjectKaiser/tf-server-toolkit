@@ -15,6 +15,9 @@ public class SrvTable extends QTable {
     public SrvTable(Class tableDef, String prefix) {
         super(SrvApiAlgs2.getISODbInfo().getTableDbName(tableDef.getName()), prefix);
     }
+    public SrvTable(String tableDefName, String prefix) {
+        super(SrvApiAlgs2.getISODbInfo().getTableDbName(tableDefName), prefix);
+    }
     public SrvTable(Class tableDef) {
         this( tableDef, "" ); //$NON-NLS-1$
     }    
