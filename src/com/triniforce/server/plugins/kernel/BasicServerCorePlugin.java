@@ -26,6 +26,8 @@ import com.triniforce.server.TFPlugin;
 import com.triniforce.server.plugins.kernel.ep.api.IPKEPAPI;
 import com.triniforce.server.plugins.kernel.ep.api.PKEPAPIs;
 import com.triniforce.server.plugins.kernel.ep.br.PKEPBackupRestore;
+import com.triniforce.server.plugins.kernel.ep.external_classes.ExternalClasses;
+import com.triniforce.server.plugins.kernel.ep.external_classes.PKEPExternalClasses;
 import com.triniforce.server.plugins.kernel.ep.sp.PKEPServerProcedures;
 import com.triniforce.server.plugins.kernel.ep.srv_ev.PKEPServerEvents;
 import com.triniforce.server.plugins.kernel.ep.tr_ext.PKEPTranInners;
@@ -136,6 +138,8 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         
         putExtension(PKEPAPIs.class, ThrdWatcherRegistrator.class);
         putExtension(PKEPAPIs.class, TimedLock2.class);
+        
+        putExtension(PKEPAPIs.class, ExternalClasses.class);
         
         //putExtension(PKEPAPIs.class, Mailer.class);
 
@@ -550,6 +554,8 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         putExtensionPoint(new PKEPTranInners());
         putExtensionPoint(new PKEPTranOuters());
         putExtensionPoint(new PKEPAPIs());
+        
+        putExtensionPoint(new PKEPExternalClasses());
     }
 
 
