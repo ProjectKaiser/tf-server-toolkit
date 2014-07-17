@@ -18,13 +18,28 @@ import com.triniforce.utils.ApiStack;
 public class PKEPExternalClassesTest extends BasicServerRunningTestCase {
     
     public static class ClassesFolder_All extends ClassesFolder{
+        private final File m_folder;
+
         public ClassesFolder_All(File folder) {
-            super(folder);
+            m_folder = folder;
         }
+
+        @Override
+        public File getFolder() {
+            return m_folder;
+        }
+        
     }
     public static class ClassesFolder_OnlyClasses extends ClassesFolder{
+        private final File m_folder;
+
         public ClassesFolder_OnlyClasses(File folder){
-            super(folder);
+            m_folder = folder;
+        }
+
+        @Override
+        public File getFolder() {
+            return m_folder;
         }
     }
     
