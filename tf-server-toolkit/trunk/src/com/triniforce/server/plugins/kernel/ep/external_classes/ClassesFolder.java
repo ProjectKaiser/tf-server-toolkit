@@ -14,17 +14,14 @@ import com.triniforce.extensions.PluginsLoader;
 /**
  * Location folder where jars should be loaded from
  */
-public class ClassesFolder{
+public abstract class ClassesFolder{
     
-    private final File m_folder;
     Collection<Class> m_classes = null;
 
-    public ClassesFolder(File folder){
-        m_folder = folder;
-    }
+    public abstract File getFolder();
     
     synchronized void loadClasses(){
-        PluginsLoader pl =  new PluginsLoader(m_folder);
+        PluginsLoader pl =  new PluginsLoader(getFolder());
         m_classes = pl.loadClasses();
     }
     
