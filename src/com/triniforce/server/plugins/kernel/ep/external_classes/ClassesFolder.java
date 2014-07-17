@@ -16,6 +16,9 @@ import com.triniforce.extensions.PluginsLoader;
  */
 public abstract class ClassesFolder{
     
+    public ClassesFolder() {
+    }
+    
     Collection<Class> m_classes = null;
 
     public abstract File getFolder();

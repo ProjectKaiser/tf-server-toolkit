@@ -18,28 +18,21 @@ import com.triniforce.utils.ApiStack;
 public class PKEPExternalClassesTest extends BasicServerRunningTestCase {
     
     public static class ClassesFolder_All extends ClassesFolder{
-        private final File m_folder;
 
-        public ClassesFolder_All(File folder) {
-            m_folder = folder;
+        public ClassesFolder_All() {
         }
-
+        
         @Override
         public File getFolder() {
-            return m_folder;
+            return folder1;
         }
         
     }
     public static class ClassesFolder_OnlyClasses extends ClassesFolder{
-        private final File m_folder;
-
-        public ClassesFolder_OnlyClasses(File folder){
-            m_folder = folder;
-        }
 
         @Override
         public File getFolder() {
-            return m_folder;
+            return folder2;
         }
     }
     
@@ -48,10 +41,8 @@ public class PKEPExternalClassesTest extends BasicServerRunningTestCase {
         @Override
         public void doRegistration() {
 
-            ClassesFolder cfAll = new ClassesFolder_All(folder1);
-            ClassesFolder cfOnlyClasses = new ClassesFolder_OnlyClasses(folder2);
-            putExtension(PKEPExternalClasses.class, cfAll.getClass().getName(), cfAll);
-            putExtension(PKEPExternalClasses.class, cfOnlyClasses.getClass().getName(), cfOnlyClasses);
+            putExtension(PKEPExternalClasses.class, ClassesFolder_All.class);
+            putExtension(PKEPExternalClasses.class, ClassesFolder_OnlyClasses.class);
             
         }
 
@@ -61,19 +52,12 @@ public class PKEPExternalClassesTest extends BasicServerRunningTestCase {
         
     }
     
-    File folder1;
-    File folder2;
+    static File folder1;
+    static File folder2;
     
     @Override
     protected void setUp() throws Exception {
         addPlugin(new MyPlugin());
-        folder1 = new File(getTmpFolder(this), "f1");
-        folder1.mkdirs();
-        folder2 = new File(getTmpFolder(this), "f2");
-        folder2.mkdirs();
-        PluginsLoaderTest.copyTestPlugins(folder1);
-        PluginsLoaderTest.copyClasses(folder2);
-        
         super.setUp();
         
 
@@ -83,6 +67,15 @@ public class PKEPExternalClassesTest extends BasicServerRunningTestCase {
     @Override
     public void test() throws Exception {
         
+        folder1 = new File(getTmpFolder(this), "f1");
+        folder1.mkdirs();
+        folder2 = new File(getTmpFolder(this), "f2");
+        folder2.mkdirs();
+        
+        PluginsLoaderTest.copyTestPlugins(folder1);
+        PluginsLoaderTest.copyClasses(folder2);
+        
+       
         IExternalClasses ec = ApiStack.getInterface(IExternalClasses.class);
         //test all jars
         {
