@@ -28,6 +28,10 @@ public class PluginsLoader {
     public List<File> getJarFiles(){
         List<File> res = new ArrayList<File>();
         
+        if(! m_folder.exists() || !m_folder.isDirectory()){
+            return res;
+        }
+        
         for(String fileName: m_folder.list()){
             File jarFile = new File(m_folder, fileName);
             if(jarFile.isFile() && fileName.endsWith(".jar")){
