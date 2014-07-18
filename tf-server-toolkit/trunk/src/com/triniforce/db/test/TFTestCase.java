@@ -187,10 +187,19 @@ public class TFTestCase extends TestCase {
     	return res;
     }
     
+    /**
+     * Use getTempTestFolder() or getTmpFolder(TFTestCase test) instead
+     * @return
+     */
+    @Deprecated
     public static File getTmpFolder(){
         File res = new File(getTfTestFolder(), "tmp");
         res.mkdirs();
         return res;
+    }
+    
+    public File getTempTestFolder(){
+        return getTmpFolder(this);
     }
     
     boolean tmpFolderCreated = false;
