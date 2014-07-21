@@ -3,11 +3,11 @@
  * All Rights Reserved.
  *
  */ 
-package com.triniforce.url_notifier;
+package com.triniforce.syncbus;
 
 import java.util.Collection;
 
-public interface IUrlListener{
+public interface ISubscriber{
     void reset(Object key);
     void handleEvents(Object key, Collection<Object> events, int missedEvents);
 }

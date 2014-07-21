@@ -3,8 +3,8 @@
  * All Rights Reserved.
  *
  */ 
-package com.triniforce.url_notifier;
+package com.triniforce.syncbus;
 
-public class UrlNotifier {
-    
+public interface IPublisher {
+
 }
