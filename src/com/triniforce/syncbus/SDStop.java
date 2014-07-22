@@ -5,6 +5,6 @@
  */ 
 package com.triniforce.syncbus;
 
-public interface IIncrementalPublisher {
+public class SDStop extends SubscrData{
 
 }
