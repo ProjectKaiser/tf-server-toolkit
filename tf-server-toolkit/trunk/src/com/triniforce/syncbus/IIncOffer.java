@@ -5,6 +5,7 @@
  */ 
 package com.triniforce.syncbus;
 
-public interface IPublisher {
-
+public interface IIncOffer extends IEntireOffer{
+    void incOffer(Object data);
+    
 }

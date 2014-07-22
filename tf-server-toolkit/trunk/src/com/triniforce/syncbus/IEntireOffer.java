@@ -5,6 +5,6 @@
  */ 
 package com.triniforce.syncbus;
 
-public interface ISubscriber{
-    SubscrResponse handleEvent(Object addr, SubscrData data);  
+public interface IEntireOffer {
+    boolean entireOffer(Object o);
 }

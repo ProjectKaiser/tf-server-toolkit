@@ -5,6 +5,6 @@
  */ 
 package com.triniforce.syncbus;
 
-public interface IEntirePublisher {
-    Object getEntireData();
+public class SubscrResponse {
+
 }
