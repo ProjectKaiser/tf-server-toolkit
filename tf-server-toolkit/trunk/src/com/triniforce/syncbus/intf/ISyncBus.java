@@ -3,7 +3,7 @@
  * All Rights Reserved.
  *
  */ 
-package com.triniforce.syncbus;
+package com.triniforce.syncbus.intf;
 
 public interface ISyncBus {
 
@@ -15,13 +15,24 @@ public interface ISyncBus {
     void registerEntirePub(IEntirePub entPub);
     
     void registerSubscriber(Object addr, ISubscriber subscr);
+
+    /**
+     * @param addr
+     * @param subscr addr.getName() will be used as address
+     */
+    void registerSubscriber(Class addr, ISubscriber subscr);
     
     void unregisterSubscriber(ISubscriber subscr);
     void unregisterPub(ISubscriber subscr);
 
     
     void postStop();
-    void waitForStoppedState();
+    void waitForAllStoppedState();
+    
+    void postPub(Object addrFrom, SDPub pubData);
+    
+    IEntirePub queryPub(Object addr);
+    
     
     /**
      * @param url

@@ -3,7 +3,7 @@
  * All Rights Reserved.
  *
  */ 
-package com.triniforce.syncbus;
+package com.triniforce.syncbus.intf;
 
 public interface IEntirePub {
     Object getEntireData();
