@@ -1,0 +1,7 @@
+*Extension class*
+ServerEventHandler
+
+*Processing*
+When any event occurs on the server event handlers are called. No exception must be thrown.
+
+All events but SERVER_FINIT are processed in registration order, SERVER_FINIT uses reverse order
