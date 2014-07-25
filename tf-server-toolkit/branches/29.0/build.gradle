@@ -1,8 +1,8 @@
 if (IS_OBSOLETE_GRADLE_VERSION())
 	ext = project
 
-ext.tf_version = '29.1';
-ext.tf_release = false
+ext.tf_version = '29.0';
+ext.tf_release = true
 ext.tf_vendor = 'Triniforce.com'
 
 apply plugin: 'java'
