@@ -117,7 +117,7 @@ import com.triniforce.utils.ApiAlgs;
 
 	protected void doServiceCall(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		ServletInputStream is = request.getInputStream(); 
-		byte[] buf = new byte[100000];
+		byte[] buf = new byte[10000];
 		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 		int nr;
 		while((nr = is.read(buf)) > 0){
