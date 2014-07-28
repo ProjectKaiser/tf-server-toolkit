@@ -7,15 +7,15 @@ package com.triniforce.syncbus;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.triniforce.syncbus.intf.IEntireOffer;
-import com.triniforce.syncbus.intf.IEntirePub;
+import com.triniforce.syncbus.intf.ICompleteOffer;
+import com.triniforce.syncbus.intf.ICompletePublisher;
 import com.triniforce.syncbus.intf.ISubscriber;
 import com.triniforce.syncbus.intf.ISyncBus;
-import com.triniforce.syncbus.intf.SDPub;
+import com.triniforce.syncbus.intf.SDEntire;
 
 public class SyncBus implements ISyncBus{
     
-    class EntireOffer implements IEntireOffer{
+    class EntireOffer implements ICompleteOffer{
         
         private final Object addr;
         public EntireOffer(Object addr) {
@@ -35,8 +35,8 @@ public class SyncBus implements ISyncBus{
     }
     
     
-    public void registerEntirePub(Object addr, IEntirePub ep) {
-        IEntireOffer eo = new EntireOffer(addr);
+    public void registerEntirePub(Object addr, ICompletePublisher ep) {
+        ICompleteOffer eo = new EntireOffer(addr);
         PubHolder h = new PubHolder(addr, ep, eo);
         PubHolder old = m_pubs.putIfAbsent(addr, h);
         if(null == old){
@@ -44,7 +44,7 @@ public class SyncBus implements ISyncBus{
         }
     }
 
-    public void registerEntirePub(IEntirePub entPub) {
+    public void registerEntirePub(ICompletePublisher entPub) {
         registerEntirePub(entPub.getClass().getName(), entPub);
         
     }
@@ -79,12 +79,12 @@ public class SyncBus implements ISyncBus{
         
     }
 
-    public void postPub(Object addrFrom, SDPub pubData) {
+    public void postPub(Object addrFrom, SDEntire pubData) {
         // TODO Auto-generated method stub
         
     }
 
-    public IEntirePub queryPub(Object addr) {
+    public ICompletePublisher queryPub(Object addr) {
         // TODO Auto-generated method stub
         return null;
     }

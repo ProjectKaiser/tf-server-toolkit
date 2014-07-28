@@ -5,7 +5,6 @@
  */ 
 package com.triniforce.syncbus.intf;
 
-public interface IIncOffer extends IEntireOffer{
-    void incOffer(Object data);
-    
+public interface ICompleteOffer {
+    boolean entireOffer(Object o);
 }
