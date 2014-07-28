@@ -5,13 +5,13 @@
  */ 
 package com.triniforce.syncbus.intf;
 
-public interface IEntirePub {
+public interface ICompletePublisher {
     Object getEntireData();
     
     /** 
      * Called once in the beginning prior any getEntireData();
      */
-    void setIEntireOffer(IEntireOffer ioffer);
+    void setIEntireOffer(ICompleteOffer ioffer);
     
     void stop();
 }

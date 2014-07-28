@@ -5,12 +5,12 @@
  */ 
 package com.triniforce.syncbus.intf;
 
-public interface IIncPub extends IEntirePub{ 
+public interface IIncrementalPublisher extends ICompletePublisher{ 
     
     /**
      * Called once in the beginning prior any getEntireData();
      */
-    void setIIncOffer(IEntireOffer ioffer);
+    void setIIncOffer(ICompleteOffer ioffer);
 
 
 }

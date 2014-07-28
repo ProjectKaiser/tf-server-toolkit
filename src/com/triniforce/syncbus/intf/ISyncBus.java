@@ -7,12 +7,12 @@ package com.triniforce.syncbus.intf;
 
 public interface ISyncBus {
 
-    void registerEntirePub(Object addr, IEntirePub entPub);
+    void registerEntirePub(Object addr, ICompletePublisher entPub);
     
     /**
      * @param entPub entPub.getClass().getName() will be used for addr
      */
-    void registerEntirePub(IEntirePub entPub);
+    void registerEntirePub(ICompletePublisher entPub);
     
     void registerSubscriber(Object addr, ISubscriber subscr);
 
@@ -29,9 +29,9 @@ public interface ISyncBus {
     void postStop();
     void waitForAllStoppedState();
     
-    void postPub(Object addrFrom, SDPub pubData);
+    void postPub(Object addrFrom, SDEntire pubData);
     
-    IEntirePub queryPub(Object addr);
+    ICompletePublisher queryPub(Object addr);
     
     
     /**

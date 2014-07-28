@@ -5,7 +5,7 @@
  */ 
 package com.triniforce.syncbus.intf;
 
-public class SDPub extends SubscrData{
+public class SDEntire extends SubscrData{
     
     private final boolean m_isIncremental;
     private final Object m_data;
@@ -14,7 +14,7 @@ public class SDPub extends SubscrData{
         return m_isIncremental;
     }
     
-    public SDPub(boolean m_isIncremental,  Object m_data){
+    public SDEntire(boolean m_isIncremental,  Object m_data){
         this.m_isIncremental = m_isIncremental;
         this.m_data = m_data;
     }
