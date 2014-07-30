@@ -13,10 +13,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.IDefLibrary.ITypeNameGenerator;
@@ -123,6 +124,30 @@ public class TypeDefLibCacheTest extends TFTestCase {
         List<C1> getV1();
     }
     
+    class ParamType1<T1,T2,T3>{
+    	T1 val1;
+    	T2 val2; 
+    	T3 val3;
+		public T1 getVal1() {
+			return val1;
+		}
+		public void setVal1(T1 val1) {
+			this.val1 = val1;
+		}
+		public T2 getVal2() {
+			return val2;
+		}
+		public void setVal2(T2 val2) {
+			this.val2 = val2;
+		}
+		public T3 getVal3() {
+			return val3;
+		}
+		public void setVal3(T3 val3) {
+			this.val3 = val3;
+		}
+    }
+    
     public void testClassDefLib(){
         HashMap<Type, TypeDef> clss = new HashMap<Type, TypeDef>();
         ClassDefLib cLib = new TypeDefLibCache.ClassDefLib(m_parser, m_lib, clss, m_lib);
@@ -130,6 +155,14 @@ public class TypeDefLibCacheTest extends TFTestCase {
         assertNotNull(cd);
         assertSame(cd, cLib.add(IA1.C1.class));
         assertSame(cd, cLib.get(IA1.C1.class));
+        
+        
+        {
+        	ClassDef res = (ClassDef) cLib.add(ParamType1.class);
+        	PropDef p1 = res.getProp("val2");
+        	assertNotNull(p1);
+        	assertSame(p1.getType(), m_lib.get(Object.class));
+        }
     }
     
     static class arraYoFfloaT{
@@ -172,42 +205,49 @@ public class TypeDefLibCacheTest extends TFTestCase {
         
     }
     
+    public void testUnsupportedType(){
+    	m_lib.add(LinkedHashMap.class);
+    }
+    
     public void testArrayDefLib() throws SecurityException, NoSuchMethodException{
+    	
         HashMap<TypeDef, ArrayDef> map = new HashMap<TypeDef, ArrayDef>();
         ArrayDefLib arrLib = new TypeDefLibCache.ArrayDefLib(m_lib, map, m_lib);
         
-        ArrayDef ad = arrLib.add(int[].class);
-        assertNotNull(ad);
-        assertSame(ad, arrLib.get(int[].class));
-        assertSame(ad, arrLib.getDefs().iterator().next());
-        
-        ad = arrLib.add(IA1.class.getMethod("getV1", (Class[])null).getGenericReturnType());
-        assertNotNull(m_lib.get(IA1.C1.class));
-        
-        assertEquals(IA1.C1[].class.getName(), ad.getType());
-        
-        PropDef prop = ad.getPropDef();
-        assertNotNull(prop);
-        assertEquals("value", prop.getName());
-        
-        List<C1> list = Arrays.asList(new IA1.C1(), new IA1.C1());
-        assertSame(list, ad.getPropDef().get(list));
-        
-        Object[] arr = list.toArray();
-        assertEquals(list, ad.getPropDef().get(arr));
-        
-        list = new ArrayList<C1>();
-        C1 obj = new C1();
-        ad.getPropDef().set(list, obj);
-        assertEquals(1, list.size());
-        
-        ad = arrLib.add(boolean[].class);
-        assertFalse(ad.getPropDef().getType().isNullable());
-        Collection res = (Collection) ad.getPropDef().get(new int[]{0,1,2});
-        assertEquals(Arrays.asList(0,1,2), res);
-        
-        assertEquals("arraYoFfloaT", m_lib.add(arraYoFfloaT.class).getName());
-        assertEquals("ArrayOfFloat1", m_lib.add(float[].class).getName());
+        {
+	        ArrayDef ad = arrLib.add(int[].class);
+	        assertNotNull(ad);
+	        assertSame(ad, arrLib.get(int[].class));
+	        assertSame(ad, arrLib.getDefs().iterator().next());
+	        
+	        ad = arrLib.add(IA1.class.getMethod("getV1", (Class[])null).getGenericReturnType());
+	        assertNotNull(m_lib.get(IA1.C1.class));
+	        
+	        assertEquals(IA1.C1[].class.getName(), ad.getType());
+	        
+	        PropDef prop = ad.getPropDef();
+	        assertNotNull(prop);
+	        assertEquals("value", prop.getName());
+	        
+	        List<C1> list = Arrays.asList(new IA1.C1(), new IA1.C1());
+	        assertSame(list, ad.getPropDef().get(list));
+	        
+	        Object[] arr = list.toArray();
+	        assertEquals(list, ad.getPropDef().get(arr));
+	        
+	        list = new ArrayList<C1>();
+	        C1 obj = new C1();
+	        ad.getPropDef().set(list, obj);
+	        assertEquals(1, list.size());
+	        
+	        ad = arrLib.add(boolean[].class);
+	        assertFalse(ad.getPropDef().getType().isNullable());
+	        Collection res = (Collection) ad.getPropDef().get(new int[]{0,1,2});
+	        assertEquals(Arrays.asList(0,1,2), res);
+	        
+	        assertEquals("arraYoFfloaT", m_lib.add(arraYoFfloaT.class).getName());
+	        assertEquals("ArrayOfFloat1", m_lib.add(float[].class).getName());
+    	}
         
         
     }

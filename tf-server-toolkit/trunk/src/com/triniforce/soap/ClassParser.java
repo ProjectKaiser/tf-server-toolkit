@@ -60,7 +60,8 @@ public class ClassParser {
 //                if(!Modifier.isStatic(getter.getModifiers()) && 
 //                        propType.equals(getter.getGenericReturnType())){
                     Class propCls = TypeDefLibCache.toClass(propType);
-                    PropDef propDef = new PropDef(lowerName, lib.add(propType), propCls.getName(), 
+                    TypeDef td = lib.add(propType);
+                    PropDef propDef = new PropDef(lowerName, td, propCls.getName(), 
                             new ClassDef.CDGetSet(cls.getName(), getter.getName(), setter.getName()));
                     res.getOwnProps().add(propDef);
                 }

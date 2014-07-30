@@ -55,7 +55,8 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         }
 
         public ScalarDef get(Type type) {
-            return m_scalars.get(type);
+        	Class cls = TypeDefLibCache.toClass(type);
+            return m_scalars.get(cls);
         }
         
         public Collection<ScalarDef> getDefs() {
