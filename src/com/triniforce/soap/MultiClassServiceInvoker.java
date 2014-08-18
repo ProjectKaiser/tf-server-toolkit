@@ -32,7 +32,7 @@ public class MultiClassServiceInvoker implements IServiceInvoker {
 	
 	public void addServiceEndpoint(String prefix, Object serviceEndpoint){
 		if(prefix.indexOf(DELIM)>=0)
-			throw new IllegalArgumentException(prefix);
+			throw new IllegalArgumentException(String.format("Underscore in package name : %s", prefix));
 		if(m_endpoints.containsKey(prefix))
 			throw new EServiceEndpointAlreadyRegistered(prefix);
 		
