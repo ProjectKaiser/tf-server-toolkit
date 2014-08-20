@@ -171,7 +171,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
             	ApiAlgs.getLog(this).error("Error preparing mail, mail is skipped",t);//$NON-NLS-1$
                 return;
             }
-            ApiAlgs.getLog(this).trace("Sending email:"+ body);//$NON-NLS-1$
+            ApiAlgs.getLog(this).info("Sending email:"+ body);//$NON-NLS-1$
             final MimeMessage finalMsg = msg; 
             try{
             	IRunnable r = new InSeparateThreadExecutor.IRunnable(){
@@ -181,7 +181,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
                 };
                 InSeparateThreadExecutor ex = new InSeparateThreadExecutor();
                 ex.execute("Send mail", r, outerTimeout);
-                ApiAlgs.getLog(this).trace("Mail sent");
+                ApiAlgs.getLog(this).info("Mail sent");
 
             } catch(RethrownException e){
                 ApiAlgs.getLog(this).error("Error sending mail, mail is skipped", e.getCause());
