@@ -12,12 +12,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.triniforce.server.srvapi.IPlugin;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.TFUtils;
 
 public class PluginsLoader {
+    
+    public static String trimVersion(String name){
+        Pattern pattern = Pattern.compile("-\\d.*");
+        Matcher matcher = pattern.matcher(name);
+        if(!matcher.find()){
+            return name;
+        }
+        return name.substring(0, matcher.start());
+        
+    }
     
     private final File m_folder;
 

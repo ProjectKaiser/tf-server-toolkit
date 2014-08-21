@@ -28,6 +28,13 @@ public class PluginsLoaderTest extends TFTestCase {
             os.close();
         }
     }
+
+    public void test_trimVersion(){
+        assertEquals("name", PluginsLoader.trimVersion("name"));
+        assertEquals("name", PluginsLoader.trimVersion("name-1"));
+        assertEquals("name2", PluginsLoader.trimVersion("name2-1.123-adqd"));
+        assertEquals("name3-po", PluginsLoader.trimVersion("name3-po-1.123-adqd"));
+    }
     
     @Override
     public void test() throws Exception {
