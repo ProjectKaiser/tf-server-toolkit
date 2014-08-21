@@ -6,6 +6,9 @@
 package com.triniforce.server.plugins.kernel.ep.external_classes;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 
@@ -14,8 +17,22 @@ import com.triniforce.extensions.PKPlugin;
 import com.triniforce.extensions.PluginsLoaderTest;
 import com.triniforce.server.srvapi.IPlugin;
 import com.triniforce.utils.ApiStack;
+import com.triniforce.utils.TFUtils;
 
 public class PKEPExternalClassesTest extends BasicServerRunningTestCase {
+    
+    public static void copyClasses(File dstFolder) throws Exception{
+        String resources[] = new String[]{"class1.jar", "class2.jar"};
+        
+        for(String resource: resources){
+            InputStream is = PKEPExternalClassesTest.class.getResourceAsStream(resource);
+            OutputStream os = new FileOutputStream(new File(dstFolder, resource));
+            TFUtils.copyStream(is, os);
+            is.close();
+            os.close();
+        }        
+    }
+
     
     public static class ClassesFolder_All extends ClassesFolder{
 
@@ -73,7 +90,8 @@ public class PKEPExternalClassesTest extends BasicServerRunningTestCase {
         folder2.mkdirs();
         
         PluginsLoaderTest.copyTestPlugins(folder1);
-        PluginsLoaderTest.copyClasses(folder2);
+        copyClasses(folder1);
+        copyClasses(folder2);
         
        
         IExternalClasses ec = ApiStack.getInterface(IExternalClasses.class);

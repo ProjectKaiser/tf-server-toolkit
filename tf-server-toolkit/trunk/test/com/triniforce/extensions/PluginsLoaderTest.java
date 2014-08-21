@@ -17,20 +17,8 @@ import com.triniforce.utils.TFUtils;
 
 public class PluginsLoaderTest extends TFTestCase {
     
-    public static void copyClasses(File dstFolder) throws Exception{
-        String resources[] = new String[]{"class1.jar", "class2.jar"};
-        
-        for(String resource: resources){
-            InputStream is = PluginsLoaderTest.class.getResourceAsStream(resource);
-            OutputStream os = new FileOutputStream(new File(dstFolder, resource));
-            TFUtils.copyStream(is, os);
-            is.close();
-            os.close();
-        }        
-    }
-    
     public static void copyTestPlugins(File dstFolder) throws Exception{
-        String resources[] = new String[]{"pk-webcontent-jquery.jar", "pk-macros-google.jar", "class1.jar", "class2.jar"};
+        String resources[] = new String[]{"pk-webcontent-jquery.jar", "pk-macros-google.jar"};
         
         for(String resource: resources){
             InputStream is = PluginsLoaderTest.class.getResourceAsStream(resource);
