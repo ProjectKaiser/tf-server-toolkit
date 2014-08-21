@@ -1046,6 +1046,9 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	    if(!isInit){
 	        PKEPAPIs apis = (PKEPAPIs) getExtensionPoint(PKEPAPIs.class);
 	        apis.finit();
+	    } else {
+            PKEPAPIs apis = (PKEPAPIs) getExtensionPoint(PKEPAPIs.class);
+            apis.init();	        
 	    }
 
 	    

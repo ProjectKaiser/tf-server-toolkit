@@ -48,4 +48,21 @@ public class PKEPAPIs  extends PKExtensionPoint{
         }
     }
 
+    public void init() {
+        List<IPKExtension> exs = new ArrayList<IPKExtension>(getExtensions().values());
+        Collections.reverse(exs);
+        
+        for(IPKExtension ex: exs){
+            Object api = ex.getInstance();
+            if(api instanceof IInitApi){
+                IInitApi f = (IInitApi) api;
+                try{
+                    f.initApi();
+                }catch(Exception e){
+                    ApiAlgs.getLog(this).error("Initialization errror", e);                    
+                }
+            }
+        }
+    }
+    
 }
