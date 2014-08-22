@@ -12,6 +12,9 @@ import java.util.List;
 import com.triniforce.extensions.IPKExtension;
 import com.triniforce.extensions.PKExtensionPoint;
 import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor;
+import com.triniforce.server.srvapi.IBasicServer;
+import com.triniforce.server.srvapi.ISrvSmartTranFactory;
+import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.utils.ApiAlgs;
 
 public class PKEPAPIs  extends PKExtensionPoint{
@@ -31,38 +34,51 @@ public class PKEPAPIs  extends PKExtensionPoint{
       }
     }
 
-    public void finit() {
+    public void initOrFinit(boolean init) {
+        String errorText = init?"API initialization errror":"API finalization errror";
         List<IPKExtension> exs = new ArrayList<IPKExtension>(getExtensions().values());
-        Collections.reverse(exs);
+        if(!init){
+            Collections.reverse(exs);
+        }
+        
+        IBasicServer bs = (IBasicServer) getRootExtensionPoint();
         
         for(IPKExtension ex: exs){
             Object api = ex.getInstance();
-            if(api instanceof IFinitApi){
-                IFinitApi f = (IFinitApi) api;
+            if((init && api instanceof IInitApi) || (!init && api instanceof IFinitApi)){
                 try{
-                    f.finitApi();
+                    if(null != bs){
+                        //tests
+                        bs.enterMode(Mode.Running);
+                    }
+                    try{
+                        if(init){
+                            ((IInitApi)api).initApi();    
+                        }else{
+                            ((IFinitApi)api).finitApi();
+                        }
+                        if(null != bs){
+                            ISrvSmartTranFactory.Helper.commit();
+                        }
+                    }
+                    finally{
+                        if(null != bs){
+                            //tests
+                        }
+                    }
                 }catch(Exception e){
-                    ApiAlgs.getLog(this).error("Finalization errror", e);                    
+                    ApiAlgs.getLog(this).error(errorText +": "+ api.getClass().getName(), e);                    
                 }
             }
         }
     }
 
+    public void finit(){
+        initOrFinit(false);
+    }
+
     public void init() {
-        List<IPKExtension> exs = new ArrayList<IPKExtension>(getExtensions().values());
-        Collections.reverse(exs);
-        
-        for(IPKExtension ex: exs){
-            Object api = ex.getInstance();
-            if(api instanceof IInitApi){
-                IInitApi f = (IInitApi) api;
-                try{
-                    f.initApi();
-                }catch(Exception e){
-                    ApiAlgs.getLog(this).error("Initialization errror", e);                    
-                }
-            }
-        }
+        initOrFinit(true);
     }
     
 }
