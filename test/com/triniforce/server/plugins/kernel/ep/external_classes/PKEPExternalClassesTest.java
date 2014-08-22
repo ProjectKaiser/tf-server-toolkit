@@ -6,9 +6,6 @@
 package com.triniforce.server.plugins.kernel.ep.external_classes;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 
@@ -17,22 +14,13 @@ import com.triniforce.extensions.PKPlugin;
 import com.triniforce.extensions.PluginsLoaderTest;
 import com.triniforce.server.srvapi.IPlugin;
 import com.triniforce.utils.ApiStack;
-import com.triniforce.utils.TFUtils;
 
 public class PKEPExternalClassesTest extends BasicServerRunningTestCase {
     
-    public static void copyClasses(File dstFolder) throws Exception{
-        String resources[] = new String[]{"class1.jar", "class2.jar"};
+    public void copyClasses(File dstFolder) throws Exception{
+        copyTestResources(new String[]{"class1.jar", "class2.jar"}, dstFolder);
         
-        for(String resource: resources){
-            InputStream is = PKEPExternalClassesTest.class.getResourceAsStream(resource);
-            OutputStream os = new FileOutputStream(new File(dstFolder, resource));
-            TFUtils.copyStream(is, os);
-            is.close();
-            os.close();
-        }        
     }
-
     
     public static class ClassesFolder_All extends ClassesFolder{
 

@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -179,6 +181,21 @@ public class TFTestCase extends TestCase {
 
     public final static String TF_TEST_FOLDER_EX = "TRINIFORCE_TEST_FOLDER";
     public final static String TOOLKIT_TEST_FOLDER = "TF_SERVER_TOOLKIT_TEST_FOLDER";
+    
+    public void copyTestResources(String resources[], File dest){
+        try {
+            for (String resource : resources) {
+                InputStream is = this.getClass()
+                        .getResourceAsStream(resource);
+                OutputStream os = new FileOutputStream(new File(dest, resource));
+                TFUtils.copyStream(is, os);
+                is.close();
+                os.close();
+            }
+        } catch (Exception e) {
+            ApiAlgs.rethrowException(e);
+        }        
+    }
     
     public static String getTfTestFolder(){
         String res = System.getenv(TOOLKIT_TEST_FOLDER);
