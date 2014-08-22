@@ -64,6 +64,7 @@ public class PKEPAPIs  extends PKExtensionPoint{
                     finally{
                         if(null != bs){
                             //tests
+                            bs.leaveMode();
                         }
                     }
                 }catch(Exception e){
