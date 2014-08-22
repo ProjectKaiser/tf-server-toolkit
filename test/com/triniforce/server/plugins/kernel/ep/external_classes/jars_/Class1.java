@@ -3,11 +3,16 @@
  * All Rights Reserved.
  *
  */ 
-package com.triniforce.server.plugins.kernel.ep.external_classes;
+package com.triniforce.server.plugins.kernel.ep.external_classes.jars_;
 
 import java.io.Serializable;
 
 public class Class1 implements Serializable {
+    
+    
+    public int callClass3(){
+        return Class3.calc();
+    }
 
     /**
      * 
