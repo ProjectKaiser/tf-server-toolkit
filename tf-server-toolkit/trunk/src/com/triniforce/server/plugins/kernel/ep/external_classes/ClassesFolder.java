@@ -23,14 +23,16 @@ public abstract class ClassesFolder{
 
     public abstract File getFolder();
     
-    synchronized void loadClasses(){
+    synchronized Collection<Class> loadClasses(){
         PluginsLoader pl =  new PluginsLoader(getFolder());
-        m_classes = pl.loadClasses();
+        return pl.loadClasses();
     }
     
     Collection<Class> listClassesOfType(Class superClass){
-        if(null == m_classes){
-            loadClasses();
+        synchronized (this) {
+            if (null == m_classes) {
+                m_classes = loadClasses();
+            }
         }
         
         Collection<Class> res =new ArrayList<Class>();

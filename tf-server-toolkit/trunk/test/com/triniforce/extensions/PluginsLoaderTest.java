@@ -45,7 +45,7 @@ public class PluginsLoaderTest extends TFTestCase {
         //test jar files
         {
             List<File> jars = pl.getJarFiles();
-            assertEquals(4, jars.size());
+            assertEquals(2, jars.size());
         }
         // test readPluginClass
         {

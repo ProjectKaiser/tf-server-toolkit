@@ -80,10 +80,9 @@ public class PluginsLoader {
         
         for(File jar: getJarFiles()){
             String mainClass = readPluginClass(jar);
-            if(TFUtils.isEmptyString(mainClass)){
-                continue;
+            if(!TFUtils.isEmptyString(mainClass)){
+                mainClasses.add(mainClass);
             }
-            mainClasses.add(mainClass);
             try {
                 urls.add(jar.toURI().toURL());
             } catch (Exception e){
