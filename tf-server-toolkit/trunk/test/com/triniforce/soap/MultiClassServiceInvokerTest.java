@@ -49,7 +49,7 @@ public class MultiClassServiceInvokerTest extends TFTestCase {
 			si.addServiceEndpoint("tst_ff", srv1);
 			fail();
 		} catch(IllegalArgumentException e){
-			assertEquals("tst_ff", e.getMessage());
+			assertTrue(e.getMessage().contains("tst_ff"));
 		}
 		
 		Mockery ctx = new Mockery();
