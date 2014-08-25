@@ -109,10 +109,10 @@ public class MailerTest extends ServicesTestCase {
 			long mailerId = dbId.createId(IMailer.class.getName());
 			IDbQueue mailerQueue = IDbQueueFactory.Helper.getQueue(mailerId);
 						
-			MailData mailData1 = new MailData(FROM1, TO, "Mailer run test1","test1");
+			MailData mailData1 = new MailData(FROM1, TO, "Mailer run test1", null, "test1", null, null, null);
 			mailerQueue.put(mailData1);
 			
-			MailData mailData2 = new MailData(FROM1, TO, "Mailer run test2","test2");
+			MailData mailData2 = new MailData(FROM1, TO, "Mailer run test2", null, "test2", null, null, null);
 			mailerQueue.put(mailData2);
 			
 			mailer.run();

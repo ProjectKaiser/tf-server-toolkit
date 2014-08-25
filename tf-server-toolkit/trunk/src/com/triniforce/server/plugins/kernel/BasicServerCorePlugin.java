@@ -145,7 +145,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         putExtension(PKEPAPIs.class, ExternalClasses.class);
         
         putExtension(PKEPAPIs.class, PTRecurringTasks.class);
-        //putExtension(PKEPAPIs.class, Mailer.class);
+//        putExtension(PKEPAPIs.class, Mailer.class);
 
 	}
 
