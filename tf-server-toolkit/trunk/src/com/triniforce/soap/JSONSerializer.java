@@ -86,14 +86,14 @@ public class JSONSerializer {
 		private static final long serialVersionUID = -2474959020925509512L;
 		public static class Error{
 			private int m_code;
-//			private String m_message;
-//			private String m_stackTrace;
+			private String m_message;
+			private String m_stackTrace;
 			
 			public Error(){}
 			public Error(int code, String msg, String stackTrace) {
 				setCode(code);
-//				setMessage(msg);
-//				setStackTrace(stackTrace);
+				setMessage(msg);
+				setStackTrace(stackTrace);
 			}
 
 			public int getCode() {
@@ -104,21 +104,21 @@ public class JSONSerializer {
 				m_code = code;
 			}
 
-//			public String getMessage() {
-//				return m_message;
-//			}
-//
-//			public void setMessage(String message) {
-//				m_message = message;
-//			}
-//
-//			public String getStackTrace() {
-//				return m_stackTrace;
-//			}
-//
-//			public void setStackTrace(String stackTrace) {
-//				m_stackTrace = stackTrace;
-//			}
+			public String getMessage() {
+				return m_message;
+			}
+
+			public void setMessage(String message) {
+				m_message = message;
+			}
+
+			public String getStackTrace() {
+				return m_stackTrace;
+			}
+
+			public void setStackTrace(String stackTrace) {
+				m_stackTrace = stackTrace;
+			}
 		}
 		private Error m_error;
 		public JsonRpcError(String jsonrpc, Integer id, Error error) {
