@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -18,8 +20,8 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeMessage.RecipientType;
+import javax.mail.internet.MimeMultipart;
 
 import com.triniforce.server.plugins.kernel.ep.api.IPKEPAPI;
 import com.triniforce.server.plugins.kernel.ep.api.PKEPAPIPeriodicalTask;
@@ -37,6 +39,22 @@ import com.triniforce.utils.Utils;
 public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 	
 	private static final String emailCharset = Charset.forName("UTF-8").name();
+	
+    static final int innerTimeout = 4*60*1000;
+    static final int outerTimeout = innerTimeout  +  innerTimeout/4;
+    
+    static final Properties INI_SESSION_PROPS = new Properties();
+    static{
+        String strTimeout = Integer.valueOf(innerTimeout).toString();
+        INI_SESSION_PROPS.put("mail.smtp.connectiontimeout",strTimeout);
+        INI_SESSION_PROPS.put("mail.smtp.timeout", strTimeout);
+        INI_SESSION_PROPS.put("mail.smtps.connectiontimeout", strTimeout);
+        INI_SESSION_PROPS.put("mail.smtps.timeout", strTimeout);
+    }
+
+	
+	protected List<Object> m_sessionKey;
+	protected Session m_session = null;
 	
 	public Mailer() {
 		super();
@@ -193,10 +211,10 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 	}
 
 
-	public void send(String from, String to, String subject, 
-			String bodyType, String body,
+	public synchronized void send(String from, String to, final String subject, 
+			final String bodyType, final String body,
 			String attachFile, String attachType, byte[] attachment) {
-		IMailerSettings mailerSettings  = ApiStack.queryInterface(IMailerSettings.class);
+		final IMailerSettings mailerSettings  = ApiStack.queryInterface(IMailerSettings.class);
 		
 		if (mailerSettings == null) {
 			ApiAlgs.getLog(this).warn("Mailer settings is null, message is skipped: " + body); //$NON-NLS-1$
@@ -210,25 +228,6 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
             ApiAlgs.getLog(this).warn("SMTP server is not configured, message is skipped: " + body); //$NON-NLS-1$
             return;
         }
-
-        Properties props = new Properties();
-        props.put("mail.smtp.host", smtpHost);//$NON-NLS-1$
-        props.put("mail.smtp.port", mailerSettings.getSmtpPort());        
-        Integer innerTimeout = 4*60*1000;
-        Integer outerTimeout = innerTimeout  +  innerTimeout/4;
-        
-        String strTimeout = innerTimeout.toString();
-        props.put("mail.smtp.connectiontimeout",strTimeout);
-        props.put("mail.smtp.timeout", strTimeout);
-        props.put("mail.smtps.connectiontimeout", strTimeout);
-        props.put("mail.smtps.timeout", strTimeout);
-        
-        
-        if(mailerSettings.useTLS() == true){
-            props.put("mail.smtp.starttls.enable", "true");
-        } else {
-        	props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        }
         
         IThrdWatcherRegistrator twr = ApiStack
                 .getInterface(IThrdWatcherRegistrator.class);
@@ -236,45 +235,18 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
         twr.registerLongTermOp(Thread.currentThread());
         
         try{
-        	Session session = null;
-            final String smtpPwd = mailerSettings.getSmtpPassword();
-            final String smtpUsr = mailerSettings.getSmtpUser();
-            if (Utils.isEmptyString(smtpUsr)) {
-                session = Session.getInstance(props, null);
-            }else{
-                props.put("mail.smtp.auth", "true");
-                javax.mail.Authenticator a = new javax.mail.Authenticator() {
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(smtpUsr, smtpPwd);
-                    }
-                }; 
-                session = Session.getInstance(props, a);            
-            }
+        	
+        	Session session = getActiveSession(mailerSettings);
             
-            MimeMessage msg = null;
+        	MimeMessage msg;
+        	final InternetAddress fromAddr;
+        	final InternetAddress toAddr;
+        	final MimeBodyPart attach;
             try {
-            	
-            	msg = new MimeMessage(session);
-                msg.setFrom(new InternetAddress(from));
-                msg.setRecipient(RecipientType.TO, new InternetAddress(to));
-                msg.setSubject(subject, emailCharset);
-                
-                if(null == attachment){
-                	msg.setText(body, emailCharset);
-                }
-                else{
-                	MimeMultipart multiPart = new MimeMultipart();
-
-                    MimeBodyPart textPart = new MimeBodyPart();
-                    multiPart.addBodyPart(textPart);
-                    textPart.setText(body, emailCharset, bodyType);
-
-                	MimeBodyPart binary = settAttachment(attachFile, "application/pdf", attachment, "");
-                    multiPart.addBodyPart(binary);
-                    
-                    msg.setContent(multiPart);
-                }
-                
+            	fromAddr = new InternetAddress(from);
+            	toAddr = new InternetAddress(to);
+           		attach = (null != attachment) ? settAttachment(attachFile, attachType, attachment, "") : null;
+            	msg = createMessage(session, fromAddr, toAddr, subject, bodyType, body, attach);
             } catch (Throwable t) {
             	ApiAlgs.getLog(this).error("Error preparing mail, mail is skipped",t);//$NON-NLS-1$
                 return;
@@ -284,8 +256,17 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
             try{
             	IRunnable r = new InSeparateThreadExecutor.IRunnable(){
                     public void run() throws Exception{
-                        Transport.send(finalMsg);
+                    	try{
+                    		Transport.send(finalMsg);
+                    	}catch(Exception e){
+                    		ApiAlgs.getLog(this).warn("Session invalidated", e);
+                    		Session session = reopenSession(mailerSettings);
+                    		MimeMessage msg2 = createMessage(session, fromAddr, toAddr, subject, bodyType, body, attach);
+                    		Transport.send(msg2);
+                    	}
                     }
+
+					
                 };
                 InSeparateThreadExecutor ex = new InSeparateThreadExecutor();
                 ex.execute("Send mail", r, outerTimeout);
@@ -298,6 +279,99 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
         	twr.unregisterLongTermOp(Thread.currentThread());
         }
 		
+	}
+
+
+	private MimeMessage createMessage(Session session, InternetAddress from, InternetAddress to, 
+			String subject, String bodyType, String body, MimeBodyPart attachment) throws MessagingException{
+		MimeMessage msg = new MimeMessage(session);
+        msg.setFrom(from);
+        msg.setRecipient(RecipientType.TO, to);
+        msg.setSubject(subject, emailCharset);
+        
+        if(null == attachment){
+        	msg.setText(body, emailCharset);
+        }
+        else{
+        	MimeMultipart multiPart = new MimeMultipart();
+
+            MimeBodyPart textPart = new MimeBodyPart();
+            multiPart.addBodyPart(textPart);
+            textPart.setText(body, emailCharset, bodyType);
+
+        	multiPart.addBodyPart(attachment);
+            
+            msg.setContent(multiPart);
+        }
+        return msg;
+	}
+
+	private Session reopenSession(final IMailerSettings mailerSettings) {
+		Properties props = createSessionProperties(mailerSettings);
+		final String smtpUsr = mailerSettings.getSmtpUser();
+        javax.mail.Authenticator authenticator = null;
+	    if (!Utils.isEmptyString(smtpUsr)) {
+            authenticator = new javax.mail.Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(smtpUsr, mailerSettings.getSmtpPassword());
+                }
+            };
+        }
+		m_session = Session.getInstance(props, authenticator);
+		return m_session;
+	}
+	
+	private Session getActiveSession(IMailerSettings mailerSettings) {
+		Session result;
+        Properties props = createSessionProperties(mailerSettings); 
+        
+        final String smtpPwd = mailerSettings.getSmtpPassword();
+        final String smtpUsr = mailerSettings.getSmtpUser();
+        
+        javax.mail.Authenticator authenticator = null;
+        
+        List<Object> key = createSessionKey(props, smtpUsr, smtpPwd);
+    	if(null == m_session || !m_sessionKey.equals(key)){
+            if (!Utils.isEmptyString(smtpUsr)) {
+                authenticator = new javax.mail.Authenticator() {
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(smtpUsr, smtpPwd);
+                    }
+                };
+            }
+            
+            result = Session.getInstance(props, authenticator); 
+            m_sessionKey = key;
+            m_session = result;
+    	}
+    	else
+    		result = m_session;
+    	
+    	return result;
+    		
+	}
+
+
+	private Properties createSessionProperties(IMailerSettings mailerSettings) {
+		Properties props = (Properties) INI_SESSION_PROPS.clone();
+        props.put("mail.smtp.host", mailerSettings.getSmtpHost());
+        props.put("mail.smtp.port", mailerSettings.getSmtpPort());        
+        
+        if(mailerSettings.useTLS() == true){
+            props.put("mail.smtp.starttls.enable", "true");
+        } else {
+        	props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        }
+        String smtpUsr = mailerSettings.getSmtpUser();
+        if (!Utils.isEmptyString(smtpUsr)) {
+            props.put("mail.smtp.auth", "true");
+        }
+		return props;
+	}
+
+
+	private List<Object> createSessionKey(Properties props, String smtpUser, String smtpPwd) {
+		return Arrays.asList((Object)props, smtpUser, smtpPwd);
 	}
 	
 	

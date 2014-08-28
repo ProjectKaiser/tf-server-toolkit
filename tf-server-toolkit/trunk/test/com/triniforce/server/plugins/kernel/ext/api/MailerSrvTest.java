@@ -5,8 +5,11 @@
  */
 package com.triniforce.server.plugins.kernel.ext.api;
 
+import java.util.Arrays;
+
 import javax.mail.Address;
 import javax.mail.BodyPart;
+import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
@@ -29,8 +32,12 @@ import com.triniforce.utils.ApiStack;
 public class MailerSrvTest extends BasicServerTestCase {
 	
 	static int TEST_SM_ID = 10001;
+
+	private static String SMTP_USER = "alex@kukuruku.com";
 	
+
 	static class TestMS implements IMailerSettings{
+		
 		public void loadSettings() {
 		}
 
@@ -43,7 +50,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 		}
 
 		public String getSmtpUser() {
-			return "alex@kukuruku.com";
+			return SMTP_USER;
 		}
 
 		public String getSmtpPassword() {
@@ -66,6 +73,10 @@ public class MailerSrvTest extends BasicServerTestCase {
 		public void send(String from, String to, String subject, String body) {
 			super.send(from, to, subject, body);
 			ApiAlgs.getLog(this).trace("MAILER: "+from + ", subj:" + subject);
+		}
+
+		public Session getActiveSession() {
+			return m_session;
 		}
 		
 	}
@@ -90,6 +101,12 @@ public class MailerSrvTest extends BasicServerTestCase {
 		greenMail.start();
 		addPlugin(new MailerSrvPlugin());
 		super.setUp();
+		getServer().enterMode(Mode.Running);
+		try{
+			IDbQueueFactory.Helper.cleanQueue(ApiStack.getInterface(INamedDbId.class).createId(IMailer.class.getName()));
+		}finally{
+			getServer().leaveMode();
+		}
 
 	}
 	
@@ -110,9 +127,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 		{
 			sendMailAttach("plain", null);
 			
-			getServer().startPeriodicalTasks();
-			Thread.sleep(500L);
-			getServer().stopPeriodicalTasks();
+			waitForMailer();
 			
 			MimeMessage msg1 = greenMail.getReceivedMessages()[0];
 			
@@ -128,9 +143,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 //		greenMail.getManagers().getImapHostManager().getInbox(user)
 		{
 			sendMailAttach("html", "TEST_ATTACH".getBytes());
-			getServer().startPeriodicalTasks();
-			Thread.sleep(500L);
-			getServer().stopPeriodicalTasks();
+			waitForMailer();
 			
 			MimeMessage msg1 = greenMail.getReceivedMessages()[1];
 			
@@ -145,10 +158,26 @@ public class MailerSrvTest extends BasicServerTestCase {
 			
 			BodyPart bin2 = mm.getBodyPart(0);
 			assertEquals("text/html; charset=UTF-8", bin2.getContentType());
-			
 		}
+	}
 
-
+	private void waitForMailer() throws InterruptedException {
+		getServer().enterMode(Mode.Running);
+		try{
+			Mailer m = getMailer();
+			m.init();
+			try{
+				m.run();
+				m.commit();
+			}finally{
+				m.finit();
+			}
+		}finally{
+			getServer().leaveMode();
+		}
+//		getServer().startPeriodicalTasks();
+//		Thread.sleep(500L);
+//		getServer().stopPeriodicalTasks();
 	}
 
 	private void sendMailAttach(String bodyType, byte[] attach){
@@ -166,5 +195,45 @@ public class MailerSrvTest extends BasicServerTestCase {
 		}finally{
 			getServer().leaveMode();
 		}
+	}
+	
+	public void testSession() throws InterruptedException{
+		assertTrue(Arrays.asList().equals(Arrays.asList()));
+		
+		TestMailer mailer = (TestMailer) getMailer();
+		assertNotNull(mailer);
+		Session session;
+		
+		sendMail();
+		assertNotNull(session = mailer.getActiveSession());
+
+		sendMail();		
+		assertSame(session, mailer.getActiveSession());
+		
+		SMTP_USER = "testSessionUser@test.com";		
+		sendMail();
+		Session s2;
+		assertNotSame(session, s2 = mailer.getActiveSession());
+
+		greenMail.stop();
+		// Should be failed and secondary send with recreated session
+		sendMailAttach("plain", "ss".getBytes());
+		waitForMailer();
+		
+		assertNotSame(s2, mailer.getActiveSession());
+		
+		incExpectedLogErrorCount(1);
+		
+	}
+
+	private void sendMail() throws InterruptedException {
+		int before = greenMail.getReceivedMessages().length;
+		sendMailAttach("plain", "ss".getBytes());
+		waitForMailer();
+		assertEquals(before+1, greenMail.getReceivedMessages().length);
+	}
+
+	private Mailer getMailer() {
+		return getServer().getExtension(PKEPAPIs.class, TestMailer.class).getInstance();
 	}
 }
