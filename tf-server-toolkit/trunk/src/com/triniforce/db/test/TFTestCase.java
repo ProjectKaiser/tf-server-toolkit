@@ -342,6 +342,11 @@ public class TFTestCase extends TestCase {
         m_avoidTmpFolderDeletion = true;        
     }
     
+    @Deprecated
+    public void avoidTempTestFolderDeletion(){        
+        avoidTmpFolderDeletion();        
+    }
+    
     protected void checkResources(){
         assertEquals("ApiStack damaged", m_apiStackCnt, ApiStack.getThreadApiContainer().getStack()
                 .size());        
