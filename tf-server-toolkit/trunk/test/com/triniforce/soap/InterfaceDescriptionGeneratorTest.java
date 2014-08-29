@@ -773,6 +773,14 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         } catch(NoSuchElementException e){
         	assertEquals("arg0", e.getMessage());
         }
+        
+        try{
+        	soapDoc.m_method = "unknownMethod_0023";
+        	gen.serialize(desc, soapDoc);
+        	fail();
+        }catch(NoSuchElementException e){
+        	assertEquals("unknownMethod_0023", e.getMessage());
+        }
 
     }
     

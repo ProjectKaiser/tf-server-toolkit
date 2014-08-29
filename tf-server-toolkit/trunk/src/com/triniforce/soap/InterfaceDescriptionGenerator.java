@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -718,6 +719,8 @@ public class InterfaceDescriptionGenerator {
         Document doc = null;
         try {
             Operation op = findByName(desc.getOperations(), soap.m_method);
+            if(null == op)
+            	throw new NoSuchElementException(soap.m_method);
             PropDef prop = soap.m_bIn ? op.getProps().get(0) : op.getProps().get(1);
             
             Node_S body = createSoapDocument(soap.m_soap);
