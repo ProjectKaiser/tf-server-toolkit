@@ -35,6 +35,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 
 	private static String SMTP_USER = "alex@kukuruku.com";
 	
+	static String DEF_SENDER = null;
 
 	static class TestMS implements IMailerSettings{
 		
@@ -59,6 +60,10 @@ public class MailerSrvTest extends BasicServerTestCase {
 
 		public boolean useTLS() {
 			return false;
+		}
+
+		public String getDefaultSender() {
+			return DEF_SENDER;
 		}
 		
 	}
@@ -159,6 +164,14 @@ public class MailerSrvTest extends BasicServerTestCase {
 			BodyPart bin2 = mm.getBodyPart(0);
 			assertEquals("text/html; charset=UTF-8", bin2.getContentType());
 		}
+		{
+			DEF_SENDER = "default@mail.com";
+			sendMailAttach(null, "plain", "5675".getBytes());
+			waitForMailer();
+			MimeMessage msg1 = greenMail.getReceivedMessages()[2];
+			assertEquals("default@mail.com", msg1.getFrom()[0].toString());
+			
+		}
 	}
 
 	private void waitForMailer() throws InterruptedException {
@@ -180,10 +193,10 @@ public class MailerSrvTest extends BasicServerTestCase {
 //		getServer().stopPeriodicalTasks();
 	}
 
-	private void sendMailAttach(String bodyType, byte[] attach){
+	private void sendMailAttach(String from, String bodyType, byte[] attach){
 		getServer().enterMode(Mode.Running);
 		try{
-			MailData data = new Mailer.MailData("test1@tur.com", "test2@tur.com", "TEST_MSG_SUBJ", 
+			MailData data = new Mailer.MailData(from, "test2@tur.com", "TEST_MSG_SUBJ", 
 					bodyType, "body", "application/pdf", "invoice.pdf", attach);
 			INamedDbId dbId = ApiStack.getInterface(INamedDbId.class);
 			long mailerId = dbId.createId(IMailer.class.getName());
@@ -195,6 +208,10 @@ public class MailerSrvTest extends BasicServerTestCase {
 		}finally{
 			getServer().leaveMode();
 		}
+	}
+	
+	private void sendMailAttach(String bodyType, byte[] attach){
+		sendMailAttach("test1@tur.com", bodyType, attach);
 	}
 	
 	public void testSession() throws InterruptedException{

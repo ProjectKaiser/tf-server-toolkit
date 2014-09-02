@@ -243,6 +243,9 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
         	final InternetAddress toAddr;
         	final MimeBodyPart attach;
             try {
+            	if(null == from){
+            		from = mailerSettings.getDefaultSender();
+            	}
             	fromAddr = new InternetAddress(from);
             	toAddr = new InternetAddress(to);
            		attach = (null != attachment) ? settAttachment(attachFile, attachType, attachment, "") : null;
