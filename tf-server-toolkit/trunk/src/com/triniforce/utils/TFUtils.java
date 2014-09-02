@@ -389,9 +389,14 @@ public class TFUtils {
             FileInputStream fis = new FileInputStream(f);
             try{
                 BufferedReader br = new BufferedReader(new InputStreamReader(fis, "utf8"));
-                String line;
-                while ((line = br.readLine()) != null && res.size() < n) {
-                    res.add(line);
+                try{
+                    String line;
+                    while ((line = br.readLine()) != null && res.size() < n) {
+                        res.add(line);
+                    }
+                }
+                finally{
+                    br.close();
                 }
             }finally{
                 fis.close();
