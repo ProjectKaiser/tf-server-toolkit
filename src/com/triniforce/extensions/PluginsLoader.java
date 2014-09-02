@@ -57,9 +57,13 @@ public class PluginsLoader {
         String res ="";
         try {
             JarFile jf = new JarFile(jar);
-            res = jf.getManifest().getMainAttributes().getValue("Main-Class");
-            if(null == res){
-                res = jf.getManifest().getMainAttributes().getValue("Pk-Plugin-Main-Class");
+            try{
+                res = jf.getManifest().getMainAttributes().getValue("Main-Class");
+                if(null == res){
+                    res = jf.getManifest().getMainAttributes().getValue("Pk-Plugin-Main-Class");
+                }
+            }finally{
+                jf.close();
             }
         } catch (Exception e) {
             ApiAlgs.getLog(this).error("Error reading manifest" + jar,e);
