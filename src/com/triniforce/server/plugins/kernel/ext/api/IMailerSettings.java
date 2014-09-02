@@ -9,5 +9,6 @@ public interface IMailerSettings {
 	public String getSmtpUser();
 	public String getSmtpPassword();
 	public boolean useTLS();
+	public String getDefaultSender();
 
 }

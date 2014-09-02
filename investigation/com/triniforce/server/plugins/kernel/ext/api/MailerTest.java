@@ -59,6 +59,11 @@ public class MailerTest extends ServicesTestCase {
 		public String getSmtpPassword() { return m_smtpPassword; }
 		
 		public boolean useTLS() { return m_useTLS; }
+
+
+		public String getDefaultSender() {
+			return null;
+		}
 		
 	}
 	

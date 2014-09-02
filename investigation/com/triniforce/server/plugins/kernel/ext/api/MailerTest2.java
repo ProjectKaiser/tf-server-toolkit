@@ -34,6 +34,7 @@ public class MailerTest2 extends BasicServerRunningTestCase {
         private String m_smtpUser;
         private String m_smtpPassword;
         private boolean m_useTLS = false;
+        private String m_sender;
 
         public MailerSettings() {
             m_smtpHost = getMustHaveTestProperty("Mailer.host");
@@ -43,6 +44,7 @@ public class MailerTest2 extends BasicServerRunningTestCase {
             m_smtpPassword = getMustHaveTestProperty("Mailer.password");
             m_useTLS = TFUtils.equals(1,
                     getMustHaveTestProperty("Mailer.useTLS"));
+            m_sender = getMustHaveTestProperty("Mailer.sender");
         }
 
         public void loadSettings() {
@@ -67,6 +69,10 @@ public class MailerTest2 extends BasicServerRunningTestCase {
         public boolean useTLS() {
             return m_useTLS;
         }
+
+		public String getDefaultSender() {
+			return m_sender;
+		}
 
     }
     
