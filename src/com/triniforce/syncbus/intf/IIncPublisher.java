@@ -5,5 +5,5 @@
  */ 
 package com.triniforce.syncbus.intf;
 
-public class SubscrData {
+public interface IIncPublisher extends ICPublisher{ 
 }

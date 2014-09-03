@@ -5,6 +5,6 @@
  */ 
 package com.triniforce.syncbus.intf;
 
-public class SubscrResponse {
-
+public interface ICOffer {
+    void post(long version);
 }

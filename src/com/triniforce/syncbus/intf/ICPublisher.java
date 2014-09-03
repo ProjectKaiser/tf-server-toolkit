@@ -5,6 +5,7 @@
  */ 
 package com.triniforce.syncbus.intf;
 
-public interface ICompleteOffer {
-    boolean entireOffer(Object o);
+public interface ICPublisher {
+    SyncVersionedData getCData();
+    void stop();
 }
