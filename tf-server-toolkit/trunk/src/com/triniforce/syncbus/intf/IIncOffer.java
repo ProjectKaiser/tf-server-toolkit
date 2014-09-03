@@ -5,6 +5,6 @@
  */ 
 package com.triniforce.syncbus.intf;
 
-public interface ISubscriber {
-
+public interface IIncOffer{
+    void post(long version, Object data);
 }

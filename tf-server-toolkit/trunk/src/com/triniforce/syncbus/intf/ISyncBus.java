@@ -7,31 +7,25 @@ package com.triniforce.syncbus.intf;
 
 public interface ISyncBus {
 
-    void registerEntirePub(Object addr, ICompletePublisher entPub);
+    void registerCPublisher(Object addr, ICPublisher cPub);
     
     /**
      * @param entPub entPub.getClass().getName() will be used for addr
      */
-    void registerEntirePub(ICompletePublisher entPub);
+    void registerCPublisher(ICPublisher cPub);
     
-    void registerSubscriber(Object addr, ISubscriber subscr);
+    void registerSubscriber(Object addr, ICSubscriber subscr);
+    void registerIncSubscriber(Object addr, IIncSubscriber subscr);
 
-    /**
-     * @param addr
-     * @param subscr addr.getName() will be used as address
-     */
-    void registerSubscriber(Class addr, ISubscriber subscr);
-    
-    void unregisterSubscriber(ISubscriber subscr);
-    void unregisterPub(ISubscriber subscr);
+    void unregisterSubscriber(ICSubscriber subscr);
+    void unregisterPub(ICSubscriber subscr);
 
     
     void postStop();
     void waitForAllStoppedState();
     
-    void postPub(Object addrFrom, SDEntire pubData);
     
-    ICompletePublisher queryPub(Object addr);
+    ICPublisher queryPub(Object addr);
     
     
     /**

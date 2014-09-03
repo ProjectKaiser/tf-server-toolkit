@@ -5,6 +5,6 @@
  */ 
 package com.triniforce.syncbus.intf;
 
-public class SDStop extends SubscrData{
-
+public interface IIncSubscriber extends ICSubscriber{
+    SyncResponse onIncData(SyncMessage message);
 }
