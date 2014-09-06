@@ -5,35 +5,31 @@
  */ 
 package com.triniforce.syncbus.intf;
 
+
 public interface ISyncBus {
 
-    void registerCPublisher(Object addr, ICPublisher cPub);
-    
     /**
-     * @param entPub entPub.getClass().getName() will be used for addr
-     */
-    void registerCPublisher(ICPublisher cPub);
-    
-    void registerSubscriber(Object addr, ICSubscriber subscr);
-    void registerIncSubscriber(Object addr, IIncSubscriber subscr);
-
-    void unregisterSubscriber(ICSubscriber subscr);
-    void unregisterPub(ICSubscriber subscr);
-
-    
-    void postStop();
-    void waitForAllStoppedState();
-    
-    
-    ICPublisher queryPub(Object addr);
-    
-    
-    /**
-     * @param url
-     * @param incThreshold If subscriber queue exceeds this value it receives ENTIRE notification
+     * If publisher with such name exists registration ignored
+     * 
+     * @param addr
+     * @param cPub
      * @return
      */
-
-    //void registerIncPub(Object url, IEntirePub incPub, int incThreshold);
+    ICOffer registerCPublisher(Object addr, ICPublisher cPub);
+    ICOffer registerCPublisher(ICPublisher cPub);
+    
+    IIncOffer registerIncPublisher(Object addr, IIncPublisher cPub);
+    IIncOffer registerIncPublisher(IIncPublisher cPub);
+    
+    
+//    void registerSubscriber(Object addr, ISubscriber subscr) throws EInvalidSubscriberType, ENoSuchPublisher;
+//    void unregisterSubscriber(Object addr, ICSubscriber subscr);
+//    
+//    void postStop();
+//    void waitForAllStoppedState();
+    
+    
+    IPublisher queryPub(Object addr);
+//    List<ISubscriber> querySubscribers(Object addr);
     
 }

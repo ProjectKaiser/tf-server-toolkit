@@ -5,71 +5,42 @@
  */ 
 package com.triniforce.syncbus;
 
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.triniforce.syncbus.intf.ICOffer;
 import com.triniforce.syncbus.intf.ICPublisher;
-import com.triniforce.syncbus.intf.ICSubscriber;
-import com.triniforce.syncbus.intf.IIncSubscriber;
+import com.triniforce.syncbus.intf.IIncOffer;
+import com.triniforce.syncbus.intf.IIncPublisher;
+import com.triniforce.syncbus.intf.IPublisher;
 import com.triniforce.syncbus.intf.ISyncBus;
 
+
 public class SyncBus implements ISyncBus{
+	
+	ConcurrentHashMap<Object, PubInstance> m_pubs = new ConcurrentHashMap<Object, PubInstance>(); 
 
-    public void registerEntirePub(Object addr, ICPublisher entPub) {
-        // TODO Auto-generated method stub
-        
-    }
+	public ICOffer registerCPublisher(Object addr, ICPublisher cPub) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    public void registerEntirePub(ICPublisher entPub) {
-        // TODO Auto-generated method stub
-        
-    }
+	public ICOffer registerCPublisher(ICPublisher cPub) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    public void registerSubscriber(Object addr, ICSubscriber subscr) {
-        // TODO Auto-generated method stub
-        
-    }
+	public IIncOffer registerIncPublisher(Object addr, IIncPublisher cPub) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    public void registerSubscriber(Class addr, ICSubscriber subscr) {
-        // TODO Auto-generated method stub
-        
-    }
+	public IIncOffer registerIncPublisher(IIncPublisher cPub) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    public void unregisterSubscriber(ICSubscriber subscr) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void unregisterPub(ICSubscriber subscr) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void postStop() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void waitForAllStoppedState() {
-        // TODO Auto-generated method stub
-        
-    }
-
-
-    public ICPublisher queryPub(Object addr) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public void registerCPublisher(Object addr, ICPublisher cPub) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void registerCPublisher(ICPublisher cPub) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void registerIncSubscriber(Object addr, IIncSubscriber subscr) {
-        // TODO Auto-generated method stub
-        
-    }
+	public IPublisher queryPub(Object addr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
