@@ -11,13 +11,13 @@ public class SyncBusTest extends TFTestCase {
     
     @SuppressWarnings("unused")
     public void test() {
-        // Test constructor
         SyncBus sb = new SyncBus();
     }
     
     public void test_registerEntirePub(){
         //test
         {
+        	
 //            SyncBus sb = new SyncBus();
 //            Mockery ctx = new Mockery();
 //            final ICPublisher eb = ctx.mock(ICPublisher.class);

@@ -6,6 +6,5 @@
 package com.triniforce.syncbus.intf;
 
 public interface IPublisher {
-    SyncVersionedData getCData();
     void stop();
 }
