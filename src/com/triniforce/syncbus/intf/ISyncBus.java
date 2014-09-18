@@ -16,14 +16,18 @@ public interface ISyncBus {
      * @return
      */
     ICOffer registerCPublisher(Object addr, ICPublisher cPub);
+    
+    /**
+     * 
+     * Register using class name as addr
+     * 
+     */
     ICOffer registerCPublisher(ICPublisher cPub);
     
     IIncOffer registerIncPublisher(Object addr, IIncPublisher cPub);
     IIncOffer registerIncPublisher(IIncPublisher cPub);
     
-    
-//    void registerSubscriber(Object addr, ISubscriber subscr) throws EInvalidSubscriberType, ENoSuchPublisher;
-//    void unregisterSubscriber(Object addr, ICSubscriber subscr);
+    IShutdownStatus shutdownSubscriber(Object addr, ICSubscriber subscr);
 //    
 //    void postStop();
 //    void waitForAllStoppedState();
