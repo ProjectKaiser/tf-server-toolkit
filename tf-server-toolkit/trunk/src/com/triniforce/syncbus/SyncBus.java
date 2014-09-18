@@ -9,9 +9,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.triniforce.syncbus.intf.ICOffer;
 import com.triniforce.syncbus.intf.ICPublisher;
+import com.triniforce.syncbus.intf.ICSubscriber;
 import com.triniforce.syncbus.intf.IIncOffer;
 import com.triniforce.syncbus.intf.IIncPublisher;
 import com.triniforce.syncbus.intf.IPublisher;
+import com.triniforce.syncbus.intf.IShutdownStatus;
 import com.triniforce.syncbus.intf.ISyncBus;
 
 
@@ -43,4 +45,9 @@ public class SyncBus implements ISyncBus{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    public IShutdownStatus shutdownSubscriber(Object addr, ICSubscriber subscr) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

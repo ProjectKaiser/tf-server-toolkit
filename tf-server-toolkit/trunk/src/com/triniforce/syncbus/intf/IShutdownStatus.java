@@ -5,6 +5,6 @@
  */ 
 package com.triniforce.syncbus.intf;
 
-public interface ICSubscriber extends ISubscriber{
-    void onCData(SyncMessage message);
+public interface IShutdownStatus {
+    boolean awaitTermination(long milliseconds);
 }
