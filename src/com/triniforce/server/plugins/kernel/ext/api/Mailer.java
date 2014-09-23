@@ -34,6 +34,7 @@ import com.triniforce.utils.ApiAlgs.RethrownException;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.InSeparateThreadExecutor;
 import com.triniforce.utils.InSeparateThreadExecutor.IRunnable;
+import com.triniforce.utils.TFUtils;
 import com.triniforce.utils.Utils;
 
 public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
@@ -69,25 +70,33 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 
 	@Override
 	public void run() {
-		
 		INamedDbId dbId = ApiStack.getInterface(INamedDbId.class);
 		long mailerId = dbId.createId(IMailer.class.getName());
 		
 		IDbQueue mailerQueue = IDbQueueFactory.Helper.getQueue(mailerId);
 		
-		Object obj = mailerQueue.get(0l);
-		while (obj != null) {
+		Object obj;
+		while ((obj = mailerQueue.get(0l)) != null) {
 			
 			MailData mailData = (MailData)obj;
+			boolean bMailSent;
 			
-			if(null == mailData.getAttachment())
-				this.send(mailData.getFrom(), mailData.getTo(), mailData.getSubject(), mailData.getBody());
-			else
-				this.send(mailData.getFrom(), mailData.getTo(), mailData.getSubject(), 
-						mailData.getBodyType(), mailData.getBody(),
-						mailData.getAttachFileName(), mailData.getAttachType(), mailData.getAttachment());
+			try{
+				if(null == mailData.getAttachment())
+					bMailSent = this.send(mailData.getFrom(), mailData.getTo(), mailData.getSubject(), mailData.getBody());
+				else
+					bMailSent = this.send(mailData.getFrom(), mailData.getTo(), mailData.getSubject(), 
+							mailData.getBodyType(), mailData.getBody(),
+							mailData.getAttachFileName(), mailData.getAttachType(), mailData.getAttachment());
+			}catch(IMailer.EMailerConfigurationError e){
+				ApiAlgs.getLog(this).warn("Mailer is not configured");
+				bMailSent = false;					
+			}
 			
-			obj = mailerQueue.get(0l);
+			if(!bMailSent){
+				mailerQueue.put(mailData);
+				break;
+			}
 		}
 	}
 	
@@ -205,20 +214,19 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 	}
 
 
-	public void send(String from, String to, String subject, String body) {
-		send(from, to, subject, null, body, null, null, null);
-		
+	public boolean send(String from, String to, String subject, String body) throws EMailerConfigurationError {
+		return send(from, to, subject, null, body, null, null, null);
 	}
 
 
-	public synchronized void send(String from, String to, final String subject, 
+	public synchronized boolean send(String from, String to, final String subject, 
 			final String bodyType, final String body,
-			String attachFile, String attachType, byte[] attachment) {
+			String attachFile, String attachType, byte[] attachment) throws EMailerConfigurationError {
 		final IMailerSettings mailerSettings  = ApiStack.queryInterface(IMailerSettings.class);
 		
 		if (mailerSettings == null) {
 			ApiAlgs.getLog(this).warn("Mailer settings is null, message is skipped: " + body); //$NON-NLS-1$
-			return;
+			throw new EMailerConfigurationError();
 		}
 		
 		mailerSettings.loadSettings();
@@ -226,7 +234,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
         String smtpHost = mailerSettings.getSmtpHost();
         if (Utils.isEmptyString(smtpHost)) {
             ApiAlgs.getLog(this).warn("SMTP server is not configured, message is skipped: " + body); //$NON-NLS-1$
-            return;
+			throw new EMailerConfigurationError();
         }
         
         IThrdWatcherRegistrator twr = ApiStack
@@ -236,7 +244,9 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
         
         try{
         	
+        	List<Object> oldSessionKey = m_sessionKey; 
         	Session session = getActiveSession(mailerSettings);
+        	final boolean bSessionRecreated = !TFUtils.equals(oldSessionKey, m_sessionKey);
             
         	MimeMessage msg;
         	final InternetAddress fromAddr;
@@ -252,7 +262,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
             	msg = createMessage(session, fromAddr, toAddr, subject, bodyType, body, attach);
             } catch (Throwable t) {
             	ApiAlgs.getLog(this).error("Error preparing mail, mail is skipped",t);//$NON-NLS-1$
-                return;
+                return false;
             }
             ApiAlgs.getLog(this).info("Sending email:"+ body);//$NON-NLS-1$
             final MimeMessage finalMsg = msg; 
@@ -262,10 +272,15 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
                     	try{
                     		Transport.send(finalMsg);
                     	}catch(Exception e){
-                    		ApiAlgs.getLog(this).warn("Session invalidated", e);
-                    		Session session = reopenSession(mailerSettings);
-                    		MimeMessage msg2 = createMessage(session, fromAddr, toAddr, subject, bodyType, body, attach);
-                    		Transport.send(msg2);
+                    		if(!bSessionRecreated){
+	                    		ApiAlgs.getLog(this).warn("Session invalidated", e);
+	                    		Session session = reopenSession(mailerSettings);
+	                    		MimeMessage msg2 = createMessage(session, fromAddr, toAddr, subject, bodyType, body, attach);
+	                    		Transport.send(msg2);
+                    		}
+                    		else{
+                    			throw e;
+                    		}
                     	}
                     }
 
@@ -274,9 +289,10 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
                 InSeparateThreadExecutor ex = new InSeparateThreadExecutor();
                 ex.execute("Send mail", r, outerTimeout);
                 ApiAlgs.getLog(this).info("Mail sent");
-
+                return true;
             } catch(RethrownException e){
                 ApiAlgs.getLog(this).error("Error sending mail, mail is skipped", e.getCause());
+                return false;
             }
         }finally{
         	twr.unregisterLongTermOp(Thread.currentThread());
