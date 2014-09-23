@@ -299,4 +299,18 @@ public class MailerSrvTest extends BasicServerTestCase {
 			getServer().leaveMode();
 		}
 	}
+	
+	public void testIsMailConfigured(){
+		getServer().enterMode(Mode.Running);
+		try{
+			Mailer m = getMailer();
+			assertTrue(m.isMailerConfigured());
+			
+			SMTP_HOST = null;
+			assertFalse(m.isMailerConfigured());
+		}finally{
+			getServer().leaveMode();
+		}
+		
+	}
 }

@@ -224,19 +224,11 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 			String attachFile, String attachType, byte[] attachment) throws EMailerConfigurationError {
 		final IMailerSettings mailerSettings  = ApiStack.queryInterface(IMailerSettings.class);
 		
-		if (mailerSettings == null) {
-			ApiAlgs.getLog(this).warn("Mailer settings is null, message is skipped: " + body); //$NON-NLS-1$
+		if(!isMailerConfigured()){
+			ApiAlgs.getLog(this).warn("Message is skipped: " + body); //$NON-NLS-1$
 			throw new EMailerConfigurationError();
 		}
 		
-		mailerSettings.loadSettings();
-				
-        String smtpHost = mailerSettings.getSmtpHost();
-        if (Utils.isEmptyString(smtpHost)) {
-            ApiAlgs.getLog(this).warn("SMTP server is not configured, message is skipped: " + body); //$NON-NLS-1$
-			throw new EMailerConfigurationError();
-        }
-        
         IThrdWatcherRegistrator twr = ApiStack
                 .getInterface(IThrdWatcherRegistrator.class);
 
@@ -391,6 +383,25 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 
 	private List<Object> createSessionKey(Properties props, String smtpUser, String smtpPwd) {
 		return Arrays.asList((Object)props, smtpUser, smtpPwd);
+	}
+
+
+	public boolean isMailerConfigured() {
+		final IMailerSettings mailerSettings  = ApiStack.queryInterface(IMailerSettings.class);
+		
+		if (mailerSettings == null) {
+			ApiAlgs.getLog(this).warn("Mailer settings is null"); //$NON-NLS-1$
+			return false;
+		}
+		
+		mailerSettings.loadSettings();
+		
+        String smtpHost = mailerSettings.getSmtpHost();
+        if (Utils.isEmptyString(smtpHost)) {
+            ApiAlgs.getLog(this).warn("SMTP server is not configured"); //$NON-NLS-1$
+			return false;
+        }
+		return true;
 	}
 	
 	
