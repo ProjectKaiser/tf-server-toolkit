@@ -36,18 +36,21 @@ public class MailerSrvTest extends BasicServerTestCase {
 	private static String SMTP_USER = "alex@kukuruku.com";
 	
 	static String DEF_SENDER = null;
+	
+	int SMTP_PORT = ServerSetupTest.SMTP.getPort();
+	String SMTP_HOST = "localhost";
 
-	static class TestMS implements IMailerSettings{
+	class TestMS implements IMailerSettings{
 		
 		public void loadSettings() {
 		}
 
 		public String getSmtpHost() {
-			return "localhost";
+			return SMTP_HOST;
 		}
 
 		public int getSmtpPort() {
-			return ServerSetupTest.SMTP.getPort();
+			return SMTP_PORT;
 		}
 
 		public String getSmtpUser() {
@@ -75,9 +78,10 @@ public class MailerSrvTest extends BasicServerTestCase {
 		}
 		
 		@Override
-		public void send(String from, String to, String subject, String body) {
-			super.send(from, to, subject, body);
+		public boolean send(String from, String to, String subject, String body) throws EMailerConfigurationError {
+			boolean res = super.send(from, to, subject, body);
 			ApiAlgs.getLog(this).trace("MAILER: "+from + ", subj:" + subject);
+			return res;
 		}
 
 		public Session getActiveSession() {
@@ -252,5 +256,47 @@ public class MailerSrvTest extends BasicServerTestCase {
 
 	private Mailer getMailer() {
 		return getServer().getExtension(PKEPAPIs.class, TestMailer.class).getInstance();
+	}
+	
+	public void testSendMailErrorConfiguration() throws InterruptedException{
+		SMTP_PORT = 52636;
+		
+		sendMailAttach("plain", "ss".getBytes());
+		waitForMailer();
+		
+		incExpectedLogErrorCount(1);
+
+		
+		getServer().enterMode(Mode.Running);
+		try{
+			INamedDbId dbId = ApiStack.getInterface(INamedDbId.class);
+			long mailerId = dbId.createId(IMailer.class.getName());
+			
+			IDbQueue mailerQueue = IDbQueueFactory.Helper.getQueue(mailerId);
+			MailData res = (MailData) mailerQueue.get(10L);
+			assertNotNull(res);
+		}finally{
+			getServer().leaveMode();
+		}
+		
+		//2 emails in queue
+		sendMailAttach("plain", "ss_2".getBytes());
+		waitForMailer();
+		incExpectedLogErrorCount(1);
+
+		SMTP_HOST = null;
+		waitForMailer();
+		
+		getServer().enterMode(Mode.Running);
+		try{
+			INamedDbId dbId = ApiStack.getInterface(INamedDbId.class);
+			long mailerId = dbId.createId(IMailer.class.getName());
+			
+			IDbQueue mailerQueue = IDbQueueFactory.Helper.getQueue(mailerId);
+			assertNotNull(mailerQueue.get(0L));
+			assertNotNull(mailerQueue.get(0L));
+		}finally{
+			getServer().leaveMode();
+		}
 	}
 }

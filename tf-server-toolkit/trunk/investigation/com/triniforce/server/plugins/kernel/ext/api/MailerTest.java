@@ -1,5 +1,6 @@
 package com.triniforce.server.plugins.kernel.ext.api;
 
+import com.triniforce.server.plugins.kernel.ext.api.IMailer.EMailerConfigurationError;
 import com.triniforce.server.plugins.kernel.ext.api.IMailerSettings;
 import com.triniforce.server.plugins.kernel.ext.api.Mailer;
 import com.triniforce.server.plugins.kernel.ext.api.Mailer.MailData;
@@ -67,7 +68,7 @@ public class MailerTest extends ServicesTestCase {
 		
 	}
 	
-	public void testSend() {
+	public void testSend() throws EMailerConfigurationError {
 	
 		Mailer mailer = new Mailer();
 		Api api = new Api();
