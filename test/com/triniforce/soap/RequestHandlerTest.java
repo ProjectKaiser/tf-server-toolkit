@@ -6,6 +6,7 @@
 package com.triniforce.soap;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
@@ -36,6 +37,10 @@ public class RequestHandlerTest extends TFTestCase {
         
         public Object method4(){
         	return "String_006334".getBytes();
+        }
+        
+        public String method_charset(){
+        	return "привет мир";
         }
     }
 
@@ -182,8 +187,19 @@ public class RequestHandlerTest extends TFTestCase {
         InterfaceDescription desc = gen.parse(null, TestService.class);
         RequestHandler handler = new RequestHandler(gen, desc, new RequestHandler.ReflectServiceInvoker(new TestService()));
         
-        String REQ1 =
-        		"{\"jsonrpc\":\"2.0\", \"method\":\"method1\",\"params\":[\"test_string\"]}";
-        handler.execJson(new ByteArrayInputStream(REQ1.getBytes("utf-8")), System.out);
+        {
+	        String REQ1 =
+	        		"{\"jsonrpc\":\"2.0\", \"method\":\"method1\",\"params\":[\"test_string\"]}";
+	        handler.execJson(new ByteArrayInputStream(REQ1.getBytes("utf-8")), System.out);
+        }
+        {
+        	ByteArrayOutputStream byte_out = new ByteArrayOutputStream();
+        	String REQ1 =
+	        		"{\"jsonrpc\":\"2.0\", \"method\":\"method_charset\",\"params\":[]}";
+	        handler.execJson(new ByteArrayInputStream(REQ1.getBytes("utf-8")), byte_out);
+	        
+	        String res = new String(byte_out.toByteArray(), "utf-8");
+	        assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"привет мир\"}", res);
+        }
     }
 }

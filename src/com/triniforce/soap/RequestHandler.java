@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 
 import javax.xml.transform.TransformerException;
 
@@ -120,7 +121,7 @@ public class RequestHandler {
 	            str = m_gen.serializeJsonException(e);
 	        }
 			finally{
-	            OutputStreamWriter writer = new OutputStreamWriter(output);
+	            OutputStreamWriter writer = new OutputStreamWriter(output, Charset.forName("UTF-8"));
 	            writer.write(str);
 	            writer.close();
 			}
