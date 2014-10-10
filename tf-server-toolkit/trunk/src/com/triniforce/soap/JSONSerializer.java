@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Stack;
@@ -404,7 +405,7 @@ public class JSONSerializer {
 
 		JSONParser parser = new JSONParser();
 		KeyFinder finder = new KeyFinder(handler);
-		InputStreamReader reader = new InputStreamReader(source);
+		InputStreamReader reader = new InputStreamReader(source, Charset.forName("UTF-8"));
 		parser.parse(reader, finder, true);
 		SOAPDocument res = new SOAPDocument();
 		res.m_method = handler.m_method;
