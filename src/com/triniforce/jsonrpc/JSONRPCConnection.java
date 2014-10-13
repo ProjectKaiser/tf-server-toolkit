@@ -46,7 +46,6 @@ public class JSONRPCConnection {
 			connection.setReadTimeout(m_readTimeout);
 			connection.setDoOutput(true);
 			connection.setDoInput(true);
-			//m_connection.connect();
 			connection.setRequestMethod("POST");
 			connection.setRequestProperty("Content-Type", "text/json");
 

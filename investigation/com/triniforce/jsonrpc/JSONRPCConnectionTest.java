@@ -1,10 +1,12 @@
 package com.triniforce.jsonrpc;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
 
 import junit.framework.TestCase;
@@ -16,8 +18,10 @@ import com.triniforce.utils.ApiAlgs;
 
 public class JSONRPCConnectionTest extends TestCase {
 
-	final String jsonRequest = "{\"jsonrpc\": \"2.0\", \"method\": \"subtract\", \"params\": [42, 23], \"id\": 1}";
-	final String jsonResponse = "{\"jsonrpc\": \"2.0\", \"result\": 19, \"id\": 1}";
+	final static String jsonRequest = "{\"jsonrpc\": \"2.0\", \"method\": \"subtract\", \"params\": [42, 23], \"id\": 1}";
+	final static String jsonResponse = "{\"jsonrpc\": \"2.0\", \"result\": 19, \"id\": 1}";
+	final static String jsonRequest2 = "{\"jsonrpc\": \"2.0\", \"method\": \"add\", \"params\": [22, 33], \"id\": 1}";
+	final static String jsonResponse2 = "{\"jsonrpc\": \"2.0\", \"result\": 55, \"id\": 1}";
 
 	public void testInvoke() throws IOException  {
 		final int port = getFreePort();
@@ -83,6 +87,65 @@ public class JSONRPCConnectionTest extends TestCase {
 		server.setExecutor(null); // creates a default executor
 		server.start();
 		return server;
+	}
+
+	public void testKeepAlive() throws IOException {
+		ServerSocket server = new SimpleOneConnectionJsonHttpSocketServer();
+		try {
+			int port = server.getLocalPort();
+			JSONRPCConnection jsonConn = new JSONRPCConnection("http://localhost:" + port + "/test", 100, 100);
+			assertEquals(jsonResponse, jsonConn.invoke(jsonRequest));
+			assertEquals(jsonResponse2, jsonConn.invoke(jsonRequest2));
+		} finally{
+			server.close();
+		}
+	}
+	
+	class SimpleOneConnectionJsonHttpSocketServer extends ServerSocket implements Runnable {
+		public SimpleOneConnectionJsonHttpSocketServer() throws IOException {
+			super(0);
+			new Thread(this).start();
+		}
+		static final byte CR = 13, LF = 10;
+		private int skipRequestHeaderAndGetContentLength(InputStream is) throws IOException {
+			int c, contentLength = -1;
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			while((c = is.read()) >= 0) {
+				if (c == LF) {
+					String str = new String(buffer.toByteArray());
+					buffer.reset();
+					if (str.isEmpty()) break;
+					if (str.toLowerCase().startsWith("content-length:"))
+						contentLength = Integer.parseInt(str.substring("content-length:".length()).trim());
+				} else if ( c != CR) {
+					buffer.write(c);
+				}
+			}
+			return contentLength;
+		}
+		public void run() {
+			try {
+				Socket socket = accept();
+				InputStream is = socket.getInputStream();
+				OutputStream os = socket.getOutputStream();
+				int requestLength = skipRequestHeaderAndGetContentLength(is);
+				assertEquals(jsonRequest.length(), requestLength);
+				assertEquals(jsonRequest, new String(JSONRPCConnection.readAllBytesFromInputStream(
+						is, requestLength), "UTF-8"));
+				os.write(("HTTP/1.1 200 OK\r\n" + "Content-Length: " + jsonResponse.length()
+						+ "\r\n\r\n" + jsonResponse).getBytes());
+				requestLength = skipRequestHeaderAndGetContentLength(is);
+				assertEquals(jsonRequest2.length(), requestLength);
+				assertEquals(jsonRequest2, new String(JSONRPCConnection.readAllBytesFromInputStream(
+						is, requestLength), "UTF-8"));
+				os.write(("HTTP/1.1 200 OK\r\n" + "Content-Length: " + jsonResponse2.length()
+						+ "\r\n\r\n" + jsonResponse2).getBytes());
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }
