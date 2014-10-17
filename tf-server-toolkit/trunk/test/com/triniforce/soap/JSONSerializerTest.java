@@ -84,11 +84,11 @@ public class JSONSerializerTest extends TFTestCase {
 		JSONSerializer srz = new JSONSerializer();
 		
 		
-		assertEquals( "{\"jsonrpc\":\"2.0\",\"params\":[124],\"method\":\"method_001\",\"id\":1}", serialize(srz, desc, 124));
-		assertEquals( "{\"jsonrpc\":\"2.0\",\"params\":[515],\"method\":\"method_001\",\"id\":1}", serialize(srz, desc, 515));
-		assertEquals( "{\"jsonrpc\":\"2.0\",\"params\":[515,634,\"turbo\"],\"method\":\"method_001\",\"id\":1}", serialize(srz, desc, 515, 634, "turbo"));
+		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_001\",\"params\":[124],\"id\":1}", serialize(srz, desc, 124));
+		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_001\",\"params\":[515],\"id\":1}", serialize(srz, desc, 515));
+		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_001\",\"params\":[515,634,\"turbo\"],\"id\":1}", serialize(srz, desc, 515, 634, "turbo"));
 //		assertEquals( "{\"jsonrpc\":\"2.0\",\"params\":[515,{\"~unique-id~\":\"0\",\"value\":\"val_0012\",\"class\":\"com.triniforce.soap.JSONSerializerTest$1\"}],\"method\":\"method_001\",\"id\":1}", serialize(srz, desc, 515, new Prop01(){{setValue("val_0012");}}));
-		assertEquals( "{\"jsonrpc\":\"2.0\",\"params\":[515,{\"value\":\"val_0012\"}],\"method\":\"method_001\",\"id\":1}", serialize(srz, desc, 515, new Prop01(){{setValue("val_0012");}}));
+		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_001\",\"params\":[515,{\"value\":\"val_0012\"}],\"id\":1}", serialize(srz, desc, 515, new Prop01(){{setValue("val_0012");}}));
 	}
 
 	private String serialize(JSONSerializer srz, InterfaceDescription desc,

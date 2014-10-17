@@ -284,7 +284,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 		waitForMailer();
 		incExpectedLogErrorCount(1);
 
-		SMTP_HOST = null;
+		SMTP_HOST = null;		
 		waitForMailer();
 		
 		getServer().enterMode(Mode.Running);
@@ -295,6 +295,27 @@ public class MailerSrvTest extends BasicServerTestCase {
 			IDbQueue mailerQueue = IDbQueueFactory.Helper.getQueue(mailerId);
 			assertNotNull(mailerQueue.get(0L));
 			assertNotNull(mailerQueue.get(0L));
+			
+			
+			
+		}finally{
+			getServer().leaveMode();
+		}
+	}
+	
+	public void testNextExecTime() throws InterruptedException{
+		SMTP_PORT = 52636;
+		m_bemu.setTimeSeq(50000, new long[]{});
+		
+		sendMailAttach("plain", "ss".getBytes());
+		waitForMailer();
+		
+		incExpectedLogErrorCount(1);
+
+		
+		getServer().enterMode(Mode.Running);
+		try{
+			assertTrue(getMailer().m_nextExecTime > 50000); 
 		}finally{
 			getServer().leaveMode();
 		}
