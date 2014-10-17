@@ -30,7 +30,7 @@ import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.utils.ApiAlgs;
 
 public class JSONSerializer {
-	static class JsonRpc extends LinkedHashMap<String, Object>{
+	public static class JsonRpc extends LinkedHashMap<String, Object>{
 		private static final long serialVersionUID = -473423311133694151L;
 		private String m_jsonrpc;
 		Integer m_id;
@@ -55,15 +55,15 @@ public class JSONSerializer {
 		}
 	}
 	
-	static class JsonRpcMessage extends JsonRpc{
+	public static class JsonRpcMessage extends JsonRpc{
 		private static final long serialVersionUID = 2086146444010066388L;
 		String m_method;
 		Object[] m_params;
 		public JsonRpcMessage(String jsonrpc, String method, Object[] params,
 				Integer id) {
 			super(jsonrpc, id);
-			setParams(params);
 			setMethod(method);
+			setParams(params);
 			remove("id");
 			setId(id);
 		}

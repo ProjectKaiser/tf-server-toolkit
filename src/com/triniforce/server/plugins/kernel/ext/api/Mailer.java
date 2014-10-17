@@ -37,6 +37,14 @@ import com.triniforce.utils.InSeparateThreadExecutor.IRunnable;
 import com.triniforce.utils.TFUtils;
 import com.triniforce.utils.Utils;
 
+/**
+ * @author ias
+ *
+ */
+/**
+ * @author ias
+ *
+ */
 public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 	
 	private static final String emailCharset = Charset.forName("UTF-8").name();
@@ -57,6 +65,11 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 	protected List<Object> m_sessionKey;
 	protected Session m_session = null;
 	
+	/**
+	 * Next run will be excecuted if this time is less then current
+	 */
+	protected long m_nextExecTime=0L; 
+	
 	public Mailer() {
 		super();
         delay = 5000;
@@ -74,7 +87,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 		long mailerId = dbId.createId(IMailer.class.getName());
 		
 		IDbQueue mailerQueue = IDbQueueFactory.Helper.getQueue(mailerId);
-		
+
 		Object obj;
 		while ((obj = mailerQueue.get(0l)) != null) {
 			
@@ -124,6 +137,11 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 			setAttachment(attach);
 			setAttachFileName(attachFName);
 		}
+		
+		public MailData(String from, String to, String subject, String body) {
+			this(from, to, subject, null, body, null, null, null);
+		}
+		
 		
 		public String getFrom() {
 			return m_from;
