@@ -261,7 +261,7 @@ public class TFTestCase extends TestCase {
         
         if(! log4jConfigured){
             PropertyConfigurator.configure(new File(TFTestCase.getTfTestFolder(), LOG4J_FILE).toString());
-            log4jConfigured = false;
+            log4jConfigured = true;
         }
         
         m_apiStackCnt = ApiStack.getThreadApiContainer().getStack().size();
