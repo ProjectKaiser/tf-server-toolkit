@@ -171,12 +171,12 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
             Types.REAL,Types.TIMESTAMP,Types.BLOB,Types.DECIMAL,
             Types.CHAR,Types.CHAR, Types.VARCHAR, Types.VARCHAR, Types.BIGINT, 
             Types.DOUBLE, Types.LONGVARBINARY, Types.FLOAT, Types.TIME, 
-            Types.DATE};
+            Types.DATE, Types.LONGVARCHAR};
         private static final ColumnType[] DDL_TYPES = {ColumnType.INT,ColumnType.SMALLINT,
             ColumnType.FLOAT,ColumnType.DATETIME,ColumnType.BLOB,ColumnType.DECIMAL,
             ColumnType.CHAR,ColumnType.NCHAR, ColumnType.VARCHAR, ColumnType.NVARCHAR, ColumnType.LONG, 
             ColumnType.DOUBLE, ColumnType.BLOB, ColumnType.FLOAT, ColumnType.DATETIME, 
-            ColumnType.DATETIME};
+            ColumnType.DATETIME, ColumnType.BLOB};
         
         
         private static final String NV_NAME = "name"; //$NON-NLS-1$

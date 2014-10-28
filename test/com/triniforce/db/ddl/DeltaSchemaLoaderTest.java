@@ -5,21 +5,27 @@
  */
 package com.triniforce.db.ddl;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.sql.Blob;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.triniforce.db.ddl.Delta.DBMetadata.IIndexLocNames;
 import com.triniforce.db.ddl.Delta.DeltaSchema;
 import com.triniforce.db.ddl.Delta.DeltaSchemaLoader;
 import com.triniforce.db.ddl.Delta.EditTabCmd;
 import com.triniforce.db.ddl.Delta.IDBNames;
-import com.triniforce.db.ddl.Delta.DBMetadata.IIndexLocNames;
 import com.triniforce.db.ddl.TableDef.FieldDef;
-import com.triniforce.db.ddl.TableDef.IndexDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
+import com.triniforce.db.ddl.TableDef.IndexDef;
 import com.triniforce.db.ddl.UpgradeRunner.DbType;
 import com.triniforce.db.test.DBTestCase;
 import com.triniforce.utils.ApiAlgs;
@@ -206,5 +212,70 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 //		assertNull(tabs.get("DeltaSchemaLoaderTest2").getFields().findElement("FIELD3"));
 //		assertNull(tabs.get("DeltaSchemaLoaderTest1").getFields().findElement("FIELD4"));
 //	}
+	
+	public void testLONGVARBINARY() throws SQLException, Exception{
+		if(getDbType().equals(DbType.FIREBIRD)){
+			Connection con = getConnection();
+			Statement st = con.createStatement();
+			if(!existTable("TEST_LONGVARBINARY")){
+				st.execute("CREATE TABLE TEST_LONGVARBINARY (DESCRIPTION BLOB SUB_TYPE 1 SEGMENT SIZE 4096)");
+				con.commit();
+			}
+			try{
+				PreparedStatement ps = con.prepareStatement("insert into TEST_LONGVARBINARY(DESCRIPTION) VALUES(?)");
+				ps.setObject(1, "TESTESTSETES".getBytes());
+				ps.execute();
+				
+				DeltaSchemaLoader loader = new DeltaSchemaLoader(Arrays.asList("TEST_LONGVARBINARY"), null);
+				DeltaSchema res = loader.loadSchema(con, new IDBNames() {
+					public String getDbName(String appName) {
+						return appName;
+					}
+					
+					public String getAppName(String dbName) {
+						return dbName;
+					}
+				});
+				
+				//loaded
+				assertEquals(FieldDef.ColumnType.BLOB, 
+						res.getTables().get("TEST_LONGVARBINARY").getFields().findElement("DESCRIPTION").getElement().getType());
+				
+				ps.close();
+				
+				ps  = con.prepareStatement("select DESCRIPTION FROM TEST_LONGVARBINARY");
+				ResultSet rs = ps.executeQuery();
+				rs.next();
+				Blob b = rs.getBlob(1);
+				assertNotNull(b);
+				
+				byte[] bytes = rs.getBytes(1);
+				assertEquals("TESTESTSETES", new String(bytes, "utf-8"));
+				
+				char[] cbuf = new char[100];
+				
+				InputStream in = rs.getBinaryStream(1);
+				InputStreamReader r = new InputStreamReader(in, "utf-8");
+				int nr = r.read(cbuf);
+				assertEquals("TESTESTSETES", new String (cbuf, 0, nr));
+
+				rs.close();
+				ps.close();
+						
+			}finally{
+//				st.execute("drop table TEST_LONGVARBINARY");
+//				con.commit();
+			}
+		}
+	}
+
+private boolean existTable(String tabName) throws SQLException, Exception {
+	ResultSet rs = getConnection().getMetaData().getTables(null, null, tabName.toUpperCase(), null);
+	try{
+		return rs.next();
+	}finally{
+		rs.close();
+	}
+}
 	
 }
