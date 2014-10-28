@@ -80,6 +80,14 @@ public class ActualStateBLTest extends DDLTestCase {
             assertEquals("t_innerclass", m_as.generateTabName("pkg1.pkg11.pkg113.OuterClass$InnerClass"));
             assertEquals("t_inner2class", m_as.generateTabName("pkg1.pkg11.pkg113.OuterClass$InnerClass$Inner2Class"));
         }
+        
+        {
+        	assertEquals("t_tab", m_as.generateTabName("pkg1.tab"));
+        	m_as.addTable("t_tab", "pkg1.tab", 1);
+        	assertEquals("t_tab1", m_as.generateTabName("pkg2.tab"));
+        	m_as.addTable("t_tab1", "pkg2.tab", 1);
+        	assertEquals("t_tab2", m_as.generateTabName("pkg3.tab"));
+        }
     }
 
     public void testTableExists() throws Exception {
