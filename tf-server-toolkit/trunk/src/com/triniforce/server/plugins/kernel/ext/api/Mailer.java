@@ -32,6 +32,7 @@ import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiAlgs.RethrownException;
 import com.triniforce.utils.ApiStack;
+import com.triniforce.utils.ITime;
 import com.triniforce.utils.InSeparateThreadExecutor;
 import com.triniforce.utils.InSeparateThreadExecutor.IRunnable;
 import com.triniforce.utils.TFUtils;
@@ -51,6 +52,8 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 	
     static final int innerTimeout = 4*60*1000;
     static final int outerTimeout = innerTimeout  +  innerTimeout/4;
+    
+    static final int ERROR_SEND_TIMEOUT = 1 * 60 * 1000; // 1 minute after error
     
     static final Properties INI_SESSION_PROPS = new Properties();
     static{
@@ -83,10 +86,15 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 
 	@Override
 	public void run() {
+		if(m_nextExecTime > ApiStack.getInterface(ITime.class).currentTimeMillis()){
+			return ;
+		}
+		
 		INamedDbId dbId = ApiStack.getInterface(INamedDbId.class);
 		long mailerId = dbId.createId(IMailer.class.getName());
 		
 		IDbQueue mailerQueue = IDbQueueFactory.Helper.getQueue(mailerId);
+		
 
 		Object obj;
 		while ((obj = mailerQueue.get(0l)) != null) {
@@ -108,6 +116,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 			
 			if(!bMailSent){
 				mailerQueue.put(mailData);
+				m_nextExecTime = ApiStack.getInterface(ITime.class).currentTimeMillis() + ERROR_SEND_TIMEOUT;
 				break;
 			}
 		}
