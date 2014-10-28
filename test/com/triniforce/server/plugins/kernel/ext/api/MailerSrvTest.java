@@ -259,6 +259,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 	}
 	
 	public void testSendMailErrorConfiguration() throws InterruptedException{
+		
 		SMTP_PORT = 52636;
 		
 		sendMailAttach("plain", "ss".getBytes());
@@ -278,6 +279,8 @@ public class MailerSrvTest extends BasicServerTestCase {
 		}finally{
 			getServer().leaveMode();
 		}
+		
+		getMailer().m_nextExecTime = 0L; // No Error timeouts
 		
 		//2 emails in queue
 		sendMailAttach("plain", "ss_2".getBytes());
@@ -305,7 +308,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 	
 	public void testNextExecTime() throws InterruptedException{
 		SMTP_PORT = 52636;
-		m_bemu.setTimeSeq(50000, new long[]{});
+		m_bemu.setTimeSeq(50000, new long[]{10});
 		
 		sendMailAttach("plain", "ss".getBytes());
 		waitForMailer();
@@ -315,10 +318,13 @@ public class MailerSrvTest extends BasicServerTestCase {
 		
 		getServer().enterMode(Mode.Running);
 		try{
-			assertTrue(getMailer().m_nextExecTime > 50000); 
+			assertTrue("" + getMailer().m_nextExecTime, getMailer().m_nextExecTime > 50000); 
 		}finally{
 			getServer().leaveMode();
 		}
+		
+		waitForMailer(); // No error because Error timeout is not reached
+
 	}
 	
 	public void testIsMailConfigured(){
