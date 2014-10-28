@@ -268,7 +268,7 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
         String tabName = tabLocName;
         int i=1;
         while(m_dbNames.contains(tabName)){
-            tabName = tabLocName + Integer.toString(i);
+            tabName = tabLocName + Integer.toString(i++);
         }
         return tabName;
     }
