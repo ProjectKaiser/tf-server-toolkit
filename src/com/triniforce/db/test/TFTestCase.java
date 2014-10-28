@@ -45,37 +45,6 @@ public class TFTestCase extends TestCase {
 			return m_errCount;
 		}
 		
-//		static class TestLog extends org.apache.commons.logging.impl.Log4JLogger{
-//			private static final long serialVersionUID = 1L;
-//			private TestLogFactory m_lf;
-//
-//			public TestLog(TestLogFactory lf, org.apache.log4j.Logger inner) {
-//				super(inner);
-//				m_lf = lf;
-//			}
-//			
-//			@Override
-//			public void error(Object arg0) {
-//				if(m_lf.bCountErrors){
-//					m_lf.m_errCount++;
-//					super.error(arg0);
-//				}
-//				else
-//					trace(arg0);
-//			}
-//			
-//			@Override
-//			public void error(Object arg0, Throwable arg1) {
-//				if(m_lf.bCountErrors){
-//					m_lf.m_errCount++;
-//					super.error(arg0, arg1);
-//				}
-//				else 
-//					trace(arg0, arg1);
-//			}
-//		}
-//		
-		
 		public static class TestLog implements Log {
 
 			private TestLogFactory m_lf;
@@ -173,8 +142,6 @@ public class TFTestCase extends TestCase {
 		@Override
 		public Log getInstance(String arg0) throws LogConfigurationException {
 			return new TestLog(this, super.getInstance(arg0));
-//			Log4JLogger inner = (Log4JLogger) super.getInstance(arg0);
-//			return new TestLog(this, inner.getLogger());
 		}
 		
 	}
@@ -284,9 +251,8 @@ public class TFTestCase extends TestCase {
 
 	private TestLogFactory m_testLF;    
 
-    {
-        PropertyConfigurator.configure(new File(TFTestCase.getTfTestFolder(),
-                LOG4J_FILE).toString());
+    static {
+        PropertyConfigurator.configure(new File(TFTestCase.getTfTestFolder(), LOG4J_FILE).toString());
     }
     
     protected int m_apiStackCnt;
