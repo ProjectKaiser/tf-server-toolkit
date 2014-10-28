@@ -251,15 +251,19 @@ public class TFTestCase extends TestCase {
 
 	private TestLogFactory m_testLF;    
 
-    static {
-        PropertyConfigurator.configure(new File(TFTestCase.getTfTestFolder(), LOG4J_FILE).toString());
-    }
-    
     protected int m_apiStackCnt;
+    
+    static boolean log4jConfigured = false;
     
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        
+        if(! log4jConfigured){
+            PropertyConfigurator.configure(new File(TFTestCase.getTfTestFolder(), LOG4J_FILE).toString());
+            log4jConfigured = false;
+        }
+        
         m_apiStackCnt = ApiStack.getThreadApiContainer().getStack().size();
         Api api = new Api();
         m_testLF = new TestLogFactory();
