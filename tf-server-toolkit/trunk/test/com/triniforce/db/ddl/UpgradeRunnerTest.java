@@ -165,7 +165,13 @@ public class UpgradeRunnerTest extends DDLTestCase {
         }catch(RuntimeException e){
         	
         }
+        
+        if(getDbType().equals(DbType.FIREBIRD)){
+        	
+        	
+        }
 	}
+	
     
     public void testGetConstraintString() throws Exception{
     	if(!getDbType().equals(DbType.MYSQL)){
