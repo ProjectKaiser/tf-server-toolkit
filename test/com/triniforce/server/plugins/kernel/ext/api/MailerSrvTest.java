@@ -71,6 +71,8 @@ public class MailerSrvTest extends BasicServerTestCase {
 		
 	}
 	
+	static RuntimeException SENDING_ERROR = null;
+	
 	public static class TestMailer extends Mailer{
 		public TestMailer() {
 			super();
@@ -79,9 +81,22 @@ public class MailerSrvTest extends BasicServerTestCase {
 		
 		@Override
 		public boolean send(String from, String to, String subject, String body) throws EMailerConfigurationError {
+			if(null != SENDING_ERROR)
+				throw SENDING_ERROR;
 			boolean res = super.send(from, to, subject, body);
 			ApiAlgs.getLog(this).trace("MAILER: "+from + ", subj:" + subject);
 			return res;
+		}
+		
+		@Override
+		public synchronized boolean send(String from, String to,
+				String subject, String bodyType, String body,
+				String attachFile, String attachType, byte[] attachment)
+				throws EMailerConfigurationError {
+			if(null != SENDING_ERROR)
+				throw SENDING_ERROR;
+			return super.send(from, to, subject, bodyType, body, attachFile, attachType,
+					attachment);
 		}
 
 		public Session getActiveSession() {
@@ -335,6 +350,25 @@ public class MailerSrvTest extends BasicServerTestCase {
 			
 			SMTP_HOST = null;
 			assertFalse(m.isMailerConfigured());
+		}finally{
+			getServer().leaveMode();
+		}
+		
+	}
+	
+	public void testSendMailError() throws InterruptedException{
+		sendMailAttach("plain", "ss".getBytes());
+		SENDING_ERROR = new RuntimeException();
+		waitForMailer();
+		
+		getServer().enterMode(Mode.Running);
+		try{
+			INamedDbId dbId = ApiStack.getInterface(INamedDbId.class);
+			long mailerId = dbId.createId(IMailer.class.getName());
+			
+			IDbQueue mailerQueue = IDbQueueFactory.Helper.getQueue(mailerId);
+			MailData res = (MailData) mailerQueue.get(10L);
+			assertNotNull(res);
 		}finally{
 			getServer().leaveMode();
 		}
