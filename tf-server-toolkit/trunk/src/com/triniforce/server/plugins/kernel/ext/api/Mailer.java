@@ -113,6 +113,10 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 				ApiAlgs.getLog(this).warn("Mailer is not configured");
 				bMailSent = false;					
 			}
+			catch (Exception e) {
+				ApiAlgs.getLog(this).warn("Mail is not sent", e);
+				bMailSent = false;					
+			}
 			
 			if(!bMailSent){
 				mailerQueue.put(mailData);
