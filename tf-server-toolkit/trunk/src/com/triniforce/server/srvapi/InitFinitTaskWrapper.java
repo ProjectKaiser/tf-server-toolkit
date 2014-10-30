@@ -30,7 +30,7 @@ public class InitFinitTaskWrapper implements Runnable  {
         return true;
     }
     
-    void logErrror(Throwable e){
+    void logInitializationErrror(Throwable e){
         String msg = "Initialization error:" + m_command.toString();
         if(isSeriousException(e)){
             ApiAlgs.getLog(this).error(msg, e);
@@ -44,8 +44,7 @@ public class InitFinitTaskWrapper implements Runnable  {
             try {
                 m_command.init();
             } catch (Throwable e) {
-                ApiAlgs.getLog(this).error(
-                        "Initialization error:" + m_command.toString(), e);//$NON-NLS-1$
+                logInitializationErrror(e);
                 return;
             }
             try {
