@@ -131,6 +131,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 		}finally{
 			getServer().leaveMode();
 		}
+		SENDING_ERROR = null;
 
 	}
 	
