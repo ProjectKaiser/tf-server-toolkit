@@ -2,6 +2,8 @@ package com.triniforce.utils;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -9,6 +11,40 @@ import org.apache.commons.logging.LogFactory;
 import com.triniforce.utils.IProfilerStack.PSI;
 
 public class ApiAlgs {
+    
+    public static List<String> m_safeExceptionsPatterns;
+    
+    static{
+        m_safeExceptionsPatterns = new ArrayList<String>();
+        m_safeExceptionsPatterns.add(".*network request to host");
+        m_safeExceptionsPatterns.add(".*database.+shutdown");
+    }
+    
+    public static boolean isSeriousException(Throwable e){
+        if(null == e){
+            return true;
+        }
+        String m = e.getMessage();
+        if(null == m){
+            return true;
+        }
+
+        for(String s:m_safeExceptionsPatterns){
+            if(m.matches(s)){
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    public static void logError(Object obj, String msg, Throwable e){
+        if(isSeriousException(e)){
+            ApiAlgs.getLog(obj).error(msg, e);
+        }else{
+            ApiAlgs.getLog(obj).trace(msg, e);
+        }
+    }
+
     
     @SuppressWarnings("serial")
     public static class RethrownException extends RuntimeException{

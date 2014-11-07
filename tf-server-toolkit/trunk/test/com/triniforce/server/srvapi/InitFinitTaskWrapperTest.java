@@ -25,12 +25,5 @@ public class InitFinitTaskWrapperTest extends TFTestCase {
         assertTrue(w2.equals(w1));
     }
 
-    public void test_isSeriousException() {
-        assertTrue(InitFinitTaskWrapper
-                .isSeriousException(new RuntimeException("")));
-        assertFalse(InitFinitTaskWrapper
-                .isSeriousException(new RuntimeException(
-                        "Unable to complete network request to host")));
-    }
 
 }
