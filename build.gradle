@@ -1,7 +1,7 @@
 if (IS_OBSOLETE_GRADLE_VERSION())
 	ext = project
 
-ext.tf_version = '33.0';
+ext.tf_version = '34.0';
 ext.tf_release = false
 ext.tf_vendor = 'Triniforce.com'
 
