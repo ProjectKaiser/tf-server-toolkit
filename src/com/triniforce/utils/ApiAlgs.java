@@ -1,6 +1,8 @@
 package com.triniforce.utils;
 
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +52,18 @@ public class ApiAlgs {
     public static class RethrownException extends RuntimeException{
         public RethrownException(Throwable t) {
             super(t);
+            ApiAlgs.assertNotNull(t, "cause");
         }
+        
+        @Override
+        public void printStackTrace(PrintStream s) {
+        	getCause().printStackTrace(s);
+        }
+        
+        public void printStackTrace(PrintWriter s) {
+        	getCause().printStackTrace(s);
+        }
+
     }
     
     @Deprecated
