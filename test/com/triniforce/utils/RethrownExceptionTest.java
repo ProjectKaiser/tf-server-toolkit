@@ -42,8 +42,8 @@ public class RethrownExceptionTest extends TestCase {
 			ApiAlgs.getLog(this).error("test", e);
 			String s = WRITER.getBuffer().toString();
 			assertFalse(s.isEmpty());
-			System.out.println(s);
 			assertFalse(s.contains("com.triniforce.utils.ApiAlgs$RethrownException: java.lang.Exception"));
+			assertTrue(s.contains("java.lang.Exception"));
 		}
 	}
 	
