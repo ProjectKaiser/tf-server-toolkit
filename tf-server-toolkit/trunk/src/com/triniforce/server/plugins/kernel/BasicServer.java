@@ -1214,12 +1214,12 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 		try{
 			stopPeriodicalTasks();
 		}catch(Throwable t){
-			ApiAlgs.getLog(this).error("Stop tasks error", t);
+			ApiAlgs.logError(this, "Stop tasks error", t);
 		}
 		try{
 			finit();
 		}catch(Throwable t){
-			ApiAlgs.getLog(this).error("Finit server error", t);
+			ApiAlgs.logError(this, "Finit server error", t);
 		}
 	}
 
