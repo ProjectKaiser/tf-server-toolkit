@@ -11,6 +11,12 @@ import com.triniforce.utils.test.JustAClass;
 
 public class ApiAlgsTest extends TFTestCase {
 	
+    public void test_isSeriousException() {
+        assertTrue(ApiAlgs.isSeriousException(new RuntimeException("")));
+        assertFalse(ApiAlgs.isSeriousException(new RuntimeException("Unable to complete network request to host")));
+        assertFalse(ApiAlgs.isSeriousException(new RuntimeException("database C:/TESTS/TESTBUILDTESTUNTILL/DB/REGRESSION.GDB shutdown")));
+    }
+    
 	public void testAssertTrue() {
 		TFUtils.assertTrue(true, "");
 		try {

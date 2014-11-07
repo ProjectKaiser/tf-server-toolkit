@@ -17,26 +17,9 @@ public class InitFinitTaskWrapper implements Runnable  {
         m_command = command;
     }
     
-    public static boolean isSeriousException(Throwable e){
-        if(null == e){
-            return true;
-        }
-        if(null == e.getMessage()){
-            return true;
-        }
-        if(e.getMessage().contains("network request to host")){
-            return false;
-        }
-        return true;
-    }
-    
     void logInitializationErrror(Throwable e){
         String msg = "Initialization error:" + m_command.toString();
-        if(isSeriousException(e)){
-            ApiAlgs.getLog(this).error(msg, e);
-        }else{
-            ApiAlgs.getLog(this).trace(msg, e);
-        }
+        ApiAlgs.logError(this, msg, e);
     }
 
     public void run() {

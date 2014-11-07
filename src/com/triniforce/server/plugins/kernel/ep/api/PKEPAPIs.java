@@ -68,7 +68,7 @@ public class PKEPAPIs  extends PKExtensionPoint{
                         }
                     }
                 }catch(Exception e){
-                    ApiAlgs.getLog(this).error(errorText +": "+ api.getClass().getName(), e);                    
+                    ApiAlgs.logError(this, errorText +": "+ api.getClass().getName(), e);
                 }
             }
         }
