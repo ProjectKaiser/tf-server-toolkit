@@ -67,7 +67,6 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 	
 	protected List<Object> m_sessionKey;
 	protected Session m_session = null;
-	private boolean m_bLastSucceed = true;
 	
 	/**
 	 * Next run will be excecuted if this time is less then current
@@ -110,22 +109,18 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 					bMailSent = this.send(mailData.getFrom(), mailData.getTo(), mailData.getSubject(), 
 							mailData.getBodyType(), mailData.getBody(),
 							mailData.getAttachFileName(), mailData.getAttachType(), mailData.getAttachment());
-				m_bLastSucceed = true;
 			}catch(IMailer.EMailerConfigurationError e){
-				if(m_bLastSucceed)
-					ApiAlgs.getLog(this).warn("Mailer is not configured");
+				ApiAlgs.getLog(this).warn("Mailer is not configured");
 				bMailSent = false;					
 			}
 			catch (Exception e) {
-				if(m_bLastSucceed)
-					ApiAlgs.getLog(this).warn("Mail is not sent", e);
+				ApiAlgs.getLog(this).warn("Mail is not sent", e);
 				bMailSent = false;					
 			}
 			
 			if(!bMailSent){
 				mailerQueue.put(mailData);
 				m_nextExecTime = ApiStack.getInterface(ITime.class).currentTimeMillis() + ERROR_SEND_TIMEOUT;
-				m_bLastSucceed = false;
 				break;
 			}
 		}
@@ -360,7 +355,8 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 	    if (!Utils.isEmptyString(smtpUsr)) {
             authenticator = new javax.mail.Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(smtpUsr, mailerSettings.getSmtpPassword());
+                    return new PasswordAuthentication(smtpUsr, 
+                    		"".equals(mailerSettings.getSmtpPassword()) ? null : mailerSettings.getSmtpPassword());
                 }
             };
         }
@@ -372,7 +368,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 		Session result;
         Properties props = createSessionProperties(mailerSettings); 
         
-        final String smtpPwd = mailerSettings.getSmtpPassword();
+        final String smtpPwd = "".equals(mailerSettings.getSmtpPassword()) ? null : mailerSettings.getSmtpPassword();
         final String smtpUsr = mailerSettings.getSmtpUser();
         
         javax.mail.Authenticator authenticator = null;
