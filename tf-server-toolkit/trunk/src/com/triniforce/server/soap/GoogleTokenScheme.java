@@ -10,6 +10,10 @@ public class GoogleTokenScheme extends AuthScheme{
     private String m_email;
     private String m_pictureUrl;
     private String m_displayName;
+    
+    public GoogleTokenScheme() {
+    }
+    
     public String getToken() {
         return m_token;
     }
