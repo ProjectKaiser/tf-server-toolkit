@@ -58,6 +58,7 @@ import com.triniforce.utils.ApiAlgs;
 	
 	@Override
 	public void init(ServletConfig arg0) throws ServletException {
+		super.init(arg0);
 		try {
 			InterfaceDescription oldDesc = null;
 //			InputStream itfRs = getInterfaceDescResource();
@@ -73,7 +74,6 @@ import com.triniforce.utils.ApiAlgs;
 			ApiAlgs.rethrowException(e);
 		}
 		
-		super.init(arg0);
 	}
 
 
