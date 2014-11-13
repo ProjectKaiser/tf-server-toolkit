@@ -9,7 +9,8 @@ import com.triniforce.utils.ITime.ITimeHelper;
 
 public class InSeparateThreadExecutor {
     
-    public interface IRunnable{
+    @Deprecated
+    public interface IRunnable extends com.triniforce.utils.IRunnable{
         public void run() throws Exception;
     }
     
@@ -28,7 +29,7 @@ public class InSeparateThreadExecutor {
     
     private ExecutionResult m_res;
     
-    public ExecutionResult execute(final String name, final IRunnable r, long timeoutMs){
+    public ExecutionResult execute(final String name, final com.triniforce.utils.IRunnable r, long timeoutMs){
         
         TFUtils.assertTrue(timeoutMs >0, "Wtong timeout");
         
