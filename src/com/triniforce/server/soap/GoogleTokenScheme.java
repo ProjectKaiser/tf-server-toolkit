@@ -5,6 +5,9 @@
  */ 
 package com.triniforce.server.soap;
 
+import com.triniforce.soap.PropertiesSequence;
+
+@PropertiesSequence( sequence = {"token", "email", "pictureUrl", "displayName"})
 public class GoogleTokenScheme extends AuthScheme{
     private String m_token;
     private String m_email;
