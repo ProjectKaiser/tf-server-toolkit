@@ -32,9 +32,9 @@ import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiAlgs.RethrownException;
 import com.triniforce.utils.ApiStack;
+import com.triniforce.utils.IRunnable;
 import com.triniforce.utils.ITime;
 import com.triniforce.utils.InSeparateThreadExecutor;
-import com.triniforce.utils.InSeparateThreadExecutor.IRunnable;
 import com.triniforce.utils.TFUtils;
 import com.triniforce.utils.Utils;
 
@@ -290,7 +290,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
             ApiAlgs.getLog(this).info("Sending email:"+ body);//$NON-NLS-1$
             final MimeMessage finalMsg = msg; 
             try{
-            	IRunnable r = new InSeparateThreadExecutor.IRunnable(){
+            	IRunnable r = new IRunnable(){
                     public void run() throws Exception{
                     	try{
                     		Transport.send(finalMsg);

@@ -13,7 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.triniforce.utils.InSeparateThreadExecutor.IRunnable;
+import com.triniforce.utils.IRunnable;
+
 
 /**
  *

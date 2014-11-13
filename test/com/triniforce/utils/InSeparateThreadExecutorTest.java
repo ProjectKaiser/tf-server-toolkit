@@ -7,7 +7,6 @@ package com.triniforce.utils;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.utils.InSeparateThreadExecutor.ExecutionResult;
-import com.triniforce.utils.InSeparateThreadExecutor.IRunnable;
 
 public class InSeparateThreadExecutorTest extends TFTestCase {
     
