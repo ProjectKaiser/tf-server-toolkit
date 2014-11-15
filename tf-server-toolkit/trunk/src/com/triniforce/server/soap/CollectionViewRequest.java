@@ -19,6 +19,15 @@ public class CollectionViewRequest extends LongListRequest {
 
     Long m_parentOf;
     
+    public CollectionViewRequest() {
+
+	}
+    
+    public CollectionViewRequest(Class target, Long parentId) {
+    	setTargetClass(target);
+    	setParentId(parentId);
+	}
+    
     @Override
     public String toString() {
     	return "view: " + getTarget()+": "+ getParentId()+": "+ super.toString();
