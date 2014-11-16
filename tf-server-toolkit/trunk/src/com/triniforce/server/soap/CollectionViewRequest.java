@@ -28,6 +28,11 @@ public class CollectionViewRequest extends LongListRequest {
     	setParentId(parentId);
 	}
     
+    public CollectionViewRequest(String target, Long parentId) {
+    	setTarget(target);
+    	setParentId(parentId);
+	}
+    
     @Override
     public String toString() {
     	return "view: " + getTarget()+": "+ getParentId()+": "+ super.toString();
@@ -121,10 +126,6 @@ public class CollectionViewRequest extends LongListRequest {
 
     public String getTarget() {
         return m_target;
-    }
-    
-    public  void setTargetCls(Class cls){
-        setTarget(cls.getName());
     }
     
     public void addColumn(IName col){
