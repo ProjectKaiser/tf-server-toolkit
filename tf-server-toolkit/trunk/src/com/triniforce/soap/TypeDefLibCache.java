@@ -83,7 +83,6 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         }
         
         public TypeDef add(Type type) {
-        	ApiAlgs.getLog(this).trace(type.toString());
             TypeDef res = get(type);
             if(null == res){
             	Class cls = toClass(type);

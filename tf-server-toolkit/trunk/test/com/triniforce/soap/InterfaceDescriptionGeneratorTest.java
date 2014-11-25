@@ -6,6 +6,7 @@
 package com.triniforce.soap;
 
 import java.beans.IntrospectionException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.ESoap.EMethodNotFound;
@@ -866,6 +868,20 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         	List<InterfaceOperationDescription> res = gen.listInterfaceOperations(CRandom.class, false);	
         	assertTrue(res.toString(), res.isEmpty());
         }
+    }
+    
+    public void testDeserialize() throws ParserConfigurationException, SAXException, IOException{
+        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        {
+	        InterfaceDescription desc = gen.parse(null, TestSrv2.class);
+	        try{
+	        	gen.deserialize(desc, new ByteArrayInputStream("".getBytes()));
+	        	fail();
+	        }catch(SAXParseException e){
+	        	assertEquals("Premature end of file.", e.getMessage());
+	        }
+        }
+    	
     }
 
 }
