@@ -12,6 +12,7 @@ import javax.xml.namespace.QName;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
@@ -147,5 +148,11 @@ class SoapHandler extends DefaultHandler{
 		result.m_bIn = m_saxHandler.m_bIn;
 		result.m_args = m_saxHandler.m_args;
 		return result;
+	}
+	
+	@Override
+	public void fatalError(SAXParseException e) throws SAXException {
+		ApiAlgs.getLog(this).trace("Invalid request", e);
+		super.fatalError(e);
 	}
 }
