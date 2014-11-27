@@ -272,17 +272,20 @@ public class ClassParserTest extends TFTestCase {
         assertEquals(int[].class.getName(), mapDef.getValueDef().getType());
         
         Collection<TypeDef> maps = m_lib.getDefs();
-        assertEquals(2, maps.size());
+        assertEquals(3, maps.size()); // Array, Map, MapEntry
         
         assertSame(mapDef, m_lib.add(t1));
-        assertEquals(2, maps.size());
+        assertEquals(3, maps.size());
         
         t1 = IL1.class.getMethod("fun4", (Class[])null).getGenericReturnType();
         assertNotSame(mapDef, m_lib.add(t1));
         t1 = IL1.class.getMethod("fun5", (Class[])null).getGenericReturnType();
         assertNotSame(mapDef, m_lib.add(t1));
         maps = m_lib.getDefs();
-        assertEquals(4, maps.size());
+        
+        //MapOfArrayOfIntByLong, MapOfLongByString, ArrayOfInt, MapOfArrayOfIntByString, 
+        //MapEntryArrayOfIntByLong, MapEntryLongByString, MapEntryArrayOfIntByString
+        assertEquals(7, maps.size()); 
 
         assertEquals("MapOfLongByString", m_lib.add(t1).getName());
         

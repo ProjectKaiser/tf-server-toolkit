@@ -208,7 +208,7 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         static class MapComponentDef extends ClassDef{
             private static final long serialVersionUID = -7007326289948350308L;
             public MapComponentDef(TypeDef keyDef, TypeDef valDef) {
-                super(null, MapEntry.class);
+                super(entryName(keyDef, valDef), MapEntry.class);
                 try {
                     getOwnProps().add(new PropDef("key", keyDef, keyDef.getType(),
                             new ClassDef.CDGetSet(Map.Entry.class.getName(), "getKey", MapEntry.class.getName(), "setKey")));
@@ -260,6 +260,11 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
 
         private static String mapName(TypeDef keyDef, TypeDef valDef) {
             String res = "MapOf"+upperName(valDef.getName())+"By"+upperName(keyDef.getName());
+            return res;
+        }
+        
+        private static String entryName(TypeDef keyDef, TypeDef valDef) {
+            String res = "MapEntry"+upperName(valDef.getName())+"By"+upperName(keyDef.getName());
             return res;
         }
         
@@ -413,6 +418,7 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         m_uniqueNameGen = new UniqueNameGenerator();
     }
     
+    @PropertiesSequence(sequence = {"key","value"})
     static class MapEntry implements Map.Entry{
 
         private Object m_key;
@@ -462,6 +468,12 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         ArrayList<TypeDef> res = new ArrayList<TypeDef>(m_arrays.values());
         res.addAll(m_classes.values());
         res.addAll(m_extLib.getDefs());
+        for(ArrayDef ad : m_arrays.values()){
+        	if(ad instanceof MapDef){
+        		MapDef md = (MapDef) ad;
+        		res.add(md.getComponentType());
+        	}
+        }
         return res;
     }
     

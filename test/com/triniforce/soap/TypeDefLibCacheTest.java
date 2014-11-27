@@ -5,6 +5,7 @@
  */ 
 package com.triniforce.soap;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -169,43 +170,69 @@ public class TypeDefLibCacheTest extends TFTestCase {
     	
     }
     
+    interface ISrv{
+    	void method_01(Map<String, Short> arg);
+    }
+    
     static class MapOfObjectByObject{}
     
     @SuppressWarnings("unchecked")
-    public void testMapDefLib(){
+    public void testMapDefLib() throws NoSuchMethodException, SecurityException{
         assertEquals("MapOfObjectByObject", m_lib.add(MapOfObjectByObject.class).getName());
         
-        HashMap<TypeDef, ArrayDef> map = new HashMap<TypeDef, ArrayDef>();
-        MapDefLib mapLib = new TypeDefLibCache.MapDefLib(m_lib, map, m_lib);
+        MapDefLib mapLib = new TypeDefLibCache.MapDefLib(m_lib, m_lib.m_arrays, m_lib);
         
-        MapDef md = (MapDef) mapLib.add(Map.class);
-        assertNotNull(md);
-        assertEquals("MapOfObjectByObject1", md.getName());
-        assertSame(md, map.values().iterator().next());
-        
-        HashMap<Object, Object> obj = new HashMap<Object, Object>();
-        obj.put(123, "str1");
-        obj.put(124, "str2");
-        obj.put(125, "str3");
-        Collection<Map.Entry> entries = (Collection<Entry>) md.getPropDef().get(obj);
-        
-        HashMap<Integer, String> res = new HashMap<Integer, String>();
-        for (Entry entry : entries) {
-            res.put((Integer)entry.getKey(), (String)entry.getValue());   
+        {
+	        MapDef md = (MapDef) mapLib.add(Map.class);
+	        assertNotNull(md);
+	        assertEquals("MapOfObjectByObject1", md.getName());
+	        assertSame(md, m_lib.m_arrays.values().iterator().next());
+	        
+	        HashMap<Object, Object> obj = new HashMap<Object, Object>();
+	        obj.put(123, "str1");
+	        obj.put(124, "str2");
+	        obj.put(125, "str3");
+	        Collection<Map.Entry> entries = (Collection<Entry>) md.getPropDef().get(obj);
+	        
+	        HashMap<Integer, String> res = new HashMap<Integer, String>();
+	        for (Entry entry : entries) {
+	            res.put((Integer)entry.getKey(), (String)entry.getValue());   
+	        }
+	        assertEquals(3, res.size());
+	        assertEquals("str2", res.get(124));
+	
+	        MapEntry entry = new TypeDefLibCache.MapEntry();
+	        entry.setKey(655);
+	        entry.setValue("newString");
+	        md.getPropDef().set(res, entry);
+	        assertEquals(4, res.size());
         }
-        assertEquals(3, res.size());
-        assertEquals("str2", res.get(124));
-
-        MapEntry entry = new TypeDefLibCache.MapEntry();
-        entry.setKey(655);
-        entry.setValue("newString");
-        md.getPropDef().set(res, entry);
-        assertEquals(4, res.size());
+        {
+        	Method m1 = ISrv.class.getMethod("method_01", Map.class);
+        	ArrayDef res = mapLib.add(m1.getGenericParameterTypes()[0]);
+        	assertEquals("MapOfShortByString", res.getName());
+        	TypeDef compDef = res.getComponentType();
+        	assertEquals("MapEntryShortByString", compDef.getName());
+        	
+        	Map<String, TypeDef> defs = toMap(m_lib.getDefs());
+        	TypeDef cd = defs.get("MapOfShortByString");
+        	assertNotNull(defs.keySet().toString(), cd);
+        	cd = defs.get("MapEntryShortByString");
+        	assertNotNull(defs.keySet().toString(),cd);
+        }
         
         
     }
     
-    public void testUnsupportedType(){
+    private Map<String, TypeDef> toMap(List<TypeDef> defs) {
+		HashMap<String, TypeDef> res = new HashMap<String, TypeDef>();
+		for (TypeDef typeDef : defs) {
+			res.put(typeDef.getName(), typeDef);	
+		}
+		return res;
+	}
+
+	public void testUnsupportedType(){
     	m_lib.add(LinkedHashMap.class);
     }
     

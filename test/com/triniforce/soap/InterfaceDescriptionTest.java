@@ -8,6 +8,7 @@ package com.triniforce.soap;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.InterfaceDescription;
@@ -27,6 +28,8 @@ public class InterfaceDescriptionTest extends TFTestCase {
         void method();
         int method2(int [] in, String in2);
         char method3();
+        
+        void method4(Map<String, Object> arg0);
     } 
 
     @SuppressWarnings("unchecked")
@@ -35,7 +38,7 @@ public class InterfaceDescriptionTest extends TFTestCase {
         WsdlDescription desc = gen.parse(null, I1.class).getWsdlDescription();
         
         Collection<WsdlTypeElement> typeElements = desc.getWsdlTypeElements();
-        assertEquals(6, typeElements.size());
+        assertEquals(8, typeElements.size());
         
         WsdlTypeElement t1 = getElement(desc.getWsdlTypeElements(), "method");
         assertEquals("method", t1.getName());
@@ -71,7 +74,7 @@ public class InterfaceDescriptionTest extends TFTestCase {
         assertEquals(1, e1.getMaxOccur());
         
         Collection<WsdlType> types = desc.getWsdlTypes();
-        assertEquals(2, types.size());
+        assertEquals(4, types.size());
         
         
         WsdlType t  = getType(desc.getWsdlTypes(), "char");
@@ -79,6 +82,14 @@ public class InterfaceDescriptionTest extends TFTestCase {
         Restriction r = t.getResriction();
         assertEquals("short", r.m_base.getName());
         assertFalse(t.isComplex());
+        
+        {
+            t  = getType(desc.getWsdlTypes(), "MapOfObjectByString");
+            e1 = t.getElements().iterator().next();
+            assertTrue(e1.isResidentType());
+            t  = getType(desc.getWsdlTypes(), "MapEntryObjectByString");
+            assertNotNull(t);
+        }
         
     }
 
