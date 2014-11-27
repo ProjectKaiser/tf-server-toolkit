@@ -19,7 +19,6 @@ import com.triniforce.soap.InterfaceDescription.Operation;
 import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.EnumDef;
-import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.WsdlDescription.WsdlPort.WsdlOperation;
@@ -138,7 +137,7 @@ public class WsdlDescription {
             else if(m_td instanceof ArrayDef){
                 ArrayDef ad = (ArrayDef) m_td;
                 return Arrays.asList(new WsdlTypeElement("value", ad.getComponentType(), 
-                		!(m_td instanceof MapDef) , -1));
+                		true , -1));
             }
             else{
                 return Collections.emptyList();

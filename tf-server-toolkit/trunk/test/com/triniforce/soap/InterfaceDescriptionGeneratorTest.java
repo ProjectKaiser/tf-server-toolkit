@@ -178,6 +178,8 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         Long run2();
         
         char run3();
+        
+        void run4(Map<String, Integer> arg0, Map arg1);
     }
     
     static Order DEFAULT_ORDER = null; 
