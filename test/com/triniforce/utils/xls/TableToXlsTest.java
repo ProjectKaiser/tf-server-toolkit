@@ -78,21 +78,5 @@ public class TableToXlsTest extends TFTestCase{
         
     }
     
-    @Override
-    public void test() throws Exception {
-        TableToXls tx = new TableToXls();
-        
-        tx.addRow();
-        tx.addCell("1.1", 1, 1);
-        tx.addCell("1.2", 1, 1);
-        tx.addCell("1.3", 1, 1);
-        tx.addRow();
-        tx.addCell("2.1", 1, 1);
-        tx.addCell("2.2", 1, 1);
-        tx.addCell("2.3", 1, 1);
-        
-    }
-    
-    
 
 }

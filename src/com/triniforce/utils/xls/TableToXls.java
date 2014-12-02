@@ -41,25 +41,25 @@ public class TableToXls {
         printSetup.setLandscape(true);
     }
     
-    public TableToXls addRow(int level){
+    public TableToXls addRow(int indentLevel){
         addRow();
         boolean top = true;
         if(m_prevLevel>=0){
-            if(m_lastTopLevel >= level){
+            if(m_lastTopLevel >= indentLevel){
                 //top-level reached
                 if( m_rowNum - m_lastTopLevelRow > 1){ 
                     m_sheet.groupRow(m_lastTopLevelRow + 1, m_rowNum - 1);
                     addRow();
                 }
-            }else if(m_lastTopLevel < level){
-                m_ident = level - m_lastTopLevel;
+            }else if(m_lastTopLevel < indentLevel){
+                m_ident = indentLevel - m_lastTopLevel;
                 top = false;
             }
         }
-        m_prevLevel = level;
+        m_prevLevel = indentLevel;
         if(top){
             m_ident = 0;
-            m_lastTopLevel = level;
+            m_lastTopLevel = indentLevel;
             m_lastTopLevelRow = m_rowNum;            
         }
         return this;
@@ -83,37 +83,42 @@ public class TableToXls {
         return r;
     }
     
-    public TableToXls addCell(String data){
-        addCell(data, 1, 1);
+    public TableToXls spanLast(int rowspan, int colspan){
+        int spanCol = m_colNum - 1;
+        m_sheet.addMergedRegion(new CellRangeAddress(m_rowNum, m_rowNum
+                + rowspan - 1, spanCol, spanCol + colspan - 1));
+        for(int row = m_rowNum; row < m_rowNum + rowspan; row++){
+            Row r = gc_row(row);
+            for (int col = spanCol; col < spanCol + colspan; col++) {
+                //skip first cell
+                if(row == m_rowNum && col == spanCol){
+                    continue;
+                }
+                r.createCell(col);
+            }
+        }
+        m_colNum += colspan - 1;
         return this;
     }
     
-    public TableToXls addCell(String data, int rowspan, int colspan){
-        //skip filled columns (as a result of span)
+    
+    public TableToXls addCell(String data) {
+        // skip filled columns (as a result of span)
         {
             Row r = gc_row(m_rowNum);
-            while(null != r.getCell(m_colNum)){
+            while (null != r.getCell(m_colNum)) {
                 m_colNum++;
             }
         }
-        if(colspan > 1 || rowspan > 1){
-            m_sheet.addMergedRegion(new CellRangeAddress(m_rowNum, m_rowNum
-                    + rowspan - 1, m_colNum, m_colNum + colspan - 1));
-        }
+        Row r = gc_row(m_rowNum);
+        Cell c = r.createCell(m_colNum);
+        c.setCellValue(data);
+        if (m_colNum == m_indentedColumn && m_ident > 0
+                && m_ident < m_indentStyles.length) {
+            c.setCellStyle(m_indentStyles[m_ident]);
 
-        for(int row = m_rowNum; row < m_rowNum + rowspan; row++){
-            Row r = gc_row(row);
-            for (int col = m_colNum; col < m_colNum + colspan; col++) {
-                Cell c = r.createCell(col);
-                c.setCellValue(data);
-                if(m_colNum == m_indentedColumn && m_ident > 0 && m_ident < m_indentStyles.length){
-                    c.setCellStyle(m_indentStyles[m_ident]);
-                        
-                }
-            }
         }
-
-        m_colNum += colspan;
+        m_colNum++;
         return this;
     }
     
