@@ -357,6 +357,75 @@ public class InvXlsTest extends TFTestCase{
     }
     
     @SuppressWarnings("deprecation")
+    public void testGrouping() throws Exception{
+        avoidTempTestFolderDeletion();
+        Workbook wb = new HSSFWorkbook();
+        Sheet sheet = wb.createSheet("Report");
+        sheet.createRow(0).createCell(0).setCellValue("i1");
+        sheet.createRow(1).createCell(0).setCellValue("i1.1");
+        sheet.createRow(2).createCell(0).setCellValue("i1.1.1");
+        sheet.createRow(3).createCell(0).setCellValue("i1.1.2");
+        sheet.createRow(4).createCell(0).setCellValue("i1.1.3");
+        sheet.createRow(5).createCell(0).setCellValue("i1.2");
+        sheet.createRow(6).createCell(0).setCellValue("i1.2.1");
+        sheet.createRow(7).createCell(0);
+        sheet.createRow(8).createCell(0).setCellValue("i2");
+        sheet.createRow(9).createCell(0).setCellValue("i2.1");
+        sheet.createRow(10).createCell(0).setCellValue("i2.1.1");
+        sheet.createRow(11).createCell(0).setCellValue("i2.1.2");
+        sheet.createRow(12).createCell(0);
+        sheet.createRow(13).createCell(0).setCellValue("i3");
+        sheet.createRow(14).createCell(0).setCellValue("i4");
+        sheet.createRow(15).createCell(0).setCellValue("i5");
+
+        sheet.groupRow(1, 6);
+        sheet.groupRow(9, 11);
+        
+        CellStyle style1 = wb.createCellStyle();
+        style1.setIndention((short)1);
+        CellStyle style2 = wb.createCellStyle();
+        style2.setIndention((short)2);
+        sheet.getRow(1).getCell(0).setCellStyle(style1);
+        sheet.getRow(2).getCell(0).setCellStyle(style2);
+        sheet.getRow(3).getCell(0).setCellStyle(style2);
+        sheet.getRow(4).getCell(0).setCellStyle(style2);
+        sheet.getRow(5).getCell(0).setCellStyle(style1);
+        sheet.getRow(6).getCell(0).setCellStyle(style2);
+        sheet.getRow(9).getCell(0).setCellStyle(style1);
+        sheet.getRow(10).getCell(0).setCellStyle(style2);
+        sheet.getRow(11).getCell(0).setCellStyle(style2);
+        
+        File file = new File(getTempTestFolder(), "grouping.xls");
+        FileOutputStream out = new FileOutputStream(file);
+        wb.write(out);
+        out.close();        
+        
+    }
+    
+    @SuppressWarnings("deprecation")
+    public void test_TableToXls_indentation(){
+        avoidTempTestFolderDeletion();
+        TableToXls tx = new TableToXls();
+        tx.setIndentedColumn(1);
+        tx.addRow(0).addCell("p2900").addCell("Mixed Ordering").addCell("support/issues");
+        tx.addRow(1).addCell("").addCell("Use In Mempry Order Data").addCell("unTill/technicals");
+        tx.addRow(1).addCell("").addCell("Better ActiveTavle tracing").addCell("UBL/dev");
+        
+        tx.addRow(0).addCell("p14").addCell("TestTimeAttendance/ProcessTask (sync problem)").addCell("untill-products/unTil/X-bugs");
+        tx.addRow(0).addCell("p0").addCell("Android. Article list is ugly if does not fit the screen").addCell("untill-products/unTil/bugs");
+        
+        tx.addRow(0).addCell("p0").addCell("Technical cleanup").addCell("untill-products/unTil/dev");
+        tx.addRow(1).addCell("").addCell("Cleanup logs").addCell("unTil/dev/technicals");
+        tx.addRow(2).addCell("").addCell("misc.log").addCell("");
+        tx.addRow(2).addCell("").addCell("trace.log").addCell("");
+        tx.addRow(2).addCell("").addCell("except.log").addCell("");
+        
+        tx.addRow(0);
+        tx.saveToFile(new File(getTempTestFolder(), "test_TableToXls_grouping.xls"));
+        
+    }
+    
+    @SuppressWarnings("deprecation")
     public void test_TableToXls(){
         avoidTempTestFolderDeletion();
         

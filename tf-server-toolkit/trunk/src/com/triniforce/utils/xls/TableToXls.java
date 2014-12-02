@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -25,11 +26,43 @@ public class TableToXls {
     int m_rowNum = -1;
     int m_colNum = -1;
     
+    int m_lastTopLevel = -1;
+    int m_lastTopLevelRow = -1;
+    int m_prevLevel = -1;
+    int m_ident = 0;
     
-    public TableToXls() {
+    private int m_indentedColumn = -1;
+    
+    CellStyle m_indentStyles[]; 
+    
+    public TableToXls(){
         m_sheet = m_wb.createSheet("Report");
         PrintSetup printSetup = m_sheet.getPrintSetup();
         printSetup.setLandscape(true);
+    }
+    
+    public TableToXls addRow(int level){
+        addRow();
+        boolean top = true;
+        if(m_prevLevel>=0){
+            if(m_lastTopLevel >= level){
+                //top-level reached
+                if( m_rowNum - m_lastTopLevelRow > 1){ 
+                    m_sheet.groupRow(m_lastTopLevelRow + 1, m_rowNum - 1);
+                    addRow();
+                }
+            }else if(m_lastTopLevel < level){
+                m_ident = level - m_lastTopLevel;
+                top = false;
+            }
+        }
+        m_prevLevel = level;
+        if(top){
+            m_ident = 0;
+            m_lastTopLevel = level;
+            m_lastTopLevelRow = m_rowNum;            
+        }
+        return this;
     }
     
     public TableToXls addRow(){
@@ -56,7 +89,7 @@ public class TableToXls {
     }
     
     public TableToXls addCell(String data, int rowspan, int colspan){
-        //skip filled rows
+        //skip filled columns (as a result of span)
         {
             Row r = gc_row(m_rowNum);
             while(null != r.getCell(m_colNum)){
@@ -73,8 +106,13 @@ public class TableToXls {
             for (int col = m_colNum; col < m_colNum + colspan; col++) {
                 Cell c = r.createCell(col);
                 c.setCellValue(data);
+                if(m_colNum == m_indentedColumn && m_ident > 0 && m_ident < m_indentStyles.length){
+                    c.setCellStyle(m_indentStyles[m_ident]);
+                        
+                }
             }
         }
+
         m_colNum += colspan;
         return this;
     }
@@ -88,5 +126,22 @@ public class TableToXls {
             ApiAlgs.rethrowException(e);
         }
     }
+
+
+    public int getIndentedColumn() {
+        return m_indentedColumn;
+    }
+
+
+    public void setIndentedColumn(int indentedColumn) {
+        m_indentedColumn = indentedColumn;
+        m_indentStyles = new CellStyle[9];
+        short indent = 0;
+        for(int i = 0; i < m_indentStyles.length ; i++){
+            m_indentStyles[i] = m_wb.createCellStyle();
+            m_indentStyles[i].setIndention(indent++);
+        }
+    }
+
 
 }
