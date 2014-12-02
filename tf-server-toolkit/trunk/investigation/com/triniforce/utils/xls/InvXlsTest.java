@@ -432,28 +432,28 @@ public class InvXlsTest extends TFTestCase{
         TableToXls tx = new TableToXls();
         
         tx.addRow();
-        tx.addCell("1.1", 2, 2);
-        tx.addCell("1.3", 1, 1);
+        tx.addCell("1.1").spanLast(2, 2);
+        tx.addCell("1.3");
         tx.addRow();
-        tx.addCell("2.3", 1, 1);
+        tx.addCell("2.3");
         tx.addRow();
-        tx.addCell("3.1", 1, 1);
-        tx.addCell("3.2", 1, 1);
-        tx.addCell("3.3", 1, 1);
+        tx.addCell("3.1");
+        tx.addCell("3.2");
+        tx.addCell("3.3");
         
         tx.saveToFile(new File(getTempTestFolder(), "ttx.xls"));
         
         
         tx = new TableToXls();
         
-        tx.addRow().addCell("", 1, 2).addCell("Build").addCell("Defect").addCell("Feature");;
+        tx.addRow().addCell("").spanLast(1, 2).addCell("Build").addCell("Defect").addCell("Feature");;
         tx.addRow().addCell("Alex Belyansky").addCell("unTill").addCell("").addCell("").addCell("40 h");
-        tx.addRow().addCell("Alex Belyansky", 1, 2).addCell("").addCell("").addCell("40 h");
+        tx.addRow().addCell("Alex Belyansky").spanLast(1, 2).addCell("").addCell("").addCell("40 h");
         
-        tx.addRow().addCell("Anton Moiseenko", 3, 1).addCell("UBL").addCell("").addCell("").addCell("40 h");
+        tx.addRow().addCell("Anton Moiseenko").spanLast(3, 1).addCell("UBL").addCell("").addCell("").addCell("40 h");
         tx.addRow().addCell("unTill").addCell("").addCell("").addCell("15 h");
         tx.addRow().addCell("untill-driver-api").addCell("").addCell("").addCell("11 h");
-        tx.addRow().addCell("Anton Moiseenko", 1, 2).addCell("").addCell("").addCell("32 h");
+        tx.addRow().addCell("Anton Moiseenko").spanLast(1, 2).addCell("").addCell("").addCell("32 h");
 
         
         tx.saveToFile(new File(getTempTestFolder(), "Employee-Project (Pivot).xls"));
