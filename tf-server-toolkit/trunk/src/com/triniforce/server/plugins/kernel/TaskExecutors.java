@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -31,12 +31,17 @@ public class TaskExecutors implements ITaskExecutors{
 	Map<ExecutorKey, ThreadPoolExecutor> m_executors = new HashMap<ExecutorKey, ThreadPoolExecutor>();
 	Integer m_executed = 0;
 	
-	public TaskExecutors() {
-	    addExecutor(ITaskExecutors.longTaskExecutorKey, new KeyTaskExecutor(80));
-        addExecutor(ITaskExecutors.shortTaskExecutorKey, new KeyTaskExecutor(10));
-        addExecutor(ITaskExecutors.periodicalTaskExecutorKey, new ScheduledThreadPoolExecutor(4));
-        addExecutor(ITaskExecutors.normalTaskExecutorKey, (ThreadPoolExecutor) Executors.newFixedThreadPool(DEFAULT_FIXED_THREAD_POOL_SIZE));
-	}
+    public TaskExecutors() {
+        addExecutor(ITaskExecutors.longTaskExecutorKey, new KeyTaskExecutor(80));
+        addExecutor(ITaskExecutors.shortTaskExecutorKey,
+                new KeyTaskExecutor(10));
+        addExecutor(ITaskExecutors.periodicalTaskExecutorKey,
+                new ScheduledThreadPoolExecutor(4));
+        addExecutor(ITaskExecutors.normalTaskExecutorKey,
+                new ThreadPoolExecutor(2, 100, 10, 
+                        TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>())
+        );
+    }
 	
 	ThreadPoolExecutor addExecutor(ExecutorKey executorKey,
 	        ThreadPoolExecutor executor) {
