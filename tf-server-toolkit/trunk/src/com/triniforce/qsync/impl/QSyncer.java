@@ -9,8 +9,10 @@ import com.triniforce.qsync.intf.IQSyncer;
 
 public class QSyncer implements IQSyncer{
 
-    public boolean sync(long qid) {
-        return false;
+    public void sync(long qid, long recordId) {
+    }
+
+    public void finit(Throwable t) {
     }
 
 }

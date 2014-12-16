@@ -2,14 +2,23 @@
  * Copyright(C) Triniforce
  * All Rights Reserved.
  *
- */ 
+ */
 package com.triniforce.qsync.intf;
 
+public class QSyncTaskResult {
 
+    public long qid;
+    public long syncerId;
 
-public enum QSyncTaskResult {
+    public QSyncTaskStatus status;
     
-    NOT_STARTED, IN_PROCESS, SYNCED, ERROR;
+    /**
+     * Makes sense only if status is ERROR
+     */;
+    public String errorMessage;
+    public String errorClass;
+    public String errorStack;
+
     
     
 }
