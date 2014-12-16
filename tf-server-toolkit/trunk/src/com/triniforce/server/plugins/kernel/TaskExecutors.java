@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -39,7 +39,7 @@ public class TaskExecutors implements ITaskExecutors{
                 new ScheduledThreadPoolExecutor(4));
         addExecutor(ITaskExecutors.normalTaskExecutorKey,
                 new ThreadPoolExecutor(2, 100, 10, 
-                        TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>())
+                        TimeUnit.SECONDS, new SynchronousQueue<Runnable>())//SynchronousQueue prevents flooding
         );
     }
 	
