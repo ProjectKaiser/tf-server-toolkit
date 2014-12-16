@@ -12,21 +12,19 @@ public interface IQSyncManager {
     
     /*
      *
-     * Configuration methods
+     * Configuration methods. Most of them affects sync process after some time.
      * 
      * 
      */
     
     
     /**
-     * Affects sync process after some time
+     * Default is 10
+     * @param value
      */
     void setMaxNumberOfSyncTasks(int value);
     int getMaxNumberOfSyncTasks();
     
-    /**
-     * Affects sync process after some time
-     */
     void setQSyncerExternals(IQSyncerExternals factory);
     IQSyncerExternals getSyncerExternals();
     
@@ -49,7 +47,7 @@ public interface IQSyncManager {
      * ?? What if tasks are in process?
      * @param qid
      */
-    void unRegisterQueue(long qid);
+    void unRegisterQueue(long qid, long syncerId);
     
     /*
      * 
@@ -59,13 +57,11 @@ public interface IQSyncManager {
      */
     
     /**
-     * 
      * Timer event
-     * 
      */
     void onEveryMinute();
-    void onRecordChanged(Long qid, Long id);
-    void onTaskCompleted(IQSyncTask task);
+    void onRecordChanged(Long qid, Long recordId);
+    void onTaskCompleted(QSyncTaskResult result);
 
     /*
      * 
@@ -78,6 +74,6 @@ public interface IQSyncManager {
     /**
      * @return list of n queues sorted by lastAttempt() DESC
      */
-    List<QSyncQueueInfo> getTopQueuesInfo(long qid, int n, EnumSet<QSyncTaskResult> resultToFilterBy);
+    List<QSyncQueueInfo> getTopQueuesInfo(long qid, int n, EnumSet<QSyncTaskStatus> statusToFilter);
     
 }

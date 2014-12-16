@@ -5,10 +5,10 @@
  */ 
 package com.triniforce.qsync.intf;
 
+/**
+ * sync is called multiple times, if error occurs or timeout expired {@link #finit()} is called
+ */
 public interface IQSyncer {
-    /**
-     * @param qid Queue Id
-     * @return true if sync completed
-     */
-    boolean sync(long qid);
+    void sync(long qid, long recordId);
+    void finit(Throwable t);
 }
