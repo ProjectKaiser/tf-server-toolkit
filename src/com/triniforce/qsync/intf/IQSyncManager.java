@@ -25,7 +25,13 @@ public interface IQSyncManager {
     void setMaxNumberOfSyncTasks(int value);
     int getMaxNumberOfSyncTasks();
     
-    void setQSyncerExternals(IQSyncerExternals factory);
+    /**
+     * Default is 60000
+     * @param value
+     */
+    void setMaxSyncSessionDurationMs(int value);
+    int getMaxSyncSessionDurationMs();
+    
     IQSyncerExternals getSyncerExternals();
     
     
