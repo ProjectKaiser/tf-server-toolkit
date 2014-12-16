@@ -32,7 +32,7 @@ public interface IQSyncManager {
     void setMaxSyncSessionDurationMs(int value);
     int getMaxSyncSessionDurationMs();
     
-    IQSyncerExternals getSyncerExternals();
+    IQSyncerManagerExternals getSyncerExternals();
     
     
     /* 
