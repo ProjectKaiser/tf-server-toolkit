@@ -15,4 +15,17 @@ public class QSyncer implements IQSyncer{
     public void finit(Throwable t) {
     }
 
+    public void initialSync() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void sync(long recordId) {
+        
+    }
+
+    public void connectToQueue(long qid) {
+        
+    }
+
 }
