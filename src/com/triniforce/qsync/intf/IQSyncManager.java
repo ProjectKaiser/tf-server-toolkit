@@ -29,10 +29,10 @@ public interface IQSyncManager {
      * Default is 60000
      * @param value
      */
-    void setMaxSyncSessionDurationMs(int value);
-    int getMaxSyncSessionDurationMs();
+    void setMaxSyncTaskDurationMs(int value);
+    int getMaxSyncTaskDurationMs();
     
-    IQSyncerManagerExternals getSyncerExternals();
+    IQSyncManagerExternals getSyncerExternals();
     
     
     /* 
@@ -75,7 +75,7 @@ public interface IQSyncManager {
      * 
      */
     
-    QSyncQueueInfo getQueueInfo(long qid, long syncerId);
+    QSyncQueueInfo getQueueInfo(long qid);
     
     /**
      * @return list of n queues sorted by lastAttempt() DESC

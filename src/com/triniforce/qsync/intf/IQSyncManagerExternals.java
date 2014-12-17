@@ -9,8 +9,8 @@ package com.triniforce.qsync.intf;
  * User of IQSyncManager must provide some function explained in this interface
  * 
  */
-public interface IQSyncerManagerExternals {
-    IQSyncer getQSyncer(long qid, long syncerId);
+public interface IQSyncManagerExternals {
+    IQSyncer getQSyncer(long qid, Class<IQSyncer> syncClass);
     /**
      * Execute runnable asynchronously
      * @param r
