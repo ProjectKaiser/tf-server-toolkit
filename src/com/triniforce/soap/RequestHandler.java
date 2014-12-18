@@ -90,7 +90,7 @@ public class RequestHandler {
             m_gen.writeDocument(output, doc);
         } catch (Throwable e) {
             try {
-            	e.printStackTrace(System.out);
+            	ApiAlgs.getLog(this).trace("service exception", e);
                 m_gen.writeDocument(output, m_gen.serializeException(soapNS, e));
             } catch (TransformerException e1) {
                 ApiAlgs.rethrowException(e1);
