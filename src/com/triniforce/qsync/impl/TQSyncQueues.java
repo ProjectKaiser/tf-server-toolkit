@@ -18,12 +18,18 @@ public class TQSyncQueues extends DBOTableDef {
 	static FieldDef id = FieldDef.createScalarField("id", ColumnType.LONG, true);
 	static FieldDef syncerId = FieldDef.createScalarField("id_syncer", ColumnType.LONG, true);
 	static FieldDef status = FieldDef.createStringField("status", ColumnType.CHAR, 11, true, null);
+	static FieldDef errorClass = FieldDef.createStringField("error_class", ColumnType.VARCHAR, 255, false, null);
+	static FieldDef errorMessage = FieldDef.createStringField("error_message", ColumnType.NVARCHAR, 255, false, null);
+	static FieldDef errorStackTrace = FieldDef.createStringField("error_stackTrace", ColumnType.VARCHAR, 2048, false, null);
 	
 	public TQSyncQueues() {
 		addField(1, id);
 		addField(2, syncerId);
 		addField(3, status);
 		addPrimaryKey(4, "pk", new String[]{id.getName()});
+		addField(5, errorClass);
+		addField(6, errorMessage);
+		addField(7, errorStackTrace);
 	}
 
 	public static class BL extends BusinessLogic{
@@ -34,7 +40,7 @@ public class TQSyncQueues extends DBOTableDef {
 		}
 
 		public ResSet getQueueInfo(long qid) {
-			ResSet rs = select(new IName[]{id, syncerId, status}, new IName[]{id}, new Object[]{qid});
+			ResSet rs = select(new IName[]{id, syncerId, status, errorClass, errorMessage, errorStackTrace}, new IName[]{id}, new Object[]{qid});
 			return rs;
 		}
 
@@ -60,7 +66,8 @@ public class TQSyncQueues extends DBOTableDef {
 		}
 
 		public void taskCompleted(QSyncTaskResult result) {
-			update(new IName[]{status}, new Object[]{result.status.name()}, 
+			update(new IName[]{status,errorClass, errorMessage, errorStackTrace}, 
+					new Object[]{result.status.name(), result.errorClass, result.errorMessage, result.errorStack}, 
 					new IName[]{id, syncerId}, new Object[]{result.qid, result.syncerId});
 			
 		}

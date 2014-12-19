@@ -5,6 +5,8 @@
  */
 package com.triniforce.qsync.impl;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +21,8 @@ import com.triniforce.qsync.intf.QSyncTaskResult;
 import com.triniforce.qsync.intf.QSyncTaskStatus;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
+import com.triniforce.utils.ApiStack;
+import com.triniforce.utils.ITime;
 
 public class QSyncManager implements IQSyncManager {
 
@@ -38,15 +42,22 @@ public class QSyncManager implements IQSyncManager {
 		}
 
 		public void run() {
-//			try{
-			exec();
-//			}catch(Exception e){
-//				
-//			}
 			QSyncTaskResult result = new QSyncTaskResult();
 			result.qid = m_qid;
 			result.syncerId = m_syncerId;
-			result.status = QSyncTaskStatus.SYNCED;  
+			try{
+				exec();
+				result.status = QSyncTaskStatus.SYNCED;  
+			}catch(Exception e){
+				result.status = QSyncTaskStatus.ERROR;
+				result.errorClass = e.getClass().getName();
+				result.errorMessage = e.getMessage();
+				
+				StringWriter sw = new StringWriter();
+				PrintWriter s = new PrintWriter(sw);
+				e.printStackTrace(s);
+				result.errorStack = sw.toString();
+			}
 			m_syncMan.onTaskCompleted(result);
 			
 		}
@@ -63,6 +74,7 @@ public class QSyncManager implements IQSyncManager {
 		}
 		public void exec() {
 			m_syncer.initialSync();
+			
 		}
 	}
 
@@ -111,8 +123,16 @@ public class QSyncManager implements IQSyncManager {
 		};
 	}
 	
+	public static class ETaskWasNotStarted extends RuntimeException{
+		private static final long serialVersionUID = 7807873920087901418L;
+		public ETaskWasNotStarted(long qid) {
+			super("queue: " + qid);
+		}
+	}
 	private Map<QSKey, IQSyncer> m_syncers = new HashMap<QSKey, IQSyncer>();
-
+//	private Map<Long, QSyncQueueInfo> m_syncTime = new HashMap<Long, QSyncQueueInfo>();
+	private Map<Long, QSyncQueueInfo> m_syncTime = new HashMap<Long, QSyncQueueInfo>();
+	
 	public void setMaxNumberOfSyncTasks(int value) {
 		m_maxNumberOfSyncTasks = value;
 	}
@@ -154,7 +174,9 @@ public class QSyncManager implements IQSyncManager {
 
 	public void onEveryMinute() {
 		ResSet rs = queueBL().getQueues();
-		while(rs.next()){
+		int nexec = m_maxNumberOfSyncTasks;
+		
+		while(nexec > 0 && rs.next()){
 			long qid = rs.getLong(1);
 			long syncerId = rs.getLong(2);
 			QSyncTaskStatus status = QSyncTaskStatus.valueOf(rs.getString(3).trim());
@@ -173,9 +195,21 @@ public class QSyncManager implements IQSyncManager {
 				}
 			}
 			
+			if(QSyncTaskStatus.IN_PROCESS.equals(status)){
+				nexec --;
+			}
+			
 			if(null != task){
-				queueBL().updateQueueStatus(qid, QSyncTaskStatus.IN_PROCESS);
+				QSyncQueueInfo sTime = m_syncTime.get(qid);
+				if(null == sTime){
+					sTime = new QSyncQueueInfo();
+					m_syncTime.put(qid, sTime);
+				}
+				sTime.lastAttempt = ApiStack.getInterface(ITime.class).currentTimeMillis();
+				queueBL().updateQueueStatus(task.m_qid, QSyncTaskStatus.IN_PROCESS);
 				m_syncerExternals.runTask(task);
+				
+				nexec --;
 			}
 		}
 		
@@ -199,7 +233,18 @@ public class QSyncManager implements IQSyncManager {
 	}
 
 	public void onTaskCompleted(QSyncTaskResult result) {
+		QSyncQueueInfo sTime = m_syncTime.get(result.qid);
+		if(null == sTime){
+			throw new ETaskWasNotStarted(result.qid);
+		}
+		if(sTime.lastAttempt < Math.max(sTime.lastError, sTime.lastSynced))
+			throw new ETaskWasNotStarted(result.qid);
 		queueBL().taskCompleted(result);
+		
+		if(QSyncTaskStatus.SYNCED.equals(result.status))
+			sTime.lastSynced = ApiStack.getInterface(ITime.class).currentTimeMillis();
+		if(QSyncTaskStatus.ERROR.equals(result.status))
+			sTime.lastError = ApiStack.getInterface(ITime.class).currentTimeMillis();
 
 	}
 
@@ -208,9 +253,20 @@ public class QSyncManager implements IQSyncManager {
 		ResSet rs = queueBL().getQueueInfo(qid);
 		if(rs.next()){
 			res = new QSyncQueueInfo();
+			QSyncQueueInfo sTime = m_syncTime.get(qid);
+			if(null != sTime){
+				res.lastAttempt = sTime.lastAttempt;
+				res.lastError   = sTime.lastError;
+				res.lastSynced  = sTime.lastSynced;
+			}
 			res.result = new QSyncTaskResult();
 			res.result.syncerId = rs.getLong(2);
 			res.result.status = QSyncTaskStatus.valueOf(QSyncTaskStatus.class, rs.getString(3).trim());
+			if(QSyncTaskStatus.ERROR.equals(res.result.status)){
+				res.result.errorClass = rs.getString(4);
+				res.result.errorMessage = rs.getString(5);
+				res.result.errorStack = rs.getString(6);
+			}
 		}
 		return res;
 	}
