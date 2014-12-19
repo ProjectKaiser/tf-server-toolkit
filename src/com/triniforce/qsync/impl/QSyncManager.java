@@ -34,11 +34,13 @@ public class QSyncManager implements IQSyncManager {
 		private IQSyncManager m_syncMan;
 		private long m_qid;
 		private long m_syncerId;
+		protected IQSyncer m_syncer;
 
-		public SyncTask(IQSyncManager sm, long qid, long syncerId) {
+		public SyncTask(IQSyncManager sm, IQSyncer syncer, long qid, long syncerId) {
 			m_syncMan = sm;
 			m_qid = qid;
 			m_syncerId = syncerId;
+			m_syncer = syncer;
 		}
 
 		public void run() {
@@ -49,6 +51,7 @@ public class QSyncManager implements IQSyncManager {
 				exec();
 				result.status = QSyncTaskStatus.SYNCED;  
 			}catch(Exception e){
+				m_syncer.finit(e);
 				result.status = QSyncTaskStatus.ERROR;
 				result.errorClass = e.getClass().getName();
 				result.errorMessage = e.getMessage();
@@ -67,10 +70,8 @@ public class QSyncManager implements IQSyncManager {
 	}
 	
 	static class InitialSync extends SyncTask{
-		IQSyncer m_syncer;
 		public InitialSync(IQSyncManager sm, IQSyncer syncer, long qid, long syncerId) {
-			super(sm, qid, syncerId);
-			m_syncer = syncer;
+			super(sm, syncer, qid, syncerId);
 		}
 		public void exec() {
 			m_syncer.initialSync();
@@ -79,12 +80,10 @@ public class QSyncManager implements IQSyncManager {
 	}
 
 	static class RecordSync extends SyncTask{
-		private IQSyncer m_syncer;
 		private long m_recordId;
 
 		public RecordSync(IQSyncManager sm, IQSyncer syncer, long qid, long syncerId, long recordId) {
-			super(sm,qid,syncerId);
-			m_syncer = syncer;
+			super(sm, syncer, qid,syncerId);
 			m_recordId = recordId;
 		}
 
@@ -130,7 +129,6 @@ public class QSyncManager implements IQSyncManager {
 		}
 	}
 	private Map<QSKey, IQSyncer> m_syncers = new HashMap<QSKey, IQSyncer>();
-//	private Map<Long, QSyncQueueInfo> m_syncTime = new HashMap<Long, QSyncQueueInfo>();
 	private Map<Long, QSyncQueueInfo> m_syncTime = new HashMap<Long, QSyncQueueInfo>();
 	
 	public void setMaxNumberOfSyncTasks(int value) {
@@ -141,12 +139,12 @@ public class QSyncManager implements IQSyncManager {
 		return m_maxNumberOfSyncTasks;
 	}
 
-	public void setMaxSyncTaskDurationMs(int value) {
+	public void setMaxIncrementalSyncTaskDurationMs(int value) {
 		m_maxSyncTaskDurationMs = value;
 
 	}
 
-	public int getMaxSyncTaskDurationMs() {
+	public int getMaxIncrementalSyncTaskDurationMs() {
 		return m_maxSyncTaskDurationMs;
 	}
 
@@ -224,7 +222,7 @@ public class QSyncManager implements IQSyncManager {
 		return (Long) IDbQueueFactory.Helper.getQueue(qid).get(0L);
 	}
 
-	private IQSyncer getSyncer(long qid, long syncerId) {
+	protected IQSyncer getSyncer(long qid, long syncerId) {
 		return m_syncers.get(new QSKey(qid, syncerId));
 	}
 
@@ -271,12 +269,10 @@ public class QSyncManager implements IQSyncManager {
 		return res;
 	}
 
-	public List<QSyncQueueInfo> getTopQueuesInfo(long qid, int n,
+	public List<QSyncQueueInfo> getTopQueuesInfo(int n,
 			EnumSet<QSyncTaskStatus> statusToFilter) {
-		// TODO Auto-generated method stub
 		return null;
 	}
-
 
 	private TQSyncQueues.BL queueBL(){
 		return SrvApiAlgs2.getIServerTran().instantiateBL(TQSyncQueues.BL.class);
