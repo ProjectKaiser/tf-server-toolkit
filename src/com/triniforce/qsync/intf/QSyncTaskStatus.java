@@ -6,6 +6,6 @@
 package com.triniforce.qsync.intf;
 
 public enum QSyncTaskStatus {
-    NOT_STARTED, IN_PROCESS, SYNCED, ERROR
+    NOT_STARTED, IN_PROCESS, EXEC_TIMEOUT, SYNCED, ERROR
 
 }
