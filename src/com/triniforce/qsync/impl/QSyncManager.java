@@ -21,6 +21,7 @@ import com.triniforce.qsync.intf.QSyncTaskResult;
 import com.triniforce.qsync.intf.QSyncTaskStatus;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
+import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.ITime;
 
@@ -31,12 +32,12 @@ public class QSyncManager implements IQSyncManager {
 	
 	static abstract class SyncTask implements Runnable{
 		
-		private IQSyncManager m_syncMan;
-		private long m_qid;
+		protected QSyncManager m_syncMan;
+		protected long m_qid;
 		private long m_syncerId;
 		protected IQSyncer m_syncer;
 
-		public SyncTask(IQSyncManager sm, IQSyncer syncer, long qid, long syncerId) {
+		public SyncTask(QSyncManager sm, IQSyncer syncer, long qid, long syncerId) {
 			m_syncMan = sm;
 			m_qid = qid;
 			m_syncerId = syncerId;
@@ -48,8 +49,8 @@ public class QSyncManager implements IQSyncManager {
 			result.qid = m_qid;
 			result.syncerId = m_syncerId;
 			try{
-				exec();
-				result.status = QSyncTaskStatus.SYNCED;  
+				boolean bCompleted = exec();
+				result.status = bCompleted ? QSyncTaskStatus.SYNCED : QSyncTaskStatus.EXEC_TIMEOUT;  
 			}catch(Exception e){
 				m_syncer.finit(e);
 				result.status = QSyncTaskStatus.ERROR;
@@ -65,31 +66,37 @@ public class QSyncManager implements IQSyncManager {
 			
 		}
 
-		abstract void exec();
+		abstract boolean exec();
 		
 	}
 	
 	static class InitialSync extends SyncTask{
-		public InitialSync(IQSyncManager sm, IQSyncer syncer, long qid, long syncerId) {
+		public InitialSync(QSyncManager sm, IQSyncer syncer, long qid, long syncerId) {
 			super(sm, syncer, qid, syncerId);
 		}
-		public void exec() {
+		public boolean exec() {
 			m_syncer.initialSync();
+			return true;
 			
 		}
 	}
 
 	static class RecordSync extends SyncTask{
-		private long m_recordId;
-
-		public RecordSync(IQSyncManager sm, IQSyncer syncer, long qid, long syncerId, long recordId) {
+		public RecordSync(QSyncManager sm, IQSyncer syncer, long qid, long syncerId) {
 			super(sm, syncer, qid,syncerId);
-			m_recordId = recordId;
 		}
 
 		@Override
-		void exec() {
-			m_syncer.sync(m_recordId);
+		boolean exec() {
+			int timeout = m_syncMan.getMaxIncrementalSyncTaskDurationMs();
+			long tst = ApiAlgs.getITime().currentTimeMillis();
+			Long recordId;
+			while(null != (recordId = m_syncMan.getQueueRecord(m_qid))){
+				m_syncer.sync(recordId);
+				if(timeout < ApiAlgs.getITime().currentTimeMillis()-tst)
+					return false;
+			}
+			return true;
 		}
 	}
 	
@@ -186,11 +193,9 @@ public class QSyncManager implements IQSyncManager {
 
 			}
 
-			if(QSyncTaskStatus.SYNCED.equals(status)){
-				Long recordId = getQueueRecord(qid);
-				if(null != recordId){
-					task = new RecordSync(this, getSyncer(qid, syncerId), qid, syncerId, recordId);
-				}
+			if(EnumSet.of(QSyncTaskStatus.SYNCED, QSyncTaskStatus.EXEC_TIMEOUT).contains(status)){
+				if(!isEmptyQueue(qid))
+					task = new RecordSync(this, getSyncer(qid, syncerId), qid, syncerId);
 			}
 			
 			if(QSyncTaskStatus.IN_PROCESS.equals(status)){
@@ -214,6 +219,10 @@ public class QSyncManager implements IQSyncManager {
 
 	}
 
+	private boolean isEmptyQueue(long qid){
+		return null == IDbQueueFactory.Helper.getQueue(qid).peek(0L);
+	}
+	
 	private void putQueueRecord(long qid, long recordId){
 		IDbQueueFactory.Helper.getQueue(qid).put(recordId);
 	}

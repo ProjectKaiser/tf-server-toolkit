@@ -268,6 +268,26 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		execRuns();
 		assertEquals(Arrays.asList(111L), synced.get(555L));
 		
+		
+		//test duration time
+		sm.onRecordChanged(555L, 112L);
+		sm.onRecordChanged(555L, 113L);
+		sm.onRecordChanged(555L, 114L);
+		sm.onEveryMinute();// recordSync
+		
+		execRuns();
+		
+		assertEquals(Arrays.asList(111L, 112L, 113L, 114L), synced.get(555L));
+		
+		sm.setMaxIncrementalSyncTaskDurationMs(0);
+		sm.onRecordChanged(555L, 115L);
+		sm.onRecordChanged(555L, 116L);
+		sm.onRecordChanged(555L, 117L);
+		sm.onEveryMinute();// recordSync
+		
+		execRuns();
+		
+		assertEquals(Arrays.asList(111L, 112L, 113L, 114L, 115L), synced.get(555L));
 	}
 
 	public void testOnTaskCompleted() {
