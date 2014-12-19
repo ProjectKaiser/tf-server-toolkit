@@ -20,12 +20,15 @@ import com.triniforce.qsync.intf.QSyncQueueInfo;
 import com.triniforce.qsync.intf.QSyncTaskResult;
 import com.triniforce.qsync.intf.QSyncTaskStatus;
 import com.triniforce.server.TFPlugin;
+import com.triniforce.utils.ApiStack;
+import com.triniforce.utils.ITime;
 
 public class QSyncManagerTest extends BasicServerRunningTestCase {
 	
 	static Map<Long, List<Long>> start_queue = new HashMap<Long, List<Long>>();
 	static Map<Long, List<Long>> synced = new HashMap<Long, List<Long>>();
 	static List<Runnable> runnables = new ArrayList<Runnable>();
+	static private RuntimeException ERROR;
 	
 	static class TestQSyncer implements IQSyncer{
 
@@ -43,6 +46,8 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		}
 
 		public void initialSync() {
+			if(null != ERROR)
+				throw ERROR;
 			List<Long> q = start_queue.get(m_qid);
 			if(null != q){
 				synced.get(m_qid).addAll(q);
@@ -96,6 +101,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		sm = new QSyncManager();
 		syncExt = new TestSyncExt();
 		sm.setSyncerExternals(syncExt);
+		ERROR = null;
 	}
 
 	public void testSetMaxNumberOfSyncTasks() {
@@ -139,6 +145,14 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			assertEquals(222, sm.getQueueInfo(6000).result.syncerId);
 			
 			assertTrue(synced.keySet().toString(), synced.keySet().contains(6002L));
+		}
+		
+		{
+			//already registered
+			try{
+				sm.registerQueue(6002L, 245);
+				fail();
+			}catch(Exception e){}
 		}
 	}
 
@@ -192,10 +206,49 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			QSyncQueueInfo qinfo = sm.getQueueInfo(3002L);
 			assertEquals(QSyncTaskStatus.SYNCED, qinfo.result.status);
 		}
-		{
+		ITime time = ApiStack.getInterface(ITime.class);
+		{//test timings
+			sm.registerQueue(6667L, 13L);
+			long t1 = time.currentTimeMillis();
+			sm.onEveryMinute();
+			long t2 = time.currentTimeMillis();
+			execRuns();
+			long t3 = time.currentTimeMillis();
 			
+			QSyncQueueInfo qinfo = sm.getQueueInfo(6667L);
+			assertTrue(""+qinfo.lastAttempt, t1 <=qinfo.lastAttempt && qinfo.lastAttempt <= t2); 
+			assertTrue(""+qinfo.lastSynced,  t2 <=qinfo.lastSynced  && qinfo.lastSynced  <= t3); 
 		}
 		
+		{// MaxNumberOfSyncTask parameter
+			assertEquals(5, sm.getMaxNumberOfSyncTasks());
+			for(int i=0; i<6; i++){
+				sm.registerQueue(1000+i, 12);
+			}
+			
+			long t1 = time.currentTimeMillis();
+			sm.onEveryMinute();
+			assertEquals(5, runnables.size());
+
+			sm.onEveryMinute();
+			assertEquals(5, runnables.size());
+			
+			runnables.get(0).run();
+			runnables.remove(0);
+			long t2 = time.currentTimeMillis();
+			
+			sm.onEveryMinute();
+			assertEquals(5, runnables.size());
+			long t3 = time.currentTimeMillis();
+			
+			QSyncQueueInfo qinfo = sm.getQueueInfo(1000);
+			
+			assertTrue(""+qinfo.lastAttempt,  t1 <=qinfo.lastAttempt && qinfo.lastAttempt  <= t2);
+			assertTrue(""+qinfo.lastSynced,  t1 <=qinfo.lastSynced  && qinfo.lastSynced  <= t2); 
+			
+			qinfo = sm.getQueueInfo(1005);
+			assertTrue(""+qinfo.lastAttempt,  t2 <=qinfo.lastAttempt && qinfo.lastAttempt  <= t3);
+		}
 	}
 
 	private void execRuns() {
@@ -214,19 +267,75 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		sm.onEveryMinute();// recordSync
 		execRuns();
 		assertEquals(Arrays.asList(111L), synced.get(555L));
+		
 	}
 
 	public void testOnTaskCompleted() {
+		ITime time = ApiStack.getInterface(ITime.class);
+		
 		sm.registerQueue(5555L, 101L);
+		long t1,t2,t3,t4;
+		{
+			sm.onEveryMinute(); // start task 
+			QSyncTaskResult result = new QSyncTaskResult();
+			result.qid = 5555L;
+			result.syncerId = 101L;
+			result.status = QSyncTaskStatus.SYNCED;
+			runnables.clear();
+			
+			t1 = time.currentTimeMillis();
+			sm.onTaskCompleted(result);
+			t2 = time.currentTimeMillis();
+			
+			
+			QSyncQueueInfo qinfo = sm.getQueueInfo(5555L);
+			assertEquals(QSyncTaskStatus.SYNCED, qinfo.result.status);
+			assertTrue(""+qinfo.lastSynced,  t1 <=qinfo.lastSynced  && qinfo.lastSynced  <= t2); 
+			assertEquals(0L, qinfo.lastError);
+		}
 		
-		QSyncTaskResult result = new QSyncTaskResult();
-		result.qid = 5555L;
-		result.syncerId = 101L;
-		result.status = QSyncTaskStatus.SYNCED;
-		
-		sm.onTaskCompleted(result);
-		
-		assertEquals(QSyncTaskStatus.SYNCED, sm.getQueueInfo(5555L).result.status);
+		{
+			sm.onRecordChanged(5555L, 900L);
+			sm.onEveryMinute();
+			runnables.clear();
+			
+			QSyncTaskResult result = new QSyncTaskResult();
+			result.qid = 5555L;
+			result.syncerId = 101L;
+			result.status = QSyncTaskStatus.ERROR;
+			
+			t3 = time.currentTimeMillis();
+			sm.onTaskCompleted(result);
+			t4 = time.currentTimeMillis();
+			
+			QSyncQueueInfo qinfo = sm.getQueueInfo(5555L);
+			assertTrue(""+qinfo.lastSynced,  t1 <=qinfo.lastSynced  && qinfo.lastSynced  <= t2); 
+			assertTrue(""+qinfo.lastError,  t3 <=qinfo.lastError && qinfo.lastError  <= t4); 
+			
+		}
+		{// task was not started
+			sm.registerQueue(5556L, 101L);
+			QSyncTaskResult result = new QSyncTaskResult();
+			result.qid = 5556L;
+			result.syncerId = 101L;
+			result.status = QSyncTaskStatus.ERROR;
+			try{
+				sm.onTaskCompleted(result);
+				fail();
+			}catch(QSyncManager.ETaskWasNotStarted e ){
+			}
+			
+			sm.onEveryMinute();
+			runnables.clear();
+			sm.onTaskCompleted(result);
+			
+			try{
+				sm.onTaskCompleted(result);
+				fail();
+			}catch(QSyncManager.ETaskWasNotStarted e ){
+			}
+		}
+
 	}
 
 	public void testGetQueueInfo() {
@@ -236,6 +345,23 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 
 	public void testGetTopQueuesInfo() {
 		sm.getTopQueuesInfo(1245, 1, EnumSet.of(QSyncTaskStatus.NOT_STARTED));
+	}
+	
+	public void testErrorExecution(){
+		ERROR = new RuntimeException("testErrorExceution");
+		
+		sm.registerQueue(555L, 1L);
+		sm.onEveryMinute();
+		execRuns();
+		
+		QSyncQueueInfo qinfo = sm.getQueueInfo(555L);
+		assertEquals(QSyncTaskStatus.ERROR, qinfo.result.status);
+		assertEquals(RuntimeException.class.getName(), qinfo.result.errorClass);
+		assertEquals("testErrorExceution", qinfo.result.errorMessage);
+		
+		String[] lines = qinfo.result.errorStack.split("\n");
+		assertEquals("java.lang.RuntimeException: testErrorExceution", lines[0].trim());
+		assertEquals("at com.triniforce.qsync.impl.QSyncManage", lines[1].trim().substring(0,40));
 	}
 
 }
