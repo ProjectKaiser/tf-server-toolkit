@@ -34,6 +34,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 
 		private long m_qid;
 //		private Class<IQSyncer> m_sc;
+		private Throwable m_finitError;
 
 		public TestQSyncer(long qid, Class<IQSyncer> syncClass) {
 			m_qid = qid;
@@ -61,8 +62,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		}
 
 		public void finit(Throwable t) {
-			// TODO Auto-generated method stub
-			
+			m_finitError = t;
 		}
 		
 	}
@@ -114,12 +114,12 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 	}
 
 	public void testSetMaxSyncTaskDurationMs() {
-		sm.setMaxSyncTaskDurationMs(3000);
-		assertEquals(3000, sm.getMaxSyncTaskDurationMs());
+		sm.setMaxIncrementalSyncTaskDurationMs(3000);
+		assertEquals(3000, sm.getMaxIncrementalSyncTaskDurationMs());
 	}
 
 	public void testGetMaxSyncTaskDurationMs() {
-		assertEquals(30000, sm.getMaxSyncTaskDurationMs());
+		assertEquals(30000, sm.getMaxIncrementalSyncTaskDurationMs());
 	}
 
 	public void testGetSyncerExternals() {
@@ -344,7 +344,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 	}
 
 	public void testGetTopQueuesInfo() {
-		sm.getTopQueuesInfo(1245, 1, EnumSet.of(QSyncTaskStatus.NOT_STARTED));
+		sm.getTopQueuesInfo(1, EnumSet.of(QSyncTaskStatus.NOT_STARTED));
 	}
 	
 	public void testErrorExecution(){
@@ -362,6 +362,9 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		String[] lines = qinfo.result.errorStack.split("\n");
 		assertEquals("java.lang.RuntimeException: testErrorExceution", lines[0].trim());
 		assertEquals("at com.triniforce.qsync.impl.QSyncManage", lines[1].trim().substring(0,40));
+		
+		TestQSyncer s  = (TestQSyncer) sm.getSyncer(555L, 1L); // Syncer finited
+		assertSame(ERROR, s.m_finitError);
 	}
 
 }
