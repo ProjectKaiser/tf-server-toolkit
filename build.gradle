@@ -73,6 +73,8 @@ dependencies {
 	compile 'javax.mail:mail:1.4.7'
 	compile 'org.apache.poi:poi:3.10.1'
 
+	compile 'org.apache.httpcomponents:httpclient:4.3.6'
+
 	testCompile 'org.firebirdsql.jdbc:jaybird-jdk16:2.2.4'
 	testCompile(group: 'junit', name: 'junit', version: '3.8.2', force: true)
 	testCompile(group: 'mysql', name: 'mysql-connector-java', version: '5.1.16')
