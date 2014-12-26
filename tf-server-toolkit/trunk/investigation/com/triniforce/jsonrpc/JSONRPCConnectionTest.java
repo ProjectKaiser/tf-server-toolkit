@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Arrays;
 
 import junit.framework.TestCase;
 
@@ -66,8 +67,7 @@ public class JSONRPCConnectionTest extends TestCase {
 				// check request
 				InputStream is = paramHttpExchange.getRequestBody();
 				try {
-					assertEquals(request, new String(JSONRPCConnection.readAllBytesFromInputStream(
-							is, -1), "UTF-8"));
+					assertEquals(request, new String(readAllBytesFromInputStream(is, -1), "UTF-8"));
 				} finally {
 					try { is.close(); } catch (Throwable e) { }
 				}
@@ -130,14 +130,12 @@ public class JSONRPCConnectionTest extends TestCase {
 				OutputStream os = socket.getOutputStream();
 				int requestLength = skipRequestHeaderAndGetContentLength(is);
 				assertEquals(jsonRequest.length(), requestLength);
-				assertEquals(jsonRequest, new String(JSONRPCConnection.readAllBytesFromInputStream(
-						is, requestLength), "UTF-8"));
+				assertEquals(jsonRequest, new String(readAllBytesFromInputStream(is, requestLength), "UTF-8"));
 				os.write(("HTTP/1.1 200 OK\r\n" + "Content-Length: " + jsonResponse.length()
 						+ "\r\n\r\n" + jsonResponse).getBytes());
 				requestLength = skipRequestHeaderAndGetContentLength(is);
 				assertEquals(jsonRequest2.length(), requestLength);
-				assertEquals(jsonRequest2, new String(JSONRPCConnection.readAllBytesFromInputStream(
-						is, requestLength), "UTF-8"));
+				assertEquals(jsonRequest2, new String(readAllBytesFromInputStream(is, requestLength), "UTF-8"));
 				os.write(("HTTP/1.1 200 OK\r\n" + "Content-Length: " + jsonResponse2.length()
 						+ "\r\n\r\n" + jsonResponse2).getBytes());
 			} catch (IOException e) {
@@ -148,4 +146,29 @@ public class JSONRPCConnectionTest extends TestCase {
 		}
 	}
 
+	public static byte[] readAllBytesFromInputStream(InputStream input, int contentLength) throws IOException {
+		byte[] bytes;
+		if (contentLength < 0) {
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			bytes = new byte[0x1000];
+			int count;
+			while ((count = input.read(bytes, 0, bytes.length)) != -1) {
+				buffer.write(bytes, 0, count);
+			}
+			buffer.flush();
+			bytes = buffer.toByteArray();
+		} else {
+			bytes = new byte[contentLength];
+			int n = 0;
+			while (n < contentLength) {
+			    int count = input.read(bytes, 0 + n, contentLength - n);
+			    if (count < 0) {
+			    	bytes = Arrays.copyOf(bytes, n);
+			    	break;
+			    }
+			    n += count;
+			}
+		}
+		return bytes;
+	}
 }

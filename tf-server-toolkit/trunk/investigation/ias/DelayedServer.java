@@ -15,6 +15,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.triniforce.jsonrpc.JSONRPCConnection;
+import com.triniforce.jsonrpc.JSONRPCConnectionTest;
 import com.triniforce.utils.ApiAlgs;
 
 public class DelayedServer extends TestCase {
@@ -67,7 +68,7 @@ public class DelayedServer extends TestCase {
 				// check request
 				InputStream is = paramHttpExchange.getRequestBody();
 				try {
-					ApiAlgs.getLog(this).trace("REQUEST: " + new String(JSONRPCConnection.readAllBytesFromInputStream(
+					ApiAlgs.getLog(this).trace("REQUEST: " + new String(JSONRPCConnectionTest.readAllBytesFromInputStream(
 							is, -1), "UTF-8"));
 				} finally {
 					try { is.close(); } catch (Throwable e) { }
@@ -137,13 +138,13 @@ public class DelayedServer extends TestCase {
 				OutputStream os = socket.getOutputStream();
 				int requestLength = skipRequestHeaderAndGetContentLength(is);
 				assertEquals(jsonRequest.length(), requestLength);
-				assertEquals(jsonRequest, new String(JSONRPCConnection.readAllBytesFromInputStream(
+				assertEquals(jsonRequest, new String(JSONRPCConnectionTest.readAllBytesFromInputStream(
 						is, requestLength), "UTF-8"));
 				os.write(("HTTP/1.1 200 OK\r\n" + "Content-Length: " + jsonResponse.length()
 						+ "\r\n\r\n" + jsonResponse).getBytes());
 				requestLength = skipRequestHeaderAndGetContentLength(is);
 				assertEquals(jsonRequest2.length(), requestLength);
-				assertEquals(jsonRequest2, new String(JSONRPCConnection.readAllBytesFromInputStream(
+				assertEquals(jsonRequest2, new String(JSONRPCConnectionTest.readAllBytesFromInputStream(
 						is, requestLength), "UTF-8"));
 				os.write(("HTTP/1.1 200 OK\r\n" + "Content-Length: " + jsonResponse2.length()
 						+ "\r\n\r\n" + jsonResponse2).getBytes());
