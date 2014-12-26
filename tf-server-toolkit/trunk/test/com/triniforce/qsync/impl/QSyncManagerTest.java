@@ -75,6 +75,11 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		public void runTask(Runnable r) {
 			runnables.add(r);
 		}
+
+        public IQSyncer getQSyncer(long qid, Long syncerId) {
+            // TODO Auto-generated method stub
+            return null;
+        }
 	}
 	
 	static class QSyncPlugin extends TFPlugin{

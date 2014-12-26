@@ -8,6 +8,8 @@ package com.triniforce.qsync.intf;
 import java.util.EnumSet;
 import java.util.List;
 
+import com.triniforce.server.plugins.kernel.SrvSmartTran;
+
 public interface IQSyncManager {
     
     /*
@@ -64,16 +66,31 @@ public interface IQSyncManager {
     
     /**
      * Timer event
+     * <li>Process errors
+     * <li>Check pending db queues?
      */
     void onEveryMinute();
+    //TODO remove
     void onRecordChanged(Long qid, Long recordId);
     void onTaskCompleted(QSyncTaskResult result);
+    
+    /**
+     * Called by {@link SrvSmartTran} when transaction is finished. Must ignore not registered queues.
+     * 
+     * @param qid Queue id
+     * @return false if queue is not registered
+     */
+    //TODO: boolean onQueueChanged(Long qid);
 
     /*
      * 
      * Status methods
      * 
      */
+    
+    
+    //TODO
+    //boolean isSyncerRunning(Long qid);
     
     QSyncQueueInfo getQueueInfo(long qid);
     

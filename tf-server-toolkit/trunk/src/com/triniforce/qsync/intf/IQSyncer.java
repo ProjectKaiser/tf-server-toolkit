@@ -12,5 +12,6 @@ public interface IQSyncer {
     void connectToQueue(long qid);
     void initialSync();
     void sync(long recordId);
+    //void sync(Object o);
     void finit(Throwable t);
 }
