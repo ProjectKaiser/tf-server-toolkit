@@ -7,7 +7,7 @@ package com.triniforce.qsync.intf;
 
 
 public class QSyncQueueInfo {
-
+    
     public QSyncTaskResult result;
 
     /**

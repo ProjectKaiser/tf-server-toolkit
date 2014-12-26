@@ -13,7 +13,7 @@ public class QSyncTaskResult {
     public QSyncTaskStatus status;
     
     /**
-     * Makes sense only if status is ERROR
+     * Makes sense only if status is ERROR or NOT_STARTED
      */;
     public String errorMessage;
     public String errorClass;
