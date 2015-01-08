@@ -131,6 +131,14 @@ public class TableToXls {
             ApiAlgs.rethrowException(e);
         }
     }
+    
+    public void saveToStream(FileOutputStream out){
+        try {
+            m_wb.write(out);
+        } catch (Exception e) {
+            ApiAlgs.rethrowException(e);
+        }
+    }
 
 
     public int getIndentedColumn() {
