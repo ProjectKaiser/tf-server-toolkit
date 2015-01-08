@@ -426,6 +426,19 @@ public class InvXlsTest extends TFTestCase{
     }
     
     @SuppressWarnings("deprecation")
+    public void test_TableToXls_numbers(){
+        avoidTempTestFolderDeletion();
+        
+        TableToXls tx = new TableToXls();
+        
+        tx.addRow();
+        tx.addCell(2.126);
+        tx.addRow();
+        tx.addCell(3.121);
+        tx.saveToFile(new File(getTempTestFolder(), "numbers.xls"));
+    }
+    
+    @SuppressWarnings("deprecation")
     public void test_TableToXls(){
         avoidTempTestFolderDeletion();
         
@@ -450,10 +463,10 @@ public class InvXlsTest extends TFTestCase{
         tx.addRow().addCell("Alex Belyansky").addCell("unTill").addCell("").addCell("").addCell("40 h");
         tx.addRow().addCell("Alex Belyansky").spanLast(1, 2).addCell("").addCell("").addCell("40 h");
         
-        tx.addRow().addCell("Anton Moiseenko").spanLast(3, 1).addCell("UBL").addCell("").addCell("").addCell("40 h");
-        tx.addRow().addCell("unTill").addCell("").addCell("").addCell("15 h");
-        tx.addRow().addCell("untill-driver-api").addCell("").addCell("").addCell("11 h");
-        tx.addRow().addCell("Anton Moiseenko").spanLast(1, 2).addCell("").addCell("").addCell("32 h");
+        tx.addRow().addCell("Anton Moiseenko").spanLast(3, 1).addCell("UBL").addCell("").addCell("").addCell("40:23");
+        tx.addRow().addCell("unTill").addCell("").addCell("").addCell("15:20");
+        tx.addRow().addCell("untill-driver-api").addCell("").addCell("").addCell("11:36");
+        tx.addRow().addCell("Anton Moiseenko").spanLast(1, 2).addCell("").addCell("").addCell("32:12");
 
         
         tx.saveToFile(new File(getTempTestFolder(), "Employee-Project (Pivot).xls"));

@@ -32,15 +32,19 @@ public class TableToXls {
     int m_lastTopLevelRow = -1;
     int m_prevLevel = -1;
     int m_ident = 0;
-    
+
     private int m_indentedColumn = -1;
     
     CellStyle m_indentStyles[];
+    
+    CellStyle m_doubleStyle;
     
     public TableToXls(){
         m_sheet = m_wb.createSheet("Report");
         PrintSetup printSetup = m_sheet.getPrintSetup();
         printSetup.setLandscape(true);
+        m_doubleStyle = m_wb.createCellStyle();
+        m_doubleStyle.setDataFormat((short)2);
     }
     
     public TableToXls addRow(int indentLevel){
@@ -117,12 +121,10 @@ public class TableToXls {
         font.setBoldweight(Font.BOLDWEIGHT_BOLD);
         s2.setFont(font);
         c.setCellStyle(s2);
-        
         return this;
-        
     }
     
-    public TableToXls addCell(String data) {
+    public TableToXls addCell(Object data) {
         // skip filled columns (as a result of span)
         {
             Row r = gc_row(m_rowNum);
@@ -132,7 +134,12 @@ public class TableToXls {
         }
         Row r = gc_row(m_rowNum);
         Cell c = r.createCell(m_colNum);
-        c.setCellValue(data);
+        if(data instanceof Double){
+            c.setCellValue((Double)data);
+            c.setCellStyle(m_doubleStyle);
+        }else{
+            c.setCellValue(data.toString());
+        }
         if (m_colNum == m_indentedColumn && m_ident > 0
                 && m_ident < m_indentStyles.length) {
             c.setCellStyle(m_indentStyles[m_ident]);
