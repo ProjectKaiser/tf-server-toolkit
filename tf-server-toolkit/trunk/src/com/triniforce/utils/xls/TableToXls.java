@@ -7,6 +7,7 @@ package com.triniforce.utils.xls;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -132,7 +133,7 @@ public class TableToXls {
         }
     }
     
-    public void saveToStream(FileOutputStream out){
+    public void saveToStream(OutputStream out){
         try {
             m_wb.write(out);
         } catch (Exception e) {
