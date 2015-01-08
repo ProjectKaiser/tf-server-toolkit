@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -34,7 +35,7 @@ public class TableToXls {
     
     private int m_indentedColumn = -1;
     
-    CellStyle m_indentStyles[]; 
+    CellStyle m_indentStyles[];
     
     public TableToXls(){
         m_sheet = m_wb.createSheet("Report");
@@ -102,6 +103,24 @@ public class TableToXls {
         return this;
     }
     
+    public TableToXls boldLast(){
+        Row r = gc_row(m_rowNum);
+        Cell c = r.getCell(m_colNum-1);
+        if(null == c) return this;
+        CellStyle s  = c.getCellStyle();
+        if(null == s){
+            return this;
+        }
+        CellStyle s2 = m_wb.createCellStyle();
+        s2.cloneStyleFrom(s);
+        Font font = m_wb.createFont();
+        font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        s2.setFont(font);
+        c.setCellStyle(s2);
+        
+        return this;
+        
+    }
     
     public TableToXls addCell(String data) {
         // skip filled columns (as a result of span)

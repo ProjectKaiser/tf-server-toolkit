@@ -446,7 +446,7 @@ public class InvXlsTest extends TFTestCase{
         
         tx = new TableToXls();
         
-        tx.addRow().addCell("").spanLast(1, 2).addCell("Build").addCell("Defect").addCell("Feature");;
+        tx.addRow().addCell("").spanLast(1, 2).addCell("Build").boldLast().addCell("Defect").boldLast().boldLast().addCell("Feature").boldLast();;
         tx.addRow().addCell("Alex Belyansky").addCell("unTill").addCell("").addCell("").addCell("40 h");
         tx.addRow().addCell("Alex Belyansky").spanLast(1, 2).addCell("").addCell("").addCell("40 h");
         
