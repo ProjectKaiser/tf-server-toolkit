@@ -38,7 +38,7 @@ public class TaskExecutorsTest extends TFTestCase {
         final Lock lock = new ReentrantLock();
         lock.lock();
 
-        for (int i = 0; i < ITaskExecutors.DEFAULT_FIXED_THREAD_POOL_SIZE * 10; i++) {
+        for (int i = 0; i < TaskExecutors.MAX_NORMAL_THREADS * 10; i++) {
 
             final Integer cnt = new Integer(i);
             InitFinitTask task = new InitFinitTask() {

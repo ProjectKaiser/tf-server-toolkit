@@ -27,6 +27,8 @@ import com.triniforce.utils.ITime.ITimeHelper;
  *
  */
 public class TaskExecutors implements ITaskExecutors{
+    
+    public static int MAX_NORMAL_THREADS = 100;
 
 	Map<ExecutorKey, ThreadPoolExecutor> m_executors = new HashMap<ExecutorKey, ThreadPoolExecutor>();
 	Integer m_executed = 0;
@@ -38,8 +40,8 @@ public class TaskExecutors implements ITaskExecutors{
         addExecutor(ITaskExecutors.periodicalTaskExecutorKey,
                 new ScheduledThreadPoolExecutor(4));
         addExecutor(ITaskExecutors.normalTaskExecutorKey,
-                new ThreadPoolExecutor(2, 100, 10, 
-                        TimeUnit.SECONDS, new SynchronousQueue<Runnable>())//SynchronousQueue prevents flooding
+                new ThreadPoolExecutor(2, MAX_NORMAL_THREADS, 10, TimeUnit.SECONDS
+                        , new SynchronousQueue<Runnable>())//SynchronousQueue prevents flooding
         );
     }
 	
