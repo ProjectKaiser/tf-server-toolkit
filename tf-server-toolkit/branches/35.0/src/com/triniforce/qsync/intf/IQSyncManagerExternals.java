@@ -25,9 +25,6 @@ public interface IQSyncManagerExternals {
      * Execute runnable asynchronously. E.g. using {@link BasicServerTask}
      * @param r
      */
-    //TODO remove
-    void runTask(Runnable r);
-    //TODO
-    //void runSync(Runnable r);
-    //void runInitialSync(Runnable r);
+    void runSync(Runnable r);
+    void runInitialSync(Runnable r);
 }

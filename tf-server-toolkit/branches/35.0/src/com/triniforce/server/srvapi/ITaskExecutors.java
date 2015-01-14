@@ -9,6 +9,7 @@ package com.triniforce.server.srvapi;
 import java.text.MessageFormat;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -22,7 +23,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 public interface ITaskExecutors {
     
     
-    Future execute(ExecutorKey executorKey, InitFinitTask task);
+    Future execute(ExecutorKey executorKey, InitFinitTask task) throws RejectedExecutionException;
 	Set<ExecutorKey> executorKeys();
 	ThreadPoolExecutor getExecutor(ExecutorKey key);
 	void shutdownNow();
@@ -80,8 +81,6 @@ public interface ITaskExecutors {
     public static final ExecutorKey longTaskExecutorKey = new LongTaskExecutorKey();
     public static final ExecutorKey shortTaskExecutorKey = new ShortTaskExecutorKey();
     public static final ExecutorKey periodicalTaskExecutorKey = new PeriodicalTaskExecutorKey();
-    
-    public static final int DEFAULT_FIXED_THREAD_POOL_SIZE = 20;
     
     /**
      * Fixed thread pool task

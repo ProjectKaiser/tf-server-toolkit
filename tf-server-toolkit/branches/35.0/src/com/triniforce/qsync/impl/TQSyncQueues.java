@@ -17,7 +17,7 @@ public class TQSyncQueues extends DBOTableDef {
 	
 	static FieldDef id = FieldDef.createScalarField("id", ColumnType.LONG, true);
 	static FieldDef syncerId = FieldDef.createScalarField("id_syncer", ColumnType.LONG, true);
-	static FieldDef status = FieldDef.createStringField("status", ColumnType.CHAR, 12, true, null);
+	static FieldDef status = FieldDef.createStringField("status", ColumnType.CHAR, 20, true, null);
 	static FieldDef errorClass = FieldDef.createStringField("error_class", ColumnType.VARCHAR, 255, false, null);
 	static FieldDef errorMessage = FieldDef.createStringField("error_message", ColumnType.NVARCHAR, 255, false, null);
 	static FieldDef errorStackTrace = FieldDef.createStringField("error_stackTrace", ColumnType.VARCHAR, 2048, false, null);

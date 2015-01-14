@@ -70,8 +70,6 @@ public interface IQSyncManager {
      * <li>Check pending db queues?
      */
     void onEveryMinute();
-    //TODO remove
-    void onRecordChanged(Long qid, Long recordId);
     void onTaskCompleted(QSyncTaskResult result);
     
     /**
@@ -80,7 +78,7 @@ public interface IQSyncManager {
      * @param qid Queue id
      * @return false if queue is not registered
      */
-    //TODO: boolean onQueueChanged(Long qid);
+    boolean onQueueChanged(Long qid);
 
     /*
      * 
