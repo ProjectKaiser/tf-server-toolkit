@@ -6,8 +6,9 @@
 package com.triniforce.qsync.impl;
 
 import com.triniforce.dbo.IDBObject;
+import com.triniforce.qsync.intf.IQSyncer;
 
-public class DboQsyncQueue implements IDBObject{
+public abstract class DboQsyncQueue implements IDBObject{
 
 	protected long m_qid;
 	private Class m_clsSyncer;
@@ -36,7 +37,7 @@ public class DboQsyncQueue implements IDBObject{
 	public long getQueueId() {
 		return m_qid;
 	}
-	
-	
+
+	public abstract IQSyncer createSyncer();
 
 }

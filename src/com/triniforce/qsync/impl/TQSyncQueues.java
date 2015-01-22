@@ -11,6 +11,7 @@ import com.triniforce.db.dml.ResSet;
 import com.triniforce.dbo.DBOTableDef;
 import com.triniforce.qsync.intf.QSyncTaskResult;
 import com.triniforce.qsync.intf.QSyncTaskStatus;
+import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.IName;
 
 public class TQSyncQueues extends DBOTableDef {
@@ -20,7 +21,7 @@ public class TQSyncQueues extends DBOTableDef {
 	static FieldDef status = FieldDef.createStringField("status", ColumnType.CHAR, 20, true, null);
 	static FieldDef errorClass = FieldDef.createStringField("error_class", ColumnType.VARCHAR, 255, false, null);
 	static FieldDef errorMessage = FieldDef.createStringField("error_message", ColumnType.NVARCHAR, 255, false, null);
-	static FieldDef errorStackTrace = FieldDef.createStringField("error_stackTrace", ColumnType.VARCHAR, 2048, false, null);
+	static FieldDef errorStackTrace = FieldDef.createStringField("error_stackTrace", ColumnType.VARCHAR, 4048, false, null);
 	
 	public TQSyncQueues() {
 		addField(1, id);
@@ -66,11 +67,24 @@ public class TQSyncQueues extends DBOTableDef {
 		}
 
 		public void taskCompleted(QSyncTaskResult result) {
+			ApiAlgs.getLog(this).trace(result.toString());
 			update(new IName[]{status,errorClass, errorMessage, errorStackTrace}, 
-					new Object[]{result.status.name(), result.errorClass, result.errorMessage, result.errorStack}, 
+					new Object[]{result.status.name(),  result.errorClass,result.errorMessage,result.errorStack},
+					//result.errorClass, result.errorMessage,result.errorStack}, 
 					new IName[]{id, syncerId}, new Object[]{result.qid, result.syncerId});
 			
 		}
+
+		public ResSet getIds() {
+			ResSet rs = select(new IName[]{id}, new IName[]{}, new Object[]{});
+			return rs;
+		}
+
+		public void clear() {
+			delete(new IName[]{}, new Object[]{});
+		}
+		
+		
     	
     }
 	

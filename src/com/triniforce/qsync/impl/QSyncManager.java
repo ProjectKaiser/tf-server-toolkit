@@ -93,9 +93,9 @@ public class QSyncManager implements IQSyncManager {
 		boolean exec() {
 			int timeout = m_syncMan.getMaxIncrementalSyncTaskDurationMs();
 			long tst = ApiAlgs.getITime().currentTimeMillis();
-			Long recordId;
-			while(null != (recordId = m_syncMan.getQueueRecord(m_qid))){
-				m_syncer.sync(recordId);
+			Object record;
+			while(null != (record = m_syncMan.getQueueRecord(m_qid))){
+				m_syncer.sync(record);
 				if(timeout < ApiAlgs.getITime().currentTimeMillis()-tst)
 					return false;
 			}
@@ -186,7 +186,7 @@ public class QSyncManager implements IQSyncManager {
 
 	public void registerQueue(long qid, long syncerId) {
 		queueBL().registerQueue(qid, syncerId, QSyncTaskStatus.INITIAL_SYNC);
-		IQSyncer syncer = m_syncerExternals.getQSyncer(qid, null);
+		IQSyncer syncer = m_syncerExternals.getQSyncer(qid, syncerId);
 		syncer.connectToQueue(qid);
 		m_syncers.put(qid, new QueueExecutionInfo(syncer));
 
@@ -211,6 +211,13 @@ public class QSyncManager implements IQSyncManager {
 			long syncerId = rs.getLong(2);
 			
 			QueueExecutionInfo syncerInfo = m_syncers.get(qid);
+			
+			if(null == syncerInfo){
+				IQSyncer syncer = m_syncerExternals.getQSyncer(qid, syncerId);
+				syncer.connectToQueue(qid);
+				syncerInfo = new QueueExecutionInfo(syncer);
+				m_syncers.put(qid, syncerInfo);
+			}
 			
 			if(syncerInfo.m_currentTask != null)
 				continue;
@@ -273,8 +280,8 @@ public class QSyncManager implements IQSyncManager {
 		return null == IDbQueueFactory.Helper.getQueue(qid).peek(0L);
 	}
 	
-	private Long getQueueRecord(long qid) {
-		return (Long) IDbQueueFactory.Helper.getQueue(qid).get(0L);
+	private Object getQueueRecord(long qid) {
+		return IDbQueueFactory.Helper.getQueue(qid).get(0L);
 	}
 
 	protected IQSyncer getSyncer(long qid, long syncerId) {

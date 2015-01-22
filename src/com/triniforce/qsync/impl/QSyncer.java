@@ -20,7 +20,7 @@ public class QSyncer implements IQSyncer{
         
     }
 
-    public void sync(long recordId) {
+    public void sync(Object obj) {
         
     }
 

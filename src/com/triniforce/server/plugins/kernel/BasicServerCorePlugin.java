@@ -22,6 +22,9 @@ import com.triniforce.dbo.PKEPDBOActualizers;
 import com.triniforce.dbo.PKEPDBObjects;
 import com.triniforce.extensions.IPKExtension;
 import com.triniforce.extensions.IPKExtensionPoint;
+import com.triniforce.qsync.impl.QSyncExternals;
+import com.triniforce.qsync.impl.QSyncManager;
+import com.triniforce.qsync.intf.IQSyncManager;
 import com.triniforce.server.TFPlugin;
 import com.triniforce.server.plugins.kernel.ep.api.IPKEPAPI;
 import com.triniforce.server.plugins.kernel.ep.api.PKEPAPIs;
@@ -190,6 +193,11 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         
         TNamedDbId namedIds = getBasicServer().getEntity(TNamedDbId.class.getName());
         api.setIntfImplementor(INamedDbId.class, namedIds);
+
+        //Sync manager
+        QSyncManager sMan = new QSyncManager();
+        sMan.setSyncerExternals(new QSyncExternals());
+        api.setIntfImplementor(IQSyncManager.class, sMan);
         
         m_runningApi = api;
 
@@ -219,6 +227,8 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
                 m_tranFactory.registerOuterExtender((ITranExtender) e.getInstance());
             }            
         }
+        
+        
         
 	}
 	

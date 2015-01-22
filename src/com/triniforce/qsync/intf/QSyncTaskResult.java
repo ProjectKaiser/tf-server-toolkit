@@ -20,5 +20,14 @@ public class QSyncTaskResult {
     public String errorStack;
 
     
+    @Override
+    public String toString() {
+    	StringBuffer sb = new StringBuffer();
+    	sb.append("Status : " + status.toString() + "\n" +
+    			"Class: " + errorClass + "\n" +
+    			"Message: " + errorMessage + "\n" +
+    			"stack: " + errorStack);
+    	return sb.toString();
+    }
     
 }

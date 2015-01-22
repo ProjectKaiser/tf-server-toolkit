@@ -14,6 +14,7 @@ import java.util.Map;
 
 import com.triniforce.db.test.BasicServerRunningTestCase;
 import com.triniforce.dbo.PKEPDBObjects;
+import com.triniforce.qsync.impl.TQSyncQueues.BL;
 import com.triniforce.qsync.intf.IQSyncManagerExternals;
 import com.triniforce.qsync.intf.IQSyncer;
 import com.triniforce.qsync.intf.QSyncQueueInfo;
@@ -21,13 +22,14 @@ import com.triniforce.qsync.intf.QSyncTaskResult;
 import com.triniforce.qsync.intf.QSyncTaskStatus;
 import com.triniforce.server.TFPlugin;
 import com.triniforce.server.srvapi.IDbQueueFactory;
+import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.ITime;
 
 public class QSyncManagerTest extends BasicServerRunningTestCase {
 	
 	static Map<Long, List<Long>> start_queue = new HashMap<Long, List<Long>>();
-	static Map<Long, List<Long>> synced = new HashMap<Long, List<Long>>();
+	static Map<Long, List<Object>> synced = new HashMap<Long, List<Object>>();
 	static List<Runnable> runnables = new ArrayList<Runnable>();
 	static private RuntimeException ERROR;
 	
@@ -44,7 +46,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 
 		public void connectToQueue(long qid) {
 			assertEquals(m_qid, qid);
-			synced.put(qid, new ArrayList<Long>());
+			synced.put(qid, new ArrayList<Object>());
 		}
 
 		public void initialSync() {
@@ -58,10 +60,10 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			
 		}
 
-		public void sync(long recordId) {
+		public void sync(Object obj) {
 			if(null != ERROR)
 				throw ERROR;
-			synced.get(m_qid).add(recordId);
+			synced.get(m_qid).add(obj);
 		}
 
 		public void finit(Throwable t) {
@@ -110,6 +112,8 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		syncExt = new TestSyncExt();
 		sm.setSyncerExternals(syncExt);
 		ERROR = null;
+		
+		SrvApiAlgs2.getIServerTran().instantiateBL(TQSyncQueues.BL.class).clear();
 	}
 
 	public void testSetMaxNumberOfSyncTasks() {
@@ -275,6 +279,14 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			qinfo = sm.getQueueInfo(300L);
 			assertEquals(QSyncTaskStatus.SYNCED, qinfo.result.status);
 			
+		}
+		
+		{
+			// QSyncer already registered
+			BL qBL = SrvApiAlgs2.getIServerTran().instantiateBL(TQSyncQueues.BL.class);
+			qBL.registerQueue(6880L, 12L, QSyncTaskStatus.INITIAL_SYNC);
+			
+			sm.onEveryMinute();
 		}
 	}
 
