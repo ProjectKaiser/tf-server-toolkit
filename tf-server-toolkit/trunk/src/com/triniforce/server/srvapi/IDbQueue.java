@@ -51,6 +51,8 @@ public interface IDbQueue {
      */
     Object get(long timeoutMilliseconds);
 
-    void clean();    
+    void clean();
+
+	long getId();    
    
 }

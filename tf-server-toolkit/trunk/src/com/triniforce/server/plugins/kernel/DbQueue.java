@@ -176,4 +176,8 @@ public class DbQueue implements IDbQueue {
         TDbQueues.PQDeleteAll.exec(m_queueId);
     }
 
+	public long getId() {
+		return m_queueId;
+	}
+
 }

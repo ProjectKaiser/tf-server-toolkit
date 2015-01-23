@@ -26,5 +26,4 @@ public interface IQSyncManagerExternals {
      * @param r
      */
     void runSync(Runnable r);
-    void runInitialSync(Runnable r);
 }

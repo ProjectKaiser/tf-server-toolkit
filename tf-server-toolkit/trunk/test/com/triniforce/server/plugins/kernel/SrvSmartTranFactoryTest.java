@@ -13,6 +13,8 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
+import com.triniforce.qsync.impl.QSyncManager;
+import com.triniforce.qsync.intf.IQSyncManager;
 import com.triniforce.server.plugins.kernel.BasicServer.ServerException;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
@@ -52,6 +54,7 @@ public class SrvSmartTranFactoryTest extends ServerTest {
 		BasicServer srv = new BasicServer(m_coreApi);
 		srv.doRegistration();
 		srv.enterMode(Mode.Registration);
+		ApiStack.pushInterface(IQSyncManager.class, new QSyncManager());
 		try{
 			ISrvSmartTranFactory trf = ApiStack.getInterface(ISrvSmartTranFactory.class);
 			Mockery ctx = new Mockery();
@@ -82,6 +85,7 @@ public class SrvSmartTranFactoryTest extends ServerTest {
 				trf.pop();
 			}
 		} finally{
+			ApiStack.popInterface(1);
 			srv.leaveMode();
 			
 		}
@@ -92,6 +96,7 @@ public class SrvSmartTranFactoryTest extends ServerTest {
 		BasicServer srv = new BasicServer(m_coreApi);
 		srv.doRegistration();
 		srv.enterMode(Mode.Registration);
+		ApiStack.pushInterface(IQSyncManager.class, new QSyncManager());
 		try{
 			ISrvSmartTranFactory trf = ApiStack.getInterface(ISrvSmartTranFactory.class);
 			Mockery ctx = new Mockery();
@@ -127,6 +132,7 @@ public class SrvSmartTranFactoryTest extends ServerTest {
 				trf.pop();
 			}
 		} finally{
+			ApiStack.popInterface(1);
 			srv.leaveMode();
 			
 		}		

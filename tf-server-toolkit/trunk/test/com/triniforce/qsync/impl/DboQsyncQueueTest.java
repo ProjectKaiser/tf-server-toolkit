@@ -43,7 +43,8 @@ public class DboQsyncQueueTest extends BasicServerTestCase {
 		runSyncMan();
 		
 		TestSyncer s = p.getSyncer(getServer());
-	
+
+		Thread.sleep(100L);
 		
 		getServer().enterMode(Mode.Running);
 		try{
@@ -56,6 +57,7 @@ public class DboQsyncQueueTest extends BasicServerTestCase {
 		
 		putQueue(40001L, "str_02");
 		runSyncMan();
+		Thread.sleep(100L);
 		
 		assertEquals(Arrays.asList("str_01", "str_02"), s.synced());
 	}

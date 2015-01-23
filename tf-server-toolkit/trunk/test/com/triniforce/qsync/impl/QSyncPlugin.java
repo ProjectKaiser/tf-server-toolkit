@@ -8,7 +8,6 @@ package com.triniforce.qsync.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.triniforce.dbo.PKEPDBOActualizers;
 import com.triniforce.dbo.PKEPDBObjects;
 import com.triniforce.extensions.PKPlugin;
 import com.triniforce.qsync.intf.IQSyncer;
@@ -61,12 +60,10 @@ public class QSyncPlugin extends PKPlugin {
 	@Override
 	public void doRegistration() {
 		putExtension(PKEPDBObjects.class, TestSyncer.class);
-		putExtension(PKEPDBObjects.class, TQSyncQueues.class);
 	}
 	
 	@Override
 	public void doExtensionPointsRegistration() {
-		putExtension(PKEPDBOActualizers.class, DboQSyncActualizer.class);
 	}
 
 	public TestSyncer getSyncer(IBasicServer s) {

@@ -142,6 +142,11 @@ public class DbQueueTest extends BasicServerTestCase {
             long delta = System.currentTimeMillis()-time;
             assertTrue(Long.toString(delta), delta < 100);
         }
+        
+        {
+        	assertEquals(777L, fqf.getDbQueue(777L).getId());
+        	assertEquals(766L, fqf.getDbQueue(766L).getId());
+        }
     }    
    
     public void testTransaction(){

@@ -22,8 +22,10 @@ import com.triniforce.dbo.PKEPDBOActualizers;
 import com.triniforce.dbo.PKEPDBObjects;
 import com.triniforce.extensions.IPKExtension;
 import com.triniforce.extensions.IPKExtensionPoint;
+import com.triniforce.qsync.impl.DboQSyncActualizer;
 import com.triniforce.qsync.impl.QSyncExternals;
 import com.triniforce.qsync.impl.QSyncManager;
+import com.triniforce.qsync.impl.TQSyncQueues;
 import com.triniforce.qsync.intf.IQSyncManager;
 import com.triniforce.server.TFPlugin;
 import com.triniforce.server.plugins.kernel.ep.api.IPKEPAPI;
@@ -128,7 +130,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         		new DBOUpgProcedure(new BreakIdGenerator(m_miscIdGenerator)));
         
         putExtension(PKEPDBObjects.class, DBOVersion.class.getName(), new DBOVersion());
-        
+     
 	}
 	
 	public void doRegistration(){
@@ -148,6 +150,9 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         
         putExtension(PKEPAPIs.class, PTRecurringTasks.class);
         putExtension(PKEPAPIs.class, Mailer.class);
+
+		putExtension(PKEPDBOActualizers.class, DboQSyncActualizer.class);
+		putExtension(PKEPDBObjects.class, TQSyncQueues.class);
 
 	}
 
@@ -569,6 +574,8 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         putExtensionPoint(new PKEPAPIs());
         
         putExtensionPoint(new PKEPExternalClasses());
+        
+
     }
 
 

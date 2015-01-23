@@ -356,6 +356,7 @@ public class JSONSerializer {
 		
 		public boolean primitive(Object arg0) throws ParseException,
 				IOException {
+			ApiAlgs.getLog(this).trace(arg0);
 			Element top = m_stk.peek();
 			if(State.Arguments.equals(m_state)){
 				if(Element.Type.Array.equals(top.m_type)){

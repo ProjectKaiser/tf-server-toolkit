@@ -66,6 +66,7 @@ public class QSyncManager implements IQSyncManager {
 				result.errorStack = sw.toString();
 			}
 			m_syncMan.onTaskCompleted(result);
+			SrvApiAlgs2.getIServerTran().commit();
 			
 		}
 
@@ -210,14 +211,9 @@ public class QSyncManager implements IQSyncManager {
 			long qid = rs.getLong(1);
 			long syncerId = rs.getLong(2);
 			
-			QueueExecutionInfo syncerInfo = m_syncers.get(qid);
-			
-			if(null == syncerInfo){
-				IQSyncer syncer = m_syncerExternals.getQSyncer(qid, syncerId);
-				syncer.connectToQueue(qid);
-				syncerInfo = new QueueExecutionInfo(syncer);
-				m_syncers.put(qid, syncerInfo);
-			}
+			QueueExecutionInfo syncerInfo = getSyncerInfo(qid, syncerId); 
+					
+
 			
 			if(syncerInfo.m_currentTask != null)
 				continue;
@@ -266,14 +262,24 @@ public class QSyncManager implements IQSyncManager {
 
 	}
 
+	private QueueExecutionInfo getSyncerInfo(long qid, long syncerId) {
+		QueueExecutionInfo res = m_syncers.get(qid);
+		
+		if(null == res){
+			IQSyncer syncer = m_syncerExternals.getQSyncer(qid, syncerId);
+			syncer.connectToQueue(qid);
+			res = new QueueExecutionInfo(syncer);
+			m_syncers.put(qid, res);
+		}
+		return res;
+	}
+
 	private void startQueueTask(long qid, SyncTask task) {
 		QueueExecutionInfo syncerInfo = m_syncers.get(qid);
 		syncerInfo.m_lastAttempt = ApiStack.getInterface(ITime.class).currentTimeMillis();
 		syncerInfo.m_currentTask = task;
-		if(task instanceof RecordSync)
-			m_syncerExternals.runSync(task);
-		else
-			m_syncerExternals.runInitialSync(task);
+		m_syncerExternals.runSync(task);
+		
 	}
 
 	private boolean isEmptyQueue(long qid){
@@ -293,11 +299,12 @@ public class QSyncManager implements IQSyncManager {
 		if(null == qinfo)
 			return false;
 		
-		if(m_syncers.get(qid).m_currentTask != null)
+		QueueExecutionInfo syncerInfo = getSyncerInfo(qid, qinfo.result.syncerId);
+		if(syncerInfo.m_currentTask != null)
 			return true;
 		
 		long syncerId = qinfo.result.syncerId;
-		startQueueTask(qid, new RecordSync(this, getSyncer(qid, syncerId), qid, syncerId));
+		startQueueTask(qid, new RecordSync(this, syncerInfo.m_syncer, qid, syncerId));
 		return true;
 	}
 	
