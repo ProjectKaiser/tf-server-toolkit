@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import com.triniforce.db.dml.SmartTran;
+import com.triniforce.qsync.intf.IQSyncManager;
 import com.triniforce.server.srvapi.IDbQueue;
 import com.triniforce.server.srvapi.ISrvPrepSqlGetter;
 import com.triniforce.server.srvapi.ISrvSmartTran;
@@ -19,6 +20,7 @@ import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory.ITranExtender;
 import com.triniforce.utils.ApiAlgs;
+import com.triniforce.utils.ApiStack;
 
 public class SrvSmartTran extends SmartTran implements ISrvSmartTran {
 
@@ -71,6 +73,13 @@ public class SrvSmartTran extends SmartTran implements ISrvSmartTran {
 	    		}
 			}
         }
+
+        if(bCommit){
+        	IQSyncManager sm = ApiStack.getInterface(IQSyncManager.class);
+            for (IDbQueue queue : m_updatedQueues) {
+                sm.onQueueChanged(queue.getId());
+            }
+    	}
         
     	super.close(bCommit);
     	
@@ -90,8 +99,10 @@ public class SrvSmartTran extends SmartTran implements ISrvSmartTran {
         for (IDbQueue queue : m_updatedQueues) {
             synchronized (queue) {
                 queue.notify();
+                
             }
         }
+        
         
         if( null != eFirstProblem){
             throw eFirstProblem;

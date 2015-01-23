@@ -6,31 +6,66 @@
 package com.triniforce.qsync.impl;
 
 import com.triniforce.dbo.PKEPDBObjects;
+import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.qsync.intf.IQSyncManagerExternals;
 import com.triniforce.qsync.intf.IQSyncer;
+import com.triniforce.server.srvapi.BasicServerTask;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.INamedDbId;
+import com.triniforce.server.srvapi.ITaskExecutors;
 import com.triniforce.utils.ApiStack;
 
 public class QSyncExternals implements IQSyncManagerExternals{
+	
+	static class EQSyncerNotFound extends RuntimeException{
+		private static final long serialVersionUID = 1L;
+	
+		public EQSyncerNotFound(String msg) {
+			super(msg);
+		}
+	}
 
 	public IQSyncer getQSyncer(long qid, Long syncerId) {
-		String dboQSyncerName = ApiStack.getInterface(INamedDbId.class).getName(syncerId);
+		IQSyncer res;
+		String qSyncerName = ApiStack.getInterface(INamedDbId.class).getName(syncerId);
 		
-		DboQsyncQueue dbo = ApiStack.getInterface(IBasicServer.class)
-		.getExtension(PKEPDBObjects.class.getName(), dboQSyncerName).getInstance();
-		
-		return dbo.createSyncer();
+		IPKExtensionPoint ep = ApiStack.getInterface(IBasicServer.class).getExtensionPoint(PKEPDBObjects.class);
+		if(ep.getExtensions().containsKey(qSyncerName)){
+			// static syncer registration
+			DboQsyncQueue dbo = ep.getExtension(qSyncerName).getInstance();
+			res = dbo.createSyncer();
+		}
+		else{
+			//dynamic
+			try {
+				Class<?> cls = Class.forName(qSyncerName);
+				res = (IQSyncer) cls.newInstance();
+			} catch (Exception e) {
+				throw new EQSyncerNotFound(qSyncerName);
+			}
+		}
+		return res;
 	}
 
 	public void runSync(Runnable r) {
-		r.run();
+		ITaskExecutors te = ApiStack.getInterface(ITaskExecutors.class);
+		te.execute(ITaskExecutors.shortTaskExecutorKey, new Task(r));
+	}
+	
+	static class Task extends BasicServerTask{
+		
+		private Runnable m_runnable;
+
+		public Task(Runnable r) {
+			m_runnable = r;
+		}
+
+		public void run() {
+			m_runnable.run();
+			
+		}
 		
 	}
 
-	public void runInitialSync(Runnable r) {
-		r.run();
-		
-	}
 
 }

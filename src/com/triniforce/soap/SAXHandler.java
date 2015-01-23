@@ -96,6 +96,8 @@ public class SAXHandler {
                     }
                     return cd.getProps().get(m_propIdx).getType();
                 }
+                else
+                	throw new ESoap.EUnknownElement(cd.getType() + "." + propName);
             }
             else if (m_objDef instanceof ArrayDef){
                 ArrayDef ad = (ArrayDef) m_objDef;

@@ -11,6 +11,7 @@ import com.triniforce.qsync.intf.IQSyncer;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.INamedDbId.ENotFound;
 import com.triniforce.server.srvapi.INamedDbId;
+import com.triniforce.server.srvapi.ITaskExecutors;
 import com.triniforce.utils.ApiStack;
 
 public class QSyncExternalsTest extends BasicServerTestCase {
@@ -47,14 +48,28 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 	
 	boolean complete = false;
 	
-	public void testRunTask(){
+	@Override
+	public void test() throws Exception {
 		QSyncExternals ext = new QSyncExternals();
-		ext.runInitialSync(new Runnable(){
+		ITaskExecutors te = ApiStack.getInterface(ITaskExecutors.class);
+		int before = te.getTasksCount();
+
+		ext.runSync(new Runnable(){
+			public void run() {}
+		});
+		
+		assertEquals(before+1, te.getTasksCount());
+		Thread.sleep(100L);
+	}
+	
+	public void testRunTask() throws InterruptedException{
+		QSyncExternals ext = new QSyncExternals();
+		ext.runSync(new Runnable(){
 			public void run() {
 				complete = true;
 			}
-			
 		});
+		Thread.sleep(100L);
 		assertTrue(complete);
 
 		complete = false;
@@ -64,6 +79,7 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 			}
 			
 		});
+		Thread.sleep(100L);
 		assertTrue(complete);
 
 	}

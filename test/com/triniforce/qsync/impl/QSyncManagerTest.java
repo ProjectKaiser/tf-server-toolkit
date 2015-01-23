@@ -12,16 +12,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+
 import com.triniforce.db.test.BasicServerRunningTestCase;
-import com.triniforce.dbo.PKEPDBObjects;
 import com.triniforce.qsync.impl.TQSyncQueues.BL;
 import com.triniforce.qsync.intf.IQSyncManagerExternals;
 import com.triniforce.qsync.intf.IQSyncer;
 import com.triniforce.qsync.intf.QSyncQueueInfo;
 import com.triniforce.qsync.intf.QSyncTaskResult;
 import com.triniforce.qsync.intf.QSyncTaskStatus;
-import com.triniforce.server.TFPlugin;
 import com.triniforce.server.srvapi.IDbQueueFactory;
+import com.triniforce.server.srvapi.ISrvSmartTran;
+import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.ITime;
@@ -85,20 +88,6 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		public void runInitialSync(Runnable r) {
 			runnables.add(r);
 		}
-	}
-	
-	static class QSyncPlugin extends TFPlugin{
-
-		@Override
-		public void doRegistration() {
-			putExtension(PKEPDBObjects.class, TQSyncQueues.class);
-		}
-
-		@Override
-		public void doExtensionPointsRegistration() {
-			
-		}
-		
 	}
 	
 	private QSyncManager sm;
@@ -174,7 +163,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		sm.unRegisterQueue(4000, 123);
 		assertNull(sm.getQueueInfo(4000));
 		assertNotNull(sm.getQueueInfo(4001));
-	}
+	}	
 
 	public void testOnEveryMinute() {
 		{
@@ -188,6 +177,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			assertEquals(1, runnables.size());
 			
 			start_queue.put(6000L,  Arrays.asList(6L,5L,4L));
+			
 			execRuns();// Run initialSync
 			
 			assertEquals(Arrays.asList(6L,5L,4L), synced.get(6000L));
@@ -245,8 +235,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			sm.onEveryMinute();
 			assertEquals(5, runnables.size());
 			
-			runnables.get(0).run();
-			runnables.remove(0);
+			execRun(0);
 			long t2 = time.currentTimeMillis();
 			
 			sm.onEveryMinute();
@@ -290,11 +279,36 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		}
 	}
 
+	private void execRun(int i) {
+		SrvApiAlgs2.getIServerTran().commit();
+		
+		ApiStack.getInterface(ISrvSmartTranFactory.class).pop();
+		ApiStack.getInterface(ISrvSmartTranFactory.class).push();
+		runnables.get(0).run();
+		runnables.remove(0);
+		ApiStack.getInterface(ISrvSmartTranFactory.class).pop();
+		ApiStack.getInterface(ISrvSmartTranFactory.class).push();
+	
+	}
+
 	private void execRuns() {
+		final ISrvSmartTran trn = ApiStack.getInterface(ISrvSmartTran.class);
+		Mockery ctx = new Mockery();
+		final ISrvSmartTran trnMock = ctx.mock(ISrvSmartTran.class);
+		ApiStack.pushInterface(ISrvSmartTran.class, trnMock);
+		ctx.checking(new Expectations(){{
+			allowing(trnMock).instantiateBL(TQSyncQueues.BL.class); 
+			will (returnValue(trn.instantiateBL(TQSyncQueues.BL.class)));
+			ignoring(trnMock);
+		}});
 		for (Runnable r : runnables) {
-			r.run();
+			try{
+				r.run();
+			}finally{
+			}
 		}
 		runnables.clear();
+		ApiStack.popInterface(1);
 	}
 
 	public void testOnQueueChanged() {
@@ -337,8 +351,18 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			assertTrue(sm.onQueueChanged(790L));
 			execRuns();
 			assertTrue(tst > sm.getQueueInfo(790L).lastAttempt);
+		}
+		
+		{
+			{
+				QSyncManager sm2 = new QSyncManager(); // update QueueBL
+				syncExt = new TestSyncExt();
+				sm2.setSyncerExternals(syncExt);
+
+				sm2.registerQueue(83485L, 346L);
+			}
 			
-			
+			sm.onQueueChanged(83485L);
 		}
 	}
 
