@@ -7,10 +7,19 @@ package com.triniforce.qsync.impl;
 
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.dml.BusinessLogic;
+import com.triniforce.db.dml.IStmtContainer;
+import com.triniforce.db.dml.PrepSql;
+import com.triniforce.db.dml.PrepStmt;
 import com.triniforce.db.dml.ResSet;
+import com.triniforce.db.qbuilder.Expr;
+import com.triniforce.db.qbuilder.Expr.EqKind;
+import com.triniforce.db.qbuilder.QSelect;
+import com.triniforce.db.qbuilder.QStatement;
+import com.triniforce.db.qbuilder.WhereClause;
 import com.triniforce.dbo.DBOTableDef;
 import com.triniforce.qsync.intf.QSyncTaskResult;
 import com.triniforce.qsync.intf.QSyncTaskStatus;
+import com.triniforce.server.plugins.kernel.SrvTable;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.IName;
 
@@ -82,6 +91,26 @@ public class TQSyncQueues extends DBOTableDef {
 
 		public void clear() {
 			delete(new IName[]{}, new Object[]{});
+		}
+		
+		
+		public static class PQSelectExclude extends PrepSql{
+			@Override
+			public QStatement buildSql() {
+				return new QSelect().joinLast(new SrvTable(TQSyncQueues.class).addCol(id).addCol(syncerId).addCol(status))
+						.where(new WhereClause().and(new Expr.Compare(new Expr.Column("", id.getName()), EqKind.NE, new Expr.Param())));
+			}
+			
+			static ResSet exec(IStmtContainer sc, long qid){
+	            PrepStmt ps = sc.prepareStatement(PQSelectExclude.class);
+	            ps.setLong(1, qid);
+	            return ps.executeQuery();
+				
+			}
+		}
+
+		public ResSet getQueuesExclude(long excludedQueue) {
+			return PQSelectExclude.exec(getSt(), excludedQueue);
 		}
 		
 		

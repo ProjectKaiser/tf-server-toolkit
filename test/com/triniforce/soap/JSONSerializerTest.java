@@ -10,6 +10,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.json.simple.parser.ParseException;
@@ -18,6 +20,7 @@ import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
 import com.triniforce.soap.JSONSerializerTest.Service001.Outter01;
 import com.triniforce.soap.JSONSerializerTest.Service001.Real1;
+import com.triniforce.utils.StringSerializer;
 
 public class JSONSerializerTest extends TFTestCase {
 	
@@ -64,6 +67,8 @@ public class JSONSerializerTest extends TFTestCase {
 		public void method_006(Outter01 v){}
 		
 		public void method_007(String v){}
+		
+		public void method_008(TObj1 v){}
 	}
 	
 	static class Prop01{
@@ -99,6 +104,53 @@ public class JSONSerializerTest extends TFTestCase {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		srz.serialize(desc, soap, out);
 		return out.toString("utf-8");
+	}
+	
+	static class TObj2{
+		
+		public TObj2(String sv) {
+			setV(sv);
+		}
+
+		public String getV() {
+			return v;
+		}
+
+		public void setV(String v) {
+			this.v = v;
+		}
+
+		private String v;
+	}
+	static class TObj1{
+		private int v;
+		private TObj2 obj;
+		
+		
+		public TObj1() {
+		}
+		
+		public TObj1(int vv, String sv) {
+			setV(vv);
+			setObj(new TObj2(sv));
+		}
+
+		public int getV() {
+			return v;
+		}
+
+		public void setV(int v) {
+			this.v = v;
+		}
+
+		public TObj2 getObj() {
+			return obj;
+		}
+
+		public void setObj(TObj2 obj) {
+			this.obj = obj;
+		}
+		
 	}
 
 	public void testDeserialize() throws IOException, ParseException {
@@ -155,7 +207,33 @@ public class JSONSerializerTest extends TFTestCase {
 
 		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_007\",\"params\":[\"string cont\\\"aining [ :}\"],\"id\":1}"));
 		assertEquals("string cont\"aining [ :}", res.m_args[0]);
-		
+
+		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_007\",\"params\":[\"\"],\"id\":1}"));
+		assertEquals("", res.m_args[0]);
+
+//		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_007\",\"params\":[\"arg0\":1,2,3],\"id\":1}"));
+//		assertEquals("", res.m_args[0]);
+
+		{		
+			String json = StringSerializer.Object2JSON(new TObj1(1234, "my_str_19951"));
+			trace(json);
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			LinkedHashMap<String, Object> mapObj = new LinkedHashMap<String, Object>();
+			HashMap<String, Object> m2 = new LinkedHashMap<String, Object>();
+			m2.put("arg0",json);
+			mapObj.put("method", "method_008");
+			mapObj.put("params", m2);
+			srz.serializeObject(mapObj, out);
+			trace(new String(out.toByteArray(), "utf-8"));
+			
+			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+
+			res = srz.deserialize(desc, in);
+			
+			assertNotNull(res);
+			trace(res.m_args[0]);
+			assertEquals(json,  res.m_args[0]);
+		}
 	}
 
 	public static InputStream source(String string) throws UnsupportedEncodingException {

@@ -24,7 +24,6 @@ import com.triniforce.qsync.intf.QSyncTaskResult;
 import com.triniforce.qsync.intf.QSyncTaskStatus;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.ISrvSmartTran;
-import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.ITime;
@@ -103,6 +102,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		ERROR = null;
 		
 		SrvApiAlgs2.getIServerTran().instantiateBL(TQSyncQueues.BL.class).clear();
+		runnables.clear();
 	}
 
 	public void testSetMaxNumberOfSyncTasks() {
@@ -111,7 +111,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 	}
 
 	public void testGetMaxNumberOfSyncTasks() {
-		assertEquals(5, sm.getMaxNumberOfSyncTasks());
+		assertEquals(10, sm.getMaxNumberOfSyncTasks());
 	}
 
 	public void testSetMaxSyncTaskDurationMs() {
@@ -223,6 +223,8 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		}
 		
 		{// MaxNumberOfSyncTask parameter
+			sm.setMaxNumberOfSyncTasks(5);
+			sm.setMaxNumberOfInitTasks(5);
 			assertEquals(5, sm.getMaxNumberOfSyncTasks());
 			for(int i=0; i<6; i++){
 				sm.registerQueue(1000+i, 12);
@@ -235,20 +237,21 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			sm.onEveryMinute();
 			assertEquals(5, runnables.size());
 			
-			execRun(0);
 			long t2 = time.currentTimeMillis();
+			execRun(0);
+			long t2_1 = time.currentTimeMillis();
 			
-			sm.onEveryMinute();
+//			sm.onEveryMinute();
 			assertEquals(5, runnables.size());
 			long t3 = time.currentTimeMillis();
 			
 			QSyncQueueInfo qinfo = sm.getQueueInfo(1000);
 			
-			assertTrue(""+qinfo.lastAttempt,  t1 <=qinfo.lastAttempt && qinfo.lastAttempt  <= t2);
-			assertTrue(""+qinfo.lastSynced,  t1 <=qinfo.lastSynced  && qinfo.lastSynced  <= t2); 
+			assertTrue(""+qinfo.lastAttempt,  t1 <=qinfo.lastAttempt && qinfo.lastAttempt  <= t2_1);
+			assertTrue(""+qinfo.lastSynced,  t1 <=qinfo.lastSynced  && qinfo.lastSynced  <= t2_1); 
 			
 			qinfo = sm.getQueueInfo(1005);
-			assertTrue(""+qinfo.lastAttempt,  t2 <=qinfo.lastAttempt && qinfo.lastAttempt  <= t3);
+			assertTrue(t2 + "<"+qinfo.lastAttempt+"<"+t3,  t2 <=qinfo.lastAttempt && qinfo.lastAttempt  <= t3);
 		}
 		
 		execRuns(); // flush runs
@@ -280,15 +283,21 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 	}
 
 	private void execRun(int i) {
-		SrvApiAlgs2.getIServerTran().commit();
+		final ISrvSmartTran trn = ApiStack.getInterface(ISrvSmartTran.class);
+		Mockery ctx = new Mockery();
+		final ISrvSmartTran trnMock = ctx.mock(ISrvSmartTran.class);
+		ApiStack.pushInterface(ISrvSmartTran.class, trnMock);
+		ctx.checking(new Expectations(){{
+			allowing(trnMock).instantiateBL(TQSyncQueues.BL.class); 
+			will (returnValue(trn.instantiateBL(TQSyncQueues.BL.class)));
+			ignoring(trnMock);
+		}});
 		
-		ApiStack.getInterface(ISrvSmartTranFactory.class).pop();
-		ApiStack.getInterface(ISrvSmartTranFactory.class).push();
-		runnables.get(0).run();
-		runnables.remove(0);
-		ApiStack.getInterface(ISrvSmartTranFactory.class).pop();
-		ApiStack.getInterface(ISrvSmartTranFactory.class).push();
+		Runnable r = runnables.get(0);
+		r.run();
+		runnables.remove(r);
 	
+		ApiStack.popInterface(1);
 	}
 
 	private void execRuns() {
@@ -301,13 +310,15 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			will (returnValue(trn.instantiateBL(TQSyncQueues.BL.class)));
 			ignoring(trnMock);
 		}});
-		for (Runnable r : runnables) {
+		ArrayList<Runnable> runs = new ArrayList<Runnable>(runnables);
+		runnables.clear();
+		for(Runnable r: runs){
 			try{
 				r.run();
 			}finally{
 			}
 		}
-		runnables.clear();
+//		runnables.clear();
 		ApiStack.popInterface(1);
 	}
 
@@ -342,6 +353,9 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		
 		assertEquals(Arrays.asList(111L, 112L, 113L, 114L, 115L), synced.get(555L));
 		
+		sm.setMaxIncrementalSyncTaskDurationMs(60000);
+		sm.onEveryMinute();
+		
 		assertFalse(sm.onQueueChanged(15321563L));
 		
 		{ // already started task
@@ -363,6 +377,20 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			}
 			
 			sm.onQueueChanged(83485L);
+		}
+		
+		{
+			execRuns();
+			sm.onEveryMinute();
+			assertTrue(runnables.toString(), runnables.isEmpty());
+		
+			assertEquals(10, sm.getMaxNumberOfSyncTasks());
+			for(int i=0; i<11; i++){
+				long qid = 556+ i;
+				sm.registerQueue(qid, 1);
+				sm.onQueueChanged(qid);
+			}
+			assertEquals(runnables.toString(), 10, runnables.size());
 		}
 	}
 
@@ -428,6 +456,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			
 			sm.onEveryMinute();
 			runnables.clear();
+			result.status = QSyncTaskStatus.SYNCED;
 			sm.onTaskCompleted(result);
 			
 			try{
@@ -435,6 +464,25 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 				fail();
 			}catch(QSyncManager.ETaskWasNotStarted e ){
 			}
+		}
+		
+		// After task completed try to start next 
+		{
+			sm.registerQueue(5557L, 101L);
+			sm.registerQueue(5558L, 101L);
+			QSyncTaskResult result = new QSyncTaskResult();
+			result.qid = 5557L;
+			result.syncerId = 101L;
+			result.status = QSyncTaskStatus.SYNCED;
+			sm.onQueueChanged(5557L);
+			
+			long t21 = ApiStack.getInterface(ITime.class).currentTimeMillis();
+			
+			sm.onTaskCompleted(result);
+			
+			QSyncQueueInfo qinfo = sm.getQueueInfo(5558L);
+			assertTrue(""+qinfo.lastAttempt, t21 < qinfo.lastAttempt);
+			
 		}
 
 	}
@@ -513,4 +561,18 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		execRuns();
 	}
 
+	
+	public void testMaxInitTasks(){
+		sm.setMaxNumberOfInitTasks(2);
+		
+		sm.registerQueue(222, 1);
+		sm.registerQueue(223, 1);
+		sm.registerQueue(224, 1);
+		sm.onEveryMinute();
+		
+		assertEquals(2, runnables.size());
+		
+		sm.onEveryMinute();
+		assertEquals(2, runnables.size());
+	}
 }

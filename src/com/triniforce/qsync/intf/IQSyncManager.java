@@ -28,6 +28,14 @@ public interface IQSyncManager {
     int getMaxNumberOfSyncTasks();
     
     /**
+     * Default is 4
+     * @param value
+     */
+    void setMaxNumberOfInitTasks(int value);
+    int getMaxNumberOfInitTasks();
+
+    
+    /**
      * Default is 60000
      * @param value
      */
