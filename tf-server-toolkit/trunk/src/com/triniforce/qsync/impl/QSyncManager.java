@@ -27,9 +27,10 @@ import com.triniforce.utils.ITime;
 
 public class QSyncManager implements IQSyncManager {
 
-	private static final int DEFAULT_MAX_SYNC_TASKS = 5;
+	private static final int DEFAULT_MAX_SYNC_TASKS = 10;
 	private static final int DEFAULT_MAX_TASK_DURATION = 30000;
 	private static final int EXEC_PER_HOUR = 60; // minute in hour
+	private static final int DEFAULT_MAX_INIT_TASKS = 4;
 	
 	static abstract class SyncTask implements Runnable{
 		
@@ -72,6 +73,11 @@ public class QSyncManager implements IQSyncManager {
 
 		abstract boolean exec();
 		
+		@Override
+		public String toString() {
+			return getClass().getSimpleName() + ", queue" + m_qid+ ", state" + m_errorStatus.name();
+		}
+		
 	}
 	
 	static class InitialSync extends SyncTask{
@@ -105,6 +111,7 @@ public class QSyncManager implements IQSyncManager {
 	}
 	
 	private int m_maxNumberOfSyncTasks = DEFAULT_MAX_SYNC_TASKS;
+	private int m_maxNumberOfInitTasks = DEFAULT_MAX_INIT_TASKS;
 	private int m_maxSyncTaskDurationMs = DEFAULT_MAX_TASK_DURATION;
 	private IQSyncManagerExternals m_syncerExternals;
 	
@@ -139,6 +146,14 @@ public class QSyncManager implements IQSyncManager {
 			super("queue: " + qid);
 		}
 	}
+	public static class EQueueNotRegistered extends RuntimeException{
+		private static final long serialVersionUID = 1L;
+		public EQueueNotRegistered(long qid) {
+			super("queue: " + qid);
+		}
+		
+	}
+	
 	private Map<Long, QueueExecutionInfo> m_syncers = new HashMap<Long, QueueExecutionInfo>();
 	
 	private static class QueueExecutionInfo{
@@ -197,15 +212,25 @@ public class QSyncManager implements IQSyncManager {
 		queueBL().dropQueue(qid);
 
 	}
-
+	
 	public void onEveryMinute() {
-		ResSet rs = queueBL().getQueues();
+		startTasks(null);
+	}
+
+	private void startTasks(Long excludedQueue) {
+		ResSet rs = null == excludedQueue ? queueBL().getQueues() : queueBL().getQueuesExclude(excludedQueue);
 		int nrunning = 0;
+		int nInitRunning = 0;
+		
 		for(QueueExecutionInfo info : m_syncers.values()){
-			if(info.m_currentTask != null)
+			if(info.m_currentTask != null){
 				nrunning ++;
+				if(info.m_currentTask instanceof InitialSync)
+					nInitRunning ++;
+			}
 		}
 		int nexec = m_maxNumberOfSyncTasks - nrunning;
+		int nExecInit = m_maxNumberOfInitTasks - nInitRunning;
 		
 		while(nexec > 0 && rs.next()){
 			long qid = rs.getLong(1);
@@ -234,17 +259,21 @@ public class QSyncManager implements IQSyncManager {
 				else{
 					if(QSyncTaskStatus.ERROR.equals(status))
 						task = new RecordSync(this, getSyncer(qid, syncerId), qid, syncerId);
-					else
+					else if(nExecInit > 0){
 						task = new InitialSync(this, getSyncer(qid, syncerId), qid, syncerId);
+						nExecInit --;
+					}
 				}
 			}
 			
-			if(EnumSet.of(QSyncTaskStatus.INITIAL_SYNC).contains(status)){
-				task = new InitialSync(this, getSyncer(qid, syncerId), qid, syncerId);
-
+			else if(EnumSet.of(QSyncTaskStatus.INITIAL_SYNC).contains(status)){
+				if(nExecInit > 0){
+					task = new InitialSync(this, getSyncer(qid, syncerId), qid, syncerId);
+					nExecInit --;
+				}
 			}
 
-			if(EnumSet.of(QSyncTaskStatus.SYNCED, QSyncTaskStatus.EXEC_TIMEOUT).contains(status)){
+			else if(EnumSet.of(QSyncTaskStatus.SYNCED, QSyncTaskStatus.EXEC_TIMEOUT).contains(status)){
 				if(!isEmptyQueue(qid))
 					task = new RecordSync(this, getSyncer(qid, syncerId), qid, syncerId);
 			}
@@ -303,13 +332,29 @@ public class QSyncManager implements IQSyncManager {
 		if(syncerInfo.m_currentTask != null)
 			return true;
 		
-		long syncerId = qinfo.result.syncerId;
-		startQueueTask(qid, new RecordSync(this, syncerInfo.m_syncer, qid, syncerId));
+		if(getRunningTasks() < getMaxNumberOfSyncTasks()){
+			long syncerId = qinfo.result.syncerId;
+			startQueueTask(qid, new RecordSync(this, syncerInfo.m_syncer, qid, syncerId));
+		}
 		return true;
 	}
 	
+	private int getRunningTasks() {
+		int nrunning = 0;
+		
+		for(QueueExecutionInfo info : m_syncers.values()){
+			if(info.m_currentTask != null){
+				nrunning ++;
+			}
+		}
+		return nrunning;
+	}
+
 	public void onTaskCompleted(QSyncTaskResult result) {
 		QueueExecutionInfo syncerInfo = m_syncers.get(result.qid);
+		if(null == syncerInfo){
+			throw new EQueueNotRegistered(result.qid);
+		}
 		if(null == syncerInfo.m_currentTask){
 			throw new ETaskWasNotStarted(result.qid);
 		}
@@ -331,6 +376,8 @@ public class QSyncManager implements IQSyncManager {
 		}
 		
 		syncerInfo.m_currentTask = null;
+		
+		startTasks(result.qid);
 	}
 
 	public QSyncQueueInfo getQueueInfo(long qid) {
@@ -363,5 +410,14 @@ public class QSyncManager implements IQSyncManager {
 
 	private TQSyncQueues.BL queueBL(){
 		return SrvApiAlgs2.getIServerTran().instantiateBL(TQSyncQueues.BL.class);
+	}
+
+	public void setMaxNumberOfInitTasks(int value) {
+		m_maxNumberOfInitTasks = value;
+		
+	}
+
+	public int getMaxNumberOfInitTasks() {
+		return m_maxNumberOfInitTasks;
 	}
 }
