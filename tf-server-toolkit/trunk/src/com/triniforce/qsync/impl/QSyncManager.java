@@ -100,11 +100,15 @@ public class QSyncManager implements IQSyncManager {
 		boolean exec() {
 			int timeout = m_syncMan.getMaxIncrementalSyncTaskDurationMs();
 			long tst = ApiAlgs.getITime().currentTimeMillis();
+			long tnd;
 			Object record;
 			while(null != (record = m_syncMan.getQueueRecord(m_qid))){
 				m_syncer.sync(record);
-				if(timeout < ApiAlgs.getITime().currentTimeMillis()-tst)
+				tnd = ApiAlgs.getITime().currentTimeMillis();
+				if(timeout < tnd-tst){
+					ApiAlgs.getLog(this).trace("time: " + tst + "("+tnd+")");
 					return false;
+				}
 			}
 			return true;
 		}
