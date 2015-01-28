@@ -25,6 +25,7 @@ import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.qsync.impl.DboQSyncActualizer;
 import com.triniforce.qsync.impl.QSyncExternals;
 import com.triniforce.qsync.impl.QSyncManager;
+import com.triniforce.qsync.impl.QSyncManagerTask;
 import com.triniforce.qsync.impl.TQSyncQueues;
 import com.triniforce.qsync.intf.IQSyncManager;
 import com.triniforce.server.TFPlugin;
@@ -153,6 +154,8 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 
 		putExtension(PKEPDBOActualizers.class, DboQSyncActualizer.class);
 		putExtension(PKEPDBObjects.class, TQSyncQueues.class);
+
+		putExtension(PKEPAPIs.class, QSyncManagerTask.class);
 
 	}
 
