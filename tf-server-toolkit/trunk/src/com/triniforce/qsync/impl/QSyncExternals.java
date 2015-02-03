@@ -5,6 +5,8 @@
  */
 package com.triniforce.qsync.impl;
 
+import java.lang.reflect.Method;
+
 import com.triniforce.dbo.PKEPDBObjects;
 import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.qsync.intf.IQSyncManagerExternals;
@@ -39,7 +41,8 @@ public class QSyncExternals implements IQSyncManagerExternals{
 			//dynamic
 			try {
 				Class<?> cls = Class.forName(qSyncerName);
-				res = (IQSyncer) cls.newInstance();
+				Method m = cls.getMethod("newInstance", new Class[]{});
+				res = (IQSyncer) m.invoke(null, new Object[]{});
 			} catch (Exception e) {
 				throw new EQSyncerNotFound(qSyncerName);
 			}
