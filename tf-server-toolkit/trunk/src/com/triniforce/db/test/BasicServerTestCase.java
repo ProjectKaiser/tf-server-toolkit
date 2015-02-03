@@ -154,6 +154,10 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
         super.setUp();  
         m_bemu.setTimeSeq(BasicServerApiEmu.START_TIME, BasicServerApiEmu.TIME_OFFSETS);
         try{
+            
+            if(getPool().m_ds.isClosed())
+                m_pool = null;
+                
 	        m_startNumActive = getPool().m_ds.getNumActive();        
 	
 	        m_coreApi = new Api();
