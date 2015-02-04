@@ -493,7 +493,28 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 	}
 
 	public void testGetTopQueuesInfo() {
-		sm.getTopQueuesInfo(1, EnumSet.of(QSyncTaskStatus.INITIAL_SYNC));
+		sm.registerQueue(222, 33);
+		sm.registerQueue(223, 33);
+		sm.registerQueue(224, 33);
+		
+		List<QSyncQueueInfo> res = sm.getTopQueuesInfo(3, EnumSet.of(QSyncTaskStatus.INITIAL_SYNC));
+		assertEquals(3, res.size());
+		assertEquals(223, res.get(1).result.qid);
+		
+		sm.onEveryMinute();
+		execRuns();
+		
+		sm.registerQueue(225,33);
+		res = sm.getTopQueuesInfo(3, EnumSet.of(QSyncTaskStatus.INITIAL_SYNC));
+		assertEquals(1, res.size());
+		assertEquals(225, res.get(0).result.qid);
+
+		
+		res = sm.getTopQueuesInfo(2, EnumSet.of(QSyncTaskStatus.INITIAL_SYNC, QSyncTaskStatus.SYNCED));
+		assertEquals(2, res.size());
+		assertEquals(225, res.get(0).result.qid);
+		
+
 	}
 	
 	public void testErrorExecution(){
