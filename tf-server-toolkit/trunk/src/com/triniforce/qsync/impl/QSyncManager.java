@@ -7,6 +7,9 @@ package com.triniforce.qsync.impl;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +59,7 @@ public class QSyncManager implements IQSyncManager {
 				boolean bCompleted = exec();
 				result.status = bCompleted ? QSyncTaskStatus.SYNCED : QSyncTaskStatus.EXEC_TIMEOUT;  
 			}catch(Exception e){
+				ApiAlgs.getLog(this).error("Sync task error", e);
 				m_syncer.finit(e);
 				result.status = m_errorStatus;
 				result.errorClass = e.getClass().getName();
@@ -396,6 +400,7 @@ public class QSyncManager implements IQSyncManager {
 				res.lastSynced  = syncerInfo.m_lastSynced;
 			}
 			res.result = new QSyncTaskResult();
+			res.result.qid = qid;
 			res.result.syncerId = rs.getLong(2);
 			res.result.status = QSyncTaskStatus.valueOf(QSyncTaskStatus.class, rs.getString(3).trim());
 			if(EnumSet.of(QSyncTaskStatus.ERROR, QSyncTaskStatus.INITIAL_SYNC_ERROR).contains(res.result.status)){
@@ -409,7 +414,48 @@ public class QSyncManager implements IQSyncManager {
 
 	public List<QSyncQueueInfo> getTopQueuesInfo(int n,
 			EnumSet<QSyncTaskStatus> statusToFilter) {
-		return null;
+		List<Long> qIds = getIds();
+		sortByAttempt(qIds);
+		
+		ArrayList<QSyncQueueInfo> res = new ArrayList<QSyncQueueInfo>();
+		for(Long qid : qIds){
+			QSyncQueueInfo q = getQueueInfo(qid);
+			if(statusToFilter.contains(q.result.status)){
+				res.add(q);
+				n--;
+				if(n<=0)
+					break;
+			}
+		}
+		return res;
+	}
+
+	private void sortByAttempt(List<Long> qIds) {
+		Collections.sort(qIds, new Comparator<Long>() {
+			public int compare(Long qid1, Long qid2) {
+				QueueExecutionInfo si1 = m_syncers.get(qid1);
+				QueueExecutionInfo si2 = m_syncers.get(qid2);
+				int res;
+				// Non created tasks first (null - no attempts)
+				if(null == si1)
+					res = null == si2 ? 0 : -1;
+				else if (null == si2)
+					res = 1;
+				else
+					res = Long.valueOf(si1.m_lastAttempt).compareTo(si2.m_lastAttempt); 
+				return res;
+			}
+		});
+		
+	}
+
+	private List<Long> getIds() {
+		ArrayList<Long> res = new ArrayList<Long>();
+		ResSet rs = queueBL().getIds();
+		while(rs.next()){
+			res.add(rs.getLong(1));
+		}
+		return res;
 	}
 
 	private TQSyncQueues.BL queueBL(){
