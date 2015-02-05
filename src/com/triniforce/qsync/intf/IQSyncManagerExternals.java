@@ -12,6 +12,14 @@ import com.triniforce.server.srvapi.BasicServerTask;
  * 
  */
 public interface IQSyncManagerExternals {
+	
+	static class EQSyncerNotFound extends RuntimeException{
+		private static final long serialVersionUID = 1L;
+	
+		public EQSyncerNotFound(String msg) {
+			super(msg);
+		}
+	}
     
     /**
      * 
@@ -19,7 +27,7 @@ public interface IQSyncManagerExternals {
      * @param syncerId
      * @return null if syncer is not registered
      */
-    IQSyncer getQSyncer(long qid, Long syncerId);
+    IQSyncer getQSyncer(long qid, Long syncerId) throws EQSyncerNotFound;
 
     /**
      * Execute runnable asynchronously. E.g. using {@link BasicServerTask}

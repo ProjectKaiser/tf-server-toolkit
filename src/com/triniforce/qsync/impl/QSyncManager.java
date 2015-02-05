@@ -244,9 +244,13 @@ public class QSyncManager implements IQSyncManager {
 			long qid = rs.getLong(1);
 			long syncerId = rs.getLong(2);
 			
-			QueueExecutionInfo syncerInfo = getSyncerInfo(qid, syncerId); 
-					
-
+			QueueExecutionInfo syncerInfo;
+			try{
+				syncerInfo = getSyncerInfo(qid, syncerId);
+			} catch(IQSyncManagerExternals.EQSyncerNotFound e){
+				ApiAlgs.getLog(this).error("", e);
+				continue;
+			}
 			
 			if(syncerInfo.m_currentTask != null)
 				continue;
