@@ -69,7 +69,7 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 				complete = true;
 			}
 		});
-		Thread.sleep(100L);
+		Thread.sleep(500L);
 		assertTrue(complete);
 
 		complete = false;
@@ -79,7 +79,7 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 			}
 			
 		});
-		Thread.sleep(100L);
+		Thread.sleep(500L);
 		assertTrue(complete);
 
 	}
