@@ -21,7 +21,6 @@ import com.triniforce.server.soap.CollectionViewRequest;
 import com.triniforce.server.soap.FieldFunctionRequest;
 import com.triniforce.server.soap.LongListResponse;
 import com.triniforce.server.soap.WhereExpr;
-import com.triniforce.server.soap.WhereExpr.ColumnExpr;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
@@ -54,8 +53,7 @@ public class CVRHandler implements ICVRHandler {
 	Collection<String> requestedColumns(List<WhereExpr> exprs){
 		HashSet<String> res = new HashSet<String>();
 		for (WhereExpr expr : exprs) {
-			if(expr instanceof ColumnExpr)
-				res.add(((ColumnExpr)expr).getColumnName());
+		    res.addAll(expr.calcColumnNames());
 		}
 		return res;
 	}

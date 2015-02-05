@@ -7,12 +7,15 @@ package com.triniforce.server.soap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.triniforce.soap.PropertiesSequence;
 
 @PropertiesSequence( sequence = {"not"})
-public class WhereExpr {
+public abstract class WhereExpr {
+
     
     private boolean m_not;
     
@@ -21,6 +24,7 @@ public class WhereExpr {
         return getClass().getSimpleName();
     }
     
+    abstract public Set<String> calcColumnNames();
     
     @PropertiesSequence( sequence = {"colExprs"}) 
     public static class ExprColumnOr extends WhereExpr{
@@ -31,6 +35,16 @@ public class WhereExpr {
         }
         public void setColExprs(List<ColumnExpr> colExprs) {
             m_colExprs = colExprs;
+        }
+        
+        @Override
+        public Set<String> calcColumnNames() {
+            Set<String> res = new HashSet<String>();
+            for(ColumnExpr e:m_colExprs){
+                res.addAll(e.calcColumnNames());
+            }
+            return res;
+
         }
     }
     
@@ -50,29 +64,39 @@ public class WhereExpr {
             m_query = query;
         }
         
+        @Override
+        public Set<String> calcColumnNames() {
+            Set res = new HashSet<String>();
+            res.add("name");
+            res.add("descr");
+            return res;
+        }
+        
     }
     
     @PropertiesSequence( sequence = {"columnName"})
     public static abstract class ColumnExpr extends WhereExpr{
-        String m_columnName;
+        String m_colName;
         public String getColumnName() {
-            return m_columnName;
+            return m_colName;
         }
         public void setColumnName(String columnName) {
-            m_columnName = columnName;
-        }        
+            m_colName = columnName;
+        }
+        
+        @Override
+        public Set<String> calcColumnNames() {
+            Set res = new HashSet();
+            res.add(m_colName);
+            return res;
+        }
+        
     }
     
     @PropertiesSequence( sequence = {"value"})
     public static abstract class ColumnExprValued extends ColumnExpr{
-        String m_columnName;
         private Object m_value;
-        public String getColumnName() {
-            return m_columnName;
-        }
-        public void setColumnName(String columnName) {
-            m_columnName = columnName;
-        }
+        
         public Object getValue() {
             return m_value;
         }
@@ -84,7 +108,7 @@ public class WhereExpr {
         }
         
         public ColumnExprValued(String name, Object value){
-            m_columnName = name;
+            setColumnName(name);
             m_value = value;
         }
         
