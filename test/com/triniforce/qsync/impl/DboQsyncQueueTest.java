@@ -14,6 +14,7 @@ import com.triniforce.qsync.intf.QSyncTaskStatus;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.ISrvSmartTran;
+import com.triniforce.server.srvapi.ITaskExecutors;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.utils.ApiStack;
 
@@ -40,26 +41,38 @@ public class DboQsyncQueueTest extends BasicServerTestCase {
 	@Override
 	public void test() throws Exception {
 		putQueue(40001L, "str_01");
-		runSyncMan();
+		synchronized (QSyncPlugin.syncObj) {
+			
+			runSyncMan();
+			QSyncPlugin.syncObj.wait();
+		}
 		
 		TestSyncer s = p.getSyncer(getServer());
 
-		Thread.sleep(100L);
-		
+		QSyncTaskStatus qsState;
 		getServer().enterMode(Mode.Running);
 		try{
-			assertEquals(QSyncTaskStatus.SYNCED, 
-					ApiStack.getInterface(IQSyncManager.class).getQueueInfo(40001L).result.status);
+			qsState = ApiStack.getInterface(IQSyncManager.class).getQueueInfo(40001L).result.status; 
 		}finally{
 			getServer().leaveMode();
 		}
 		
+		assertEquals(QSyncTaskStatus.SYNCED, qsState);
 		
 		putQueue(40001L, "str_02");
-		runSyncMan();
-		Thread.sleep(100L);
+		synchronized (QSyncPlugin.syncObj) {
+			runSyncMan();
+			QSyncPlugin.syncObj.wait();
+		}
 		
 		assertEquals(Arrays.asList("str_01", "str_02"), s.synced());
+		
+		getServer().enterMode(Mode.Running);
+		try{
+			ApiStack.getInterface(ITaskExecutors.class).shutdownNow(); 
+		}finally{
+			getServer().leaveMode();
+		}
 	}
 
 	private void runSyncMan() {

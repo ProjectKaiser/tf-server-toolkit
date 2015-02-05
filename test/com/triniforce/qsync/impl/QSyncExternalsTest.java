@@ -59,27 +59,39 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 		});
 		
 		assertEquals(before+1, te.getTasksCount());
-		Thread.sleep(100L);
 	}
+	
+	Object obj = new Object();
 	
 	public void testRunTask() throws InterruptedException{
 		QSyncExternals ext = new QSyncExternals();
-		ext.runSync(new Runnable(){
-			public void run() {
-				complete = true;
-			}
-		});
-		Thread.sleep(500L);
+		synchronized (obj) {
+			ext.runSync(new Runnable(){
+				public void run() {
+					complete = true;
+					synchronized (obj) {
+						obj.notify();
+					}
+					
+				}
+			});
+			obj.wait();
+		}
 		assertTrue(complete);
 
-		complete = false;
-		ext.runSync(new Runnable(){
-			public void run() {
-				complete = true;
-			}
-			
-		});
-		Thread.sleep(500L);
+		synchronized (obj) {
+			complete = false;
+			ext.runSync(new Runnable(){
+				public void run() {
+					complete = true;
+					synchronized (obj) {
+						obj.notify();
+					}
+				}
+				
+			});
+			obj.wait();
+		}
 		assertTrue(complete);
 
 	}

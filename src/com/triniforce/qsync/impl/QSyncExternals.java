@@ -46,7 +46,7 @@ public class QSyncExternals implements IQSyncManagerExternals{
 
 	public void runSync(Runnable r) {
 		ITaskExecutors te = ApiStack.getInterface(ITaskExecutors.class);
-		te.execute(ITaskExecutors.shortTaskExecutorKey, new Task(r));
+		te.execute(ITaskExecutors.normalTaskExecutorKey, new Task(r));
 	}
 	
 	static class Task extends BasicServerTask{
