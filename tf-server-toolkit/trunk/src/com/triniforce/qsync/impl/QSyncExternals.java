@@ -19,13 +19,7 @@ import com.triniforce.utils.ApiStack;
 
 public class QSyncExternals implements IQSyncManagerExternals{
 	
-	static class EQSyncerNotFound extends RuntimeException{
-		private static final long serialVersionUID = 1L;
-	
-		public EQSyncerNotFound(String msg) {
-			super(msg);
-		}
-	}
+
 
 	public IQSyncer getQSyncer(long qid, Long syncerId) {
 		IQSyncer res;

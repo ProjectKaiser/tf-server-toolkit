@@ -77,6 +77,8 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 	static class TestSyncExt implements IQSyncManagerExternals{
 
         public IQSyncer getQSyncer(long qid, Long syncerId) {
+        	if(syncerId == 10001)
+        		throw new EQSyncerNotFound("test");
 			return new TestQSyncer(qid, null);
         }
 
@@ -259,6 +261,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		{	//start ERROR tasks
 			sm.registerQueue(300L, 80L);
 			ERROR = new RuntimeException("testError");
+			incExpectedLogErrorCount(1);
 			sm.onEveryMinute();
 			execRuns();
 			QSyncQueueInfo qinfo = sm.getQueueInfo(300L);
@@ -279,6 +282,13 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			qBL.registerQueue(6880L, 12L, QSyncTaskStatus.INITIAL_SYNC);
 			
 			sm.onEveryMinute();
+		}
+		
+		{ //QSyncExternal return exception
+			SrvApiAlgs2.getIServerTran().instantiateBL(TQSyncQueues.BL.class).registerQueue(12412, 10001, QSyncTaskStatus.SYNCED);
+			incExpectedLogErrorCount(1);
+			sm.onEveryMinute();
+				
 		}
 	}
 
@@ -518,7 +528,9 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 	}
 	
 	public void testErrorExecution(){
+		
 		{
+			incExpectedLogErrorCount(1);
 			ERROR = new RuntimeException("testErrorExceution");
 			
 			sm.registerQueue(555L, 1L);
@@ -546,6 +558,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			assertEquals(null, qinfo.result.errorMessage);
 			
 			
+			incExpectedLogErrorCount(1);
 			ERROR = new RuntimeException("testErrorExceution_InSYNC");
 			
 			putRecord(555L, 564L);
@@ -559,6 +572,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		}
 		
 		{	// If Error occured next try should be executed with doubled interval
+			incExpectedLogErrorCount(4);
 			sm.registerQueue(540L, 10L);
 			ERROR = new RuntimeException();
 			execTry(); // execute
