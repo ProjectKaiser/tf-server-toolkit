@@ -16,6 +16,8 @@ import com.triniforce.utils.ApiAlgs;
 
 public class QSyncPlugin extends PKPlugin {
 	
+	public static Object syncObj = new Object();
+	
 	public static class TestSyncer extends DboQsyncQueue implements IQSyncer{
 
 		boolean m_initiallySynced = false;
@@ -38,7 +40,9 @@ public class QSyncPlugin extends PKPlugin {
 		public void initialSync() {
 			ApiAlgs.assertTrue(!m_initiallySynced,"");
 			m_initiallySynced  = true;
-			
+			synchronized (syncObj) {
+				syncObj.notify();
+			}
 		}
 
 		public void finit(Throwable t) {
@@ -53,6 +57,11 @@ public class QSyncPlugin extends PKPlugin {
 		public void sync(Object o) {
 			m_synced.add(o);
 			
+			
+			synchronized (syncObj) {
+				syncObj.notify();
+			}
+
 		} 
 		
 	}
