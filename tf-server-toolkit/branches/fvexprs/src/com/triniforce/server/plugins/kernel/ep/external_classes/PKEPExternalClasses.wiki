@@ -1,0 +1,5 @@
+Developer who creates ClassesFolder puts ClassesFolder _instances_ to PKEPExternalClasses
+
+Developer who uses ClassesFolder uses IExternalClasses to get list of classes
+
+
