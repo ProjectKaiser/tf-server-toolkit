@@ -6,6 +6,7 @@
 
 package com.triniforce.eval;
 
-public interface IOlValueGetter{
-    Object getValue(int idx);
+public interface IOlValue {
+	Object getValue(IOlColumnGetter vg);
+	
 }

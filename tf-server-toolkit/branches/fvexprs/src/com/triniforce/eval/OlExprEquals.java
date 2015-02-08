@@ -42,16 +42,16 @@ public class OlExprEquals extends OlExpr {
     }
 
     @Override
-    public boolean evaluate(Object value, IOlValueGetter vg) {
-        if (null == value) {
-            return value == getTestValue();
+    public boolean evaluate(Object columnValue, IOlColumnGetter vg) {
+        if (null == columnValue) {
+            return columnValue == getTestValue();
         }
         if (null == m_workTestValue) {
-            m_workTestValue = getWorkingTestValue(getTestValue(), value);
+            m_workTestValue = getWorkingTestValue(getTestValue(), columnValue);
         }
         if (null == m_workTestValue)
             return false;
-        return evaluateValue(value);
+        return evaluateValue(columnValue);
     }
 
     public Object getTestValue() {

@@ -18,7 +18,7 @@ public class OlExprBetween extends OlExpr {
         m_rightExpr = new OlExprLE(rightValue);
     }
     @Override
-    public boolean evaluate(Object value, IOlValueGetter vg) {
+    public boolean evaluate(Object value, IOlColumnGetter vg) {
         return getLeftExpr().evaluate(value, vg) && getRightExpr().evaluate(value, vg); 
     }
     public OlExprGE getLeftExpr() {

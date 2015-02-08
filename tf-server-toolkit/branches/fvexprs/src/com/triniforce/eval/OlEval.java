@@ -31,7 +31,7 @@ public class OlEval implements IOlEvaluator {
         getEvaluators().add(eval);
     }
     
-    public boolean evaluate(IOlValueGetter vg){
+    public boolean evaluate(IOlColumnGetter vg){
         for (IOlEvaluator e : getEvaluators()) {
             if (e.evaluate(vg) != m_andConcatenation){
                 return isNot() ^ !m_andConcatenation;
@@ -41,7 +41,7 @@ public class OlEval implements IOlEvaluator {
     }
     
     public boolean evalArray(final Object values[], final int startIdx){
-        IOlValueGetter vg = new IOlValueGetter() {
+        IOlColumnGetter vg = new IOlColumnGetter() {
             public Object getValue(int idx) {
                 return values[startIdx + idx];
             }
@@ -50,7 +50,7 @@ public class OlEval implements IOlEvaluator {
     }
 
     public boolean evalList(final List values, final int startIdx) {
-        IOlValueGetter vg = new IOlValueGetter() {
+        IOlColumnGetter vg = new IOlColumnGetter() {
             public Object getValue(int idx) {
                 return values.get(startIdx + idx);
             }

@@ -16,7 +16,7 @@ public abstract class Ol_ExprString extends OlExpr{
     }
     
     @Override
-    public boolean evaluate(Object value, IOlValueGetter vg) {
+    public boolean evaluate(Object value, IOlColumnGetter vg) {
         return evaluateString( null!= value? value.toString(): null);
     }
     

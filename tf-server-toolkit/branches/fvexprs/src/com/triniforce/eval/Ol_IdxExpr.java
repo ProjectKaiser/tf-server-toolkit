@@ -20,7 +20,7 @@ public class Ol_IdxExpr implements IOlEvaluator{
     public OlExpr getExpr() {
         return m_expr;
     }
-    public boolean evaluate(IOlValueGetter vg) {
+    public boolean evaluate(IOlColumnGetter vg) {
         return getExpr().evaluate(vg.getValue(getIdx()), vg);
     }
     
