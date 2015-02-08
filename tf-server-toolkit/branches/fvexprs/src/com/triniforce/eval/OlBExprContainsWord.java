@@ -9,11 +9,11 @@ package com.triniforce.eval;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class OlExprContainsWord extends Ol_ExprString{
+public class OlBExprContainsWord extends Ol_ExprString{
     
     private Pattern m_pattern;
 
-    public OlExprContainsWord(Object value) {
+    public OlBExprContainsWord(Object value) {
         super(value);
         m_value = m_value.toLowerCase();
         m_pattern = Pattern.compile( "(^|[\\s@.,;\\-]+)" + Pattern.quote(m_value.toString()), Pattern.CASE_INSENSITIVE);

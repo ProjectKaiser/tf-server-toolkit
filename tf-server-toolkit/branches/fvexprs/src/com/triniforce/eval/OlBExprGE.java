@@ -7,9 +7,9 @@
 package com.triniforce.eval;
 
 
-public class OlExprGE extends OlExprEquals {
+public class OlBExprGE extends OlBExprEquals {
 
-    OlExprGE(Object testValue) {
+    OlBExprGE(Object testValue) {
         super(testValue);
     }
 

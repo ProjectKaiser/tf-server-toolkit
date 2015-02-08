@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 import com.triniforce.db.test.TFTestCase;
 
-public class OlExprContainsWordTest extends TFTestCase {
+public class OlBExprContainsWordTest extends TFTestCase {
     
     public void testPattern(){
         Pattern pattern = Pattern.compile("(^|[\\s.,;\\-]+)Р\\а\\б\\о\\т\\а".toLowerCase(), Pattern.CASE_INSENSITIVE);
@@ -54,7 +54,7 @@ public class OlExprContainsWordTest extends TFTestCase {
     public void test() throws Exception {
         {
             OlEval of = new OlEval();
-            of.addExpr(0, new OlExprContainsWord("tHe"));
+            of.addExpr(0, new OlBExprContainsWord("tHe"));
             assertFalse(of.evalArray(new Object[]{null}, 0));
             assertTrue(of.evalArray(new Object[]{"ThE"}, 0));
             assertTrue(of.evalArray(new Object[]{" the"}, 0));
@@ -64,21 +64,21 @@ public class OlExprContainsWordTest extends TFTestCase {
         }
         {
             OlEval of = new OlEval();
-            of.addExpr(0, new OlExprContainsWord("maxim.ge"));
+            of.addExpr(0, new OlBExprContainsWord("maxim.ge"));
             assertFalse(of.evalArray(new Object[]{null}, 0));
             assertFalse(of.evalArray(new Object[]{"ThEmaxim.ge@gmail.com"}, 0));
             assertTrue(of.evalArray(new Object[]{"maxim.ge@gmail.com"}, 0));
         }
         {
             OlEval of = new OlEval();
-            of.addExpr(0, new OlExprContainsWord("gMail.com"));
+            of.addExpr(0, new OlBExprContainsWord("gMail.com"));
             assertFalse(of.evalArray(new Object[]{null}, 0));
             assertFalse(of.evalArray(new Object[]{"maxim.ge@_gmail.com"}, 0));
             assertTrue(of.evalArray(new Object[]{"maxim.ge@gmAil.com"}, 0));
         }
         {
             OlEval of = new OlEval();
-            of.addExpr(0, new OlExprContainsWord("maxim.ge@gmail.com"));
+            of.addExpr(0, new OlBExprContainsWord("maxim.ge@gmail.com"));
             assertFalse(of.evalArray(new Object[]{null}, 0));
             assertFalse(of.evalArray(new Object[]{"maxim.ge@_gmail.com"}, 0));
             assertTrue(of.evalArray(new Object[]{"a maxim.ge@gmAil.com"}, 0));

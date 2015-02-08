@@ -8,7 +8,7 @@ package com.triniforce.eval;
 
 import com.triniforce.utils.TFUtils;
 
-public abstract class Ol_ExprString extends OlExpr{
+public abstract class Ol_ExprString extends OlBExpr{
     String m_value;
     public Ol_ExprString(Object value) {
         TFUtils.assertNotNull(value, "Argument for " + this.getClass().getName()+ " must have not null String value");

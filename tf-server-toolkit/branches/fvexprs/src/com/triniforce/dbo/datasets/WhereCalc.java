@@ -9,7 +9,7 @@ import java.util.List;
 
 import com.triniforce.eval.IOlColumnGetter;
 import com.triniforce.eval.OlEval;
-import com.triniforce.eval.OlExprEquals;
+import com.triniforce.eval.OlBExprEquals;
 import com.triniforce.server.plugins.kernel.outline.OlEvalCVRConvertor;
 import com.triniforce.server.soap.WhereExpr;
 
@@ -39,7 +39,7 @@ public class WhereCalc {
 	}
 
 	public void addExpr(List<String>columns, String column, Object value) {
-		m_eval.addExpr(columns.indexOf(column), new OlExprEquals(value));
+		m_eval.addExpr(columns.indexOf(column), new OlBExprEquals(value));
 	}
 
 }

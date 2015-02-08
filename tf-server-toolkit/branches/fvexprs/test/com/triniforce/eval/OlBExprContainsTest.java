@@ -9,18 +9,18 @@ package com.triniforce.eval;
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.utils.EUtils.EAssertNotNullFailed;
 
-public class OlExprContainsTest extends TFTestCase {
+public class OlBExprContainsTest extends TFTestCase {
 	@Override
 	public void test() throws Exception {
         try {
-            new OlExprContains(null);
+            new OlBExprContains(null);
             fail();
         } catch (EAssertNotNullFailed e) {
             trace(e);
         }
         
         OlEval of = new OlEval();
-        of.addExpr(0, new OlExprContains("tHe"));
+        of.addExpr(0, new OlBExprContains("tHe"));
         assertFalse(of.evalArray(new Object[]{null}, 0));
         assertFalse(of.evalArray(new Object[]{1}, 0));
         assertFalse(of.evalArray(new Object[]{"2"}, 0));

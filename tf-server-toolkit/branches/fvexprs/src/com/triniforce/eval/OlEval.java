@@ -23,7 +23,7 @@ public class OlEval implements IOlEvaluator {
     private final List<IOlEvaluator> m_evaluators = new ArrayList<IOlEvaluator>();
     private boolean m_andConcatenation = true;
     
-    public void addExpr(int idx, OlExpr expr) {
+    public void addExpr(int idx, OlBExpr expr) {
         getEvaluators().add(new Ol_IdxExpr(idx, expr));
     }
     

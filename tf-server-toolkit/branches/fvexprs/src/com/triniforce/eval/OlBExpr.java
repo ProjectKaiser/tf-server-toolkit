@@ -6,7 +6,11 @@
 
 package com.triniforce.eval;
 
-public abstract class OlExpr {
+/**
+ * Boolean expression
+ *
+ */
+public abstract class OlBExpr {
     public abstract boolean evaluate(Object columnValue, IOlColumnGetter vg);
     
     @Override

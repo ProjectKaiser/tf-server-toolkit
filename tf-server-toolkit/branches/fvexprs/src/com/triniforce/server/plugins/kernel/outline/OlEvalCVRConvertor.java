@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.triniforce.eval.OlEval;
-import com.triniforce.eval.OlExpr;
-import com.triniforce.eval.OlExprBetween;
-import com.triniforce.eval.OlExprContains;
-import com.triniforce.eval.OlExprContainsWord;
-import com.triniforce.eval.OlExprEquals;
-import com.triniforce.eval.OlExprIN;
-import com.triniforce.eval.OlExprNotNull;
+import com.triniforce.eval.OlBExpr;
+import com.triniforce.eval.OlBExprBetween;
+import com.triniforce.eval.OlBExprContains;
+import com.triniforce.eval.OlBExprContainsWord;
+import com.triniforce.eval.OlBExprEquals;
+import com.triniforce.eval.OlBExprIN;
+import com.triniforce.eval.OlBExprNotNull;
 import com.triniforce.server.soap.CollectionViewRequest;
 import com.triniforce.server.soap.WhereExpr;
 import com.triniforce.server.soap.WhereExpr.ColumnExpr;
@@ -49,7 +49,7 @@ import com.triniforce.utils.TFUtils;
 public class OlEvalCVRConvertor {
     
     public interface IAddOlExpr{
-        public void addNamedOlExpr(String colName, OlExpr olExpr);
+        public void addNamedOlExpr(String colName, OlBExpr olExpr);
     }
     
     final Map<String, Integer> m_nameToIdx;
@@ -115,21 +115,21 @@ public class OlEvalCVRConvertor {
         }
         ColumnExpr expr = (ColumnExpr) aExpr;
         
-        OlExpr dstExpr = null;
+        OlBExpr dstExpr = null;
         if(expr instanceof WhereExpr.ExprIn){
             WhereExpr.ExprIn srcExpr = (ExprIn) expr;
-            dstExpr = new OlExprIN( ((WhereExpr.ExprIn)srcExpr).getVals()); 
+            dstExpr = new OlBExprIN( ((WhereExpr.ExprIn)srcExpr).getVals()); 
         }else if(expr instanceof WhereExpr.ExprBetween){
             WhereExpr.ExprBetween srcExpr = (ExprBetween) expr;
-            dstExpr = new OlExprBetween(srcExpr.getFrom(), srcExpr.getTo());
+            dstExpr = new OlBExprBetween(srcExpr.getFrom(), srcExpr.getTo());
         }else if(expr instanceof WhereExpr.ExprNotNull){
-            dstExpr = new OlExprNotNull();
+            dstExpr = new OlBExprNotNull();
         }else if(expr instanceof WhereExpr.ExprContains){
-            dstExpr = new OlExprContains(((WhereExpr.ExprContains) expr).getValue());
+            dstExpr = new OlBExprContains(((WhereExpr.ExprContains) expr).getValue());
         }else if(expr instanceof WhereExpr.ExprContainsWord){
-            dstExpr = new OlExprContainsWord(((WhereExpr.ExprContainsWord) expr).getValue());
+            dstExpr = new OlBExprContainsWord(((WhereExpr.ExprContainsWord) expr).getValue());
         }else if(expr instanceof WhereExpr.ExprEquals){
-            dstExpr = new OlExprEquals(((WhereExpr.ExprEquals) expr).getValue());
+            dstExpr = new OlBExprEquals(((WhereExpr.ExprEquals) expr).getValue());
         }
         
         TFUtils.assertNotNull(dstExpr, expr.toString());

@@ -11,18 +11,18 @@ import java.util.List;
 
 import com.triniforce.utils.TFUtils;
 
-public class OlExprIN extends OlExpr {
-    final List<OlExprEquals> m_exprs = new ArrayList<OlExprEquals>();
+public class OlBExprIN extends OlBExpr {
+    final List<OlBExprEquals> m_exprs = new ArrayList<OlBExprEquals>();
             
-    public OlExprIN(Object values[]) {
+    public OlBExprIN(Object values[]) {
         TFUtils.assertNotNull(values, "IN values");
         for(Object value: values){
-            m_exprs.add(new OlExprEquals(value));
+            m_exprs.add(new OlBExprEquals(value));
         }
     }
     @Override
     public boolean evaluate(Object value, IOlColumnGetter vg) {
-        for(OlExprEquals expr: m_exprs){
+        for(OlBExprEquals expr: m_exprs){
             if(expr.evaluate(value, vg)) return true;
         }
         return false;
@@ -31,7 +31,7 @@ public class OlExprIN extends OlExpr {
     @Override
     public String toString() {
 		String res = super.toString() + "(";
-		for (OlExprEquals e : m_exprs) {
+		for (OlBExprEquals e : m_exprs) {
 			res += "," + e.getTestValue();
 		}
 		res += ")";

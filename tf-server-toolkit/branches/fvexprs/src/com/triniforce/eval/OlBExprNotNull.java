@@ -7,7 +7,7 @@
 package com.triniforce.eval;
 
 
-public class OlExprNotNull extends OlExpr {
+public class OlBExprNotNull extends OlBExpr {
     @Override
     public boolean evaluate(Object value, IOlColumnGetter vg) {
         return ( null != value);
