@@ -151,8 +151,8 @@ public class OlEvalCVRConvertorTest extends TFTestCase {
             assertEquals(colIdx, ((Ol_IdxExpr)f.getEvaluators().get(idx)).getIdx());
             OlBExprGE ge = olExpr.getLeftExpr();
             OlBExprLE le = olExpr.getRightExpr();
-            assertEquals(12, ge.getTestValue());
-            assertEquals(15, le.getTestValue());
+            assertEquals(12, ge.getTestExpr().eval(null));
+            assertEquals(15, le.getTestExpr().eval(null));
         }
         //check in
         {

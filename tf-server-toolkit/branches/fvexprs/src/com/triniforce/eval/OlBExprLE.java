@@ -14,7 +14,7 @@ public class OlBExprLE extends OlBExprEquals {
     }
 
     @Override
-    boolean evaluateValue(Object value) {
+    boolean internal_evaluateValue(Object value) {
         Comparable cmp = (Comparable) value;
         return cmp.compareTo(m_workTestValue) <= 0;
     }

@@ -21,9 +21,9 @@ public class OlBExprIN extends OlBExpr {
         }
     }
     @Override
-    public boolean evaluate(Object value, IOlColumnGetter vg) {
+    public boolean eval(Object value, IOlColumnGetter vg) {
         for(OlBExprEquals expr: m_exprs){
-            if(expr.evaluate(value, vg)) return true;
+            if(expr.eval(value, vg)) return true;
         }
         return false;
     }
@@ -32,7 +32,7 @@ public class OlBExprIN extends OlBExpr {
     public String toString() {
 		String res = super.toString() + "(";
 		for (OlBExprEquals e : m_exprs) {
-			res += "," + e.getTestValue();
+			res += "," + e.getTestExpr();
 		}
 		res += ")";
 		return res;

@@ -11,10 +11,18 @@ package com.triniforce.eval;
  *
  */
 public abstract class OlBExpr {
-    public abstract boolean evaluate(Object columnValue, IOlColumnGetter vg);
+    public abstract boolean eval(Object columnValue, IOlColumnGetter vg);
     
     @Override
     public String toString() {
-    	return getClass().getSimpleName();
+    	return " " + getClass().getSimpleName();
     }
+    
+    public static String safeToString(OlBExpr bexpr){
+    	if(null == bexpr){
+    		return " nullOp";
+    	}
+    	return bexpr.toString();
+    }
+    
 }

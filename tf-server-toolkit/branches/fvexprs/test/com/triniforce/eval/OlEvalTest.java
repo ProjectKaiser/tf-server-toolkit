@@ -10,7 +10,32 @@ import java.util.Arrays;
 import com.triniforce.db.test.TFTestCase;
 
 public class OlEvalTest extends TFTestCase {
-    
+
+	
+	public void test_toString(){
+		
+		OlEval ev = new OlEval();
+		trace(ev);
+		ev.setNot(true);
+		trace(ev);
+		
+		OlBExprEquals eq = new OlBExprEquals(5);
+		ev.addExpr(0, eq);
+		trace(ev);
+		
+		ev.addExpr(1, new OlBExprEquals(null));
+		trace(ev);
+		
+		ev.setAndConcatenation(false);
+		trace(ev);
+		
+		ev.addExpr(2, new OlBExprGE(54));
+		trace(ev);
+		
+		ev.addExpr(1, new OlBExprBetween(new OlExprColumn(12), 4));
+		trace(ev);
+		
+	}
     public void testConstructor(){
         OlEval of = new OlEval();
         assertTrue(of.evalArray(new Object[]{}, 0));

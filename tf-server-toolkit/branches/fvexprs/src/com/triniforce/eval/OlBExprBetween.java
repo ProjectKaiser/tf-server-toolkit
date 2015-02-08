@@ -18,8 +18,8 @@ public class OlBExprBetween extends OlBExpr {
         m_rightExpr = new OlBExprLE(rightValue);
     }
     @Override
-    public boolean evaluate(Object value, IOlColumnGetter vg) {
-        return getLeftExpr().evaluate(value, vg) && getRightExpr().evaluate(value, vg); 
+    public boolean eval(Object value, IOlColumnGetter vg) {
+        return getLeftExpr().eval(value, vg) && getRightExpr().eval(value, vg); 
     }
     public OlBExprGE getLeftExpr() {
         return m_leftExpr;
@@ -27,4 +27,10 @@ public class OlBExprBetween extends OlBExpr {
     public OlBExprLE getRightExpr() {
         return m_rightExpr;
     }
+    
+    @Override
+    public String toString() {
+    	return " between (" + m_leftExpr.getTestExpr()+", " + m_rightExpr.getTestExpr()+")";
+    }
+    
 }

@@ -21,12 +21,12 @@ public class Ol_IdxExpr implements IOlEvaluator{
         return m_expr;
     }
     public boolean evaluate(IOlColumnGetter vg) {
-        return getExpr().evaluate(vg.getValue(getIdx()), vg);
+        return getExpr().eval(vg.getValue(getIdx()), vg);
     }
     
     @Override
     public String toString() {
-        return null == m_expr?"null":m_expr.toString() + "[" + m_idx + "]";
+        return null == m_expr?"null":"col[" + m_idx + "]" + m_expr.toString();
     }
     
 }

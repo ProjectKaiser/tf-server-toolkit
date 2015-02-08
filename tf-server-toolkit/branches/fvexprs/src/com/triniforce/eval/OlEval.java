@@ -88,5 +88,4 @@ public class OlEval implements IOlEvaluator {
 		res+=")";
 		return res;
 	}
-
 }
