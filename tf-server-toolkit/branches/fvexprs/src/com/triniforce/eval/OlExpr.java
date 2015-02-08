@@ -7,9 +7,7 @@
 package com.triniforce.eval;
 
 public abstract class OlExpr {
-    public boolean evaluate(Object value) {
-        return false;
-    }
+    public abstract boolean evaluate(Object columnValue, IOlValueGetter vg);
     
     @Override
     public String toString() {

@@ -21,7 +21,7 @@ public class Ol_IdxExpr implements IOlEvaluator{
         return m_expr;
     }
     public boolean evaluate(IOlValueGetter vg) {
-        return getExpr().evaluate(vg.getValue(getIdx()));
+        return getExpr().evaluate(vg.getValue(getIdx()), vg);
     }
     
     @Override

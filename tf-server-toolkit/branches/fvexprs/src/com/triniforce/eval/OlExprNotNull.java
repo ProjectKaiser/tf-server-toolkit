@@ -9,7 +9,7 @@ package com.triniforce.eval;
 
 public class OlExprNotNull extends OlExpr {
     @Override
-    public boolean evaluate(Object value) {
+    public boolean evaluate(Object value, IOlValueGetter vg) {
         return ( null != value);
     }
 }

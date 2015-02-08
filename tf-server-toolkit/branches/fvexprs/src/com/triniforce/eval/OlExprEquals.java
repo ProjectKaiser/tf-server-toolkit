@@ -41,7 +41,8 @@ public class OlExprEquals extends OlExpr {
     	return super.toString() +"(" +m_testValue +")";
     }
 
-    public boolean evaluate(Object value) {
+    @Override
+    public boolean evaluate(Object value, IOlValueGetter vg) {
         if (null == value) {
             return value == getTestValue();
         }

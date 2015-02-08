@@ -21,9 +21,9 @@ public class OlExprIN extends OlExpr {
         }
     }
     @Override
-    public boolean evaluate(Object value) {
+    public boolean evaluate(Object value, IOlValueGetter vg) {
         for(OlExprEquals expr: m_exprs){
-            if(expr.evaluate(value)) return true;
+            if(expr.evaluate(value, vg)) return true;
         }
         return false;
     }
