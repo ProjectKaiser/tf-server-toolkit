@@ -18,22 +18,27 @@ public abstract class OlBExprColumnVsValue  extends OlBExpr {
         m_testExpr = OlExprConstant.calcIExpr(testExpr);
     }
 
-    public static Object calcComparableTestValue(Object testValue, Object columnValue) {
-        if (null == testValue)
+    /**
+     * @param nullableTestValue
+     * @param notNullColumnValue IS NOT NULL
+     * @return
+     */
+    Object calcComparableTestValue(Object nullableTestValue, Object notNullColumnValue) {
+        if (null == nullableTestValue)
             return null;
-        if (columnValue.getClass().equals(Long.class)) {
-            return (Long) (((Number) testValue).longValue());
+        if (notNullColumnValue.getClass().equals(Long.class)) {
+            return (Long) (((Number) nullableTestValue).longValue());
         }
-        if (columnValue.getClass().equals(Integer.class)) {
-            return (Integer) (((Number) testValue).intValue());
+        if (notNullColumnValue.getClass().equals(Integer.class)) {
+            return (Integer) (((Number) nullableTestValue).intValue());
         }
-        if (columnValue.getClass().equals(Short.class)) {
-            return (Short) (((Number) testValue).shortValue());
+        if (notNullColumnValue.getClass().equals(Short.class)) {
+            return (Short) (((Number) nullableTestValue).shortValue());
         }
-        if (columnValue.getClass().equals(String.class)) {
-            return testValue.toString().toLowerCase();
+        if (notNullColumnValue.getClass().equals(String.class)) {
+            return nullableTestValue.toString().toLowerCase();
         }
-        return testValue;
+        return nullableTestValue;
     }
     
     abstract boolean compareNotNullValues(Object columnValue, Object testValue);

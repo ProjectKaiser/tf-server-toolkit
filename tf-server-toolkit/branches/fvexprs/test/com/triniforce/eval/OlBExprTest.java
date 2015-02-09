@@ -29,7 +29,7 @@ public class OlBExprTest extends TFTestCase {
         printExpr("in", new OlBExprIN(new Object[]{1,new OlExprColumn(22),3}));
         
         printExpr("contains", new OlBExprContains("THE"));
-        printExpr("contains", new OlBExprContainsWord("THE"));
+        printExpr("contains word", new OlBExprContainsWord("THE"));
         
     }
 

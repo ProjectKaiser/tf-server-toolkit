@@ -7,18 +7,10 @@
 package com.triniforce.eval;
 
 import com.triniforce.db.test.TFTestCase;
-import com.triniforce.utils.EUtils.EAssertNotNullFailed;
 
 public class OlBExprContainsTest extends TFTestCase {
 	@Override
 	public void test() throws Exception {
-        try {
-            new OlBExprContains(null);
-            fail();
-        } catch (EAssertNotNullFailed e) {
-            trace(e);
-        }
-        
         OlEval of = new OlEval();
         of.addExpr(0, new OlBExprContains("tHe"));
         assertFalse(of.evalArray(new Object[]{null}, 0));
@@ -31,10 +23,20 @@ public class OlBExprContainsTest extends TFTestCase {
 
 	}
 	
-	public void testVsColumn(){
+	public void testColumn(){
 	    OlEval of = new OlEval();
         of.addExpr(0, new OlBExprContains( new OlExprColumn(1)));
-        //assertTrue(of.evalArray(new Object[]{"the", "the"}, 0));
+        assertTrue(of.evalArray(new Object[]{"the", "the"}, 0));
+        assertTrue(of.evalArray(new Object[]{"21", 1}, 0));
+        assertTrue(of.evalArray(new Object[]{"21", 21}, 0));
+        assertTrue(of.evalArray(new Object[]{"7682111", 21}, 0));
+        assertTrue(of.evalArray(new Object[]{7682111, 21}, 0));
+        assertFalse(of.evalArray(new Object[]{"21", 211}, 0));
+        
+        assertFalse(of.evalArray(new Object[]{null, 21}, 0));
+        assertFalse(of.evalArray(new Object[]{"7682111", null}, 0));
+        assertFalse(of.evalArray(new Object[]{null, null}, 0));
+        
 	}
 
 }

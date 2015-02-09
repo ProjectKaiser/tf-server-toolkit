@@ -7,22 +7,29 @@
 package com.triniforce.eval;
 
 
-public class OlBExprContains extends Ol_ExprString {
+public class OlBExprContains extends OlBExprColumnVsValue {
     public OlBExprContains(Object value) {
 		super(value);
-		m_value = m_value.toLowerCase();
 	}
-
-	@Override
-    public boolean evaluateString(String value) {
-        if(null == value) return false;
-        String sv = ((String)value).toLowerCase();
-        return sv.indexOf(m_value) >=0;
+    
+    @Override
+    Object calcComparableTestValue(Object testValue, Object columnValue) {
+        if(null == testValue){
+            return null;
+        }
+        return testValue.toString().toLowerCase();
+        
     }
-	
+
     @Override
     public String getOpName() {
         return "CONTAINS";
+    }
+
+    @Override
+    boolean compareNotNullValues(Object columnValue, Object testValue) {
+        String sv = columnValue.toString().toLowerCase();
+        return sv.indexOf((String)testValue) >=0;
     }
     
 }

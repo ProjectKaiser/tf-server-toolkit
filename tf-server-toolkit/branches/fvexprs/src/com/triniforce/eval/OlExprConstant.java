@@ -30,6 +30,9 @@ public class OlExprConstant implements IOlExpr{
 		if(null == m_constValue){
 			return "null";
 		}
+		if(m_constValue instanceof String){
+		    return "\"" + m_constValue.toString() + "\"";
+		}
 		return m_constValue.toString();
 	}
 	

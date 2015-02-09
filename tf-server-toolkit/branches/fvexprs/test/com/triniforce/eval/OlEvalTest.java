@@ -143,12 +143,14 @@ public class OlEvalTest extends TFTestCase {
         //null
         {
             OlEval of = new OlEval();
-            of.addExpr(0, new OlBExprIN(new Object[]{6, null, 12}));
+            of.addExpr(0, new OlBExprIN(new Object[]{6, null, 12, new OlExprColumn(1)}));
             assertTrue(of.evalArray(new Object[]{6}, 0));
-            assertFalse(of.evalArray(new Object[]{9}, 0));
+            assertFalse(of.evalArray(new Object[]{9, 10}, 0));
             assertTrue(of.evalArray(new Object[]{12}, 0));
-            assertFalse(of.evalArray(new Object[]{13}, 0));
+            assertFalse(of.evalArray(new Object[]{13, 10}, 0));
             assertTrue(of.evalArray(new Object[]{null}, 0));
+            assertTrue(of.evalArray(new Object[]{1, 1}, 0));
+            assertFalse(of.evalArray(new Object[]{1, 2}, 0));
         }
     }
     
@@ -188,6 +190,16 @@ public class OlEvalTest extends TFTestCase {
             assertTrue(of.evalArray(new Object[]{1, 1}, 0));
             assertFalse(of.evalArray(new Object[]{0, 1}, 0));
         }
+        //test null
+        {
+            OlEval of = new OlEval();
+            of.addExpr(0, new OlBExprGE(new OlExprColumn(1)));
+            assertFalse(of.evalArray(new Object[]{2, null}, 0));
+            assertFalse(of.evalArray(new Object[]{null, null}, 0));
+            assertFalse(of.evalArray(new Object[]{null, 2}, 0));
+            assertTrue(of.evalArray(new Object[]{2, 1}, 0));
+        }
+
     }
     public void testLExpr(){
         {

@@ -9,26 +9,32 @@ package com.triniforce.eval;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class OlBExprContainsWord extends Ol_ExprString{
+public class OlBExprContainsWord extends OlBExprColumnVsValue{
     
-    private Pattern m_pattern;
+    //private Pattern m_pattern;
 
     @Override
     public String getOpName() {
         return "CONTAINS_WORD";
     }
     
-    public OlBExprContainsWord(Object value) {
-        super(value);
-        m_value = m_value.toLowerCase();
-        m_pattern = Pattern.compile( "(^|[\\s@.,;\\-]+)" + Pattern.quote(m_value.toString()), Pattern.CASE_INSENSITIVE);
+    @Override
+    Object calcComparableTestValue(Object testValue, Object columnValue) {
+        if(null == testValue){
+            return null;
+        }
+        testValue = testValue.toString().toLowerCase();
+        return Pattern.compile( "(^|[\\s@.,;\\-]+)" + Pattern.quote(testValue.toString()), Pattern.CASE_INSENSITIVE);
     }
     
+    public OlBExprContainsWord(Object value) {
+        super(value);
+    }
+
     @Override
-    public boolean evaluateString(String value) {
-        if(null == value) return false;
-        String sv = ((String)value).toLowerCase();
-        Matcher m = m_pattern.matcher(sv);
+    boolean compareNotNullValues(Object columnValue, Object testValue) {
+        String sv = columnValue.toString().toLowerCase();
+        Matcher m = ((Pattern)testValue).matcher(sv);
         return m.find();
     }
     

@@ -50,6 +50,18 @@ public class OlBExprContainsWordTest extends TFTestCase {
         
     }
     
+    public void testColumns(){
+        OlEval of = new OlEval();
+        of.addExpr(0, new OlBExprContainsWord( new OlExprColumn(1)));
+        assertTrue(of.evalArray(new Object[]{"1", "1"}, 0));
+        assertFalse(of.evalArray(new Object[]{"1", "2"}, 0));
+        assertTrue(of.evalArray(new Object[]{"2 1", "1"}, 0));
+        assertTrue(of.evalArray(new Object[]{"2 1235", "123"}, 0));
+        assertFalse(of.evalArray(new Object[]{null, "1"}, 0));
+        assertFalse(of.evalArray(new Object[]{"2 1", null}, 0));
+        assertFalse(of.evalArray(new Object[]{null, null}, 0));
+    }
+    
     @Override
     public void test() throws Exception {
         {
