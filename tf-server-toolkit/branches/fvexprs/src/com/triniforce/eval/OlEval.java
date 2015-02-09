@@ -8,6 +8,8 @@ package com.triniforce.eval;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.triniforce.utils.TFUtils;
+
 
 /**
  * 
@@ -27,13 +29,21 @@ public class OlEval implements IOlEvaluator {
         getEvaluators().add(new Ol_IdxExpr(idx, expr));
     }
     
-    public void addEval(OlEval eval) {
+    public void addEval(IOlEvaluator eval) {
         getEvaluators().add(eval);
     }
     
     public boolean evaluate(IOlColumnGetter vg){
+        return TFUtils.equals(true, evaluateThreeValued(vg));
+    }
+    
+    public Boolean evaluateThreeValued(IOlColumnGetter vg){
         for (IOlEvaluator e : getEvaluators()) {
-            if (e.evaluate(vg) != m_andConcatenation){
+            Boolean evRes = e.evaluateThreeValued(vg);
+            if(null == evRes) {
+                return null;
+            }
+            if (evRes != m_andConcatenation){
                 return isNot() ^ !m_andConcatenation;
             }
         }

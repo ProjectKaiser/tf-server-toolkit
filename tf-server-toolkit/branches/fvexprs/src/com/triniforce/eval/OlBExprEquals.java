@@ -9,6 +9,12 @@ package com.triniforce.eval;
 
 public class OlBExprEquals extends OlBExprColumnVsValue {
 
+    
+    @Override
+    Boolean bothNulls() {
+        return true;
+    }
+    
     public OlBExprEquals(Object testExpr) {
         super(testExpr);
     }

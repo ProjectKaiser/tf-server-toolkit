@@ -11,14 +11,14 @@ package com.triniforce.eval;
 public abstract class OlBExprColumnVsValue  extends OlBExpr {
 
     private IOlExpr m_testExpr;
-    boolean isTestExprConstant;
-    Object m_workTestValue;
+    Object m_comparableConstantTestValue;
+    boolean isTestValueCalculated = false;
     
     public OlBExprColumnVsValue(Object testExpr) {
         m_testExpr = OlExprConstant.calcIExpr(testExpr);
     }
 
-    public static Object calcWorkingTestValue(Object testValue, Object columnValue) {
+    public static Object calcComparableTestValue(Object testValue, Object columnValue) {
         if (null == testValue)
             return null;
         if (columnValue.getClass().equals(Long.class)) {
@@ -30,22 +30,33 @@ public abstract class OlBExprColumnVsValue  extends OlBExpr {
         if (columnValue.getClass().equals(Short.class)) {
             return (Short) (((Number) testValue).shortValue());
         }
+        if (columnValue.getClass().equals(String.class)) {
+            return testValue.toString().toLowerCase();
+        }
         return testValue;
     }
     
     abstract boolean compareNotNullValues(Object columnValue, Object testValue);
+    
+    Boolean bothNulls(){
+        return null;
+    }
         
     @Override
-    public boolean eval(Object columnValue, IOlColumnGetter vg) {
+    public Boolean eval(Object columnValue, IOlColumnGetter vg) {
         if (null == columnValue) {
-            return null == getTestExpr().eval(vg);
+            if(null == getTestExpr().eval(vg)){
+                return bothNulls();
+            }
+            return null;
         }
-        if ( !m_testExpr.isConstant() ||  null == m_workTestValue) {
-            m_workTestValue = calcWorkingTestValue(getTestExpr().eval(vg), columnValue);
+        if ( !m_testExpr.isConstant() ||  !isTestValueCalculated) {
+            m_comparableConstantTestValue = calcComparableTestValue(getTestExpr().eval(vg), columnValue);
+            isTestValueCalculated = true;
         }
-        if (null == m_workTestValue)
-            return false;
-        return compareNotNullValues(columnValue, m_workTestValue);
+        if (null == m_comparableConstantTestValue)
+            return null;
+        return compareNotNullValues(columnValue, m_comparableConstantTestValue);
     }
 
     public IOlExpr getTestExpr() {

@@ -11,7 +11,7 @@ package com.triniforce.eval;
  *
  */
 public abstract class OlBExpr {
-    public abstract boolean eval(Object columnValue, IOlColumnGetter vg);
+    public abstract Boolean eval(Object columnValue, IOlColumnGetter vg);
     
     @Override
     public String toString() {

@@ -18,6 +18,29 @@ public class OlEvalTest extends TFTestCase {
     }
     
     
+    public void testThreeValued(){
+        OlEval ev = new OlEval();
+        
+        IOlEvaluator nullEv = new IOlEvaluator(){
+            public Boolean evaluateThreeValued(IOlColumnGetter vg) {
+                return null;
+            }
+        };
+        
+        IOlEvaluator trueEv = new IOlEvaluator(){
+            public Boolean evaluateThreeValued(IOlColumnGetter vg) {
+                return true;
+            }
+        };
+        
+        ev.addEval(trueEv);
+        assertTrue(ev.evalArray(new Object[]{}, 0));
+        ev.addEval(nullEv);
+        assertFalse(ev.evalArray(new Object[]{}, 0));
+        assertNull(ev.evaluateThreeValued(null));
+        
+    }
+    
     public void testEvaluate(){
             
             // (val[0] == 1 AND val[1] == 2) OR (val[2] == 3 AND val[3] == 4)
@@ -109,12 +132,24 @@ public class OlEvalTest extends TFTestCase {
     }
     
     public void testINExpr(){
-        OlEval of = new OlEval();
-        of.addExpr(0, new OlBExprIN(new Object[]{6, 9, 12}));
-        assertTrue(of.evalArray(new Object[]{6}, 0));
-        assertTrue(of.evalArray(new Object[]{9}, 0));
-        assertTrue(of.evalArray(new Object[]{12}, 0));
-        assertFalse(of.evalArray(new Object[]{13}, 0));        
+        {
+            OlEval of = new OlEval();
+            of.addExpr(0, new OlBExprIN(new Object[]{6, 9, 12}));
+            assertTrue(of.evalArray(new Object[]{6}, 0));
+            assertTrue(of.evalArray(new Object[]{9}, 0));
+            assertTrue(of.evalArray(new Object[]{12}, 0));
+            assertFalse(of.evalArray(new Object[]{13}, 0));
+        }
+        //null
+        {
+            OlEval of = new OlEval();
+            of.addExpr(0, new OlBExprIN(new Object[]{6, null, 12}));
+            assertTrue(of.evalArray(new Object[]{6}, 0));
+            assertFalse(of.evalArray(new Object[]{9}, 0));
+            assertTrue(of.evalArray(new Object[]{12}, 0));
+            assertFalse(of.evalArray(new Object[]{13}, 0));
+            assertTrue(of.evalArray(new Object[]{null}, 0));
+        }
     }
     
     public void testBETWEENExpr(){

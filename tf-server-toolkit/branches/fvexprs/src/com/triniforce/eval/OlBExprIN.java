@@ -26,9 +26,9 @@ public class OlBExprIN extends OlBExpr {
         }
     }
     @Override
-    public boolean eval(Object value, IOlColumnGetter vg) {
+    public Boolean eval(Object value, IOlColumnGetter vg) {
         for(OlBExprEquals expr: m_exprs){
-            if(expr.eval(value, vg)) return true;
+            if(TFUtils.equals(true, expr.eval(value, vg))) return true;
         }
         return false;
     }

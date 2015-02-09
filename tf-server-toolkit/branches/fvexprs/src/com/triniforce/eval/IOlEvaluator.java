@@ -6,5 +6,5 @@
 package com.triniforce.eval;
 
 public interface IOlEvaluator {
-    public boolean evaluate(IOlColumnGetter vg);
+    public Boolean evaluateThreeValued(IOlColumnGetter vg);
 }
