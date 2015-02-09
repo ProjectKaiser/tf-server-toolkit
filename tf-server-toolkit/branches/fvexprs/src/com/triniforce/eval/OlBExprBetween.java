@@ -29,8 +29,13 @@ public class OlBExprBetween extends OlBExpr {
     }
     
     @Override
+    public String getOpName() {
+        return "BETWEEN";
+    }
+    
+    @Override
     public String toString() {
-    	return " between (" + m_leftExpr.getTestExpr()+", " + m_rightExpr.getTestExpr()+")";
+    	return "BETWEEN (" + m_leftExpr.getTestExpr()+", " + m_rightExpr.getTestExpr()+")";
     }
     
 }

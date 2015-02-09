@@ -23,7 +23,11 @@ public class OlExprColumn  implements IOlExpr{
 	
 	@Override
 	public String toString() {
-		return "col(" + m_idx + ")";
+		return "col[" + m_idx + "]";
+	}
+	
+	public boolean isConstant() {
+	    return false;
 	}
 
 }

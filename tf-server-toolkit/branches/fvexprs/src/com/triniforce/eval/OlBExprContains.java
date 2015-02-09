@@ -19,5 +19,10 @@ public class OlBExprContains extends Ol_ExprString {
         String sv = ((String)value).toLowerCase();
         return sv.indexOf(m_value) >=0;
     }
+	
+    @Override
+    public String getOpName() {
+        return "CONTAINS";
+    }
     
 }

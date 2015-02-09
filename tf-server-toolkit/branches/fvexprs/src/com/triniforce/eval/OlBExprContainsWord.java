@@ -13,6 +13,11 @@ public class OlBExprContainsWord extends Ol_ExprString{
     
     private Pattern m_pattern;
 
+    @Override
+    public String getOpName() {
+        return "CONTAINS_WORD";
+    }
+    
     public OlBExprContainsWord(Object value) {
         super(value);
         m_value = m_value.toLowerCase();

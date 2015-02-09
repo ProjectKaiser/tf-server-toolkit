@@ -7,15 +7,21 @@
 package com.triniforce.eval;
 
 
-public class OlBExprLE extends OlBExprEquals {
+public class OlBExprLE extends OlBExprColumnVsValue {
 
-    OlBExprLE(Object testValue) {
+    public OlBExprLE(Object testValue) {
         super(testValue);
     }
 
     @Override
-    boolean internal_evaluateValue(Object value) {
-        Comparable cmp = (Comparable) value;
-        return cmp.compareTo(m_workTestValue) <= 0;
+    boolean compareNotNullValues(Object columnValue, Object testValue) {
+        Comparable cmp = (Comparable) columnValue;
+        return cmp.compareTo(testValue) <= 0;
     }
+
+    @Override
+    public String getOpName() {
+        return "<=";
+    }
+    
 }

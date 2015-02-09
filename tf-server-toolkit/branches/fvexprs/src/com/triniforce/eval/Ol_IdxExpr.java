@@ -26,7 +26,7 @@ public class Ol_IdxExpr implements IOlEvaluator{
     
     @Override
     public String toString() {
-        return null == m_expr?"null":"col[" + m_idx + "]" + m_expr.toString();
+        return null == m_expr?"null":"col[" + m_idx + "] " + m_expr.toString();
     }
     
 }

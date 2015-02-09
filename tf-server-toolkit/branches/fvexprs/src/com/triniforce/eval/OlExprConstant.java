@@ -33,4 +33,8 @@ public class OlExprConstant implements IOlExpr{
 		return m_constValue.toString();
 	}
 	
+	public boolean isConstant() {
+	    return true;
+	}
+	
 }

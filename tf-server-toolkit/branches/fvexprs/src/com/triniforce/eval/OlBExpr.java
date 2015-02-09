@@ -15,7 +15,7 @@ public abstract class OlBExpr {
     
     @Override
     public String toString() {
-    	return " " + getClass().getSimpleName();
+    	return getOpName();
     }
     
     public static String safeToString(OlBExpr bexpr){
@@ -24,5 +24,7 @@ public abstract class OlBExpr {
     	}
     	return bexpr.toString();
     }
+    
+    public abstract String getOpName();
     
 }

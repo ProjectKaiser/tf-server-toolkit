@@ -30,5 +30,11 @@ public class OlBExprContainsTest extends TFTestCase {
         assertTrue(of.evalArray(new Object[]{"qqq ThE"}, 0));
 
 	}
+	
+	public void testVsColumn(){
+	    OlEval of = new OlEval();
+        of.addExpr(0, new OlBExprContains( new OlExprColumn(1)));
+        //assertTrue(of.evalArray(new Object[]{"the", "the"}, 0));
+	}
 
 }

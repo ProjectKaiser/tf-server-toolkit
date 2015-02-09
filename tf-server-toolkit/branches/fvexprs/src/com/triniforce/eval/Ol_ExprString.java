@@ -26,7 +26,7 @@ public abstract class Ol_ExprString extends OlBExpr{
     
     @Override
     public String toString() {
-    	return super.toString() +"(" + m_value + ")";
+    	return super.toString() +" \"" + m_value + "\"";
     }
     
 

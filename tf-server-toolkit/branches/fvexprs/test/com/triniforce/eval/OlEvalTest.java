@@ -12,30 +12,6 @@ import com.triniforce.db.test.TFTestCase;
 public class OlEvalTest extends TFTestCase {
 
 	
-	public void test_toString(){
-		
-		OlEval ev = new OlEval();
-		trace(ev);
-		ev.setNot(true);
-		trace(ev);
-		
-		OlBExprEquals eq = new OlBExprEquals(5);
-		ev.addExpr(0, eq);
-		trace(ev);
-		
-		ev.addExpr(1, new OlBExprEquals(null));
-		trace(ev);
-		
-		ev.setAndConcatenation(false);
-		trace(ev);
-		
-		ev.addExpr(2, new OlBExprGE(54));
-		trace(ev);
-		
-		ev.addExpr(1, new OlBExprBetween(new OlExprColumn(12), 4));
-		trace(ev);
-		
-	}
     public void testConstructor(){
         OlEval of = new OlEval();
         assertTrue(of.evalArray(new Object[]{}, 0));
@@ -69,15 +45,23 @@ public class OlEvalTest extends TFTestCase {
             assertFalse(e0.evalArray(new Object[]{2, 2, 4, 4}, 0));
         }
 
+    public void testEquals(){
+        
+        OlEval ev = new OlEval();
+        ev.addExpr(0, new OlBExprEquals(new OlExprColumn(2)));
+        assertTrue(ev.evalArray(new Object[]{1, 1, 1}, 0));
+        assertFalse(ev.evalArray(new Object[]{1, 1, 2}, 0));
+    }
+    
     public void testNot(){
     	
     	//not = 15678
     	{
-    		OlEval of = new OlEval();
-    		of.setNot(true);
-    		of.addExpr(0, new OlBExprEquals(15678));
-    		assertTrue(of.evalArray(new Object[]{6}, 0));
-    		assertFalse(of.evalArray(new Object[]{15678}, 0));
+    		OlEval ev = new OlEval();
+    		ev.setNot(true);
+    		ev.addExpr(0, new OlBExprEquals(15678));
+    		assertTrue(ev.evalArray(new Object[]{6}, 0));
+    		assertFalse(ev.evalArray(new Object[]{15678}, 0));
     	}
     	
     	//not ( in(1,4) or EQ(2) )
@@ -154,20 +138,43 @@ public class OlEvalTest extends TFTestCase {
     }
     
     public void testGExpr(){
-        OlEval of = new OlEval();
-        of.addExpr(0, new OlBExprGE(1));
-        assertTrue(of.evalArray(new Object[]{2}, 0));
-        assertTrue(of.evalArray(new Object[]{1}, 0));
-        assertFalse(of.evalArray(new Object[]{0}, 0));
+        {
+            OlEval of = new OlEval();
+            of.addExpr(0, new OlBExprGE(1));
+            assertTrue(of.evalArray(new Object[]{2}, 0));
+            assertTrue(of.evalArray(new Object[]{1}, 0));
+            assertFalse(of.evalArray(new Object[]{0}, 0));
+        }
+        //test column
+        {
+            OlEval of = new OlEval();
+            of.addExpr(0, new OlBExprGE( new OlExprColumn(1)));
+            assertTrue(of.evalArray(new Object[]{2, 1}, 0));
+            assertTrue(of.evalArray(new Object[]{1, 1}, 0));
+            assertFalse(of.evalArray(new Object[]{0, 1}, 0));
+        }
     }
     public void testLExpr(){
-        OlEval of = new OlEval();
-        of.addExpr(0, new OlBExprLE(1));
-        assertFalse(of.evalArray(new Object[]{2}, 0));
-        assertTrue(of.evalArray(new Object[]{1}, 0));
-        assertTrue(of.evalArray(new Object[]{0}, 0));
+        {
+            OlEval of = new OlEval();
+            of.addExpr(0, new OlBExprLE(1));
+            assertFalse(of.evalArray(new Object[]{2}, 0));
+            assertTrue(of.evalArray(new Object[]{1}, 0));
+            assertTrue(of.evalArray(new Object[]{0}, 0));
+        }
+        //test column
+        {
+            OlEval of = new OlEval();
+            of.addExpr(0, new OlBExprLE( new OlExprColumn(1)));
+            assertFalse(of.evalArray(new Object[]{2, 1}, 0));
+            assertTrue(of.evalArray(new Object[]{1, 1}, 0));
+            assertTrue(of.evalArray(new Object[]{0, 1}, 0));
+        }
     }    
     
+    /**
+     * comparison with Integer, Long
+     */
     public void testValuedExpr(){
         {
             OlEval of = new OlEval();
