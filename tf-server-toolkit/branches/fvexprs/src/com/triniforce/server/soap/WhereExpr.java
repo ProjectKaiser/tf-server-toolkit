@@ -8,6 +8,7 @@ package com.triniforce.server.soap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -86,7 +87,7 @@ public abstract class WhereExpr {
         
         @Override
         public Set<String> calcColumnNames() {
-            Set res = new HashSet();
+            Set res = new LinkedHashSet();
             res.add(m_colName);
             return res;
         }
@@ -110,6 +111,15 @@ public abstract class WhereExpr {
         public ColumnExprValued(String name, Object value){
             setColumnName(name);
             m_value = value;
+        }
+        
+        @Override
+        public Set<String> calcColumnNames() {
+            Set res = super.calcColumnNames();
+            if(m_value instanceof VariantExpr){
+                res.addAll(((VariantExpr)m_value).calcColumnNames());                
+            }
+            return res;
         }
         
     }
@@ -170,7 +180,7 @@ public abstract class WhereExpr {
         public ExprEquals(String name, Object value) {
             super(name, value);
         }
-    }    
+    }
     
     public static class ExprContainsWord  extends ColumnExprValued{
         public ExprContainsWord() {
