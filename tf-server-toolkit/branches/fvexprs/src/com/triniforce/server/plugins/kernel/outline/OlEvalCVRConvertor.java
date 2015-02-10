@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.triniforce.eval.OlEval;
 import com.triniforce.eval.OlBExpr;
 import com.triniforce.eval.OlBExprBetween;
 import com.triniforce.eval.OlBExprContains;
@@ -17,7 +16,9 @@ import com.triniforce.eval.OlBExprContainsWord;
 import com.triniforce.eval.OlBExprEquals;
 import com.triniforce.eval.OlBExprIN;
 import com.triniforce.eval.OlBExprNotNull;
+import com.triniforce.eval.OlEval;
 import com.triniforce.server.soap.CollectionViewRequest;
+import com.triniforce.server.soap.ExprV.ExprVColumn;
 import com.triniforce.server.soap.WhereExpr;
 import com.triniforce.server.soap.WhereExpr.ColumnExpr;
 import com.triniforce.server.soap.WhereExpr.ExprBetween;
@@ -90,6 +91,13 @@ public class OlEvalCVRConvertor {
     
     public void addEquals(String colName, Object value){
         addWhereExpr(new WhereExpr.ExprEquals(colName, value));
+    }
+    
+    public static Object convertExprV(Object val){
+        if(val instanceof ExprVColumn){
+            //ExprVColumn ev = (ExprVColumn) val;
+        }
+        return null;
     }
     
     private void addToEval(OlEval eval, WhereExpr aExpr, int level) {

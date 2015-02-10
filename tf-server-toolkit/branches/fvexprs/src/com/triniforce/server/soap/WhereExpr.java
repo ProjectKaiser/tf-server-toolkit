@@ -116,8 +116,8 @@ public abstract class WhereExpr {
         @Override
         public Set<String> calcColumnNames() {
             Set res = super.calcColumnNames();
-            if(m_value instanceof VariantExpr){
-                res.addAll(((VariantExpr)m_value).calcColumnNames());                
+            if(m_value instanceof ExprV){
+                res.addAll(((ExprV)m_value).calcColumnNames());                
             }
             return res;
         }
@@ -178,6 +178,24 @@ public abstract class WhereExpr {
         }
         
         public ExprEquals(String name, Object value) {
+            super(name, value);
+        }
+    }
+    
+    public static class ExprGT  extends ColumnExprValued{
+        public ExprGT() {
+        }
+        
+        public ExprGT(String name, Object value) {
+            super(name, value);
+        }
+    }
+    
+    public static class ExprLT  extends ColumnExprValued{
+        public ExprLT() {
+        }
+        
+        public ExprLT(String name, Object value) {
             super(name, value);
         }
     }

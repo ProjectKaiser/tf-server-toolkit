@@ -10,16 +10,16 @@ import java.util.Set;
 
 import com.triniforce.utils.TFUtils;
 
-public abstract class VariantExpr{
+public abstract class ExprV{
 
     public Set<String> calcColumnNames() {
         return new LinkedHashSet<String>();
     }
     
-    public static class ColumnValue extends VariantExpr{
+    public static class ExprVColumn extends ExprV{
         private String m_name;
 
-        public ColumnValue(String name){
+        public ExprVColumn(String name){
             setName(name);            
         }
 

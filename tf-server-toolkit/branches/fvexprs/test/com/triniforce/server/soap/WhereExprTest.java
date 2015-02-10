@@ -14,6 +14,7 @@ public class WhereExprTest extends TFTestCase {
     
     @Override
     public void test(){
+        //
         {
             ExprEquals eq = new ExprEquals();
             eq.setColumnName("col1");
@@ -21,7 +22,7 @@ public class WhereExprTest extends TFTestCase {
             Set cols = eq.calcColumnNames();
             assertEquals(1, cols.size());
             
-            VariantExpr.ColumnValue cv = new VariantExpr.ColumnValue("col2");
+            ExprV.ExprVColumn cv = new ExprV.ExprVColumn("col2");
             eq.setValue(cv);
             cols = eq.calcColumnNames();
             assertEquals(2, cols.size());
