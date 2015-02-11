@@ -23,7 +23,7 @@ public class QSyncTaskResult {
     @Override
     public String toString() {
     	StringBuffer sb = new StringBuffer();
-    	sb.append("Status : " + status.toString() + "\n");
+    	sb.append("Status : " + status.toString() + "("+qid+")"+"\n");
     	if(null != errorClass)
     		sb.append("Class: " + errorClass + "\n" +
     			"Message: " + errorMessage + "\n" +
