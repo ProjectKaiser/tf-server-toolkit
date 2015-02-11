@@ -38,9 +38,6 @@ public abstract class OlBExprColumnVsValue  extends OlBExpr {
         if (notNullColumnValue.getClass().equals(Short.class)) {
             return (Short) (((Number) nullableTestValue).shortValue());
         }
-        if (notNullColumnValue.getClass().equals(String.class)) {
-            return nullableTestValue.toString().toLowerCase();
-        }
         return nullableTestValue;
     }
     
