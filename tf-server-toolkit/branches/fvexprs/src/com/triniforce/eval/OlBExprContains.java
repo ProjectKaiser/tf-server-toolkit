@@ -8,6 +8,10 @@ package com.triniforce.eval;
 
 
 public class OlBExprContains extends OlBExprColumnVsValue {
+    
+    public OlBExprContains() {
+    }
+    
     public OlBExprContains(Object value) {
 		super(value);
 	}

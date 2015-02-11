@@ -8,6 +8,10 @@ package com.triniforce.eval;
 
 
 public class OlBExprNotNull extends OlBExpr {
+    
+    public OlBExprNotNull() {
+    }
+    
     @Override
     public Boolean eval(Object value, IOlColumnGetter vg) {
         return ( null != value);

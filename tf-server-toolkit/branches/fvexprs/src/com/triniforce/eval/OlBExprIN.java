@@ -13,6 +13,9 @@ import com.triniforce.utils.TFUtils;
 
 public class OlBExprIN extends OlBExpr {
     
+    public OlBExprIN() {
+    }
+    
     @Override
     public String getOpName() {
         return "IN";

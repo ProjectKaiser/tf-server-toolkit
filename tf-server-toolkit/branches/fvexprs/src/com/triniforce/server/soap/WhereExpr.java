@@ -78,6 +78,15 @@ public abstract class WhereExpr {
     @PropertiesSequence( sequence = {"columnName"})
     public static abstract class ColumnExpr extends WhereExpr{
         String m_colName;
+        
+        public ColumnExpr() {
+        }
+        
+        
+        public ColumnExpr(String columnName) {
+            m_colName = columnName;
+        }
+        
         public String getColumnName() {
             return m_colName;
         }
@@ -91,7 +100,6 @@ public abstract class WhereExpr {
             res.add(m_colName);
             return res;
         }
-        
     }
     
     @PropertiesSequence( sequence = {"value"})
@@ -127,14 +135,11 @@ public abstract class WhereExpr {
     
     @PropertiesSequence( sequence = {"value"})
     public static class ExprNotNull extends ColumnExpr{
-        private Object m_value;
-
-        public void setValue(Object value){
-            m_value = value;
+        public ExprNotNull() {
         }
-        public Object getValue(){
-            return m_value;
-        }        
+        public ExprNotNull(String columnName) {
+            super(columnName);
+        }
     }
     
     @PropertiesSequence( sequence = {"from", "to"})
@@ -187,6 +192,24 @@ public abstract class WhereExpr {
         }
         
         public ExprGT(String name, Object value) {
+            super(name, value);
+        }
+    }
+    
+    public static class ExprGE  extends ColumnExprValued{
+        public ExprGE() {
+        }
+        
+        public ExprGE(String name, Object value) {
+            super(name, value);
+        }
+    }
+    
+    public static class ExprLE  extends ColumnExprValued{
+        public ExprLE() {
+        }
+        
+        public ExprLE(String name, Object value) {
             super(name, value);
         }
     }

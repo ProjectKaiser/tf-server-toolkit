@@ -8,7 +8,7 @@ package com.triniforce.eval;
 
 import com.triniforce.utils.TFUtils;
 
-public class OlExprColumn  implements IOlExpr{
+public class OlExprColumn  extends OlExpr{
 
 	private final int m_idx;
 
@@ -18,16 +18,20 @@ public class OlExprColumn  implements IOlExpr{
 	}
 	
 	public Object eval(IOlColumnGetter vg) {
-		return vg.getValue(m_idx);
+		return vg.getValue(getIdx());
 	}
 	
 	@Override
 	public String toString() {
-		return "col[" + m_idx + "]";
+		return "col[" + getIdx() + "]";
 	}
 	
 	public boolean isConstant() {
 	    return false;
 	}
+
+    public int getIdx() {
+        return m_idx;
+    }
 
 }

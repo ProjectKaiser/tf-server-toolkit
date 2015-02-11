@@ -6,7 +6,7 @@
 
 package com.triniforce.eval;
 
-public class OlExprConstant implements IOlExpr{
+public class OlExprConstant extends OlExpr{
 
 	private final Object m_constValue;
 

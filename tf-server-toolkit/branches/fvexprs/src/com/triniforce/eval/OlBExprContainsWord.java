@@ -11,8 +11,10 @@ import java.util.regex.Pattern;
 
 public class OlBExprContainsWord extends OlBExprColumnVsValue{
     
-    //private Pattern m_pattern;
 
+    public OlBExprContainsWord() {
+    }
+    
     @Override
     public String getOpName() {
         return "CONTAINS_WORD";

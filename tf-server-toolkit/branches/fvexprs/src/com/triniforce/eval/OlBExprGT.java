@@ -9,6 +9,9 @@ package com.triniforce.eval;
 
 public class OlBExprGT extends OlBExprColumnVsValue {
 
+    public OlBExprGT() {
+    }
+    
     public OlBExprGT(Object testValue) {
         super(testValue);
     }

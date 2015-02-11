@@ -19,11 +19,14 @@ public abstract class ExprV{
     public static class ExprVColumn extends ExprV{
         private String m_name;
 
+        public ExprVColumn() {
+        }
+        
         public ExprVColumn(String name){
-            setName(name);            
+            setColumnName(name);            
         }
 
-        public String getName() {
+        public String getColumnName() {
             return m_name;
         }
         @Override
@@ -33,7 +36,7 @@ public abstract class ExprV{
             return res;
         }
 
-        public void setName(String name) {
+        public void setColumnName(String name) {
             TFUtils.assertNotNull(name, "Column name must not be empty");
             m_name = name;
         }

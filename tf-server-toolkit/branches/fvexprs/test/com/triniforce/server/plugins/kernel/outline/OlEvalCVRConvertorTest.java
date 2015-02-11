@@ -7,19 +7,26 @@
 package com.triniforce.server.plugins.kernel.outline;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.eval.OlBExprBetween;
 import com.triniforce.eval.OlBExprContains;
+import com.triniforce.eval.OlBExprEquals;
 import com.triniforce.eval.OlBExprGE;
 import com.triniforce.eval.OlBExprIN;
 import com.triniforce.eval.OlBExprLE;
 import com.triniforce.eval.OlBExprNotNull;
 import com.triniforce.eval.OlEval;
+import com.triniforce.eval.OlExprColumn;
 import com.triniforce.eval.Ol_IdxExpr;
 import com.triniforce.server.soap.CollectionViewRequest;
+import com.triniforce.server.soap.ExprV.ExprVColumn;
 import com.triniforce.server.soap.WhereExpr;
+import com.triniforce.server.soap.WhereExpr.ExprEquals;
+import com.triniforce.server.soap.WhereExpr.ExprNotNull;
 import com.triniforce.utils.EUtils.EAssertNotNullFailed;
 
 public class OlEvalCVRConvertorTest extends TFTestCase {
@@ -32,6 +39,78 @@ public class OlEvalCVRConvertorTest extends TFTestCase {
         cvr.getColumns().add("where1");
         cvr.getColumns().add("not filtered");
         return cvr;
+        
+    }
+    
+
+    public void test_convertWhereExpr(){
+        Map<String, Integer> cols = new HashMap<String, Integer>();
+        cols.put("col1", 2);
+        cols.put("col2", 3);
+        cols.put("col3", 4);
+        
+        //Equals
+        {
+            ExprEquals eq = new ExprEquals("col1", 5);
+            OlBExprEquals e = (OlBExprEquals) OlEvalCVRConvertor.convertWhereExpr(eq, cols);
+            assertEquals(5, e.getTestExpr().eval(null));
+            
+            eq = new ExprEquals("col1", new ExprVColumn("col2"));
+            e = (OlBExprEquals) OlEvalCVRConvertor.convertWhereExpr(eq, cols);
+            assertEquals(3, ((OlExprColumn) e.getTestExpr()).getIdx());
+        }
+        
+        //NotNull
+        {
+            ExprNotNull eq = new ExprNotNull("col1");
+            @SuppressWarnings("unused")
+            OlBExprNotNull nn = (OlBExprNotNull) OlEvalCVRConvertor.convertWhereExpr(eq, cols);
+        }
+        
+    }
+    
+    public void test_convertGT(){
+        
+        CollectionViewRequest cvr = new CollectionViewRequest();
+        WhereExpr gt = new WhereExpr.ExprGT("col1", new ExprVColumn("col2"));
+        cvr.addColumn("col1");
+        cvr.addColumn("col2");
+        cvr.getWhereExprs().add(gt);
+        
+        OlEvalCVRConvertor cv =new OlEvalCVRConvertor(cvr);
+        OlEval ev = cv.getOlEval();
+        
+        assertFalse(ev.evalArray(new Object[]{1, 2}, 0));
+        assertFalse(ev.evalArray(new Object[]{2, 2}, 0));
+        
+    }
+    
+    public void test_convertExprV(){
+        
+        //not ExprV
+        final String cnst = "constant";
+        assertSame(cnst, OlEvalCVRConvertor.convertExprV(cnst, null));
+        
+        Map colMap = new HashMap<String, Integer>();
+        colMap.put("col1", 2);
+        colMap.put("col2", 3);
+        
+        ExprVColumn vc =new ExprVColumn();
+        vc.setColumnName("col2");
+        
+        OlExprColumn ec = (OlExprColumn) OlEvalCVRConvertor.convertExprV(vc, colMap);
+        assertEquals(23, ec.evalArray(20, 21, 22, 23));
+        vc.setColumnName("col1");
+        ec = (OlExprColumn) OlEvalCVRConvertor.convertExprV(vc, colMap);
+        assertEquals(22, ec.evalArray(20, 21, 22, 23));
+        
+        vc.setColumnName("col11");
+        try {
+            OlEvalCVRConvertor.convertExprV(vc, colMap);
+            fail();
+        } catch (EAssertNotNullFailed e) {
+            trace(e);
+        }
         
     }
         

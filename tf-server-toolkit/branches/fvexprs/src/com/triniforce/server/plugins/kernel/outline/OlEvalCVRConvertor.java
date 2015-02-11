@@ -11,12 +11,10 @@ import java.util.Map;
 
 import com.triniforce.eval.OlBExpr;
 import com.triniforce.eval.OlBExprBetween;
-import com.triniforce.eval.OlBExprContains;
-import com.triniforce.eval.OlBExprContainsWord;
-import com.triniforce.eval.OlBExprEquals;
+import com.triniforce.eval.OlBExprColumnVsValue;
 import com.triniforce.eval.OlBExprIN;
-import com.triniforce.eval.OlBExprNotNull;
 import com.triniforce.eval.OlEval;
+import com.triniforce.eval.OlExprColumn;
 import com.triniforce.server.soap.CollectionViewRequest;
 import com.triniforce.server.soap.ExprV.ExprVColumn;
 import com.triniforce.server.soap.WhereExpr;
@@ -24,6 +22,7 @@ import com.triniforce.server.soap.WhereExpr.ColumnExpr;
 import com.triniforce.server.soap.WhereExpr.ExprBetween;
 import com.triniforce.server.soap.WhereExpr.ExprColumnOr;
 import com.triniforce.server.soap.WhereExpr.ExprIn;
+import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.TFUtils;
 
 /**
@@ -93,12 +92,39 @@ public class OlEvalCVRConvertor {
         addWhereExpr(new WhereExpr.ExprEquals(colName, value));
     }
     
-    public static Object convertExprV(Object val){
-        if(val instanceof ExprVColumn){
-            //ExprVColumn ev = (ExprVColumn) val;
+    public static OlBExpr convertWhereExpr(WhereExpr.ColumnExpr ce,  Map<String, Integer> colMap){
+        String shortName = "OlBExpr" + ce.getClass().getSimpleName().substring(4);
+        try {
+            Class cl = Class.forName("com.triniforce.eval." + shortName);
+            OlBExpr res = (OlBExpr) cl.newInstance();
+            if(res instanceof OlBExprColumnVsValue){
+                OlBExprColumnVsValue cv = (OlBExprColumnVsValue) res;
+                Object testValue = ((WhereExpr.ColumnExprValued) ce).getValue();
+                cv.setTestExpr(convertExprV(testValue, colMap));
+            }
+            return res;
+        } catch (Exception e) {
+            ApiAlgs.rethrowException(e);
         }
         return null;
     }
+    
+    public static Object convertExprV(Object val,  Map<String, Integer> colMap){
+        if(val instanceof ExprVColumn){
+            ExprVColumn ev = (ExprVColumn) val;
+            Integer idx = colMap.get(ev.getColumnName());
+            TFUtils.assertNotNull(idx, "Index for column: " + ev.getColumnName());
+
+            OlExprColumn ec = new OlExprColumn(idx);
+            return ec;
+        }
+        return val;
+    }
+    
+    Object cev(Object val){
+        return convertExprV(val, m_nameToIdx);
+    }
+    
     
     private void addToEval(OlEval eval, WhereExpr aExpr, int level) {
         
@@ -126,18 +152,12 @@ public class OlEvalCVRConvertor {
         OlBExpr dstExpr = null;
         if(expr instanceof WhereExpr.ExprIn){
             WhereExpr.ExprIn srcExpr = (ExprIn) expr;
-            dstExpr = new OlBExprIN( ((WhereExpr.ExprIn)srcExpr).getVals()); 
+            dstExpr = new OlBExprIN( srcExpr.getVals()); 
         }else if(expr instanceof WhereExpr.ExprBetween){
             WhereExpr.ExprBetween srcExpr = (ExprBetween) expr;
-            dstExpr = new OlBExprBetween(srcExpr.getFrom(), srcExpr.getTo());
-        }else if(expr instanceof WhereExpr.ExprNotNull){
-            dstExpr = new OlBExprNotNull();
-        }else if(expr instanceof WhereExpr.ExprContains){
-            dstExpr = new OlBExprContains(((WhereExpr.ExprContains) expr).getValue());
-        }else if(expr instanceof WhereExpr.ExprContainsWord){
-            dstExpr = new OlBExprContainsWord(((WhereExpr.ExprContainsWord) expr).getValue());
-        }else if(expr instanceof WhereExpr.ExprEquals){
-            dstExpr = new OlBExprEquals(((WhereExpr.ExprEquals) expr).getValue());
+            dstExpr = new OlBExprBetween( cev(srcExpr.getFrom()), cev(srcExpr.getTo()));
+        }else if(expr instanceof WhereExpr.ColumnExpr){
+            dstExpr = convertWhereExpr(expr, m_nameToIdx);
         }
         
         TFUtils.assertNotNull(dstExpr, expr.toString());

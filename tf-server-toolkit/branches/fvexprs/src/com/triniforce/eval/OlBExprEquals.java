@@ -15,6 +15,10 @@ public class OlBExprEquals extends OlBExprColumnVsValue {
         return true;
     }
     
+    public OlBExprEquals() {
+    }
+    
+    
     public OlBExprEquals(Object testExpr) {
         super(testExpr);
     }

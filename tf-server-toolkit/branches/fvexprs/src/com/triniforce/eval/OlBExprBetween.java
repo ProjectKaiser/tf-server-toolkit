@@ -17,6 +17,7 @@ public class OlBExprBetween extends OlBExpr {
         m_leftExpr = new OlBExprGE(leftValue);
         m_rightExpr = new OlBExprLE(rightValue);
     }
+    
     @Override
     public Boolean eval(Object columnValue, IOlColumnGetter vg) {
         return TFUtils.equals(true, getLeftExpr().eval(columnValue, vg)) 

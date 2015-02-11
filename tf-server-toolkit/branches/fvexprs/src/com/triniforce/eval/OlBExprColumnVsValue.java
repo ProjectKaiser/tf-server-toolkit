@@ -14,8 +14,11 @@ public abstract class OlBExprColumnVsValue  extends OlBExpr {
     Object m_comparableConstantTestValue;
     boolean isTestValueCalculated = false;
     
+    public OlBExprColumnVsValue() {
+    }
+    
     public OlBExprColumnVsValue(Object testExpr) {
-        m_testExpr = OlExprConstant.calcIExpr(testExpr);
+        setTestExpr(testExpr);
     }
 
     /**
@@ -55,7 +58,7 @@ public abstract class OlBExprColumnVsValue  extends OlBExpr {
             }
             return null;
         }
-        if ( !m_testExpr.isConstant() ||  !isTestValueCalculated) {
+        if ( !getTestExpr().isConstant() ||  !isTestValueCalculated) {
             m_comparableConstantTestValue = calcComparableTestValue(getTestExpr().eval(vg), columnValue);
             isTestValueCalculated = true;
         }
@@ -73,6 +76,10 @@ public abstract class OlBExprColumnVsValue  extends OlBExpr {
     @Override
     public String toString() {
         return getOpName() + " " + getTestExpr().toString();
+    }
+
+    public void setTestExpr(Object testExpr) {
+        m_testExpr = OlExprConstant.calcIExpr(testExpr);
     }
 
 
