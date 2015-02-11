@@ -15,6 +15,7 @@ import com.triniforce.server.srvapi.BasicServerTask;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.INamedDbId;
 import com.triniforce.server.srvapi.ITaskExecutors;
+import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 
 public class QSyncExternals implements IQSyncManagerExternals{
@@ -38,6 +39,7 @@ public class QSyncExternals implements IQSyncManagerExternals{
 				Method m = cls.getMethod("newInstance", new Class[]{});
 				res = (IQSyncer) m.invoke(null, new Object[]{});
 			} catch (Exception e) {
+				ApiAlgs.getLog(this).trace("instantiation problem", e);
 				throw new EQSyncerNotFound(qSyncerName);
 			}
 		}
@@ -46,7 +48,9 @@ public class QSyncExternals implements IQSyncManagerExternals{
 
 	public void runSync(Runnable r) {
 		ITaskExecutors te = ApiStack.getInterface(ITaskExecutors.class);
+//		Future future = 
 		te.execute(ITaskExecutors.normalTaskExecutorKey, new Task(r));
+		
 	}
 	
 	static class Task extends BasicServerTask{
