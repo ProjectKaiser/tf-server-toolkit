@@ -1,1 +1,0 @@
-Makes sure that all plugins are same or newer than archived
