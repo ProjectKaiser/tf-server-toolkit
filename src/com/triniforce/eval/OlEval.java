@@ -8,6 +8,8 @@ package com.triniforce.eval;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.triniforce.utils.TFUtils;
+
 
 /**
  * 
@@ -23,17 +25,25 @@ public class OlEval implements IOlEvaluator {
     private final List<IOlEvaluator> m_evaluators = new ArrayList<IOlEvaluator>();
     private boolean m_andConcatenation = true;
     
-    public void addExpr(int idx, OlExpr expr) {
+    public void addExpr(int idx, OlBExpr expr) {
         getEvaluators().add(new Ol_IdxExpr(idx, expr));
     }
     
-    public void addEval(OlEval eval) {
+    public void addEval(IOlEvaluator eval) {
         getEvaluators().add(eval);
     }
     
-    public boolean evaluate(IOlValueGetter vg){
+    public boolean evaluate(IOlColumnGetter vg){
+        return TFUtils.equals(true, evaluateThreeValued(vg));
+    }
+    
+    public Boolean evaluateThreeValued(IOlColumnGetter vg){
         for (IOlEvaluator e : getEvaluators()) {
-            if (e.evaluate(vg) != m_andConcatenation){
+            Boolean evRes = e.evaluateThreeValued(vg);
+            if(null == evRes) {
+                return null;
+            }
+            if (evRes != m_andConcatenation){
                 return isNot() ^ !m_andConcatenation;
             }
         }
@@ -41,7 +51,7 @@ public class OlEval implements IOlEvaluator {
     }
     
     public boolean evalArray(final Object values[], final int startIdx){
-        IOlValueGetter vg = new IOlValueGetter() {
+        IOlColumnGetter vg = new IOlColumnGetter() {
             public Object getValue(int idx) {
                 return values[startIdx + idx];
             }
@@ -50,7 +60,7 @@ public class OlEval implements IOlEvaluator {
     }
 
     public boolean evalList(final List values, final int startIdx) {
-        IOlValueGetter vg = new IOlValueGetter() {
+        IOlColumnGetter vg = new IOlColumnGetter() {
             public Object getValue(int idx) {
                 return values.get(startIdx + idx);
             }
@@ -88,5 +98,4 @@ public class OlEval implements IOlEvaluator {
 		res+=")";
 		return res;
 	}
-
 }
