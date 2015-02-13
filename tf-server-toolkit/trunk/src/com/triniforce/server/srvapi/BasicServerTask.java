@@ -8,8 +8,9 @@ package com.triniforce.server.srvapi;
 
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
+import com.triniforce.utils.ICommitable;
 
-public abstract class BasicServerTask extends InitFinitTask{
+public abstract class BasicServerTask extends InitFinitTask implements ICommitable{
 
     IBasicServer m_basicServer;
     private String m_threadName;
@@ -19,6 +20,9 @@ public abstract class BasicServerTask extends InitFinitTask{
     Class logClass;
     
     
+    public void commit(){
+        ISrvSmartTranFactory.Helper.commit();
+    }
 
     public BasicServerTask() {
         m_basicServer = ApiStack.getInterface(IBasicServer.class);
