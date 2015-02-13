@@ -9,4 +9,5 @@ import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodi
 import com.triniforce.utils.ICommitable;
 
 public abstract class PKEPAPIPeriodicalTask extends BasicPeriodicalTask implements IPKEPAPI, ICommitable{
+    //
 }
