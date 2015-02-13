@@ -80,6 +80,9 @@ public class ApiAlgs {
             Log log = getLog(cls);
             if(log.isTraceEnabled()){
                 return cls;
+            }else if(log.isDebugEnabled()){
+                //yes, DEBUG disables tracing
+                return null;
             }
             cls = cls.getSuperclass();
         }
