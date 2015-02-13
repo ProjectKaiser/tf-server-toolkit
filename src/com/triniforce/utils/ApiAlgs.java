@@ -91,7 +91,7 @@ public class ApiAlgs {
     }    
 
     public static Log getLog(IApi api, Class category){
-        LogFactory logFactory = api.getIntfImplementor(LogFactory.class);
+        LogFactory logFactory = api.queryIntfImplementor(LogFactory.class);
         if(null == logFactory)
             return LogFactory.getLog(category);
         else
