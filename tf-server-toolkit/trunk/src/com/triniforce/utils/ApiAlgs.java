@@ -71,18 +71,36 @@ public class ApiAlgs {
         return getLog(category.getClass());
     }
     
+    /**
+     * @param cls
+     * @return null if not enabled
+     */
+    public static Class calcEnabledTraceClass(IApi api, Class cls){
+        while(cls != null){
+            Log log = getLog(cls);
+            if(log.isTraceEnabled()){
+                return cls;
+            }
+            cls = cls.getSuperclass();
+        }
+        return null;
+    }
+    
     public static Log getLog(Object category){
         return getLog(category.getClass());
     }    
+
+    public static Log getLog(IApi api, Class category){
+        LogFactory logFactory = api.getIntfImplementor(LogFactory.class);
+        if(null == logFactory)
+            return LogFactory.getLog(category);
+        else
+            return logFactory.getInstance(category);
+    }
+
     
     public static Log getLog(Class category){
-        Log res;
-        LogFactory logFactory = ApiStack.queryInterface(LogFactory.class);
-        if(null == logFactory)
-            res = LogFactory.getLog(category);
-        else
-            res = logFactory.getInstance(category);
-        return res;
+        return getLog(ApiStack.getApi(), category);
     }
 
     public static void rethrowException(Throwable e) throws RuntimeException{

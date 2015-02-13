@@ -194,7 +194,8 @@ public class MailerSrvTest extends BasicServerTestCase {
 		}
 	}
 
-	private void waitForMailer() throws InterruptedException {
+	@SuppressWarnings("deprecation")
+    private void waitForMailer() throws InterruptedException {
 		getServer().enterMode(Mode.Running);
 		try{
 			Mailer m = getMailer();
