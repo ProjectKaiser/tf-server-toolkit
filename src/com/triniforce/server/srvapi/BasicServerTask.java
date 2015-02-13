@@ -15,6 +15,10 @@ public abstract class BasicServerTask extends InitFinitTask{
     private String m_threadName;
 
     boolean b_modeEntered = false;
+    
+    Class logClass;
+    
+    
 
     public BasicServerTask() {
         m_basicServer = ApiStack.getInterface(IBasicServer.class);
@@ -25,13 +29,17 @@ public abstract class BasicServerTask extends InitFinitTask{
     public void init() {
         m_oldThreadName = Thread.currentThread().getName();
         Thread.currentThread().setName(m_threadName);
+        
+        logClass = ApiAlgs.calcEnabledTraceClass(m_basicServer.getCoreApi(), this.getClass());
+        if(null != logClass){
+            ApiAlgs.getLog(m_basicServer.getCoreApi(), logClass).trace("Task started: " + getThreadName());
+        }
+
         m_basicServer.enterMode(IBasicServer.Mode.Running);
         b_modeEntered = true;
                 
         IThrdWatcherRegistrator twr = ApiStack.getInterface(IThrdWatcherRegistrator.class);
         twr.registerThread(Thread.currentThread(), null);
-        
-        ApiAlgs.getLog(this).trace("Task started: " + getThreadName());
         
     };
 
@@ -42,7 +50,9 @@ public abstract class BasicServerTask extends InitFinitTask{
             m_basicServer.leaveMode();
             b_modeEntered = false;
         }
-        ApiAlgs.getLog(this).trace("Task finished: " + getThreadName());
+        if(null != logClass){
+            ApiAlgs.getLog(m_basicServer.getCoreApi(), logClass).trace("Task finished: " + getThreadName());
+        }
         Thread.currentThread().setName(m_oldThreadName);
     }
 
