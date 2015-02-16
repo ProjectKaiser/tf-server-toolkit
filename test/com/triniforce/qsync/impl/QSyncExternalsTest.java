@@ -29,6 +29,7 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 	
 	@Override
 	protected void tearDown() throws Exception {
+		
 		getServer().leaveMode();
 		super.tearDown();
 	}
@@ -47,6 +48,8 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 	}
 	
 	boolean complete = false;
+
+	Object obj = new Object();
 	
 	@Override
 	public void test() throws Exception {
@@ -55,13 +58,22 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 		int before = te.getTasksCount();
 
 		ext.runSync(new Runnable(){
-			public void run() {}
+			public void run() {
+				synchronized (obj) {
+					obj.notify();
+				}
+			}
 		});
 		
 		assertEquals(before+1, te.getTasksCount());
+		
+		synchronized (obj) {
+			obj.wait(0);
+			
+		}
+		
 	}
 	
-	Object obj = new Object();
 	
 	public void testRunTask() throws InterruptedException{
 		QSyncExternals ext = new QSyncExternals();
@@ -94,5 +106,6 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 		}
 		assertTrue(complete);
 
+		
 	}
 }

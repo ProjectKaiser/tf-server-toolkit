@@ -15,7 +15,6 @@ import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ITaskExecutors;
-import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.utils.ApiStack;
 
 public class DboQsyncQueueTest extends BasicServerTestCase {
@@ -36,20 +35,35 @@ public class DboQsyncQueueTest extends BasicServerTestCase {
 		}finally{
 			getServer().leaveMode();
 		}
+		
+		getServer().enterMode(Mode.Running);
+		try{
+			ApiStack.getInterface(ITaskExecutors.class).awatTermination(1000L);
+		}finally{
+			getServer().leaveMode();
+		}
 	}
 
 	@Override
 	public void test() throws Exception {
-		putQueue(40001L, "str_01");
 		synchronized (QSyncPlugin.syncObj) {
-			
-			runSyncMan();
+			putQueue(40001L, "str_01");
 			QSyncPlugin.syncObj.wait();
 		}
 		
 		TestSyncer s = p.getSyncer(getServer());
+		
+		getServer().enterMode(Mode.Running);
+		try{
+			QSyncManager sm = (QSyncManager) ApiStack.getInterface(IQSyncManager.class);
+			QSyncExternals sme = (QSyncExternals) sm.getSyncerExternals();
+			sme.waitForTaskCompletition();
+		}finally{
+			getServer().leaveMode();
+		}
 
 		QSyncTaskStatus qsState;
+		trace("Read queue status");
 		getServer().enterMode(Mode.Running);
 		try{
 			qsState = ApiStack.getInterface(IQSyncManager.class).getQueueInfo(40001L).result.status; 
@@ -59,27 +73,17 @@ public class DboQsyncQueueTest extends BasicServerTestCase {
 		
 		assertEquals(QSyncTaskStatus.SYNCED, qsState);
 		
-		putQueue(40001L, "str_02");
 		synchronized (QSyncPlugin.syncObj) {
-			runSyncMan();
+			putQueue(40001L, "str_02");
 			QSyncPlugin.syncObj.wait();
 		}
 		
 		assertEquals(Arrays.asList("str_01", "str_02"), s.synced());
 		
+		
 		getServer().enterMode(Mode.Running);
 		try{
-			ApiStack.getInterface(ITaskExecutors.class).shutdownNow(); 
-		}finally{
-			getServer().leaveMode();
-		}
-	}
-
-	private void runSyncMan() {
-		getServer().enterMode(Mode.Running);
-		try{
-			ApiStack.getInterface(IQSyncManager.class).onEveryMinute();
-			SrvApiAlgs2.getIServerTran().commit();
+			ApiStack.getInterface(ITaskExecutors.class).awatTermination(1000L);
 		}finally{
 			getServer().leaveMode();
 		}

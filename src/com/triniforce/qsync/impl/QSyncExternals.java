@@ -6,6 +6,9 @@
 package com.triniforce.qsync.impl;
 
 import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import com.triniforce.dbo.PKEPDBObjects;
 import com.triniforce.extensions.IPKExtensionPoint;
@@ -20,7 +23,12 @@ import com.triniforce.utils.ApiStack;
 
 public class QSyncExternals implements IQSyncManagerExternals{
 	
+	private static final int STORED_FUTURES = 10;
+	private LinkedList<Future> m_lastFutures;
 
+	public QSyncExternals() {
+		m_lastFutures = new LinkedList<Future>();
+	}
 
 	public IQSyncer getQSyncer(long qid, Long syncerId) {
 		IQSyncer res;
@@ -48,9 +56,10 @@ public class QSyncExternals implements IQSyncManagerExternals{
 
 	public void runSync(Runnable r) {
 		ITaskExecutors te = ApiStack.getInterface(ITaskExecutors.class);
-//		Future future = 
-		te.execute(ITaskExecutors.normalTaskExecutorKey, new Task(r));
-		
+		Future future = te.execute(ITaskExecutors.normalTaskExecutorKey, new Task(r));
+		m_lastFutures.push(future);
+		if(m_lastFutures.size() > STORED_FUTURES)
+			m_lastFutures.pop();
 	}
 	
 	static class Task extends BasicServerTask{
@@ -66,6 +75,12 @@ public class QSyncExternals implements IQSyncManagerExternals{
 			
 		}
 		
+	}
+	
+	public void waitForTaskCompletition() throws InterruptedException, ExecutionException{
+		for (Future  f : m_lastFutures) {
+			f.get();
+		}
 	}
 
 

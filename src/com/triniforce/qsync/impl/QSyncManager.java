@@ -208,7 +208,7 @@ public class QSyncManager implements IQSyncManager {
 	}
 
 
-	public void registerQueue(long qid, long syncerId) {
+	synchronized public void registerQueue(long qid, long syncerId) {
 		queueBL().registerQueue(qid, syncerId, QSyncTaskStatus.INITIAL_SYNC);
 		IQSyncer syncer = m_syncerExternals.getQSyncer(qid, syncerId);
 		syncer.connectToQueue(qid);
@@ -216,12 +216,12 @@ public class QSyncManager implements IQSyncManager {
 
 	}
 
-	public void unRegisterQueue(long qid, long syncerId) {
+	synchronized public void unRegisterQueue(long qid, long syncerId) {
 		queueBL().dropQueue(qid);
 
 	}
 	
-	public void onEveryMinute() {
+	synchronized public void onEveryMinute() {
 		startTasks(null);
 	}
 
@@ -335,14 +335,16 @@ public class QSyncManager implements IQSyncManager {
 		return m_syncers.get(qid).m_syncer;
 	}
 
-	public boolean onQueueChanged(Long qid) {
+	synchronized  public boolean onQueueChanged(Long qid) {
 		QSyncQueueInfo qinfo = getQueueInfo(qid);
 		if(null == qinfo)
 			return false;
 		
 		QueueExecutionInfo syncerInfo = getSyncerInfo(qid, qinfo.result.syncerId);
-		if(syncerInfo.m_currentTask != null)
+		if(syncerInfo.m_currentTask != null){
+			ApiAlgs.getLog(this).trace("Task queue already started. Queue: "+qid);
 			return true;
+		}
 		
 		if(getRunningTasks() < getMaxNumberOfSyncTasks()){
 			long syncerId = qinfo.result.syncerId;
@@ -362,7 +364,7 @@ public class QSyncManager implements IQSyncManager {
 		return nrunning;
 	}
 
-	public void onTaskCompleted(QSyncTaskResult result) {
+	synchronized public void onTaskCompleted(QSyncTaskResult result) {
 		QueueExecutionInfo syncerInfo = m_syncers.get(result.qid);
 		if(null == syncerInfo){
 			throw new EQueueNotRegistered(result.qid);
@@ -389,10 +391,12 @@ public class QSyncManager implements IQSyncManager {
 		
 		syncerInfo.m_currentTask = null;
 		
+		ApiAlgs.getLog(this).trace("task completed. Status: " + result.status );
+		
 		startTasks(result.qid);
 	}
 
-	public QSyncQueueInfo getQueueInfo(long qid) {
+	synchronized public QSyncQueueInfo getQueueInfo(long qid) {
 		QSyncQueueInfo res = null;
 		ResSet rs = queueBL().getQueueInfo(qid);
 		if(rs.next()){
@@ -416,7 +420,7 @@ public class QSyncManager implements IQSyncManager {
 		return res;
 	}
 
-	public List<QSyncQueueInfo> getTopQueuesInfo(int n,
+	synchronized public List<QSyncQueueInfo> getTopQueuesInfo(int n,
 			EnumSet<QSyncTaskStatus> statusToFilter) {
 		List<Long> qIds = getIds();
 		sortByAttempt(qIds);

@@ -32,10 +32,7 @@ public class QSyncPlugin extends PKPlugin {
 			return this;
 		}
 
-		public void connectToQueue(long qid) {
-			// TODO Auto-generated method stub
-			
-		}
+		public void connectToQueue(long qid) {}
 
 		public void initialSync() {
 			ApiAlgs.assertTrue(!m_initiallySynced,"");
@@ -45,10 +42,7 @@ public class QSyncPlugin extends PKPlugin {
 			}
 		}
 
-		public void finit(Throwable t) {
-			// TODO Auto-generated method stub
-			
-		}
+		public void finit(Throwable t) {}
 
 		public List synced() {
 			return m_synced;
@@ -56,7 +50,6 @@ public class QSyncPlugin extends PKPlugin {
 
 		public void sync(Object o) {
 			m_synced.add(o);
-			
 			
 			synchronized (syncObj) {
 				syncObj.notify();
