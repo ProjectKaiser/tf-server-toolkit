@@ -50,7 +50,7 @@ public class InitFinitTaskWrapper implements Runnable  {
             }
         } catch (Throwable t) {
             try {
-                System.err.println("Fatal error in run:" + t);
+                System.err.println("Fatal error executing " + (m_command != null?m_command.getClass().toString():"null")+ ": " + t);
                 t.printStackTrace();
             } catch (Throwable tt) {
 
