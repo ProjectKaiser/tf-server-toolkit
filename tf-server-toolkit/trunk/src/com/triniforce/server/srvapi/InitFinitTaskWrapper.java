@@ -25,31 +25,39 @@ public class InitFinitTaskWrapper implements Runnable  {
     public void run() {
         try {
             try {
-                m_command.init();
-            } catch (Throwable e) {
-                logInitializationErrror(e);
-                return;
-            }
-            try {
-                m_command.run();
-                if(m_command instanceof ICommitable){
-                    ((ICommitable) m_command).commit();
+                try {
+                    m_command.init();
+                } catch (Throwable e) {
+                    logInitializationErrror(e);
+                    return;
                 }
-            } catch (Throwable e) {
-                ApiAlgs.getLog(this).error(
-                        "Run error:" + m_command.toString(), e);//$NON-NLS-1$
+                try {
+                    m_command.run();
+                    if (m_command instanceof ICommitable) {
+                        ((ICommitable) m_command).commit();
+                    }
+                } catch (Throwable e) {
+                    ApiAlgs.getLog(this).error(
+                            "Run error:" + m_command.toString(), e);//$NON-NLS-1$
+                }
+            } finally {
+                try {
+                    m_command.finit();
+                } catch (Throwable e) {
+                    ApiAlgs.getLog(this).error(
+                            "Finit error:" + m_command.toString(), e);//$NON-NLS-1$
+                }
             }
-        } finally {
+        } catch (Throwable t) {
             try {
-                m_command.finit();
-            } catch (Throwable e) {
-                ApiAlgs.getLog(this).error(
-                        "Finit error:" + m_command.toString(), e);//$NON-NLS-1$
+                System.err.println("Fatal error in run:" + t);
+                t.printStackTrace();
+            } catch (Throwable tt) {
+
             }
         }
+        
     }
-
-
 
     @Override
     public int hashCode() {
