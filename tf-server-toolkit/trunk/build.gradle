@@ -1,7 +1,4 @@
-if (IS_OBSOLETE_GRADLE_VERSION())
-	ext = project
-
-ext.tf_version = '38.0';
+ext.tf_version = '38.0'
 ext.tf_release = false
 ext.tf_vendor = 'Triniforce.com'
 
@@ -17,7 +14,7 @@ targetCompatibility = 1.6
 group = 'com.triniforce.tf-server-toolkit'
 
 //version = "8.0${release?'':'-SNAPSHOT'}"
-version = tf_version + (tf_release? '' : '-SNAPSHOT')
+version = tf_version + (tf_release ? '' : '-SNAPSHOT')
 
 
 // Get dynamic environment settings
@@ -26,25 +23,19 @@ apply from: 'config.gradle'
 defaultTasks 'clean', 'ide'
 
 repositories {
-	if (IS_OBSOLETE_GRADLE_VERSION()) {
-		org.apache.ivy.util.url.CredentialsStore.INSTANCE.addCredentials(
-			MavenResolveRealm, MavenResolveHost, MavenUsername, MavenPassword);
-		mavenRepo urls: MavenResolveUrl
-	} else {
-		maven {
-			url MavenResolveUrl
-			credentials {
-				username = MavenUsername
-				password = MavenPassword
-			}
+	maven {
+		url MavenResolveUrl
+		credentials {
+			username = MavenUsername
+			password = MavenPassword
 		}
 	}
 }
 
 processResources {
-	from('src'){
-		include '**/*.properties';
-		include '**/*.wiki';
+	from('src') {
+		include '**/*.properties'
+		include '**/*.wiki'
 	}
 }
 
@@ -92,11 +83,8 @@ sourceSets.test.compileClasspath += configurations.providedCompile
 sourceSets.test.runtimeClasspath += configurations.providedCompile
 
 sourceSets {
-	main.java.srcDir 'src'
-	test.java {
-		srcDir 'test'
-		srcDir 'investigation'
-	}
+	main.java.srcDirs = ['src']
+	test.java.srcDirs = ['test', 'investigation']
 }
 
 tasks.eclipse.enabled = false
@@ -110,10 +98,11 @@ eclipse {
 		containers.add 'org.eclipse.jdt.launching.JRE_CONTAINER' +
 				'/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre' + sourceCompatibility
 		downloadJavadoc = true
+		plusConfigurations += [configurations.providedCompile]
 	}
 }
 
-task ide(dependsOn: [eclipseClasspath, eclipseProject]) {
+task ide(dependsOn: tasks.eclipse) {
 	group = 'IDE'
 	description = 'preparing for work in the development environment'
 }
@@ -142,7 +131,7 @@ uploadArchives {
 task jar_lib(type: Copy, dependsOn:[jar]){
 	from "${jar.destinationDir}/${jar.archiveName}"
 	into "K:/Products/triniforce/workspace/tflib/srvdist"
-	rename {String fileName -> 'tf-server-toolkit.jar'}
+	rename { String fileName -> 'tf-server-toolkit.jar' }
 }
 
 /*
@@ -186,9 +175,3 @@ jar {
 		)
 	}
 }
-
-boolean IS_OBSOLETE_GRADLE_VERSION() {
-	return project.gradle.gradleVersion == '1.0-milestone-3'
-}
-
-eclipse.classpath.plusConfigurations += configurations.providedCompile
