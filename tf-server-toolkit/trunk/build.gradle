@@ -92,11 +92,9 @@ tasks.cleanEclipse.enabled = false
 tasks.eclipseJdt.enabled = false
 tasks.cleanEclipseJdt.enabled = false
 
+tasks.eclipse.dependsOn(cleanEclipse)
 eclipse {
 	classpath {
-		containers.clear()
-		containers.add 'org.eclipse.jdt.launching.JRE_CONTAINER' +
-				'/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre' + sourceCompatibility
 		downloadJavadoc = true
 		plusConfigurations += [configurations.providedCompile]
 	}
