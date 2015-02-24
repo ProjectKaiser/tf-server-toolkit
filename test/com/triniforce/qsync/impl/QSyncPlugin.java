@@ -59,9 +59,52 @@ public class QSyncPlugin extends PKPlugin {
 		
 	}
 	
+	
+	public static class TestSyncer2 extends DboQsyncQueue implements IQSyncer{
+		public static Object s1 = new Object();
+		public static Object s2 = new Object();
+
+		public TestSyncer2() {
+			super(40011L, TestSyncer2.class);
+		}
+
+		public void connectToQueue(long qid) {
+			
+		}
+
+		public void initialSync() {
+			synchronized (s1) {
+				s1.notify();
+			}
+			synchronized (s2) {
+				try {
+					s2.wait();
+				} catch (InterruptedException e) {
+					ApiAlgs.rethrowException(e);
+				}
+			}
+			
+		}
+
+		public void sync(Object o) {
+			initialSync();
+		}
+
+		public void finit(Throwable t) {
+		}
+
+		@Override
+		public IQSyncer createSyncer() {
+			return this;
+		}
+		
+	}
+	
 	@Override
 	public void doRegistration() {
 		putExtension(PKEPDBObjects.class, TestSyncer.class);
+		
+		putExtension(PKEPDBObjects.class, TestSyncer2.class);
 	}
 	
 	@Override
