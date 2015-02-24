@@ -83,5 +83,12 @@ public class QSyncExternals implements IQSyncManagerExternals{
 		}
 	}
 
+	public void interruptAll() {
+		for (Future  f : m_lastFutures) {
+			f.cancel(true);
+		}
+		
+	}
+
 
 }

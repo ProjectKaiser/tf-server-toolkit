@@ -591,6 +591,10 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		
 	}
 
+	public void testRejectedExecutionException(){
+		
+	}
+	
 	private void execTry() {
 		sm.onEveryMinute();
 		execRuns();

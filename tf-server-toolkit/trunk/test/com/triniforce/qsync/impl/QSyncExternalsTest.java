@@ -9,8 +9,8 @@ import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.qsync.impl.QSyncPlugin.TestSyncer;
 import com.triniforce.qsync.intf.IQSyncer;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
-import com.triniforce.server.srvapi.INamedDbId.ENotFound;
 import com.triniforce.server.srvapi.INamedDbId;
+import com.triniforce.server.srvapi.INamedDbId.ENotFound;
 import com.triniforce.server.srvapi.ITaskExecutors;
 import com.triniforce.utils.ApiStack;
 
@@ -41,8 +41,10 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 			fail();
 		}catch(ENotFound e){}
 		
+		
+		
 		Long sId;
-		assertNotNull(sId = ApiStack.getInterface(INamedDbId.class).queryId(TestSyncer.class.getName()));
+		sId = ApiStack.getInterface(INamedDbId.class).createId(TestSyncer.class.getName());
 		IQSyncer res = ext.getQSyncer(40003L, sId);
 		assertNotNull(res);
 	}
@@ -105,7 +107,5 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 			obj.wait();
 		}
 		assertTrue(complete);
-
-		
 	}
 }
