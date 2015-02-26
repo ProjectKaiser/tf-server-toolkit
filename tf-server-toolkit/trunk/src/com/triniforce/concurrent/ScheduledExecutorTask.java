@@ -23,10 +23,12 @@ public class ScheduledExecutorTask implements ScheduledFuture, Runnable {
     private final long m_delayMs;
     
     private ITime m_time;
+	private boolean m_done;
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() +": " + m_initialDelayMs + "," + m_delayMs + ", " + m_cancelled;
+    	String rName = m_runnableTask == null? "" : m_runnableTask.getClass().getName();
+        return getClass().getSimpleName() +": " + rName +": "+ m_initialDelayMs + "," + m_delayMs + ", " + m_cancelled;
     }
     
     public ScheduledExecutorTask(Runnable r, long initialDelayMs, long delayMs) {
@@ -47,7 +49,7 @@ public class ScheduledExecutorTask implements ScheduledFuture, Runnable {
      * @return false if task must not be run anymore
      */
     synchronized public boolean calcNextStart() {
-        if(m_cancelled){
+        if(m_cancelled || m_done){
             return false;
         }
         if (m_nextStartMs < 0) {
@@ -55,6 +57,7 @@ public class ScheduledExecutorTask implements ScheduledFuture, Runnable {
             return true;
         } else {
             if(m_delayMs <= 0){
+            	m_done = true;
                 return false;
             }
             m_nextStartMs = getTime().currentTimeMillis() + m_delayMs;
@@ -90,7 +93,7 @@ public class ScheduledExecutorTask implements ScheduledFuture, Runnable {
 
     @Override
     public boolean isDone() {
-        return m_cancelled;
+        return m_done || m_cancelled;
     }
 
     @Override

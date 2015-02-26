@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.triniforce.db.test.TFTestCase;
 
-public class InvThreadExecutorsTest extends TFTestCase {
+public class ThreadExecutorsInvTest extends TFTestCase {
 
     // new ThreadPoolExecutor(2, MAX_NORMAL_THREADS, 10, TimeUnit.SECONDS
     // , new SynchronousQueue<Runnable>())
