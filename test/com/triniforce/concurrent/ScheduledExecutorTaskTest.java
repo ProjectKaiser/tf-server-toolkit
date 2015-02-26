@@ -98,6 +98,9 @@ public class ScheduledExecutorTaskTest extends TFTestCase {
         t1.calcNextStart();
         assertEquals(2, t1.getDelay(TimeUnit.MILLISECONDS));
         assertEquals(2000, t1.getDelay(TimeUnit.MICROSECONDS));
+        
+        m_time = 5;
+        assertEquals(-3, t1.getDelay(TimeUnit.MILLISECONDS));
     }
     
     /**
@@ -133,10 +136,12 @@ public class ScheduledExecutorTaskTest extends TFTestCase {
 
         //run-once task
         {
+        	//delay == 0
             ScheduledExecutorTask runOnce = newTask(7, 0);
             assertTrue(runOnce.calcNextStart());
             assertFalse(runOnce.calcNextStart());
             
+        	//delay < 0
             ScheduledExecutorTask runOnce2 = newTask(7, -2);
             assertTrue(runOnce2.calcNextStart());
             assertFalse(runOnce2.calcNextStart());
