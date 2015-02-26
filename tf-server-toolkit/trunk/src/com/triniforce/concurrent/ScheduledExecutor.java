@@ -24,6 +24,14 @@ import com.triniforce.utils.ICheckInterrupted;
 
 
 public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledExecutorService, Runnable{
+
+    public static final int EMPTY_TASK_QUEUE_TIMEOUT_MS = 1000 * 60;
+    public static final int REJECTED_EXECUTION_TIMOUT_MS = 50;
+
+    BlockingQueue<Cmd> m_commandQueue = new LinkedBlockingQueue<Cmd>();
+    Queue<ScheduledExecutorTask> m_taskQueue = new PriorityQueue<ScheduledExecutorTask>();
+	private final Future<?> m_schedulerFuture; 
+
     
     abstract class Cmd implements Runnable{
                
@@ -54,9 +62,8 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
 		@Override
 		public void run() {
 			try {
-				
 				m_t.run();
-				
+
 				//if exception occurs task won't be rescheduled
 				
 				Cmd c = new CmdScheduleTask(m_t);
@@ -70,10 +77,6 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
 			}
 		}
 	}
-    
-    BlockingQueue<Cmd> m_commandQueue = new LinkedBlockingQueue<Cmd>();
-    Queue<ScheduledExecutorTask> m_taskQueue = new PriorityQueue<ScheduledExecutorTask>();
-	private final Future<?> m_schedulerFuture; 
     
     public static class MyThreadFactory implements ThreadFactory{
 
@@ -122,9 +125,6 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
         return t;
     }
 
-    public static final int EMPTY_TASK_QUEUE_TIMEOUT_MS = 1000 * 60;
-    public static final int REJECTED_EXECUTION_TIMOUT_MS = 50;
-    
     @Override
     public void run() {
         while(true){
