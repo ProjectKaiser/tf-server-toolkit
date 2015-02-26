@@ -11,39 +11,53 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.triniforce.utils.ITime.ITimeHelper;
+import com.triniforce.utils.ITime;
 
-public class ScheduledExecutorTask implements ScheduledFuture {
+public class ScheduledExecutorTask implements ScheduledFuture, Runnable {
 
     long m_nextStartMs = -1;
-    boolean m_cancelled = false;
+    volatile boolean m_cancelled = false;
     boolean m_mayInterruptIfRunning = false;
     private final Runnable m_runnableTask;
     private final long m_initialDelayMs;
     private final long m_delayMs;
+    
+    private ITime m_time;
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() +": " + m_initialDelayMs + "," + m_delayMs + ", " + m_cancelled;
+    }
+    
     public ScheduledExecutorTask(Runnable r, long initialDelayMs, long delayMs) {
         m_runnableTask = r;
         m_initialDelayMs = initialDelayMs;
         m_delayMs = delayMs;
-        calcNextStart();
+        
+        setTime(new ITime(){
+            @Override
+            public long currentTimeMillis() {
+                return System.currentTimeMillis();
+            }
+        });
+        
     }
 
     /**
      * @return false if task must not be run anymore
      */
-    public boolean calcNextStart() {
+    synchronized public boolean calcNextStart() {
         if(m_cancelled){
             return false;
         }
         if (m_nextStartMs < 0) {
-            m_nextStartMs = ITimeHelper.currentTimeMillis() + m_initialDelayMs;
+            m_nextStartMs = getTime().currentTimeMillis() + m_initialDelayMs;
             return true;
         } else {
             if(m_delayMs <= 0){
                 return false;
             }
-            m_nextStartMs = ITimeHelper.currentTimeMillis() + m_delayMs;
+            m_nextStartMs = getTime().currentTimeMillis() + m_delayMs;
             return true;
         }
     }
@@ -51,7 +65,7 @@ public class ScheduledExecutorTask implements ScheduledFuture {
     @Override
     public long getDelay(TimeUnit paramTimeUnit) {
         return paramTimeUnit.convert(
-                m_nextStartMs - ITimeHelper.currentTimeMillis(),
+                m_nextStartMs - getTime().currentTimeMillis(),
                 TimeUnit.MILLISECONDS);
     }
 
@@ -63,7 +77,7 @@ public class ScheduledExecutorTask implements ScheduledFuture {
     }
 
     @Override
-    public boolean cancel(boolean mayInterruptIfRunning) {
+    synchronized public boolean cancel(boolean mayInterruptIfRunning) {
         m_cancelled = true;
         m_mayInterruptIfRunning = mayInterruptIfRunning;
         return true;
@@ -92,6 +106,22 @@ public class ScheduledExecutorTask implements ScheduledFuture {
 
     public Runnable getRunnableTask() {
         return m_runnableTask;
+    }
+
+    public ITime getTime() {
+        return m_time;
+    }
+
+    public void setTime(ITime time) {
+        m_time = time;
+    }
+
+    @Override
+    public void run() {
+        if(null == m_runnableTask){
+            return;
+        }
+        m_runnableTask.run();
     }
 
 }
