@@ -87,7 +87,6 @@ public class InvThreadExecutorsTest extends TFTestCase {
             es.submit(r3);
             fail();
         } catch (RejectedExecutionException e) {
-            trace(e);
         }
 
         finish.countDown();
