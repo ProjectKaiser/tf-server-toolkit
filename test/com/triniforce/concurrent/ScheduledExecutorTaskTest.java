@@ -168,5 +168,27 @@ public class ScheduledExecutorTaskTest extends TFTestCase {
         assertTrue(t1.isDone());
         assertTrue(t1.isCancelled());
     }
+    
+    public void testDonel(){
+    	//run once
+    	{
+	        ScheduledExecutorTask t1 = newStartedTask(1, 0);
+	        assertFalse(t1.isDone());
+	        t1.calcNextStart();
+	        assertTrue(t1.isDone());
+	        assertFalse(t1.isCancelled());
+    	}
+    	//periodical
+    	{
+	        ScheduledExecutorTask t1 = newStartedTask(1, 2);
+	        assertFalse(t1.isDone());
+	        t1.calcNextStart();
+	        assertFalse(t1.isDone());
+	        t1.cancel(true);
+	        assertTrue(t1.isDone());
+	        assertTrue(t1.isCancelled());
+    	}
+        
+    }
 
 }
