@@ -36,6 +36,17 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
                
     }
     
+    class CmdExceptionOccured extends Cmd{
+
+        @Override
+        public void run() {
+        }
+        
+        CmdExceptionOccured(ScheduledExecutorTask task){
+
+        }
+    }
+    
     class CmdScheduleTask extends Cmd{
         private final ScheduledExecutorTask m_task;
 
@@ -69,7 +80,7 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
 				m_commandQueue.add(c);
 				
 			} catch (RuntimeException r) {
-				//TODO: put empty cmd
+			    m_commandQueue.add(new CmdExceptionOccured(m_t));
 				if(!ICheckInterrupted.Helper.isInterruptedException(r)){
 					System.err.println(m_t.toString());
 					r.printStackTrace();
@@ -125,40 +136,47 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
         return t;
     }
 
+    boolean internal_doIteration(){
+        try {
+            ScheduledExecutorTask t = m_taskQueue.poll();
+            long delayMs = (null == t) ? EMPTY_TASK_QUEUE_TIMEOUT_MS : t.getDelay(TimeUnit.MILLISECONDS); 
+            if(delayMs > 0){
+                Cmd c = m_commandQueue.poll(delayMs, TimeUnit.MILLISECONDS);
+                if(null != c){
+                    //put task back
+                    if(null != t){
+                        m_taskQueue.add(t);
+                    }
+                    c.run();
+                    return true;
+                }
+            }
+            if(null == t){
+                return true;
+            }
+            TaskWrapper tw = new  TaskWrapper(t);
+            try{
+                submit(tw);
+            }catch(RejectedExecutionException re){
+                //put task back
+                m_taskQueue.add(t);
+                //wait for any command and put it back
+                Cmd c = m_commandQueue.poll(EMPTY_TASK_QUEUE_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+                if(null != c){
+                    m_commandQueue.put(c);
+                }
+            }
+        } catch (InterruptedException e) {
+            return false;
+        } catch (RuntimeException r){
+            r.printStackTrace();
+        }
+        return true;
+    }
+    
     @Override
     public void run() {
-        while(true){
-            try {
-                ScheduledExecutorTask t = m_taskQueue.poll();
-				long delayMs = null == t ? EMPTY_TASK_QUEUE_TIMEOUT_MS : t.getDelay(TimeUnit.MILLISECONDS); 
-                if(delayMs > 0){
-                	Cmd c = m_commandQueue.poll(delayMs, TimeUnit.MILLISECONDS);
-                    if(null != c){
-                    	//put task back
-                    	if(null != t){
-                    		m_taskQueue.add(t);
-                    	}
-                        c.run();
-                        continue;
-                    }
-                }
-                if(null == t){
-                	continue;
-                }
-                TaskWrapper tw = new  TaskWrapper(t);
-                try{
-                	submit(tw);
-                }catch(RejectedExecutionException re){
-                	//put task back
-                	m_taskQueue.add(t);
-                }
-            } catch (InterruptedException e) {
-                break;
-            } catch (RuntimeException r){
-            	r.printStackTrace();
-            }
-        }
-        
+        while(internal_doIteration());
     }
 
 	public Future<?> getSchedulerFuture() {
