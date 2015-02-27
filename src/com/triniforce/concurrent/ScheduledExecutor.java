@@ -26,7 +26,6 @@ import com.triniforce.utils.ICheckInterrupted;
 public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledExecutorService, Runnable{
 
     public static final int EMPTY_TASK_QUEUE_TIMEOUT_MS = 1000 * 60;
-    public static final int REJECTED_EXECUTION_TIMOUT_MS = 50;
 
     BlockingQueue<Cmd> m_commandQueue = new LinkedBlockingQueue<Cmd>();
     Queue<ScheduledExecutorTask> m_taskQueue = new PriorityQueue<ScheduledExecutorTask>();
@@ -70,6 +69,7 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
 				m_commandQueue.add(c);
 				
 			} catch (RuntimeException r) {
+				//TODO: put empty cmd
 				if(!ICheckInterrupted.Helper.isInterruptedException(r)){
 					System.err.println(m_t.toString());
 					r.printStackTrace();
@@ -151,13 +151,11 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
                 }catch(RejectedExecutionException re){
                 	//put task back
                 	m_taskQueue.add(t);
-                	Thread.sleep(REJECTED_EXECUTION_TIMOUT_MS);
                 }
             } catch (InterruptedException e) {
                 break;
             } catch (RuntimeException r){
             	r.printStackTrace();
-            	ICheckInterrupted.Helper.sleep(1000);
             }
         }
         
