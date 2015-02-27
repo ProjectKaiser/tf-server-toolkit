@@ -54,7 +54,7 @@ public class QSyncExternals implements IQSyncManagerExternals{
 		return res;
 	}
 
-	public void runSync(Runnable r) {
+	synchronized  public void runSync(Runnable r) {
 		ITaskExecutors te = ApiStack.getInterface(ITaskExecutors.class);
 		Future future = te.execute(ITaskExecutors.normalTaskExecutorKey, new Task(r));
 		m_lastFutures.push(future);
@@ -77,13 +77,13 @@ public class QSyncExternals implements IQSyncManagerExternals{
 		
 	}
 	
-	public void waitForTaskCompletition() throws InterruptedException, ExecutionException{
+	synchronized public void waitForTaskCompletition() throws InterruptedException, ExecutionException{
 		for (Future  f : m_lastFutures) {
 			f.get();
 		}
 	}
 
-	public void interruptAll() {
+	synchronized public void interruptAll() {
 		for (Future  f : m_lastFutures) {
 			f.cancel(true);
 		}
