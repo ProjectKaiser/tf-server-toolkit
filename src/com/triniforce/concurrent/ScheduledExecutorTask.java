@@ -13,7 +13,7 @@ import java.util.concurrent.TimeoutException;
 
 import com.triniforce.utils.ITime;
 
-public class ScheduledExecutorTask implements ScheduledFuture, Runnable {
+public class ScheduledExecutorTask implements ScheduledFuture<Object>, Runnable {
 
     long m_nextStartMs = -1;
     volatile boolean m_cancelled = false;
