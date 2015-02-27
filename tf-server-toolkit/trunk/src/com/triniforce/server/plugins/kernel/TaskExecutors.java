@@ -11,11 +11,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.triniforce.concurrent.ScheduledExecutor;
 import com.triniforce.server.srvapi.ITaskExecutors;
 import com.triniforce.server.srvapi.InitFinitTask;
 import com.triniforce.server.srvapi.InitFinitTaskWrapper;
@@ -37,8 +37,7 @@ public class TaskExecutors implements ITaskExecutors{
         addExecutor(ITaskExecutors.longTaskExecutorKey, new KeyTaskExecutor(80));
         addExecutor(ITaskExecutors.shortTaskExecutorKey,
                 new KeyTaskExecutor(10));
-        addExecutor(ITaskExecutors.periodicalTaskExecutorKey,
-                new ScheduledThreadPoolExecutor(4));
+        addExecutor(ITaskExecutors.periodicalTaskExecutorKey, new ScheduledExecutor(2, 8));
         addExecutor(ITaskExecutors.normalTaskExecutorKey,
                 new ThreadPoolExecutor(2, MAX_NORMAL_THREADS, 10, TimeUnit.SECONDS
                         , new SynchronousQueue<Runnable>())//SynchronousQueue prevents flooding
