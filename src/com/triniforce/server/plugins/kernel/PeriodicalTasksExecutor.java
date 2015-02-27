@@ -5,7 +5,7 @@
  */
 package com.triniforce.server.plugins.kernel;
 
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.triniforce.server.srvapi.BasicServerTask;
@@ -73,7 +73,7 @@ public class PeriodicalTasksExecutor implements IFinitable {
 
     public void scheduleWithFixedDelay(BasicPeriodicalTask command,
             long initialDelay, long delay, TimeUnit unit) {
-        ScheduledThreadPoolExecutor spe = (ScheduledThreadPoolExecutor) getTe().getExecutor(ITaskExecutors.periodicalTaskExecutorKey);
+        ScheduledExecutorService spe = (ScheduledExecutorService) getTe().getExecutor(ITaskExecutors.periodicalTaskExecutorKey);
         spe.scheduleWithFixedDelay(new PeriodicalTaskWrapper(command),
                 initialDelay, delay, unit);
     }
