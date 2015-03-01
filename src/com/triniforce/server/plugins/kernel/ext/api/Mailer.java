@@ -290,7 +290,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
             ApiAlgs.getLog(this).info("Sending email:"+ body);//$NON-NLS-1$
             final MimeMessage finalMsg = msg; 
             try{
-            	IRunnable r = new IRunnable(){
+            	IRunnable  r = new IRunnable(){
                     public void run() throws Exception{
                     	try{
                     		Transport.send(finalMsg);
