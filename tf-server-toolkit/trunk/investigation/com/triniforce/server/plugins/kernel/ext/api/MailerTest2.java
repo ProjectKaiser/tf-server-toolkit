@@ -16,12 +16,13 @@ import com.triniforce.utils.TFUtils;
 
 test.properties must have the following settings:
 
-Mailer.host=mail
-Mailer.port=25
-Mailer.user=gmp
+Mailer.host=smtp.yandex.ru
+Mailer.port=465
+Mailer.user=triniforce@yandex.ru
 Mailer.password=
-Mailer.useTLS=0
-Mailer.from=gmp@sigma-soft.spb.ru
+Mailer.useTLS=1
+Mailer.sender=triniforce@yandex.ru
+Mailer.from=triniforce@yandex.ru
 Mailer.to=maxim.ge@gmail.com
  
  */
