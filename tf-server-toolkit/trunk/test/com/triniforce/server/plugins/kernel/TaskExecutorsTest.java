@@ -87,7 +87,6 @@ public class TaskExecutorsTest extends TFTestCase {
         ITaskExecutors te = new TaskExecutors();
         assertTrue(te.executorKeys().contains(new LongTaskExecutorKey()));
         assertTrue(te.executorKeys().contains(new ShortTaskExecutorKey()));
-        assertTrue(te.executorKeys().contains(new PeriodicalTaskExecutorKey()));
         assertTrue(te.executorKeys().contains(new ITaskExecutors.NormalTaskExecutorKey()));
         
         final SynchronousQueue<String> q1 = new SynchronousQueue();

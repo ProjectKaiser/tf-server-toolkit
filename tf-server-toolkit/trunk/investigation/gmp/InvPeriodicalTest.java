@@ -13,7 +13,7 @@ public class InvPeriodicalTest extends BasicServerTestCase{
     public void test() throws Exception {
         m_server.startPeriodicalTasks();
         try {
-            ICheckInterrupted.Helper.sleep(60000);
+            ICheckInterrupted.Helper.sleep(20000);
         } finally {
             m_server.stopPeriodicalTasks();
         }

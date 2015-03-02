@@ -21,14 +21,15 @@ public class ScheduledExecutorTest extends TFTestCase {
         Runnable r1 = new Runnable() {
             @Override
             public void run() {
-                assertEquals("ScheduledExecutor_2", Thread.currentThread().getName());
+                trace(Thread.currentThread());
+                assertTrue(Thread.currentThread().getName().endsWith("_2"));
             }
         };
         
         Runnable r2 = new Runnable() {
             @Override
             public void run() {
-                assertEquals("ScheduledExecutor_3", Thread.currentThread().getName());
+                assertTrue(Thread.currentThread().getName().endsWith("_3"));
             }
         };
         

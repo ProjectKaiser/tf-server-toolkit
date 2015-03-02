@@ -1113,6 +1113,8 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 	public void startPeriodicalTasks(){
 	    
+	    m_ptExecutor.init();
+	    
 	    PKEPAPIs apis = (PKEPAPIs) getExtensionPoint(PKEPAPIs.class);
 	    apis.scheduleTasks(m_ptExecutor);
 
