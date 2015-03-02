@@ -91,20 +91,28 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
     
     public static class MyThreadFactory implements ThreadFactory{
 
-        AtomicInteger cnt = new AtomicInteger(0); 
+        AtomicInteger cnt = new AtomicInteger(0);
+        private final int m_cntExecutor;
+        
+        MyThreadFactory(int cntExecutor){
+            m_cntExecutor = cntExecutor;
+            
+        }
         
         @Override
         public Thread newThread(Runnable paramRunnable) {
             int curCnt = cnt.incrementAndGet();
             String sfx = 1 == curCnt? "scheduler": "" + curCnt;
-            Thread t = new Thread(paramRunnable, "ScheduledExecutor_" + sfx);
+            Thread t = new Thread(paramRunnable, "ScheduledExecutor_"+m_cntExecutor +"_" + sfx);
             return t;
         }
     }
     
+    static AtomicInteger cntExecutors = new AtomicInteger(0);
+    
     public ScheduledExecutor(int corePoolSize, int maxmimumPoolSize) {
         super(corePoolSize + 1, maxmimumPoolSize + 1, 60, TimeUnit.SECONDS,
-                new SynchronousQueue<Runnable>(), new MyThreadFactory());
+                new SynchronousQueue<Runnable>(), new MyThreadFactory(cntExecutors.incrementAndGet()));
         m_schedulerFuture = submit(this);
     }
 
