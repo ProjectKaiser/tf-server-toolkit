@@ -106,8 +106,9 @@ public class QSyncManager implements IQSyncManager {
 			long tst = ApiAlgs.getITime().currentTimeMillis();
 			long tnd;
 			Object record;
-			while(null != (record = m_syncMan.getQueueRecord(m_qid))){
+			while(null != (record = m_syncMan.peekQueueRecord(m_qid))){
 				m_syncer.sync(record);
+				m_syncMan.getQueueRecord(m_qid); //Record synced
 				tnd = ApiAlgs.getITime().currentTimeMillis();
 				if(timeout < tnd-tst){
 					ApiAlgs.getLog(this).trace("time: " + tst + "("+tnd+")");
@@ -325,6 +326,10 @@ public class QSyncManager implements IQSyncManager {
 
 	private boolean isEmptyQueue(long qid){
 		return null == IDbQueueFactory.Helper.getQueue(qid).peek(0L);
+	}
+	
+	private Object peekQueueRecord(long qid) {
+		return IDbQueueFactory.Helper.getQueue(qid).peek(0L);
 	}
 	
 	private Object getQueueRecord(long qid) {

@@ -5,6 +5,7 @@
  */
 package com.triniforce.qsync.impl;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -23,6 +24,7 @@ import com.triniforce.qsync.intf.QSyncQueueInfo;
 import com.triniforce.qsync.intf.QSyncTaskResult;
 import com.triniforce.qsync.intf.QSyncTaskStatus;
 import com.triniforce.server.srvapi.IDbQueueFactory;
+import com.triniforce.server.srvapi.INamedDbId;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.utils.ApiStack;
@@ -402,6 +404,10 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			}
 			assertEquals(runnables.toString(), 10, runnables.size());
 		}
+		
+		{// If 
+			
+		}
 	}
 
 	private void putRecord(long qId, long rId) {
@@ -503,26 +509,56 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 	}
 
 	public void testGetTopQueuesInfo() {
-		sm.registerQueue(222, 33);
-		sm.registerQueue(223, 33);
-		sm.registerQueue(224, 33);
+		INamedDbId ids = ApiStack.getInterface(INamedDbId.class);
+		long sid = ids.createId("testGetTopQueuesInfo.syncer");
+		long qids[];
+		{
+			qids = new long[]{
+					ids.createId("testGetTopQueuesInfo.q1"),
+					ids.createId("testGetTopQueuesInfo.q2"),
+					ids.createId("testGetTopQueuesInfo.q3"),
+					ids.createId("testGetTopQueuesInfo.q4")
+			};
+		}
+
+		
+		sm.registerQueue(qids[0], sid);
+		sm.registerQueue(qids[1], sid);
+		sm.registerQueue(qids[2], sid);
 		
 		List<QSyncQueueInfo> res = sm.getTopQueuesInfo(3, EnumSet.of(QSyncTaskStatus.INITIAL_SYNC));
 		assertEquals(3, res.size());
-		assertEquals(223, res.get(1).result.qid);
+		assertEquals(qids[1], res.get(1).result.qid);
 		
 		sm.onEveryMinute();
 		execRuns();
 		
-		sm.registerQueue(225,33);
+		sm.registerQueue(qids[3],sid);
 		res = sm.getTopQueuesInfo(3, EnumSet.of(QSyncTaskStatus.INITIAL_SYNC));
 		assertEquals(1, res.size());
-		assertEquals(225, res.get(0).result.qid);
+		assertEquals(qids[3], res.get(0).result.qid);
 
 		
 		res = sm.getTopQueuesInfo(2, EnumSet.of(QSyncTaskStatus.INITIAL_SYNC, QSyncTaskStatus.SYNCED));
 		assertEquals(2, res.size());
-		assertEquals(225, res.get(0).result.qid);
+		assertEquals(qids[3], res.get(0).result.qid);
+		
+		
+		String format = "queueId\tsyncerId\tstatus\tattempt - error - synced ";
+		DateFormat df = DateFormat.getInstance();
+		res = sm.getTopQueuesInfo(100, EnumSet.allOf(QSyncTaskStatus.class));
+		for (QSyncQueueInfo info : res) {
+			String str = format;
+			str = str.replaceFirst("queueId", Long.valueOf(info.result.qid).toString());
+			str = str.replaceFirst("syncerId", Long.valueOf(info.result.syncerId).toString());
+			str = str.replaceFirst("status", info.result.status.name());
+			
+			str = str.replaceFirst("attempt",df.format(info.lastAttempt) );
+			str = str.replaceFirst("error",df.format(info.lastError) );
+			str = str.replaceFirst("synced",df.format(info.lastSynced) );
+			trace(str);
+			
+		}
 		
 
 	}
@@ -572,6 +608,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		}
 		
 		{	// If Error occured next try should be executed with doubled interval
+			sm.unRegisterQueue(555L, 1L);
 			incExpectedLogErrorCount(4);
 			sm.registerQueue(540L, 10L);
 			ERROR = new RuntimeException();
@@ -614,4 +651,16 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		sm.onEveryMinute();
 		assertEquals(2, runnables.size());
 	}
+	
+	
+	public void testRecordSync(){
+		putRecord(555L, 564L);
+		sm.registerQueue(555L, 100L);
+		sm.onQueueChanged(555L);
+		ERROR = new RuntimeException();
+		incExpectedLogErrorCount(1);
+		execRuns();
+		assertEquals(564L, IDbQueueFactory.Helper.getQueue(555L).get(0L));
+	}
+	
 }
