@@ -1,5 +1,5 @@
 ext.tf_version = '39.0'
-ext.tf_release = release
+ext.tf_release = true
 ext.tf_vendor = 'Triniforce.com'
 
 apply plugin: 'java'
