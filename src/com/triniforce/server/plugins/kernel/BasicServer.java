@@ -980,12 +980,9 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 			int stSize = srvMode.getStackSize() + 1;
 
 			if (stSize != ApiStack.getThreadApiContainer().getStack().size()) {
-				ApiAlgs
-						.getLog(this)
-						.error(
-								MessageFormat
-										.format(
-												"Api stack corrupted. Stack size: {0}, must be: {1}", ApiStack.getThreadApiContainer().getStack().size(), stSize));//$NON-NLS-1$
+			    String msg = MessageFormat.format("Api stack corrupted. Stack size: {0}, must be: {1}", ApiStack.getThreadApiContainer().getStack().size(), stSize); 
+				ApiAlgs.getLog(this).error(msg);
+				ApiAlgs.getLog(this).error(ApiStack._toString());
 			}
 
 		} catch (Throwable t) {
