@@ -37,14 +37,14 @@ public class InitFinitTaskWrapper implements Runnable  {
                         ((ICommitable) m_command).commit();
                     }
                 } catch (Throwable e) {
-                    ApiAlgs.getLog(this).error(
+                    ApiAlgs.logError(this,
                             "Run error:" + m_command.toString(), e);//$NON-NLS-1$
                 }
             } finally {
                 try {
                     m_command.finit();
                 } catch (Throwable e) {
-                    ApiAlgs.getLog(this).error(
+                    ApiAlgs.logError(this,
                             "Finit error:" + m_command.toString(), e);//$NON-NLS-1$
                 }
             }
