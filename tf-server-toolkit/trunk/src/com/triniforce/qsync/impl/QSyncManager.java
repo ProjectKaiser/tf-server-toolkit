@@ -345,15 +345,20 @@ public class QSyncManager implements IQSyncManager {
 		if(null == qinfo)
 			return false;
 		
-		QueueExecutionInfo syncerInfo = getSyncerInfo(qid, qinfo.result.syncerId);
-		if(syncerInfo.m_currentTask != null){
-			ApiAlgs.getLog(this).trace("Task queue already started. Queue: "+qid);
-			return true;
-		}
-		
-		if(getRunningTasks() < getMaxNumberOfSyncTasks()){
-			long syncerId = qinfo.result.syncerId;
-			startQueueTask(qid, new RecordSync(this, syncerInfo.m_syncer, qid, syncerId));
+		try{
+			QueueExecutionInfo syncerInfo = getSyncerInfo(qid, qinfo.result.syncerId);
+			if(syncerInfo.m_currentTask != null){
+				ApiAlgs.getLog(this).trace("Task queue already started. Queue: "+qid);
+				return true;
+			}
+			
+			if(getRunningTasks() < getMaxNumberOfSyncTasks()){
+				long syncerId = qinfo.result.syncerId;
+				startQueueTask(qid, new RecordSync(this, syncerInfo.m_syncer, qid, syncerId));
+			}
+		}catch(Exception e){
+			ApiAlgs.getLog(this).error(e.getMessage(), e);
+			return false;
 		}
 		return true;
 	}
