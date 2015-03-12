@@ -544,12 +544,14 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		assertEquals(qids[3], res.get(0).result.qid);
 		
 		
-		String format = "queueId\tsyncerId\tstatus\tattempt - error - synced ";
+		String format = "queue(queueId)\tsyncer(syncerId)\tstatus\tattempt - error - synced ";
 		DateFormat df = DateFormat.getInstance();
 		res = sm.getTopQueuesInfo(100, EnumSet.allOf(QSyncTaskStatus.class));
 		for (QSyncQueueInfo info : res) {
 			String str = format;
+			str = str.replaceFirst("queue", ids.getName(info.result.qid));
 			str = str.replaceFirst("queueId", Long.valueOf(info.result.qid).toString());
+			str = str.replaceFirst("syncer", ids.getName(info.result.syncerId));
 			str = str.replaceFirst("syncerId", Long.valueOf(info.result.syncerId).toString());
 			str = str.replaceFirst("status", info.result.status.name());
 			
@@ -557,7 +559,8 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			str = str.replaceFirst("error",df.format(info.lastError) );
 			str = str.replaceFirst("synced",df.format(info.lastSynced) );
 			trace(str);
-			
+			if(null != info.result.errorClass)
+				trace(info.result.toString());
 		}
 		
 
