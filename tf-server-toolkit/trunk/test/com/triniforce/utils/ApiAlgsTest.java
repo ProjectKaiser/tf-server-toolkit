@@ -15,6 +15,8 @@ public class ApiAlgsTest extends TFTestCase {
         assertTrue(ApiAlgs.isSeriousException(new RuntimeException("")));
         assertFalse(ApiAlgs.isSeriousException(new RuntimeException("Unable to complete network request to host")));
         assertFalse(ApiAlgs.isSeriousException(new RuntimeException("database C:/TESTS/TESTBUILDTESTUNTILL/DB/REGRESSION.GDB shutdown")));
+        assertFalse(ApiAlgs.isSeriousException(new RuntimeException("GDS Exception. 335544721. Unable to complete network request to host")));
+        
     }
     
 	public void testAssertTrue() {
