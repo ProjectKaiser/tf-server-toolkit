@@ -18,8 +18,8 @@ public class ApiAlgs {
     
     static{
         m_safeExceptionsPatterns = new ArrayList<String>();
-        m_safeExceptionsPatterns.add(".*network request to host");
-        m_safeExceptionsPatterns.add(".*database.+shutdown");
+        m_safeExceptionsPatterns.add(".*network request to host.*");
+        m_safeExceptionsPatterns.add(".*database.+shutdown.*");
     }
     
     public static boolean isSeriousException(Throwable e){
