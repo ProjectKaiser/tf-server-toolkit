@@ -25,6 +25,9 @@ import com.triniforce.utils.IName;
 
 public class TQSyncQueues extends DBOTableDef {
 	
+	static final int MAX_ERROR_MESSAGE = 250;
+	static final int MAX_ERROR_STACK = 4048;
+	
 	static FieldDef id = FieldDef.createScalarField("id", ColumnType.LONG, true);
 	static FieldDef syncerId = FieldDef.createScalarField("id_syncer", ColumnType.LONG, true);
 	static FieldDef status = FieldDef.createStringField("status", ColumnType.CHAR, 20, true, null);
@@ -77,11 +80,21 @@ public class TQSyncQueues extends DBOTableDef {
 
 		public void taskCompleted(QSyncTaskResult result) {
 			ApiAlgs.getLog(this).trace(result.toString());
+			String errMsg = cutStringIfExceeded(result.errorMessage, MAX_ERROR_MESSAGE);
+			String errStack = cutStringIfExceeded(result.errorStack, MAX_ERROR_STACK);
 			update(new IName[]{status,errorClass, errorMessage, errorStackTrace}, 
-					new Object[]{result.status.name(),  result.errorClass,result.errorMessage,result.errorStack},
+					new Object[]{result.status.name(),  result.errorClass,errMsg,errStack},
 					//result.errorClass, result.errorMessage,result.errorStack}, 
 					new IName[]{id, syncerId}, new Object[]{result.qid, result.syncerId});
 			
+		}
+
+		private String cutStringIfExceeded(String str,
+				int max) {
+			if(str.length() > max){
+				str= str.substring(0, max);
+			}
+			return str;
 		}
 
 		public ResSet getIds() {
