@@ -190,7 +190,10 @@ public class LongListResponse extends BasicResponse{
     public int calcValueIdx(int rowNum, int colNum){
         if(colNum >= m_colNames.size())
             throw new IndexOutOfBoundsException(String.format("colNum: %d, size: %d", colNum, m_colNames.size())); //$NON-NLS-1$
-        
+
+        if(rowNum < 0){
+        	rowNum = getRowsNumber() - 1;
+        }
         int idx = rowNum*m_colNames.size() + colNum;
         if(idx >= m_values.size()){
             int rNum = m_values.size() / m_colNames.size();
