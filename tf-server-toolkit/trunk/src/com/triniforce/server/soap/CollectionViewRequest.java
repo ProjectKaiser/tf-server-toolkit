@@ -142,6 +142,21 @@ public class CollectionViewRequest extends LongListRequest {
     public void addWhere(String col, Object value){
         getWhere().put(col, value);
     }
+    
+    public void addFunctionToIdColumn(Class function, String resultName){
+        FieldFunctionRequest ffr = new FieldFunctionRequest("id", function.getName(), resultName);
+        getFunctions().add(ffr);
+    }
+    
+    public void addFunctionToColumn(IName col, Class function, String resultName){
+        FieldFunctionRequest ffr = new FieldFunctionRequest(col, function, resultName);
+        getFunctions().add(ffr);
+    }
+    
+    public void addFunctionToColumn(String col, Class function, String resultName){
+        FieldFunctionRequest ffr = new FieldFunctionRequest(col, function.getName(), resultName);
+        getFunctions().add(ffr);
+    }
 
     public void setTargetClass(Class cls) {
         m_target = cls.getName();
