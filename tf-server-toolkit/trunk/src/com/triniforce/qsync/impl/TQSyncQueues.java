@@ -91,6 +91,8 @@ public class TQSyncQueues extends DBOTableDef {
 
 		private String cutStringIfExceeded(String str,
 				int max) {
+			if(null == str)
+				return null;
 			if(str.length() > max){
 				str= str.substring(0, max);
 			}

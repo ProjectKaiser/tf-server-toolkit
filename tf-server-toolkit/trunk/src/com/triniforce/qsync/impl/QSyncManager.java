@@ -336,7 +336,7 @@ public class QSyncManager implements IQSyncManager {
 		return IDbQueueFactory.Helper.getQueue(qid).get(0L);
 	}
 
-	protected IQSyncer getSyncer(long qid, long syncerId) {
+	public IQSyncer getSyncer(long qid, long syncerId) {
 		return m_syncers.get(qid).m_syncer;
 	}
 
