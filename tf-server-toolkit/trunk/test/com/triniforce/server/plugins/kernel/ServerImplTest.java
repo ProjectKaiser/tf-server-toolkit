@@ -577,6 +577,7 @@ public class ServerImplTest extends ServerTest {
             	one(log).error(with(any(String.class)), with(any(RuntimeException.class)));
             	one(log).error(with(any(String.class)), with(any(RuntimeException.class)));
                 one(log).error(String.format("Api stack corrupted. Stack size: %d, must be: %d", stSz+7, stSz+1));
+                one(log).error(with(any(String.class)));
             }});
             server.leaveMode();
             
