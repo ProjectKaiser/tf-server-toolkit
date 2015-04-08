@@ -48,7 +48,9 @@ public class DboQsyncQueueTest extends BasicServerTestCase {
 	public void test() throws Exception {
 		synchronized (QSyncPlugin.syncObj) {
 			putQueue(40001L, "str_01");
-			QSyncPlugin.syncObj.wait();
+			long tst = System.currentTimeMillis();
+			QSyncPlugin.syncObj.wait(4000);
+			assertTrue("wait timeout expired", System.currentTimeMillis() - tst < 4000);
 		}
 		
 		TestSyncer s = p.getSyncer(getServer());

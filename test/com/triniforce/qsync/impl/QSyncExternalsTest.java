@@ -10,7 +10,6 @@ import com.triniforce.qsync.impl.QSyncPlugin.TestSyncer;
 import com.triniforce.qsync.intf.IQSyncer;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.INamedDbId;
-import com.triniforce.server.srvapi.INamedDbId.ENotFound;
 import com.triniforce.server.srvapi.ITaskExecutors;
 import com.triniforce.utils.ApiStack;
 
@@ -39,7 +38,7 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 		try{
 			assertNull(ext.getQSyncer(188L, 999L));
 			fail();
-		}catch(ENotFound e){}
+		}catch(com.triniforce.qsync.intf.IQSyncManagerExternals.EQSyncerNotFound e){}
 		
 		
 		
