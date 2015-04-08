@@ -32,7 +32,12 @@ public class QSyncExternals implements IQSyncManagerExternals{
 
 	public IQSyncer getQSyncer(long qid, Long syncerId) {
 		IQSyncer res;
-		String qSyncerName = ApiStack.getInterface(INamedDbId.class).getName(syncerId);
+		String qSyncerName;
+		try{
+			qSyncerName = ApiStack.getInterface(INamedDbId.class).getName(syncerId);
+		}catch(INamedDbId.ENotFound e){
+			throw new EQSyncerNotFound("" + syncerId);	
+		}
 		
 		IPKExtensionPoint ep = ApiStack.getInterface(IBasicServer.class).getExtensionPoint(PKEPDBObjects.class);
 		if(ep.getExtensions().containsKey(qSyncerName)){

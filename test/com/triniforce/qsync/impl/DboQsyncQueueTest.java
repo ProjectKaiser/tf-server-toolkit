@@ -61,6 +61,9 @@ public class DboQsyncQueueTest extends BasicServerTestCase {
 		}finally{
 			getServer().leaveMode();
 		}
+		
+		assertEquals(Arrays.asList("str_01"), s.synced());
+
 
 		QSyncTaskStatus qsState;
 		trace("Read queue status");
