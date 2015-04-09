@@ -49,7 +49,7 @@ public class DboQsyncQueueTest extends BasicServerTestCase {
 		synchronized (QSyncPlugin.syncObj) {
 			putQueue(40001L, "str_01");
 			long tst = System.currentTimeMillis();
-			QSyncPlugin.syncObj.wait(4000);
+			QSyncPlugin.syncObj.wait(0);
 			assertTrue("wait timeout expired", System.currentTimeMillis() - tst < 4000);
 		}
 		
