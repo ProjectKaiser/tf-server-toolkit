@@ -58,6 +58,7 @@ public class TQSyncQueues extends DBOTableDef {
 		}
 
 		public void registerQueue(long qid, long sncId, QSyncTaskStatus vstatus) {
+			delete(new IName[]{id}, new Object[]{qid});
 			insert(new IName[]{id, syncerId, status}, new Object[]{qid, sncId, vstatus.name()});
 			
 		}

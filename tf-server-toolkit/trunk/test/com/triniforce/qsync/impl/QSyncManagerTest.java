@@ -154,10 +154,11 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		
 		{
 			//already registered
-			try{
-				sm.registerQueue(6002L, 245);
-				fail();
-			}catch(Exception e){}
+			sm.registerQueue(6002L, 245);		
+			QSyncQueueInfo res = sm.getQueueInfo(6002);
+			assertEquals(245, res.result.syncerId);
+			assertEquals(QSyncTaskStatus.INITIAL_SYNC, res.result.status);
+	
 		}
 	}
 
