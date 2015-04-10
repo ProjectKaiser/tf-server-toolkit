@@ -9,6 +9,7 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -17,6 +18,7 @@ import java.nio.charset.Charset;
 
 import javax.xml.transform.TransformerException;
 
+import org.apache.commons.logging.Log;
 import org.w3c.dom.Document;
 
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
@@ -75,10 +77,36 @@ public class RequestHandler {
         m_invoker = service;
     } 
 
+    static final int LOG_BUF_SIZE = 1000;
+    
     public void exec(InputStream input, OutputStream output){
         String soapNS = null;
+    	
         try {
-            SOAPDocument in = m_gen.deserialize(m_desc, input);
+        	boolean bLogErorRequest;
+            Log log = ApiAlgs.getLog(this);
+            bLogErorRequest = log.isTraceEnabled() && input.markSupported();
+            if(bLogErorRequest)
+            	input.mark(LOG_BUF_SIZE);
+            SOAPDocument in;
+            try{
+            	in = m_gen.deserialize(m_desc, input);
+        	} catch (Exception e){
+            	ApiAlgs.getLog(this).error("service exception", e);
+                m_gen.writeDocument(output, m_gen.serializeException(soapNS, e));
+                if(bLogErorRequest){
+                	try {
+    					input.reset();
+    					byte[] buf = new byte[LOG_BUF_SIZE];
+    					input.read(buf);
+    					log.trace(new String(buf, "utf-8"));
+    				} catch (IOException e1) {
+    					ApiAlgs.getLog(this).error("Log request failed", e1);
+    				}
+                	
+                }
+        		return;
+        	} 
             soapNS = in.m_soap;
             Object res = m_invoker.invokeService(in.m_method, in.m_args);
             SOAPDocument out = new SOAPDocument();
