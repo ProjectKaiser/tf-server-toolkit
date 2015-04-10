@@ -8,6 +8,7 @@ package com.triniforce.soap;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import com.triniforce.db.test.TFTestCase;
@@ -41,6 +42,9 @@ public class RequestHandlerTest extends TFTestCase {
         
         public String method_charset(){
         	return "привет мир";
+        }
+
+        public void methodDecimal(BigDecimal v){
         }
     }
 
@@ -201,5 +205,27 @@ public class RequestHandlerTest extends TFTestCase {
 	        String res = new String(byte_out.toByteArray(), "utf-8");
 	        assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"привет мир\"}", res);
         }
+    }
+    
+    public void testDeserializeRequestError() throws UnsupportedEncodingException{
+    	
+        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        InterfaceDescription desc = gen.parse(null, TestService.class);
+        RequestHandler handler = new RequestHandler(gen, desc, new RequestHandler.ReflectServiceInvoker(new TestService()));
+        
+        String REQ1 = 
+            "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+
+            "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
+            "       xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
+            "       xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"+
+            "  <soap:Body>"+
+            "    <methodDecimal xmlns=\"http://tempuri.org/\">"+
+            "      <arg0>56734,235</arg0>"+
+            "    </methodDecimal>"+
+            "  </soap:Body>"+
+            "</soap:Envelope>";
+        
+        incExpectedLogErrorCount(1);
+        handler.exec(new ByteArrayInputStream(REQ1.getBytes("utf-8")), System.out);
     }
 }
