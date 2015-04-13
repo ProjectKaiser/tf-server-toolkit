@@ -151,5 +151,9 @@ public class ApiStack implements IApi, IFinitable{
         res += "--- ApiStack eof\n";
         return res;
 	}
+	
+	public static void finitThreadLocal(){
+		m_SrvTL.remove();
+	}
 
 }
