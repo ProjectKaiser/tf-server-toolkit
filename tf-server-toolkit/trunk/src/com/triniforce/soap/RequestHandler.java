@@ -77,7 +77,7 @@ public class RequestHandler {
         m_invoker = service;
     } 
 
-    static final int LOG_BUF_SIZE = 1000;
+    static final int LOG_BUF_SIZE = 8000;
     
     public void exec(InputStream input, OutputStream output){
         String soapNS = null;

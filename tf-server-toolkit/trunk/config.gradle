@@ -1,4 +1,4 @@
-adjustProperty('MavenBaseUrl', 'https://offsxp.sigma-soft.ru/artifactory')
+adjustProperty('MavenBaseUrl', 'https://offsxp.office.sigma-soft.ru:8443/artifactory')
 adjustProperty('MavenUsername', null, true)
 adjustProperty('MavenPassword', null, true)
 adjustProperty('MavenResolveUrl', combineUrl(MavenBaseUrl, 'repo'))
