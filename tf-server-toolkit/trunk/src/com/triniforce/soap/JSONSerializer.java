@@ -366,7 +366,8 @@ public class JSONSerializer {
 						m_argIdx++;
 	
 					}
-					m_handler.startElement(argName, false, null);
+					boolean bNull = null == arg0;
+					m_handler.startElement(argName, bNull, null);
 					setPrimitive(arg0);
 					m_handler.endElement();
 				}
@@ -383,6 +384,8 @@ public class JSONSerializer {
 
 
 		private void setPrimitive(Object arg0) {
+			if(null == arg0)
+				return ;
 			CurrentObject co = m_handler.getTopObject();
 			TypeDef td = co.getType();
 			if(td.getName().equals("object")){

@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,6 +35,9 @@ public class JSONSerializerTest extends TFTestCase {
 
 		public String method_002(int v1, int v2){
 			return null;
+		}
+
+		public void log_log(String s, Object o, String s2){
 		}
 		
 		interface IAbstract{}
@@ -234,6 +238,12 @@ public class JSONSerializerTest extends TFTestCase {
 			trace(res.m_args[0]);
 //			assertEquals(json,  res.m_args[0]);
 		}
+		
+		String str = "{\"jsonrpc\":\"2.0\",\"method\":\"log_log\",\"params\":[\"log_me\",null,\"INFO\"]}";
+		res = srz.deserialize(desc, source(str));
+		assertEquals(Arrays.asList("log_me", null, "INFO"), Arrays.asList(res.m_args));
+
+
 	}
 
 	public static InputStream source(String string) throws UnsupportedEncodingException {
