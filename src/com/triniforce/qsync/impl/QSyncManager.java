@@ -5,8 +5,6 @@
  */
 package com.triniforce.qsync.impl;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -52,27 +50,22 @@ public class QSyncManager implements IQSyncManager {
 		}
 
 		public void run() {
-			QSyncTaskResult result = new QSyncTaskResult();
-			result.qid = m_qid;
-			result.syncerId = m_syncerId;
+			QSyncTaskResult result;
 			try{
 				boolean bCompleted = exec();
-				result.status = bCompleted ? QSyncTaskStatus.SYNCED : QSyncTaskStatus.EXEC_TIMEOUT;  
+				result = new QSyncTaskResult(m_qid, m_syncerId, bCompleted ? QSyncTaskStatus.SYNCED : QSyncTaskStatus.EXEC_TIMEOUT, null);
 			}catch(Exception e){
 				ApiAlgs.getLog(this).error("Sync task error", e);
 				m_syncer.finit(e);
-				result.status = m_errorStatus;
-				result.errorClass = e.getClass().getName();
-				result.errorMessage = e.getMessage();
-				
-				StringWriter sw = new StringWriter();
-				PrintWriter s = new PrintWriter(sw);
-				e.printStackTrace(s);
-				result.errorStack = sw.toString();
+				result = new QSyncTaskResult(m_qid, m_syncerId, m_errorStatus, e);
 			}
 			m_syncMan.onTaskCompleted(result);
 			SrvApiAlgs2.getIServerTran().commit();
 			
+		}
+		
+		QSyncTaskStatus getErrorStatus(){
+			return m_errorStatus;
 		}
 
 		abstract boolean exec();
@@ -296,8 +289,8 @@ public class QSyncManager implements IQSyncManager {
 //			}
 			
 			if(null != task){
-				startQueueTask(qid, task);
-				nexec --;
+				if(startQueueTask(qid, syncerId,  task));
+					nexec --;
 			}
 		}
 		
@@ -316,11 +309,19 @@ public class QSyncManager implements IQSyncManager {
 		return res;
 	}
 
-	private void startQueueTask(long qid, SyncTask task) {
+	private boolean startQueueTask(long qid, long sid, SyncTask task) {
 		QueueExecutionInfo syncerInfo = m_syncers.get(qid);
-		syncerInfo.m_lastAttempt = ApiStack.getInterface(ITime.class).currentTimeMillis();
-		syncerInfo.m_currentTask = task;
-		m_syncerExternals.runSync(task);
+		syncerInfo.m_lastAttempt = ApiStack.getInterface(ITime.class).currentTimeMillis(); 
+		try{
+			m_syncerExternals.runSync(task);
+			syncerInfo.m_currentTask = task; // Task started
+		}catch(Exception e){
+			ApiAlgs.getLog(this).error(e.getMessage(), e);
+			syncerInfo.m_lastError = ApiStack.getInterface(ITime.class).currentTimeMillis();
+			queueBL().taskCompleted(new QSyncTaskResult(qid, sid, task.m_errorStatus, e)); // set error status
+			return false;
+		}
+		return true;
 		
 	}
 
@@ -354,7 +355,7 @@ public class QSyncManager implements IQSyncManager {
 			
 			if(getRunningTasks() < getMaxNumberOfSyncTasks()){
 				long syncerId = qinfo.result.syncerId;
-				startQueueTask(qid, new RecordSync(this, syncerInfo.m_syncer, qid, syncerId));
+				return startQueueTask(qid, syncerId, new RecordSync(this, syncerInfo.m_syncer, qid, syncerId));
 			}
 		}catch(Exception e){
 			ApiAlgs.getLog(this).error(e.getMessage(), e);
@@ -417,14 +418,13 @@ public class QSyncManager implements IQSyncManager {
 				res.lastError   = syncerInfo.m_lastError;
 				res.lastSynced  = syncerInfo.m_lastSynced;
 			}
-			res.result = new QSyncTaskResult();
-			res.result.qid = qid;
-			res.result.syncerId = rs.getLong(2);
-			res.result.status = QSyncTaskStatus.valueOf(QSyncTaskStatus.class, rs.getString(3).trim());
-			if(EnumSet.of(QSyncTaskStatus.ERROR, QSyncTaskStatus.INITIAL_SYNC_ERROR).contains(res.result.status)){
-				res.result.errorClass = rs.getString(4);
-				res.result.errorMessage = rs.getString(5);
-				res.result.errorStack = rs.getString(6);
+			
+			QSyncTaskStatus status = QSyncTaskStatus.valueOf(QSyncTaskStatus.class, rs.getString(3).trim());
+			if(EnumSet.of(QSyncTaskStatus.ERROR, QSyncTaskStatus.INITIAL_SYNC_ERROR).contains(status)){
+				res.result = new QSyncTaskResult(qid, rs.getLong(2), status, rs.getString(4), rs.getString(5),rs.getString(6));
+			}
+			else{
+				res.result = new QSyncTaskResult(qid, rs.getLong(2), status, null);
 			}
 		}
 		return res;
