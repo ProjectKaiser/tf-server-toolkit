@@ -5,6 +5,9 @@
  */
 package com.triniforce.qsync.intf;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 public class QSyncTaskResult {
 
     public long qid;
@@ -18,7 +21,31 @@ public class QSyncTaskResult {
     public String errorMessage;
     public String errorClass;
     public String errorStack;
+    
+    public QSyncTaskResult(long qid, long sid, QSyncTaskStatus status ,Exception e) {
+		this.qid = qid;
+		this.syncerId = sid;
+		this.status = status;
+		if(null != e){
+			this.status = status;
+			this.errorClass = e.getClass().getName();
+			this.errorMessage = e.getMessage();
+			StringWriter sw = new StringWriter();
+			PrintWriter s = new PrintWriter(sw);
+			e.printStackTrace(s);
+			this.errorStack = sw.toString();
+		}
+	}
 
+    public QSyncTaskResult(long qid, long sid, QSyncTaskStatus status , String cls, String msg, String stk) {
+		this.qid = qid;
+		this.syncerId = sid;
+		this.status = status;
+		this.status = status;
+		this.errorClass = cls;
+		this.errorMessage = msg;
+		this.errorStack = stk;
+	}
     
     @Override
     public String toString() {

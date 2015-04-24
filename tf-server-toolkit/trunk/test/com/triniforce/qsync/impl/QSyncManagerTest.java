@@ -36,6 +36,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 	static Map<Long, List<Object>> synced = new HashMap<Long, List<Object>>();
 	static List<Runnable> runnables = new ArrayList<Runnable>();
 	static private RuntimeException ERROR;
+	static private RuntimeException EXECUTOR_START_ERROR = null;
 	
 	static class TestQSyncer implements IQSyncer{
 
@@ -85,6 +86,8 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
         }
 
 		public void runSync(Runnable r) {
+			if(null != EXECUTOR_START_ERROR)
+				throw EXECUTOR_START_ERROR;
 			runnables.add(r);
 		}
 
@@ -423,10 +426,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		long t1,t2,t3,t4;
 		{
 			sm.onEveryMinute(); // start task 
-			QSyncTaskResult result = new QSyncTaskResult();
-			result.qid = 5555L;
-			result.syncerId = 101L;
-			result.status = QSyncTaskStatus.SYNCED;
+			QSyncTaskResult result = new QSyncTaskResult(5555L, 101L, QSyncTaskStatus.SYNCED, null);
 			runnables.clear();
 			
 			t1 = time.currentTimeMillis();
@@ -445,10 +445,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			sm.onQueueChanged(5555L);
 			runnables.clear();
 			
-			QSyncTaskResult result = new QSyncTaskResult();
-			result.qid = 5555L;
-			result.syncerId = 101L;
-			result.status = QSyncTaskStatus.ERROR;
+			QSyncTaskResult result = new QSyncTaskResult(5555L, 101L, QSyncTaskStatus.ERROR, null);
 			
 			t3 = time.currentTimeMillis();
 			sm.onTaskCompleted(result);
@@ -461,10 +458,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		}
 		{// task was not started
 			sm.registerQueue(5556L, 101L);
-			QSyncTaskResult result = new QSyncTaskResult();
-			result.qid = 5556L;
-			result.syncerId = 101L;
-			result.status = QSyncTaskStatus.ERROR;
+			QSyncTaskResult result = new QSyncTaskResult(5555L, 101L, QSyncTaskStatus.ERROR, null);
 			try{
 				sm.onTaskCompleted(result);
 				fail();
@@ -487,7 +481,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		{
 			sm.registerQueue(5557L, 101L);
 			sm.registerQueue(5558L, 101L);
-			QSyncTaskResult result = new QSyncTaskResult();
+			QSyncTaskResult result = new QSyncTaskResult(5555L, 101L, QSyncTaskStatus.SYNCED, null);
 			result.qid = 5557L;
 			result.syncerId = 101L;
 			result.status = QSyncTaskStatus.SYNCED;
@@ -665,6 +659,23 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		incExpectedLogErrorCount(1);
 		execRuns();
 		assertEquals(564L, IDbQueueFactory.Helper.getQueue(555L).get(0L));
+	}
+	
+	public void testStartTask(){
+		sm.registerQueue(1000L, 100L);
+		EXECUTOR_START_ERROR = new RuntimeException("testStartTask");
+		long tst = ApiStack.getInterface(ITime.class).currentTimeMillis();
+		assertFalse(sm.onQueueChanged(1000L));
+		QSyncQueueInfo qinfo = sm.getQueueInfo(1000L);
+		assertTrue(qinfo.lastError > tst);
+		tst = ApiStack.getInterface(ITime.class).currentTimeMillis();  
+		assertFalse(sm.onQueueChanged(1000L));
+		qinfo = sm.getQueueInfo(1000L);
+		assertTrue(qinfo.lastError > tst);
+		incExpectedLogErrorCount(2);
+		EXECUTOR_START_ERROR = null;
+		
+		assertNotNull(qinfo.result.errorMessage);
 	}
 	
 }
