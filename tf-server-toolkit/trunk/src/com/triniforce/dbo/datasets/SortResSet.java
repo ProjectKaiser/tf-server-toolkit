@@ -31,6 +31,7 @@ public class SortResSet extends BasicResSet implements IResSet {
 		Collections.sort(m_rows, new ArrayRowComparator(createIndex(m_columns, order)));
 	}
 	
+	
     /**
      * @param colNames   list of column names
      * @param orderBy    list of column for order

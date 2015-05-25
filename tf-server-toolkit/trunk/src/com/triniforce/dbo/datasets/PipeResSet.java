@@ -29,6 +29,11 @@ public class PipeResSet extends BasicResSet implements IResSet, IRow{
 	}
 	
 	@Override
+	public boolean isRowBeg() {
+		return m_src.isRowBeg();
+	}
+	
+	@Override
 	public boolean first() {
 	    return m_src.first();
 	}
