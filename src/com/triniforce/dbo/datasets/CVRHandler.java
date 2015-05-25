@@ -83,24 +83,6 @@ public class CVRHandler implements ICVRHandler {
 		return res;
 	}
 
-	public IResSet filterAndSend(IResSet rs, List<WhereExpr> where,
-			List<FieldFunctionRequest> ffs, List<FieldFunction> ff, List<String> fields, int from, int to) {
-		PipeResSet fltRs = new PipeResSet(rs);
-		Iterator<FieldFunction> iff = ff.iterator();
-		for(FieldFunctionRequest req : ffs){
-			fltRs.addFieldFunction(getFFResName(req), req.getFieldName(), iff.next());
-		}
-		setWhereExprs(fltRs, where);
-
-		TruncResSet result = new TruncResSet(fltRs);
-		for (String column : fields) {
-			result.addColumn(column);
-		}
-		result.setFromBorder(from);
-		result.setToBorder(to);
-		return result;
-	}
-
 	public IResSet order(IResSet rs, List<Object> order,
 			List<FieldFunctionRequest> ffs, List<FieldFunction> ff) {
 		PipeResSet pipe = new PipeResSet(rs);

@@ -56,12 +56,6 @@ public interface ICVRHandler {
 	IResSet filter(IResSet rs, List<WhereExpr> where, List<FieldFunctionRequest> ffs, List<FieldFunction> ff);
 	
 	/**
-	 * Filter and send data. Function called when order data is not needed
-	 * 
-	 */
-	IResSet filterAndSend(IResSet rs, List<WhereExpr> where, List<FieldFunctionRequest> ffs, List<FieldFunction> ff, List<String> fields, int from, int to);
-	
-	/**
 	 * Order data 
 	 * @return
 	 */
