@@ -145,49 +145,6 @@ public class CVRHandlerTest extends TFTestCase {
 		};
 	}
 
-	public void testFilterAndSend() {
-		ArrayList<WhereExpr> where = new ArrayList<WhereExpr>();
-		ArrayList<FieldFunctionRequest> ffs = new ArrayList<FieldFunctionRequest>();
-		ArrayList<FieldFunction> ff = new ArrayList<FieldFunction>();
-		ArrayList<String> fields = new ArrayList<String>();
-		fields.addAll(Arrays.asList("idx", "name", "price"));
-		CVRHandler h = new CVRHandler();
-		{
-			IResSet res = h.filterAndSend(getRS(), where, ffs, ff, fields,0,0);
-			assertTrue(res.next());
-			assertEquals(Arrays.asList("idx", "name", "price"), res.getColumns());
-		}
-		{
-			fields.clear();
-			fields.addAll(Arrays.asList("name", "price"));
-			IResSet res = h.filterAndSend(getRS(), where, ffs, ff, fields,0,0);
-			assertEquals(Arrays.asList("name", "price"), res.getColumns());
-			assertTrue(res.next());
-		}
-		{
-			IResSet res = h.filterAndSend(getRS(), where, ffs, ff, fields,2,3);
-			assertTrue(res.next());
-			assertEquals(19.99, res.getObject(2));
-			assertFalse(res.next());
-		}
-		{
-			ffs.add(new FieldFunctionRequest("price", TestFunSale.class.getName(), "sale"));
-			ff.add(new TestFunSale());
-			fields.clear();
-			fields.addAll(Arrays.asList("sale"));
-			IResSet res = h.filterAndSend(getRS(), where, ffs, ff, fields,0,0);
-			assertTrue(res.next());
-			assertEquals("50%", res.getObject(1));
-		}
-		
-		{
-			where.add(new WhereExpr.ExprEquals("sale", "10%"));
-			IResSet res = h.filterAndSend(getRS(), where, ffs, ff, fields,0,0);
-			assertTrue(res.next());
-			assertEquals("10%", res.getObject(1));
-		}
-	}
-
 	public void testOrder() {
 		ArrayList<FieldFunctionRequest> ffs = new ArrayList<FieldFunctionRequest>();
 		ArrayList<FieldFunction> ff = new ArrayList<FieldFunction>();
