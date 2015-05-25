@@ -12,6 +12,8 @@ import com.triniforce.utils.IName;
 public interface IResSet {
     boolean next();  
     boolean first();
+    
+    boolean isRowBeg();
   
     
     public int getIndexOf(String name) throws EColumnNotFound;

@@ -36,6 +36,11 @@ public abstract class BasicResSet implements IResSet {
     public abstract List<String> getColumns();
     public abstract boolean first();
     public abstract boolean next();
+    
+    public boolean isRowBeg(){
+    	return true;
+    }
+    
     public int getIndexOf(String colName) throws EColumnNotFound{
         if(m_idx == null){
             m_idx = new HashMap<String, Integer>();
