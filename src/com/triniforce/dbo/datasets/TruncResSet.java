@@ -24,7 +24,7 @@ public class TruncResSet extends BasicResSet implements IResSet {
 	private List<String> m_columns = new ArrayList<String>();
 	private List<Integer> m_columnIndieces = new ArrayList<Integer>();
 	private IResSet m_src;
-	private int m_lineNo = -1;
+	int curRow = -1;
 	private int m_from = 0;
 	private int m_to;
 		
@@ -49,21 +49,26 @@ public class TruncResSet extends BasicResSet implements IResSet {
 		m_to = to;
 	}
 	
+	
+		
     @Override
     public boolean first() {
-        m_lineNo = -1;
+    	curRow = -1;
         return m_src.first();
     }
 	
 	public boolean next() {
+	//	int prevRow = curRow;
 		do{
-			m_lineNo++;
-			if(0!=m_to && m_lineNo >= m_to)
-				return false;
 			if(!m_src.next())
 				return false;
-			
-		}while(m_lineNo < m_from);
+			if(m_src.isRowBeg()){
+				curRow++;
+			}
+			if(0!=m_to && curRow >= m_to)
+				return false;
+
+		}while(curRow < m_from);
 		return true;
 	}
 
