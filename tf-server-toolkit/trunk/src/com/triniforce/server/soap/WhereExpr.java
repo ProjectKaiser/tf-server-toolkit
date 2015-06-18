@@ -231,6 +231,13 @@ public abstract class WhereExpr {
         }
     }
     
+    public static class ExprContainsId  extends ColumnExprValued{
+        public ExprContainsId() {
+        }
+        public ExprContainsId(String name, Object value){
+            super(name, value);
+        }
+    }
     
     
     @PropertiesSequence( sequence = {"vals"})
