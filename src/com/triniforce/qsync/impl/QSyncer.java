@@ -16,8 +16,6 @@ public class QSyncer implements IQSyncer{
     }
 
     public void initialSync() {
-        // TODO Auto-generated method stub
-        
     }
 
     public void sync(Object obj) {

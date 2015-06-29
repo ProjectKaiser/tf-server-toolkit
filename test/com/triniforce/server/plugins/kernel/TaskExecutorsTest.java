@@ -38,7 +38,7 @@ public class TaskExecutorsTest extends TFTestCase {
         final Lock lock = new ReentrantLock();
         lock.lock();
 
-        //TODO: must be MAX_NORMAL_THREADS * 10
+        //LATER: must be MAX_NORMAL_THREADS * 10
         for (int i = 0; i < TaskExecutors.MAX_NORMAL_THREADS; i++) {
 
             final Integer cnt = new Integer(i);
