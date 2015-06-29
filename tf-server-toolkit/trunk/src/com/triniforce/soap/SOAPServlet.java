@@ -116,7 +116,7 @@ import com.triniforce.utils.ApiAlgs;
 	}
 
 	protected void doServiceCall(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    //FIXME gmp: limit total size of buffer?
+	    //LATER gmp: limit total size of buffer?
 		ServletInputStream is = request.getInputStream(); 
 		byte[] buf = new byte[10000];
 		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();

@@ -95,9 +95,6 @@ public interface IQSyncManager {
      */
     
     
-    //TODO
-    //boolean isSyncerRunning(Long qid);
-    
     QSyncQueueInfo getQueueInfo(long qid);
     
     /**

@@ -220,7 +220,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
             }
         }
 
-        //TODO: почему здесь а не в doRegistration() ?
+        //LATER: почему здесь а не в doRegistration() ?
         //tran inners
         {
             IPKExtensionPoint ep = getRootExtensionPoint().getExtensionPoint(PKEPTranInners.class);
