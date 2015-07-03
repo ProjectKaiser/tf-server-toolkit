@@ -100,6 +100,11 @@ public abstract class WhereExpr {
             res.add(m_colName);
             return res;
         }
+        
+        @Override
+        public String toString() {
+        	return super.toString()+ ", column=" + m_colName;
+        }
     }
     
     @PropertiesSequence( sequence = {"value"})
@@ -128,6 +133,11 @@ public abstract class WhereExpr {
                 res.addAll(((ExprV)m_value).calcColumnNames());                
             }
             return res;
+        }
+        
+        @Override
+        public String toString() {
+        	return super.toString()+", value="+m_value;
         }
         
     }
