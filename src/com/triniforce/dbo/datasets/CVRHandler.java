@@ -47,7 +47,6 @@ public class CVRHandler implements ICVRHandler {
 			FieldFunctionRequest ffr = ffs.get(iFfr);
 			res.addFieldFunction(getFFResName(ffr), ffr.getFieldName(), ff.get(iFfr));
 		}
-
 	}
 
 	Collection<String> requestedColumns(List<WhereExpr> exprs){
@@ -170,7 +169,12 @@ public class CVRHandler implements ICVRHandler {
 	private List<WhereExpr> getWhereExprs(CollectionViewRequest req) {
 		ArrayList<WhereExpr> res = new ArrayList<WhereExpr>(req.getWhereExprs());
 		for(Map.Entry<String, Object> entry : req.getWhere().entrySet()){
-			res.add(new WhereExpr.ExprEquals(entry.getKey(), entry.getValue()));
+			if("is_active".equals(entry.getKey())  && TFUtils.equals(2, entry.getValue())){
+				//LATER: is_active = 2 is handled internalle by SOME some datasets
+				//Here we ignore it as a work around
+			}else{
+				res.add(new WhereExpr.ExprEquals(entry.getKey(), entry.getValue()));
+			}
 		}
 		return res;
 	}
