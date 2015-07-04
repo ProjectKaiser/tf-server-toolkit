@@ -159,11 +159,21 @@ public class CVRHandler implements ICVRHandler {
 		if(isOrderNeeded(flags, req.getOrderBy())){
 			rs = order(rs, req.getOrderBy(), req.getFunctions(), ffs);
 		}
+		
+		if(isAfterOrderFilterNeeded(flags, req)){
+			rs = filter(rs, req.getAfterOrderWhereExprs(), req.getFunctions(), ffs);
+		}
+		
 		if(isTruncNeeded(rs.getColumns(), resColumns, req)){
 			int to = req.getLimit() == 0 ? 0 : req.getStartFrom() + req.getLimit();
 			rs = send(rs, resColumns, req.getFunctions(), ffs, req.getStartFrom(), to);
 		}
 		return rs;
+	}
+
+	private boolean isAfterOrderFilterNeeded(RSFlags flags,
+			CollectionViewRequest req) {
+		return !(flags.m_bFilter || req.getAfterOrderWhereExprs() == null || req.getAfterOrderWhereExprs().isEmpty());
 	}
 
 	private List<WhereExpr> getWhereExprs(CollectionViewRequest req) {

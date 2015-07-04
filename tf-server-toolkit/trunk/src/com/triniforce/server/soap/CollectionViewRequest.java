@@ -14,7 +14,7 @@ import com.triniforce.soap.PropertiesSequence;
 import com.triniforce.utils.IName;
 
 @PropertiesSequence( sequence = {"target", "parentOf", "parentId", "columns", 
-        "where", "orderBy", "whereExprs", "functions", "dbValue"}) 
+        "where", "orderBy", "whereExprs", "functions", "dbValue", "afterOrderWhereExprs"}) 
 public class CollectionViewRequest extends LongListRequest {
 
     Long m_parentOf;
@@ -87,6 +87,12 @@ public class CollectionViewRequest extends LongListRequest {
     List<Object> m_orderBy = new ArrayList<Object>();
     
     List<WhereExpr> m_whereExprs = new ArrayList<WhereExpr>();
+    
+    /**
+     * Used for datasets which use standard ordering and filtering (e.g. not for CDOutline). 
+     * These exprs are applied after ordering, so functions like SameAsPrevious will work
+     */
+    private List<WhereExpr> m_afterOrderWhereExprs = new ArrayList<WhereExpr>();
     
     List<FieldFunctionRequest> m_functions = new ArrayList<FieldFunctionRequest>();
     
@@ -197,4 +203,12 @@ public class CollectionViewRequest extends LongListRequest {
     public void setWhereExprs(List<WhereExpr> whereExprs) {
         m_whereExprs = whereExprs;
     }
+
+	public List<WhereExpr> getAfterOrderWhereExprs() {
+		return m_afterOrderWhereExprs;
+	}
+
+	public void setAfterOrderWhereExprs(List<WhereExpr> afterOrderWhereExprs) {
+		m_afterOrderWhereExprs = afterOrderWhereExprs;
+	}
 }
