@@ -23,7 +23,7 @@ public class PipeResSet extends BasicResSet implements IResSet, IRow{
 		
 	public PipeResSet(IResSet src){
 		m_src = src;
-		m_columns = m_src.getColumns();
+		m_columns = new ArrayList(m_src.getColumns());
 		m_srcSize = m_columns.size();
 		
 	}
@@ -82,8 +82,6 @@ public class PipeResSet extends BasicResSet implements IResSet, IRow{
 	public void addFieldFunction(String column, String srcColumn, FieldFunction ff) {
 		if(m_columns.contains(column))
 			throw new EColumnAlreadyAdded(column);
-		//FIXME new???
-		m_columns = new ArrayList<String>(m_columns);
 		m_columns.add(column);
 		m_ffCalc.addFieldFunction(m_columns, srcColumn, ff);
 	}
