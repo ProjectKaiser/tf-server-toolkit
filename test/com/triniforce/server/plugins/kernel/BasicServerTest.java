@@ -36,6 +36,8 @@ import com.triniforce.utils.ApiStack;
 
 public class BasicServerTest extends BasicServerTestCase {
 
+    static TimeZone tz1 = TimeZone.getDefault();
+    
 	public static class Handlers{
 		public IHandler handler1;
 		public IHandler handler2;
@@ -77,21 +79,40 @@ public class BasicServerTest extends BasicServerTestCase {
 	
 	@Override
 	public void test() throws Exception {
-	    @SuppressWarnings("unused")
-        BasicServer bs = new BasicServer();
-	    TimeZone def = TimeZone.getDefault();
-	    TimeZone gmt = TimeZone.getTimeZone("GMT");
-	    assertEquals(gmt, def);
-        m_server.enterMode(Mode.Running);
-        try{
-            TimeZone tz = ApiStack.getInterface(TimeZone.class);
-            assertEquals("Europe/Helsinki", tz.getID());
-            
-            ApiAlgs.getLog(this).trace(new Date());
-            
-        } finally{
-            m_server.leaveMode();
-        }
+		{
+		    @SuppressWarnings("unused")
+	        BasicServer bs = new BasicServer();
+            assertEquals(tz1.getID(), System.getProperty(BasicServer.TZ_PROPERTY));
+		    TimeZone def = TimeZone.getDefault();
+		    TimeZone gmt = TimeZone.getTimeZone("GMT");
+		    assertEquals(gmt, def);
+	        m_server.enterMode(Mode.Running);
+	        try{
+	            TimeZone tz = ApiStack.getInterface(TimeZone.class);
+	            assertEquals("Europe/Helsinki", tz.getID());
+	            
+	            ApiAlgs.getLog(this).trace(new Date());
+	            
+	        } finally{
+	            m_server.leaveMode();
+	        }
+		}
+		{
+			m_coreApi.setIntfImplementor(TimeZone.class, TimeZone.getTimeZone("GMT+05:00"));
+			
+			BasicServer bs = new BasicServer(m_coreApi);
+			bs.doRegistration();
+			if(bs.isDbModificationNeeded())
+				bs.doDbModification();
+			bs.enterMode(Mode.Running);
+			try{
+				assertEquals("GMT+05:00", ApiStack.getInterface(TimeZone.class).getID());
+			}finally{
+				bs.leaveMode();
+			}
+			
+		    
+		}
 	 
 	}
 	

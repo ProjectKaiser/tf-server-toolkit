@@ -245,6 +245,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 	public static String DPP_TABLE = "com.triniforce.server.plugins.kernel.tables.DataPrepProcedures"; //$NON-NLS-1$
 	public static String UP_TABLE = "com.triniforce.server.plugins.kernel.tables.UpgradeProcedures"; //$NON-NLS-1$
+	public static String TZ_PROPERTY = BasicServer.class.getName() + ".TimeZone";
 
 	protected ApiStack m_coreApi;
 
@@ -264,10 +265,12 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 //	private List<DataPreparationProcedure> m_dppRegList = null;
 	
-	TimeZone m_defTimeZone;
+//	TimeZone m_defTimeZone;
 
 	public BasicServer() {
-	    m_defTimeZone = TimeZone.getDefault();
+	    if(null == System.getProperty(TZ_PROPERTY))
+	    	System.setProperty(TZ_PROPERTY, TimeZone.getDefault().getID());
+	    
 	    TimeZone gmt = TimeZone.getTimeZone("GMT");
 	    TimeZone.setDefault(gmt);
 	    DateTimeZone.setDefault(DateTimeZone.forID("GMT"));
@@ -301,7 +304,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
         serverApi.setIntfImplementor(ITaskExecutors.class, m_ptExecutor.getTe());
         
         if (null == baseApi.queryIntfImplementor(TimeZone.class))
-        	serverApi.setIntfImplementor(TimeZone.class, m_defTimeZone);
+        	serverApi.setIntfImplementor(TimeZone.class, TimeZone.getTimeZone(System.getProperty(TZ_PROPERTY)));
         
         m_coreApi.pushApiIntoStack(serverApi);      
 
