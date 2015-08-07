@@ -26,7 +26,12 @@ public class DboQSyncActualizer extends DBOActualizer{
 		for (IDBObject idbObject : dboList) {
 			DboQsyncQueue qs = (DboQsyncQueue)idbObject;
 			long syncerId = ApiStack.getInterface(INamedDbId.class).createId(qs.getClass().getName());
-			qsMan.registerQueue(qs.getQueueId(), syncerId);
+			Long qId = qs.getQueueId();
+			if(qId == null){
+				qs.setQueueId(syncerId);
+				qId = syncerId;
+			}
+			qsMan.registerQueue(qId, syncerId);
 		}
 	}
 

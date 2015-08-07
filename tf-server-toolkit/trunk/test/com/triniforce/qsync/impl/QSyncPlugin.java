@@ -24,8 +24,7 @@ public class QSyncPlugin extends PKPlugin {
 		List<Object> m_synced = new ArrayList<Object>();
 
 		public TestSyncer() {
-			super(40001L, TestSyncer.class);
-		}
+				}
 
 		@Override
 		public IQSyncer createSyncer() {
@@ -54,7 +53,6 @@ public class QSyncPlugin extends PKPlugin {
 			synchronized (syncObj) {
 				syncObj.notify();
 			}
-
 		} 
 		
 	}
