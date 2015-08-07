@@ -18,7 +18,7 @@ public class QSyncPlugin extends PKPlugin {
 	
 	public static Object syncObj = new Object();
 	
-	public static class TestSyncer extends DboQsyncQueue implements IQSyncer{
+	public static class TestSyncer extends DboQSyncQueue implements IQSyncer{
 
 		boolean m_initiallySynced = false;
 		List<Object> m_synced = new ArrayList<Object>();

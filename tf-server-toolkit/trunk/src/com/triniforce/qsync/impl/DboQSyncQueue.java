@@ -8,15 +8,15 @@ package com.triniforce.qsync.impl;
 import com.triniforce.dbo.IDBObject;
 import com.triniforce.qsync.intf.IQSyncer;
 
-public abstract class DboQsyncQueue implements IDBObject{
+public abstract class DboQSyncQueue implements IDBObject{
 
 	protected Long m_qid;
 
-	public DboQsyncQueue(long qid) {
+	public DboQSyncQueue(long qid) {
 		m_qid = qid;
 	}
 	
-	public DboQsyncQueue() {
+	public DboQSyncQueue() {
 	}
 	
 

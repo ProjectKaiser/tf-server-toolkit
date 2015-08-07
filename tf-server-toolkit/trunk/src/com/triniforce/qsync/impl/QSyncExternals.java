@@ -42,7 +42,7 @@ public class QSyncExternals implements IQSyncManagerExternals{
 		IPKExtensionPoint ep = ApiStack.getInterface(IBasicServer.class).getExtensionPoint(PKEPDBObjects.class);
 		if(ep.getExtensions().containsKey(qSyncerName)){
 			// static syncer registration
-			DboQsyncQueue dbo = ep.getExtension(qSyncerName).getInstance();
+			DboQSyncQueue dbo = ep.getExtension(qSyncerName).getInstance();
 			res = dbo.createSyncer();
 		}
 		else{
