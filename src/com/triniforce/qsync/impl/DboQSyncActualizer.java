@@ -24,7 +24,7 @@ public class DboQSyncActualizer extends DBOActualizer{
 	public void actualize(List<IDBObject> dboList) {
 		IQSyncManager qsMan = ApiStack.getInterface(IQSyncManager.class);
 		for (IDBObject idbObject : dboList) {
-			DboQsyncQueue qs = (DboQsyncQueue)idbObject;
+			DboQSyncQueue qs = (DboQSyncQueue)idbObject;
 			long syncerId = ApiStack.getInterface(INamedDbId.class).createId(qs.getClass().getName());
 			Long qId = qs.getQueueId();
 			if(qId == null){
