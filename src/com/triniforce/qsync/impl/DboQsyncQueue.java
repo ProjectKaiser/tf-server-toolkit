@@ -10,13 +10,15 @@ import com.triniforce.qsync.intf.IQSyncer;
 
 public abstract class DboQsyncQueue implements IDBObject{
 
-	protected long m_qid;
-	private Class m_clsSyncer;
+	protected Long m_qid;
 
-	public DboQsyncQueue(long qid, Class clsSyncer) {
+	public DboQsyncQueue(long qid) {
 		m_qid = qid;
-		m_clsSyncer = clsSyncer;
 	}
+	
+	public DboQsyncQueue() {
+	}
+	
 
 	public IDBObject[] getDependiencies() {
 		return new IDBObject[]{};
@@ -31,11 +33,15 @@ public abstract class DboQsyncQueue implements IDBObject{
 	}
 
 	public Object getKey() {
-		return String.format("%s:%d",m_clsSyncer.getName(), m_qid);
+		return String.format("%s:%d",this.getClass().getName(), m_qid);
 	}
 
-	public long getQueueId() {
+	public Long getQueueId() {
 		return m_qid;
+	}
+	
+	public void setQueueId(long value) {
+		m_qid = value;
 	}
 
 	public abstract IQSyncer createSyncer();

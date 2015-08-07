@@ -13,6 +13,7 @@ import com.triniforce.qsync.intf.IQSyncManager;
 import com.triniforce.qsync.intf.QSyncTaskStatus;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.IDbQueueFactory;
+import com.triniforce.server.srvapi.INamedDbId;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ITaskExecutors;
 import com.triniforce.utils.ApiStack;
@@ -20,6 +21,9 @@ import com.triniforce.utils.ApiStack;
 public class DboQsyncQueueTest extends BasicServerTestCase {
 
 	private QSyncPlugin p;
+	
+
+	long qId;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -27,10 +31,12 @@ public class DboQsyncQueueTest extends BasicServerTestCase {
 		addPlugin(p = new QSyncPlugin());
 
 		super.setUp();
-		
+
 		getServer().enterMode(Mode.Running);
 		try{
-			IDbQueueFactory.Helper.cleanQueue(40001L);
+			INamedDbId dbId = ApiStack.getInterface(INamedDbId.class);
+			qId = dbId.getId(TestSyncer.class.getName());
+			IDbQueueFactory.Helper.cleanQueue(qId);
 			ApiStack.getInterface(ISrvSmartTran.class).commit();
 		}finally{
 			getServer().leaveMode();
@@ -47,7 +53,7 @@ public class DboQsyncQueueTest extends BasicServerTestCase {
 	@Override
 	public void test() throws Exception {
 		synchronized (QSyncPlugin.syncObj) {
-			putQueue(40001L, "str_01");
+			putQueue(qId, "str_01");
 			long tst = System.currentTimeMillis();
 			QSyncPlugin.syncObj.wait(0);
 			assertTrue("wait timeout expired", System.currentTimeMillis() - tst < 4000);
@@ -71,7 +77,7 @@ public class DboQsyncQueueTest extends BasicServerTestCase {
 		trace("Read queue status");
 		getServer().enterMode(Mode.Running);
 		try{
-			qsState = ApiStack.getInterface(IQSyncManager.class).getQueueInfo(40001L).result.status; 
+			qsState = ApiStack.getInterface(IQSyncManager.class).getQueueInfo(qId).result.status; 
 		}finally{
 			getServer().leaveMode();
 		}
@@ -79,7 +85,7 @@ public class DboQsyncQueueTest extends BasicServerTestCase {
 		assertEquals(QSyncTaskStatus.SYNCED, qsState);
 		
 		synchronized (QSyncPlugin.syncObj) {
-			putQueue(40001L, "str_02");
+			putQueue(qId, "str_02");
 			QSyncPlugin.syncObj.wait();
 		}
 		
