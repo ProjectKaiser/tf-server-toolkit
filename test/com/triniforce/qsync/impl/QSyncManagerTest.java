@@ -77,8 +77,6 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 
 		@Override
 		public void init() {
-			// TODO Auto-generated method stub
-			
 		}
 		
 	}
