@@ -74,6 +74,12 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		public void finit(Throwable t) {
 			m_finitError = t;
 		}
+
+		@Override
+		public void init() {
+			// TODO Auto-generated method stub
+			
+		}
 		
 	}
 	

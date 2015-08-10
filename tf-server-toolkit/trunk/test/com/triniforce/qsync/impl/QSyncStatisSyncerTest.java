@@ -18,7 +18,7 @@ import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ITaskExecutors;
 import com.triniforce.utils.ApiStack;
 
-public class DboQSyncQueueTest extends BasicServerTestCase {
+public class QSyncStatisSyncerTest extends BasicServerTestCase {
 
 	private QSyncPlugin p;
 	

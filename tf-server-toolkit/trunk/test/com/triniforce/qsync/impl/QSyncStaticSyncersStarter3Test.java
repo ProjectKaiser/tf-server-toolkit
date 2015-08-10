@@ -13,7 +13,7 @@ import com.triniforce.server.srvapi.INamedDbId;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.utils.ApiStack;
 
-public class DboQSyncActualizerTest extends BasicServerTestCase {
+public class QSyncStaticSyncersStarter3Test extends BasicServerTestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
