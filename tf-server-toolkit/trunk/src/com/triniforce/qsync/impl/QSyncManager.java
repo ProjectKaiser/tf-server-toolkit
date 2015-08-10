@@ -508,7 +508,6 @@ public class QSyncManager extends PKEPAPIPeriodicalTask implements IQSyncManager
 
 	@Override
 	public void initApi() {
-		IQSyncManager qsMan = ApiStack.getInterface(IQSyncManager.class);
 		IBasicServer bs = ApiStack.getInterface(IBasicServer.class);
 		IPKExtensionPoint ess = (PKEPQSyncStaticSyncers) bs.getExtensionPoint(PKEPQSyncStaticSyncers.class);
 		for(String ek: ess.getExtensions().keySet()){
@@ -520,7 +519,7 @@ public class QSyncManager extends PKEPAPIPeriodicalTask implements IQSyncManager
 				qId = ApiStack.getInterface(INamedDbId.class).createId(ek);
 				ss.setQueueId(qId);
 			}
-			qsMan.registerQueue(qId, syncerId);
+			registerQueue(qId, syncerId);
 		}
 	}
 }
