@@ -56,8 +56,6 @@ public class QSyncPlugin extends PKPlugin {
 
 		@Override
 		public void init() {
-			// TODO Auto-generated method stub
-			
 		} 
 		
 	}
