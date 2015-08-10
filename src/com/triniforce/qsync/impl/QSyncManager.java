@@ -14,19 +14,25 @@ import java.util.List;
 import java.util.Map;
 
 import com.triniforce.db.dml.ResSet;
+import com.triniforce.extensions.IPKExtension;
+import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.qsync.intf.IQSyncManager;
 import com.triniforce.qsync.intf.IQSyncManagerExternals;
 import com.triniforce.qsync.intf.IQSyncer;
 import com.triniforce.qsync.intf.QSyncQueueInfo;
 import com.triniforce.qsync.intf.QSyncTaskResult;
 import com.triniforce.qsync.intf.QSyncTaskStatus;
+import com.triniforce.server.plugins.kernel.ep.api.IInitApi;
+import com.triniforce.server.plugins.kernel.ep.api.PKEPAPIPeriodicalTask;
+import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IDbQueueFactory;
+import com.triniforce.server.srvapi.INamedDbId;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.ITime;
 
-public class QSyncManager implements IQSyncManager {
+public class QSyncManager extends PKEPAPIPeriodicalTask implements IQSyncManager, IInitApi {
 
 	private static final int DEFAULT_MAX_SYNC_TASKS = 10;
 	private static final int DEFAULT_MAX_TASK_DURATION = 30000;
@@ -52,6 +58,7 @@ public class QSyncManager implements IQSyncManager {
 		public void run() {
 			QSyncTaskResult result;
 			try{
+				m_syncer.init();
 				boolean bCompleted = exec();
 				result = new QSyncTaskResult(m_qid, m_syncerId, bCompleted ? QSyncTaskStatus.SYNCED : QSyncTaskStatus.EXEC_TIMEOUT, null);
 			}catch(Exception e){
@@ -115,7 +122,7 @@ public class QSyncManager implements IQSyncManager {
 	private int m_maxNumberOfSyncTasks = DEFAULT_MAX_SYNC_TASKS;
 	private int m_maxNumberOfInitTasks = DEFAULT_MAX_INIT_TASKS;
 	private int m_maxSyncTaskDurationMs = DEFAULT_MAX_TASK_DURATION;
-	private IQSyncManagerExternals m_syncerExternals;
+	private IQSyncManagerExternals m_syncerExternals = new QSyncExternals();
 	
 	static class QSKey{
 		private long m_sid;
@@ -487,5 +494,33 @@ public class QSyncManager implements IQSyncManager {
 
 	public int getMaxNumberOfInitTasks() {
 		return m_maxNumberOfInitTasks;
+	}
+
+	@Override
+	public Class getImplementedInterface() {
+		return IQSyncManager.class;
+	}
+
+	@Override
+	public void run() {
+		onEveryMinute();
+	}
+
+	@Override
+	public void initApi() {
+		IQSyncManager qsMan = ApiStack.getInterface(IQSyncManager.class);
+		IBasicServer bs = ApiStack.getInterface(IBasicServer.class);
+		IPKExtensionPoint ess = (PKEPQSyncStaticSyncers) bs.getExtensionPoint(PKEPQSyncStaticSyncers.class);
+		for(String ek: ess.getExtensions().keySet()){
+			IPKExtension e =  ess.getExtension(ek);
+			QSyncStatisSyncer ss = e.getInstance();
+			long syncerId = ApiStack.getInterface(INamedDbId.class).createId(ss.getClass().getName());
+			Long qId = ss.getQueueId();
+			if(qId == null){
+				qId = ApiStack.getInterface(INamedDbId.class).createId(ek);
+				ss.setQueueId(qId);
+			}
+			qsMan.registerQueue(qId, syncerId);
+		}
 	}
 }

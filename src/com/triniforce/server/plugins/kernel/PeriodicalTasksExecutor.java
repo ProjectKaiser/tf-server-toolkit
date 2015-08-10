@@ -26,7 +26,7 @@ public class PeriodicalTasksExecutor implements IFinitable {
     
 
     public abstract static class BasicPeriodicalTask extends BasicServerTask {
-        public long initialDelay = 60000;
+        public long initialDelay = 5000;
 
         public long delay = 60000;
 

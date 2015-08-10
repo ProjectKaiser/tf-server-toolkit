@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import com.triniforce.dbo.PKEPDBObjects;
 import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.qsync.intf.IQSyncManagerExternals;
 import com.triniforce.qsync.intf.IQSyncer;
@@ -39,10 +38,10 @@ public class QSyncExternals implements IQSyncManagerExternals{
 			throw new EQSyncerNotFound("" + syncerId);	
 		}
 		
-		IPKExtensionPoint ep = ApiStack.getInterface(IBasicServer.class).getExtensionPoint(PKEPDBObjects.class);
+		IPKExtensionPoint ep = ApiStack.getInterface(IBasicServer.class).getExtensionPoint(PKEPQSyncStaticSyncers.class);
 		if(ep.getExtensions().containsKey(qSyncerName)){
 			// static syncer registration
-			DboQSyncQueue dbo = ep.getExtension(qSyncerName).getInstance();
+			QSyncStatisSyncer dbo = ep.getExtension(qSyncerName).getInstance();
 			res = dbo.createSyncer();
 		}
 		else{

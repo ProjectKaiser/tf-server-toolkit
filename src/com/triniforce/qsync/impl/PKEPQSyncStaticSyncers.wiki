@@ -1,0 +1,7 @@
+*Extension class*
+
+QSyncStatisSyncer
+
+*Processing*
+
+When server starts all syncers are registered in IQSyncManager
