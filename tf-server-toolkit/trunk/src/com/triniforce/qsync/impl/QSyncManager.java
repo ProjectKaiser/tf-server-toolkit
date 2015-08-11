@@ -208,13 +208,15 @@ public class QSyncManager extends PKEPAPIPeriodicalTask implements IQSyncManager
 		m_syncerExternals = value;
 	}
 
-
-	synchronized public void registerQueue(long qid, long syncerId) {
+	synchronized public void registerQueue(long qid, long syncerId, IQSyncer syncer) {
 		queueBL().registerQueue(qid, syncerId, QSyncTaskStatus.INITIAL_SYNC);
-		IQSyncer syncer = m_syncerExternals.getQSyncer(qid, syncerId);
 		syncer.connectToQueue(qid);
 		m_syncers.put(qid, new QueueExecutionInfo(syncer));
+	}
 
+	synchronized public void registerQueue(long qid, long syncerId) {
+		IQSyncer syncer = m_syncerExternals.getQSyncer(qid, syncerId);
+		registerQueue(qid, syncerId, syncer);
 	}
 
 	synchronized public void unRegisterQueue(long qid, long syncerId) {
