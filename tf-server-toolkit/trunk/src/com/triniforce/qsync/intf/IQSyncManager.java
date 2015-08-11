@@ -58,7 +58,6 @@ public interface IQSyncManager {
      * @param syncerId
      */
     void registerQueue(long qid, long syncerId);
-    void registerQueue(long qid, long syncerId, IQSyncer qSyncer);
 
     /**
      * ?? What if tasks are in process?
