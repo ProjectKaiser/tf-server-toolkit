@@ -58,12 +58,13 @@ public class QSyncExternals implements IQSyncManagerExternals{
 		return res;
 	}
 
-	synchronized  public void runSync(Runnable r) {
-		ITaskExecutors te = ApiStack.getInterface(ITaskExecutors.class);
-		Future future = te.execute(ITaskExecutors.normalTaskExecutorKey, new Task(r));
-		m_lastFutures.push(future);
-		if(m_lastFutures.size() > STORED_FUTURES)
-			m_lastFutures.pop();
+	synchronized  public void runSync(final Runnable r) {
+
+						final ITaskExecutors te = ApiStack.getInterface(ITaskExecutors.class);
+						Future future = te.execute(ITaskExecutors.normalTaskExecutorKey, new Task(r));
+						m_lastFutures.push(future);
+						if(m_lastFutures.size() > STORED_FUTURES)
+							m_lastFutures.pop();
 	}
 	
 	static class Task extends BasicServerTask{
@@ -72,6 +73,16 @@ public class QSyncExternals implements IQSyncManagerExternals{
 
 		public Task(Runnable r) {
 			m_runnable = r;
+		}
+		
+		@Override
+		public void init() {
+//			try {
+//				Thread.sleep(100L);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+			super.init();
 		}
 
 		public void run() {

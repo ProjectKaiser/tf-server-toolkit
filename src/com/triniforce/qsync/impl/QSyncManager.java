@@ -27,6 +27,8 @@ import com.triniforce.server.plugins.kernel.ep.api.PKEPAPIPeriodicalTask;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.INamedDbId;
+import com.triniforce.server.srvapi.ISrvSmartTran;
+import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
@@ -102,19 +104,26 @@ public class QSyncManager extends PKEPAPIPeriodicalTask implements IQSyncManager
 
 		@Override
 		boolean exec() {
+			ApiAlgs.getLog(this).trace("RecordSync started");
 			int timeout = m_syncMan.getMaxIncrementalSyncTaskDurationMs();
 			long tst = ApiAlgs.getITime().currentTimeMillis();
 			long tnd;
 			Object record;
+			boolean bEmpty = true;
 			while(null != (record = m_syncMan.peekQueueRecord(m_qid))){
+				ApiAlgs.getLog(this).trace("RecordSync : " + record);
+				bEmpty = false;
 				m_syncer.sync(record);
 				m_syncMan.getQueueRecord(m_qid); //Record synced
 				tnd = ApiAlgs.getITime().currentTimeMillis();
 				if(timeout < tnd-tst){
 					ApiAlgs.getLog(this).trace("time: " + tst + "("+tnd+")");
 					return false;
-				}
+				}				
 			}
+			if( bEmpty )
+				ApiAlgs.getLog(this).trace("empty queue");
+			
 			return true;
 		}
 	}
@@ -349,24 +358,30 @@ public class QSyncManager extends PKEPAPIPeriodicalTask implements IQSyncManager
 	}
 
 	synchronized  public boolean onQueueChanged(Long qid) {
-		QSyncQueueInfo qinfo = getQueueInfo(qid);
-		if(null == qinfo)
-			return false;
-		
+		ISrvSmartTranFactory.Helper.push();
 		try{
-			QueueExecutionInfo syncerInfo = getSyncerInfo(qid, qinfo.result.syncerId);
-			if(syncerInfo.m_currentTask != null){
-				ApiAlgs.getLog(this).trace("Task queue already started. Queue: "+qid);
-				return true;
-			}
+			QSyncQueueInfo qinfo = getQueueInfo(qid);
+			if(null == qinfo)
+				return false;
 			
-			if(getRunningTasks() < getMaxNumberOfSyncTasks()){
-				long syncerId = qinfo.result.syncerId;
-				return startQueueTask(qid, syncerId, new RecordSync(this, syncerInfo.m_syncer, qid, syncerId));
+			try{
+				QueueExecutionInfo syncerInfo = getSyncerInfo(qid, qinfo.result.syncerId);
+				if(syncerInfo.m_currentTask != null){
+					ApiAlgs.getLog(this).trace("Task queue already started. Queue: "+qid);
+					return true;
+				}
+				
+				if(getRunningTasks() < getMaxNumberOfSyncTasks()){
+					long syncerId = qinfo.result.syncerId;
+					return startQueueTask(qid, syncerId, new RecordSync(this, syncerInfo.m_syncer, qid, syncerId));
+				}
+			}catch(Exception e){
+				ApiAlgs.getLog(this).error(e.getMessage(), e);
+				return false;
 			}
-		}catch(Exception e){
-			ApiAlgs.getLog(this).error(e.getMessage(), e);
-			return false;
+			ApiStack.getInterface(ISrvSmartTran.class).commit();
+		}finally{
+			ISrvSmartTranFactory.Helper.pop();
 		}
 		return true;
 	}
