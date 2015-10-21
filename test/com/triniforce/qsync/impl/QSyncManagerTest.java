@@ -345,6 +345,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 	public void testOnQueueChanged() {
 		m_bemu.setTimeSeq(1000, new long[]{10L});
 		sm.registerQueue(555L, 101L);
+		assertNotNull(sm.getQueueInfo(555L));
 		execRuns();
 
 		putRecord(555L, 111L);
@@ -471,7 +472,7 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 			
 			sm.onEveryMinute();
 			runnables.clear();
-			result.status = QSyncTaskStatus.SYNCED;
+			result.status = QSyncTaskStatus.ERROR;
 			sm.onTaskCompleted(result);
 			
 			try{

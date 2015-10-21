@@ -79,7 +79,13 @@ public class SrvSmartTran extends SmartTran implements ISrvSmartTran {
     	if(bCommit){
         	IQSyncManager sm = ApiStack.getInterface(IQSyncManager.class);
             for (IDbQueue queue : m_updatedQueues) {
-                sm.onQueueChanged(queue.getId());
+        		ISrvSmartTranFactory.Helper.push();
+        		try{
+        			sm.onQueueChanged(queue.getId());
+    				ApiStack.getInterface(ISrvSmartTran.class).commit();
+        		}finally{
+        			ISrvSmartTranFactory.Helper.pop();
+        		}
             }
     	}
         
