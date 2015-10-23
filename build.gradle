@@ -23,12 +23,14 @@ apply from: 'config.gradle'
 defaultTasks 'clean', 'ide'
 
 repositories {
+	
 	maven {
 		url MavenResolveUrl
-		credentials {
+		credentials(PasswordCredentials) {
 			username = MavenUsername
 			password = MavenPassword
 		}
+
 	}
 }
 
