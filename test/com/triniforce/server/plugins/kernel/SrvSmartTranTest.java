@@ -16,6 +16,7 @@ import org.jmock.Mockery;
 import com.triniforce.db.test.DBTestCase;
 import com.triniforce.qsync.intf.IQSyncManager;
 import com.triniforce.server.srvapi.IDbQueue;
+import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory.ITranExtender;
 import com.triniforce.utils.Api;
@@ -121,13 +122,16 @@ public class SrvSmartTranTest extends DBTestCase{
 			final Log log = ctx.mock(Log.class);
 			final IQSyncManager sm = ctx.mock(IQSyncManager.class);
 			Api api = new Api();
+			final ISrvSmartTran trnExt = ctx.mock(ISrvSmartTran.class);
 			api.setIntfImplementor(ISrvSmartTranFactory.class, trf);
 			api.setIntfImplementor(LogFactory.class, new ServerImplTest.TestLogFactory(log));
-			api.setIntfImplementor(IQSyncManager.class, sm);			
+			api.setIntfImplementor(IQSyncManager.class, sm);
+			api.setIntfImplementor(ISrvSmartTran.class, trnExt);
 			ApiStack.pushApi(api);
 			try{
 				ctx.checking(new Expectations(){{
 					ignoring(trf);
+					ignoring(trnExt);
 				}});
 				final IDbQueue fq = ctx.mock(IDbQueue.class);
 				{
