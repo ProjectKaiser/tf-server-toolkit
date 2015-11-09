@@ -378,10 +378,5 @@ public class TFTestCase extends TestCase {
 			DATA_SOURCE = null;
 		}
 	}
-	
-	protected void tfcopy(InputStream from, OutputStream to){
-		tfcopy(from, to);
-	}
-
 
 }
