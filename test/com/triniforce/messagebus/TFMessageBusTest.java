@@ -6,10 +6,8 @@
 
 package com.triniforce.messagebus;
 
-public class BMStop extends BM{
+import junit.framework.TestCase;
 
-	public BMStop() {
-		super(null);
-	}
+public class TFMessageBusTest extends TestCase {
 
 }
