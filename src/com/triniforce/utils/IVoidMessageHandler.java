@@ -6,6 +6,6 @@
 
 package com.triniforce.utils;
 
-public interface ICallable<T>{
-	public Object call(T arg);
+public interface IVoidMessageHandler<T>{
+	public void onMessage(T arg) throws Exception;
 }
