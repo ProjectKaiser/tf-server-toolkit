@@ -11,7 +11,7 @@ import java.util.Collection;
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.messagebus.error.EPublicationError;
 import com.triniforce.messagebus.error.IPublicationErrorHandler;
-import com.triniforce.utils.IVoidMessageHandler;
+import com.triniforce.utils.IMessageHandler;
 
 public class TFMessageBusTest extends TFTestCase {
 	
@@ -19,14 +19,14 @@ public class TFMessageBusTest extends TFTestCase {
 	public void test() throws Exception {
 		TFMessageBus mb = new TFMessageBus();
 		
-		IVoidMessageHandler mh1 = new IVoidMessageHandler<String>() {
+		IMessageHandler mh1 = new IMessageHandler<String>() {
 			@Override
 			public void onMessage(String arg) {
 				trace(arg);
 			}
 		};
 		
-		IVoidMessageHandler<String> mh2 = new IVoidMessageHandler<String>() {
+		IMessageHandler<String> mh2 = new IMessageHandler<String>() {
 			@Override
 			public void onMessage(String arg) {
 				trace(arg);
@@ -44,7 +44,7 @@ public class TFMessageBusTest extends TFTestCase {
 		assertEquals(2, mb.getCopyOfClassHandlers(String.class).size());
 		
 		mb.subscribe(String.class, mh2);
-		Collection<IVoidMessageHandler> handlers = mb.getCopyOfClassHandlers(String.class);
+		Collection<IMessageHandler> handlers = mb.getCopyOfClassHandlers(String.class);
 		assertEquals(3, handlers.size());
 		handlers.remove(mh1);
 		assertEquals(2, handlers.size());
@@ -90,7 +90,7 @@ public class TFMessageBusTest extends TFTestCase {
 			}
 		};
 		
-		IVoidMessageHandler mh1 = new IVoidMessageHandler<String>() {
+		IMessageHandler mh1 = new IMessageHandler<String>() {
 			@Override
 			public void onMessage(String arg) {
 				m_cnt++;
@@ -99,7 +99,7 @@ public class TFMessageBusTest extends TFTestCase {
 		};
 		
 		
-		IVoidMessageHandler mh2 = new IVoidMessageHandler<String>() {
+		IMessageHandler mh2 = new IMessageHandler<String>() {
 			@Override
 			public void onMessage(String arg) {
 				m_cnt++;
@@ -107,7 +107,7 @@ public class TFMessageBusTest extends TFTestCase {
 			}
 		};
 		
-		IVoidMessageHandler mh3 = new IVoidMessageHandler<String>() {
+		IMessageHandler mh3 = new IMessageHandler<String>() {
 			@Override
 			public void onMessage(String arg) {
 				m_cnt++;

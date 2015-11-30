@@ -10,7 +10,7 @@ import com.triniforce.messagebus.error.EPublicationError;
 import com.triniforce.messagebus.error.IPublicationErrorHandler;
 import com.triniforce.server.plugins.kernel.ep.api.IPKEPAPI;
 import com.triniforce.utils.ApiAlgs;
-import com.triniforce.utils.IVoidMessageHandler;
+import com.triniforce.utils.IMessageHandler;
 
 public class PKMessageBus implements IPKEPAPI, IMessageBus{
 
@@ -40,13 +40,13 @@ public class PKMessageBus implements IPKEPAPI, IMessageBus{
 	}
 
 	@Override
-	public <T> void subscribe(Class<T> msgClass, IVoidMessageHandler<T> handler) {
+	public <T> void subscribe(Class<T> msgClass, IMessageHandler<T> handler) {
 		m_bus.subscribe(msgClass, handler);
 		
 	}
 
 	@Override
-	public <T> void unsubscribe(Class<T> msgClass, IVoidMessageHandler<T> handler) {
+	public <T> void unsubscribe(Class<T> msgClass, IMessageHandler<T> handler) {
 		m_bus.unsubscribe(msgClass, handler);
 	}
 	

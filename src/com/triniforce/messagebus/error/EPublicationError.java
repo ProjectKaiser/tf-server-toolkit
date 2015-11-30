@@ -5,14 +5,14 @@
  */
 package com.triniforce.messagebus.error;
 
-import com.triniforce.utils.IVoidMessageHandler;
+import com.triniforce.utils.IMessageHandler;
 
 public class EPublicationError {
 
 	// Internal state
 	private Throwable cause;
 	private String message;
-	private IVoidMessageHandler handler;
+	private IMessageHandler handler;
 	private Object publishedMessage;
 
 	/**
@@ -29,7 +29,7 @@ public class EPublicationError {
 	 * @param publishedObject
 	 *            The published object which gave rise to the error.
 	 */
-	public EPublicationError(final Throwable cause, final String message, final IVoidMessageHandler handler, final Object publishedObject) {
+	public EPublicationError(final Throwable cause, final String message, final IMessageHandler handler, final Object publishedObject) {
 
 		this.cause = cause;
 		this.message = message;
@@ -77,11 +77,11 @@ public class EPublicationError {
 		return this;
 	}
 
-	public IVoidMessageHandler getHandler() {
+	public IMessageHandler getHandler() {
 		return handler;
 	}
 
-	public EPublicationError setHandler(IVoidMessageHandler handler) {
+	public EPublicationError setHandler(IMessageHandler handler) {
 		this.handler = handler;
 		return this;
 	}

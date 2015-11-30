@@ -15,12 +15,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import com.triniforce.messagebus.error.EPublicationError;
 import com.triniforce.messagebus.error.IPublicationErrorHandler;
-import com.triniforce.utils.IVoidMessageHandler;
+import com.triniforce.utils.IMessageHandler;
 import com.triniforce.utils.TFUtils;
 
 public class TFMessageBus {
 	
-	LinkedHashMap<Class, Collection<IVoidMessageHandler>> m_handlers = new LinkedHashMap<Class, Collection<IVoidMessageHandler>>();
+	LinkedHashMap<Class, Collection<IMessageHandler>> m_handlers = new LinkedHashMap<Class, Collection<IMessageHandler>>();
 	ReentrantReadWriteLock m_rw = new ReentrantReadWriteLock();
 	private final IPublicationErrorHandler m_peh;
 	
@@ -37,14 +37,14 @@ public class TFMessageBus {
 		m_peh = peh;
 	}
 	
-	public <T> void  subscribe(Class<T> msgClass, IVoidMessageHandler<T> handler){
+	public <T> void  subscribe(Class<T> msgClass, IMessageHandler<T> handler){
 
 		WriteLock lock = m_rw.writeLock();
 		lock.lock();
 		try{
-			Collection<IVoidMessageHandler> classHandlers = m_handlers.get(msgClass);
+			Collection<IMessageHandler> classHandlers = m_handlers.get(msgClass);
 			if (null == classHandlers) {
-				classHandlers = new ArrayList<IVoidMessageHandler>();
+				classHandlers = new ArrayList<IMessageHandler>();
 				m_handlers.put(msgClass, classHandlers);
 			}
 			classHandlers.add(handler);
@@ -53,12 +53,12 @@ public class TFMessageBus {
 		}
 	}
 	
-	public <T> void  unsubscribe(Class<T> msgClass, IVoidMessageHandler<T> handler){
+	public <T> void  unsubscribe(Class<T> msgClass, IMessageHandler<T> handler){
 
 		WriteLock lock = m_rw.writeLock();
 		lock.lock();
 		try{
-			Collection<IVoidMessageHandler> classHandlers = m_handlers.get(msgClass);
+			Collection<IMessageHandler> classHandlers = m_handlers.get(msgClass);
 			if (null != classHandlers) {
 				classHandlers.remove(handler);
 			}
@@ -68,12 +68,12 @@ public class TFMessageBus {
 	}
 	
 	
-	public Collection<IVoidMessageHandler> getCopyOfClassHandlers(Class msgClass){
-		Collection<IVoidMessageHandler> res = new ArrayList<IVoidMessageHandler>();
+	public Collection<IMessageHandler> getCopyOfClassHandlers(Class msgClass){
+		Collection<IMessageHandler> res = new ArrayList<IMessageHandler>();
 		ReadLock lock = m_rw.readLock();
 		lock.lock();
 		try{
-			Collection<IVoidMessageHandler> classHandlers = m_handlers.get(msgClass);
+			Collection<IMessageHandler> classHandlers = m_handlers.get(msgClass);
 			if (null == classHandlers) {
 				return res;
 			}
@@ -88,8 +88,8 @@ public class TFMessageBus {
 		if(null == message){
 			return;
 		}
-		Collection<IVoidMessageHandler> handlers = getCopyOfClassHandlers(message.getClass());
-		for(IVoidMessageHandler handler: handlers){
+		Collection<IMessageHandler> handlers = getCopyOfClassHandlers(message.getClass());
+		for(IMessageHandler handler: handlers){
 			try{
 				handler.onMessage(message);
 			}catch(Exception cause){
