@@ -20,7 +20,7 @@ version = tf_version + (tf_release ? '' : '-SNAPSHOT')
 // Get dynamic environment settings
 apply from: 'config.gradle'
 
-defaultTasks 'clean', 'idefoxford'
+defaultTasks 'clean', 'ide'
 
 repositories {
 	
