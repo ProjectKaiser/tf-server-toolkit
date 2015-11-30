@@ -1,5 +1,5 @@
 ext.tf_version = '43.0'
-ext.tf_release = true
+ext.tf_release = false
 ext.tf_vendor = 'Triniforce.com'
 
 apply plugin: 'java'
@@ -20,7 +20,7 @@ version = tf_version + (tf_release ? '' : '-SNAPSHOT')
 // Get dynamic environment settings
 apply from: 'config.gradle'
 
-defaultTasks 'clean', 'ide'
+defaultTasks 'clean', 'idefoxford'
 
 repositories {
 	
