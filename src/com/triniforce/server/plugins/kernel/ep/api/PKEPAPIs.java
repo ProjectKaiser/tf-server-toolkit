@@ -87,7 +87,7 @@ public class PKEPAPIs  extends PKExtensionPoint{
             
             //subscribe after init
             if(init  && null != mb){
-            	mb.subscribe(api);
+            	//mb.subscribe(api);
             }
             
         }

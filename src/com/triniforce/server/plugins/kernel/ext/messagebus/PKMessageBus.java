@@ -5,27 +5,27 @@
  */ 
 package com.triniforce.server.plugins.kernel.ext.messagebus;
 
-import net.engio.mbassy.bus.MBassador;
-import net.engio.mbassy.bus.error.IPublicationErrorHandler;
-import net.engio.mbassy.bus.error.PublicationError;
-
+import com.triniforce.messagebus.TFMessageBus;
+import com.triniforce.messagebus.error.EPublicationError;
+import com.triniforce.messagebus.error.IPublicationErrorHandler;
 import com.triniforce.server.plugins.kernel.ep.api.IPKEPAPI;
 import com.triniforce.utils.ApiAlgs;
+import com.triniforce.utils.IVoidMessageHandler;
 
 public class PKMessageBus implements IPKEPAPI, IMessageBus{
 
-	MBassador m_bus;
+	TFMessageBus m_bus;
 	
 	public PKMessageBus(){
 		IPublicationErrorHandler peh = new IPublicationErrorHandler(){
 
 			@Override
-			public void handleError(PublicationError error) {
+			public void handleError(EPublicationError error) {
 				ApiAlgs.getLog(PKMessageBus.class).error(error);
 			}
 			
 		};		
-		m_bus = new MBassador(peh);
+		m_bus = new TFMessageBus(peh);
 	}
 	
 	@Override
@@ -39,12 +39,15 @@ public class PKMessageBus implements IPKEPAPI, IMessageBus{
 		return IMessageBus.class;
 	}
 	
-	public void subscribe(Object o){
-		m_bus.subscribe(o);
+	@Override
+	public <T> void subscribe(Class<T> msgClass, IVoidMessageHandler<T> handler) {
+		m_bus.subscribe(msgClass, handler);
+	}
+
+	@Override
+	public <T> void unsubscribe(Class<T> msgClass, IVoidMessageHandler<T> handler) {
+		m_bus.unsubscribe(msgClass, handler);
 	}
 	
-	public void unsubscribe(Object o){
-		m_bus.unsubscribe(o);
-	}
 
 }
