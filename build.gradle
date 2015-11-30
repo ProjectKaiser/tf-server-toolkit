@@ -132,8 +132,16 @@ uploadArchives {
 
 task jar_lib(type: Copy, dependsOn:[jar]){
 	from "${jar.destinationDir}/${jar.archiveName}"
-	into "../tflib/srvdist"
+	into "$System.env.TF_LIB_HOME/srvdist"
 	rename { String fileName -> 'tf-server-toolkit.jar' }
+}
+
+jar_lib.doFirst{
+	def envName ="TF_LIB_HOME"
+	def env = System.env[envName]
+	if (null == env || env.length() == 0){
+		throw new StopExecutionException("Variable $envName must point to TF_LIB HOME")
+	}
 }
 
 /*
