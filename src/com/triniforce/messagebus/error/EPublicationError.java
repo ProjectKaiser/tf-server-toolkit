@@ -5,8 +5,6 @@
  */
 package com.triniforce.messagebus.error;
 
-import net.engio.mbassy.bus.IMessagePublication;
-
 import com.triniforce.utils.IVoidMessageHandler;
 
 public class EPublicationError {
@@ -37,13 +35,6 @@ public class EPublicationError {
 		this.message = message;
 		this.handler = handler;
 		this.publishedMessage = publishedObject;
-	}
-
-	public EPublicationError(final Throwable cause, final String message,
-			final IMessagePublication publication) {
-		this.cause = cause;
-		this.message = message;
-		this.publishedMessage = publication != null ? publication.getMessage() : null;
 	}
 
 	public EPublicationError(Throwable cause, String message) {
