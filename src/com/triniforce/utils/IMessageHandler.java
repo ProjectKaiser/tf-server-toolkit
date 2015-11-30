@@ -6,7 +6,6 @@
 
 package com.triniforce.utils;
 
-//FIXME rename
-public interface IVoidMessageHandler<T>{
+public interface IMessageHandler<T>{
 	public void onMessage(T arg) throws Exception;
 }

@@ -7,7 +7,7 @@ package com.triniforce.server.plugins.kernel.ext.messagebus;
 
 import com.triniforce.db.test.BasicServerRunningTestCase;
 import com.triniforce.utils.ApiStack;
-import com.triniforce.utils.IVoidMessageHandler;
+import com.triniforce.utils.IMessageHandler;
 
 public class PKMessageBusTest extends BasicServerRunningTestCase {
 	
@@ -18,7 +18,7 @@ public class PKMessageBusTest extends BasicServerRunningTestCase {
 		
 		IMessageBus imb = ApiStack.getInterface(IMessageBus.class);
 
-		IVoidMessageHandler mh1 = new IVoidMessageHandler<String>() {
+		IMessageHandler mh1 = new IMessageHandler<String>() {
 			@Override
 			public void onMessage(String arg) {
 				cnt++;
