@@ -5,38 +5,45 @@
  */ 
 package com.triniforce.server.plugins.kernel.ext.messagebus;
 
-import net.engio.mbassy.listener.Handler;
-
 import com.triniforce.db.test.BasicServerRunningTestCase;
 import com.triniforce.utils.ApiStack;
+import com.triniforce.utils.IVoidMessageHandler;
 
 public class PKMessageBusTest extends BasicServerRunningTestCase {
 	
 	int cnt;
 	
-	@Handler
-	void stringHandler(String msg){
-		cnt++;
-	}
-	
-	@Handler
-	void stringHandler2(String msg){
-		cnt++;
-		throw new RuntimeException("stringHandler2");
-	}
-	
 	@Override
 	public void test() throws Exception {
 		
 		IMessageBus imb = ApiStack.getInterface(IMessageBus.class);
-		PKMessageBus mb = (PKMessageBus) imb;
-		mb.subscribe(this);
-		
+
+		IVoidMessageHandler mh1 = new IVoidMessageHandler<String>() {
+			@Override
+			public void onMessage(String arg) {
+				cnt++;
+				trace(arg);
+			}
+		};
+
 		cnt = 0;
-		incExpectedLogErrorCount(1);
+		imb.subscribe(String.class, mh1);
+		imb.subscribe(String.class, mh1);
 		imb.publish("Hello");
-		
 		assertEquals(2, cnt);
+		
+		// Unsibscribe first
+		
+		imb.unsubscribe(String.class, mh1);
+		imb.publish("Hello");
+		assertEquals(3, cnt);
+		
+		// Unsibscribe second
+		
+		imb.unsubscribe(String.class, mh1);
+		imb.publish("Hello");
+		assertEquals(3, cnt);
+		
 		
 	}
 
