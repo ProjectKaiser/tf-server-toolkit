@@ -6,6 +6,7 @@
 
 package com.triniforce.messagebus;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -18,12 +19,13 @@ import com.triniforce.messagebus.error.IPublicationErrorHandler;
 import com.triniforce.utils.IMessageHandler;
 import com.triniforce.utils.TFUtils;
 
+
 public class TFMessageBus {
 	
 	LinkedHashMap<Class, Collection<IMessageHandler>> m_handlers = new LinkedHashMap<Class, Collection<IMessageHandler>>();
 	ReentrantReadWriteLock m_rw = new ReentrantReadWriteLock();
 	private final IPublicationErrorHandler m_peh;
-	
+
 	public TFMessageBus() {
 		this(new IPublicationErrorHandler() {
 			@Override
@@ -36,7 +38,7 @@ public class TFMessageBus {
 		TFUtils.assertNotNull(peh, "peh");
 		m_peh = peh;
 	}
-	
+
 	public <T> void  subscribe(Class<T> msgClass, IMessageHandler<T> handler){
 
 		WriteLock lock = m_rw.writeLock();
@@ -50,6 +52,20 @@ public class TFMessageBus {
 			classHandlers.add(handler);
 		}finally{
 			lock.unlock();
+		}
+	}
+	
+	public void  subscribeByAnnotation(Object obj){
+		Class cls = obj.getClass();
+		for(Method m: cls.getMethods()){
+			if(null == m.getAnnotation(MessageHandler.class)){
+				continue;
+			}
+			Class params[] = m.getParameterTypes();
+			if (params.length != 1){
+				continue;
+			}
+			subscribe(params[0], new MethodWrapper(obj, m));
 		}
 	}
 	
@@ -88,13 +104,21 @@ public class TFMessageBus {
 		if(null == message){
 			return;
 		}
-		Collection<IMessageHandler> handlers = getCopyOfClassHandlers(message.getClass());
-		for(IMessageHandler handler: handlers){
-			try{
-				handler.onMessage(message);
-			}catch(Exception cause){
-				EPublicationError pe = new EPublicationError(cause, "Error handling message", handler, message);
-				m_peh.handleError(pe);
+		
+		Class curClass = message.getClass();
+		while(true){
+			Collection<IMessageHandler> handlers = getCopyOfClassHandlers(curClass);
+			for(IMessageHandler handler: handlers){
+				try{
+					handler.onMessage(message);
+				}catch(Exception cause){
+					EPublicationError pe = new EPublicationError(cause, "Error handling message", handler, message);
+					m_peh.handleError(pe);
+				}
+			}
+			curClass = curClass.getSuperclass();
+			if(null == curClass){
+				break;
 			}
 		}
 	}
