@@ -50,4 +50,9 @@ public class PKMessageBus implements IPKEPAPI, IMessageBus{
 		m_bus.unsubscribe(msgClass, handler);
 	}
 	
+	public void subscribeByAnnotation(Object obj){
+		m_bus.subscribeByAnnotation(obj);
+	}
+	
+	
 }

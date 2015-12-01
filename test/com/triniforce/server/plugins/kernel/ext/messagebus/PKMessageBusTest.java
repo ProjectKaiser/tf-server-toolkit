@@ -6,12 +6,19 @@
 package com.triniforce.server.plugins.kernel.ext.messagebus;
 
 import com.triniforce.db.test.BasicServerRunningTestCase;
+import com.triniforce.messagebus.MessageHandler;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.IMessageHandler;
 
 public class PKMessageBusTest extends BasicServerRunningTestCase {
 	
 	int cnt;
+	
+	@MessageHandler
+	public String myHandler(Integer i){
+		cnt++;
+		return null;
+	}
 	
 	@Override
 	public void test() throws Exception {
@@ -44,7 +51,14 @@ public class PKMessageBusTest extends BasicServerRunningTestCase {
 		imb.publish("Hello");
 		assertEquals(3, cnt);
 		
+		cnt = 0;
+
+		imb.publish(12);
+		assertEquals(0, cnt);
+		
+		imb.subscribeByAnnotation(this);
+		imb.publish(12);
+		assertEquals(1, cnt);
 		
 	}
-
 }

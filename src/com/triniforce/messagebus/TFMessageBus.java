@@ -55,8 +55,8 @@ public class TFMessageBus {
 		}
 	}
 	
-	public void  subscribeByAnnotation(Object obj){
-		Class cls = obj.getClass();
+	public void  subscribeByAnnotation(Object listener){
+		Class cls = listener.getClass();
 		for(Method m: cls.getMethods()){
 			if(null == m.getAnnotation(MessageHandler.class)){
 				continue;
@@ -65,7 +65,7 @@ public class TFMessageBus {
 			if (params.length != 1){
 				continue;
 			}
-			subscribe(params[0], new MethodWrapper(obj, m));
+			subscribe(params[0], new MethodWrapper(listener, m));
 		}
 	}
 	
