@@ -13,6 +13,17 @@ import com.triniforce.db.test.TFTestCase;
 
 public class TFUtilsTest extends TFTestCase {
     public static final String UNICODE_PATTERN = "۞∑русскийڧüöäë面伴";
+    
+    public void test_string_bytes(){
+    	assertNull(TFUtils.stringToBytes(null));
+    	assertNull(TFUtils.bytesToString(null));
+    	
+    	byte bytes[] = TFUtils.stringToBytes(UNICODE_PATTERN);
+    	String str = TFUtils.bytesToString(bytes);
+    	assertEquals(UNICODE_PATTERN, str);
+    }
+    
+    
     @Override
     public void test() throws Exception {
         String us = TFUtils.readResource(this.getClass(), "TFUtilsTest_unicode.txt");

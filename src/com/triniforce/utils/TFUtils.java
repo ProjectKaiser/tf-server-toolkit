@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -29,11 +30,34 @@ import java.util.zip.ZipOutputStream;
 
 public class TFUtils {
 	
+	public static final String UTF8 = "UTF-8";
+	
 	public static String lineSeparator(){
 		return System.getProperty("line.separator");
 	}
 	
-
+	public static String bytesToString(byte bytes[]){
+		if(null == bytes){
+			return null;
+		}
+		try {
+			return new String(bytes, UTF8);
+		} catch (UnsupportedEncodingException e) {
+			return new String(bytes);
+		}
+	}
+	
+	public static byte[] stringToBytes(String str){
+		if(null == str){
+			return null;
+		}
+		try {
+			return str.getBytes(UTF8);
+		} catch (UnsupportedEncodingException e) {
+			return str.getBytes();
+		}
+	}
+	
 	/**
 	 * @param language
 	 * @param country
