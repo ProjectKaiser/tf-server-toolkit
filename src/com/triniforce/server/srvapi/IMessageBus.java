@@ -3,7 +3,7 @@
  * All Rights Reserved.
  *
  */ 
-package com.triniforce.server.plugins.kernel.ext.messagebus;
+package com.triniforce.server.srvapi;
 
 import com.triniforce.utils.IMessageHandler;
 

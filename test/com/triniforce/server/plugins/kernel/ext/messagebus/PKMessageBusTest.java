@@ -7,6 +7,7 @@ package com.triniforce.server.plugins.kernel.ext.messagebus;
 
 import com.triniforce.db.test.BasicServerRunningTestCase;
 import com.triniforce.messagebus.MessageHandler;
+import com.triniforce.server.srvapi.IMessageBus;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.IMessageHandler;
 
