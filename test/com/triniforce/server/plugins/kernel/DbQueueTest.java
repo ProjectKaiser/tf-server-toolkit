@@ -32,11 +32,11 @@ public class DbQueueTest extends BasicServerTestCase {
     
     protected void setUp() throws Exception {
         super.setUp();
-        m_server.enterMode(Mode.Running);
+        getServer().enterMode(Mode.Running);
     }
 
     protected void tearDown() throws Exception {
-        m_server.leaveMode();
+        getServer().leaveMode();
         super.tearDown();
     }
 
@@ -170,18 +170,18 @@ public class DbQueueTest extends BasicServerTestCase {
     }
     
     public void testNotify() throws InterruptedException{
-        m_server.enterMode(Mode.Running);
+        getServer().enterMode(Mode.Running);
         try{
             clearQueue(getFileQueue());
             ISrvSmartTranFactory.Helper.commit();
         } finally{
-            m_server.leaveMode();
+            getServer().leaveMode();
         }
         
         Thread producer = new Thread(){
             @Override
             public void run() {
-                m_server.enterMode(Mode.Running);
+                getServer().enterMode(Mode.Running);
                 try{
                     sleep(1000);    //Small delay for wait
                     IDbQueue fq2 = getFileQueue(); 
@@ -190,7 +190,7 @@ public class DbQueueTest extends BasicServerTestCase {
                 }catch (InterruptedException e) {
                     e.printStackTrace();
                 }finally{
-                    m_server.leaveMode();
+                    getServer().leaveMode();
                 }
             }
         };
@@ -305,12 +305,12 @@ public class DbQueueTest extends BasicServerTestCase {
         String terminateMesage = "stop";
         
         //prepare test
-        m_server.enterMode(Mode.Running);
+        getServer().enterMode(Mode.Running);
         try{
             clearQueue(getFileQueue());
             ISrvSmartTranFactory.Helper.commit();
         } finally{
-            m_server.leaveMode();
+            getServer().leaveMode();
         }
         
         ArrayList<TestWriterThread> threads = new ArrayList<TestWriterThread>();
@@ -363,14 +363,14 @@ public class DbQueueTest extends BasicServerTestCase {
                     for(int i=0; i<MSG_NUM; i++){
                         synchronized(syncObject){
                             readyFlag = false;
-                            m_server.enterMode(Mode.Running);
+                            getServer().enterMode(Mode.Running);
                             try{
                                 if((i+1) % 50 == 0)
                                     trace("Msg: "+(i+1));
                                 getFileQueue().put("Data");
                                 ISrvSmartTranFactory.Helper.commit();
                             }finally{
-                                m_server.leaveMode();
+                                getServer().leaveMode();
                             }
                             syncObject.wait(5000);
                             if(!readyFlag){
@@ -394,7 +394,7 @@ public class DbQueueTest extends BasicServerTestCase {
                 boolean bShutDown = false;
                 
                 while(!bShutDown){
-                    m_server.enterMode(Mode.Running);
+                    getServer().enterMode(Mode.Running);
                     try{
                         String data;
                         data = (String) getFileQueue().get(100000);
@@ -407,7 +407,7 @@ public class DbQueueTest extends BasicServerTestCase {
                         ISrvSmartTranFactory.Helper.commit();
                         
                     }finally{
-                        m_server.leaveMode();
+                        getServer().leaveMode();
                     }
                         
                     synchronized(syncObject){

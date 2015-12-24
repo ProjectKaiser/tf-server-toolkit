@@ -18,7 +18,7 @@ public class ServerTransationFactoryTest extends BasicServerTestCase {
 	
 	@Override
 	public void test() throws Exception {
-		m_server.enterMode(Mode.Running);
+		getServer().enterMode(Mode.Running);
 		try{
 			ISrvSmartTranFactory trf = SrvApiAlgs2.getISrvTranFactory();
 			{	// test that interface installed by transaction extender
@@ -35,7 +35,7 @@ public class ServerTransationFactoryTest extends BasicServerTestCase {
 				}
 			}
 		}finally{
-			m_server.leaveMode();
+			getServer().leaveMode();
 		}
 	}
 }

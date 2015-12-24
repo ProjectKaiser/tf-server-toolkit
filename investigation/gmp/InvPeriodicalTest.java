@@ -11,11 +11,11 @@ import com.triniforce.utils.ICheckInterrupted;
 public class InvPeriodicalTest extends BasicServerTestCase{
     @Override
     public void test() throws Exception {
-        m_server.startPeriodicalTasks();
+        getServer().startPeriodicalTasks();
         try {
             ICheckInterrupted.Helper.sleep(20000);
         } finally {
-            m_server.stopPeriodicalTasks();
+            getServer().stopPeriodicalTasks();
         }
 
     }
@@ -36,7 +36,7 @@ public class InvPeriodicalTest extends BasicServerTestCase{
         Thread t = new Thread(r);
         t.start();
         trace("started");
-        m_server.startPeriodicalTasks();
+        getServer().startPeriodicalTasks();
         ICheckInterrupted.Helper.sleep(5000);
         
     }

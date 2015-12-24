@@ -11,11 +11,11 @@ public class BasicServerRunningTestCase extends BasicServerTestCase{
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        m_server.enterMode(Mode.Running);
+        getServer().enterMode(Mode.Running);
     }
     @Override
     protected void tearDown() throws Exception {
-        m_server.leaveMode();
+    	getServer().leaveMode();
         super.tearDown();
     }
 

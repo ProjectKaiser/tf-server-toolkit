@@ -24,7 +24,7 @@ public class ForeignKeysTest extends BasicServerTestCase{
 
 	@Override
 	public void test() throws Exception {
-		m_server.enterMode(Mode.Running);
+		getServer().enterMode(Mode.Running);
 		try{
 
 			int prevMaxIdle = getPool().m_ds.getMaxIdle();
@@ -66,7 +66,7 @@ public class ForeignKeysTest extends BasicServerTestCase{
 			}
 			
 		}finally{
-			m_server.leaveMode();
+			getServer().leaveMode();
 		}
 	}
 }
