@@ -5,6 +5,8 @@
  */
 package com.triniforce.qsync.impl;
 
+import java.util.concurrent.ExecutionException;
+
 import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.qsync.impl.QSyncPlugin.TestSyncer;
 import com.triniforce.qsync.intf.IQSyncer;
@@ -72,11 +74,13 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 			obj.wait(0);
 			
 		}
+		te.awatTermination(100L);
 		
+		ext.waitForTaskCompletition();
 	}
 	
 	
-	public void testRunTask() throws InterruptedException{
+	public void testRunTask() throws InterruptedException, ExecutionException{
 		QSyncExternals ext = new QSyncExternals();
 		synchronized (obj) {
 			ext.runSync(new Runnable(){
@@ -106,5 +110,6 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 			obj.wait();
 		}
 		assertTrue(complete);
+		ext.waitForTaskCompletition();
 	}
 }

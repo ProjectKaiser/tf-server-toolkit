@@ -90,14 +90,18 @@ public class QSyncStatisSyncerTest extends BasicServerTestCase {
 		}
 		
 		assertEquals(Arrays.asList("str_01", "str_02"), s.synced());
-		
+	
 		
 		getServer().enterMode(Mode.Running);
 		try{
 			ApiStack.getInterface(ITaskExecutors.class).awatTermination(1000L);
+			QSyncManager sm = (QSyncManager) ApiStack.getInterface(IQSyncManager.class);
+			QSyncExternals sme = (QSyncExternals) sm.getSyncerExternals();
+			sme.waitForTaskCompletition();
 		}finally{
 			getServer().leaveMode();
 		}
+		
 	}
 
 	private void putQueue(long qId, String string) {

@@ -325,7 +325,9 @@ public class QSyncManager extends PKEPAPIPeriodicalTask implements IQSyncManager
 
 	private boolean startQueueTask(long qid, long sid, SyncTask task) {
 		QueueExecutionInfo syncerInfo = m_syncers.get(qid);
-		syncerInfo.m_lastAttempt = ApiStack.getInterface(ITime.class).currentTimeMillis(); 
+		long time = ApiStack.getInterface(ITime.class).currentTimeMillis();
+//		ApiAlgs.getDevLog(this).trace("Task started: " + qid+ ", " + time);
+		syncerInfo.m_lastAttempt = time; 
 		try{
 			m_syncerExternals.runSync(task);
 			syncerInfo.m_currentTask = task; // Task started
@@ -397,16 +399,22 @@ public class QSyncManager extends PKEPAPIPeriodicalTask implements IQSyncManager
 		if(null == syncerInfo.m_currentTask){
 			throw new ETaskWasNotStarted(result.qid);
 		}
-		if(syncerInfo.m_lastAttempt < Math.max(syncerInfo.m_lastError, syncerInfo.m_lastSynced))
+		if(syncerInfo.m_lastAttempt < Math.max(syncerInfo.m_lastError, syncerInfo.m_lastSynced)){
+//			ApiAlgs.getDevLog(this).trace("LA:" + syncerInfo.m_lastAttempt + ", "+ Math.max(syncerInfo.m_lastError, syncerInfo.m_lastSynced));
 			throw new ETaskWasNotStarted(result.qid);
+		}
 		queueBL().taskCompleted(result);
 		
+		
+		long time = ApiStack.getInterface(ITime.class).currentTimeMillis();
+//		ApiAlgs.getDevLog(this).trace("Task completed: " + result.qid+ ", " + time);
+		
 		if(QSyncTaskStatus.SYNCED.equals(result.status)){
-			syncerInfo.m_lastSynced = ApiStack.getInterface(ITime.class).currentTimeMillis();
+			syncerInfo.m_lastSynced = time; 
 		}
 		
 		if(EnumSet.of(QSyncTaskStatus.ERROR, QSyncTaskStatus.INITIAL_SYNC_ERROR).contains(result.status)){
-			syncerInfo.m_lastError = ApiStack.getInterface(ITime.class).currentTimeMillis();
+			syncerInfo.m_lastError = time;
 			syncerInfo.m_errorCounter ++;
 		}
 		else{
