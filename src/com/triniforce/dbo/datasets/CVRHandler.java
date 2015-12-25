@@ -213,6 +213,7 @@ public class CVRHandler implements ICVRHandler {
 			FieldFunctionRequest ffReq) {
 		final String target = req.getTarget();
 		final String field = ffReq.getFieldName();
+		final Long parentId = req.getParentId();
 		IPKRootExtensionPoint root = ApiStack.getInterface(IBasicServer.class);
 		FieldFunction ff = root.getExtensionPoint(PKEPFieldFunctions.class).getExtension(ffReq.getFunctionName()).getInstance();
 		ff.init(new FieldFunction.IFieldFunctionCtx() {
@@ -221,6 +222,10 @@ public class CVRHandler implements ICVRHandler {
 			}
 			public String getField() {
 				return field;
+			}
+			@Override
+			public Long getParentId() {
+				return parentId;
 			}
 		});
 		return ff;

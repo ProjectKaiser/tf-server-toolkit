@@ -7,10 +7,11 @@ package com.triniforce.dbo.datasets;
 
 
 
-public class FieldFunction {
+public abstract class FieldFunction {
     public interface IFieldFunctionCtx{
         String getField();
         String getTarget();
+        Long getParentId();
     }
     
     /**
