@@ -81,9 +81,10 @@ public class RequestHandler {
     
     public void exec(InputStream input, OutputStream output){
         String soapNS = null;
-    	boolean bLogErorRequest = false;
-    	Log log = ApiAlgs.getLog(this);
+    	
         try {
+        	boolean bLogErorRequest;
+            Log log = ApiAlgs.getLog(this);
             bLogErorRequest = log.isTraceEnabled() && input.markSupported();
             if(bLogErorRequest)
             	input.mark(LOG_BUF_SIZE);
@@ -99,7 +100,6 @@ public class RequestHandler {
     					byte[] buf = new byte[LOG_BUF_SIZE];
     					input.read(buf);
     					log.trace(new String(buf, "utf-8"));
-    					bLogErorRequest = false;
     				} catch (IOException e1) {
     					ApiAlgs.getLog(this).error("Log request failed", e1);
     				}
@@ -120,20 +120,6 @@ public class RequestHandler {
             try {
             	ApiAlgs.getLog(this).trace("service exception", e);
                 m_gen.writeDocument(output, m_gen.serializeException(soapNS, e));
-                
-                if(bLogErorRequest){
-                	try {
-    					input.reset();
-    					byte[] buf = new byte[LOG_BUF_SIZE];
-    					input.read(buf);
-    					log.trace(new String(buf, "utf-8"));
-    				} catch (IOException e1) {
-    					ApiAlgs.getLog(this).error("Log request failed", e1);
-    				}
-                	
-                }
-
-                
             } catch (TransformerException e1) {
                 ApiAlgs.rethrowException(e1);
             }

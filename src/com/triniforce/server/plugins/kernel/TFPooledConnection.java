@@ -17,10 +17,6 @@ import com.triniforce.utils.ApiAlgs;
 
 public class TFPooledConnection implements IPooledConnection{
 
-	public static class EConnectionPoolLimitReached extends RuntimeException{
-		private static final long serialVersionUID = -8383997808216154002L;
-	}
-	
     Map<Connection, StackTraceElement[]> m_conStack = new HashMap<Connection, StackTraceElement[]>();
 
     public BasicDataSource m_ds = null;
@@ -28,7 +24,6 @@ public class TFPooledConnection implements IPooledConnection{
     public TFPooledConnection(BasicDataSource ds, int maxActive){
         m_ds = ds;
         m_ds.setMaxActive(maxActive);
-        m_ds.setMaxWait(10000L);
     }
 
     synchronized public Connection getPooledConnection() throws SQLException {

@@ -125,10 +125,6 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
 		public void setMaxIdle(int maxIdle) {
 			m_ds.setMaxIdle(maxIdle);
 		}
-		
-		public void setDataSource(BasicDataSource basicDataSource){
-			m_ds = basicDataSource;
-		}
     }
     
     protected int m_liUsers = 10000;
@@ -139,9 +135,9 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
 
     protected ArrayList<IPlugin> m_plugins;
 
-    private static BasicServer m_server;
+    protected BasicServer m_server;
 
-    protected boolean m_bFinitServer = false;
+    //protected SrvApiEmu m_emu = new SrvApiEmu();;
 
     public BasicServerTestCase() {
         m_plugins = new ArrayList<IPlugin>();
@@ -157,69 +153,32 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
     protected void setUp() throws Exception {
         super.setUp();  
         m_bemu.setTimeSeq(BasicServerApiEmu.START_TIME, BasicServerApiEmu.TIME_OFFSETS);
-
-        if(isNeededServerRestart())
-        	finitServer();
-        
-        
-        if(null == m_server){
-	        try{
-	                
-		        m_startNumActive = getPool().m_ds.getNumActive();        
-		
-		        m_coreApi = new Api();
-		
-		        setCoreApiInteraces(m_coreApi);
-		        
-		        m_server = createServer(m_coreApi, getPlugins());
-		        m_server.doRegistration();
-		        if(m_server.isDbModificationNeeded()){
-		            m_wasDbModificationNeeded = true;
-		        	m_server.doDbModification();
-		        }
-		        m_server.init();
-	        } catch (Exception e) {
-	        	trace(e);
-				super.tearDown();
-				throw e;
-			}
-        }
+        try{
+            
+            if(getPool().m_ds.isClosed())
+                m_pool = null;
+                
+	        m_startNumActive = getPool().m_ds.getNumActive();        
+	
+	        m_coreApi = new Api();
+	
+	        setCoreApiInteraces(m_coreApi);
+	        
+	        m_server = createServer(m_coreApi, getPlugins());
+	        m_server.doRegistration();
+	        if(m_server.isDbModificationNeeded()){
+	            m_wasDbModificationNeeded = true;
+	        	m_server.doDbModification();
+	        }
+	        m_server.init();
+        } catch (Exception e) {
+        	trace(e);
+			super.tearDown();
+			throw e;
+		}
     }
 
-    private void finitServer() {
-        if( null != m_server){
-        	try{
-        		m_server.finit();
-        	}catch(Exception e){
-        		ApiAlgs.getLog(this).trace("server finit error", e);
-        	}
-        }
-        m_server = null;
-
-	}
-
-	private boolean isNeededServerRestart() {
-		boolean res = false;
-		if(null != m_server){
-			List<IPlugin> plugins = getPlugins();
-			List<IPlugin> installedPlugins = m_server.getPlugins();
-			res = !installedPlugins.containsAll(plugins);
-			
-			if(res && plugins.size() == installedPlugins.size()){
-				ApiAlgs.getLog(this).info("NEED_RESTART: " + plugins.toString());
-			}
-		}
-
-        if(getPool().m_ds.isClosed()){
-        	getPool().setDataSource(getDataSource());
-        	res = true;
-        }
-
-		
-		return res;
-	}
-
-	protected BasicServer createServer(Api api, List<IPlugin> plugins) throws Exception {
+    protected BasicServer createServer(Api api, List<IPlugin> plugins) throws Exception {
     	return new BasicServer(api, plugins);
 	}
 
@@ -278,9 +237,10 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
     int m_startNumActive = 0;
     
     protected void tearDown() throws Exception {
-    	if(m_bFinitServer){
-    		finitServer();
-    	}
+        if( null != m_server){
+            m_server.finit();
+        }
+        m_server = null;
         m_coreApi = null;
         m_plugins = null;
         m_bemu = null;

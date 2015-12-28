@@ -86,7 +86,7 @@ public class BasicServerTest extends BasicServerTestCase {
 		    TimeZone def = TimeZone.getDefault();
 		    TimeZone gmt = TimeZone.getTimeZone("GMT");
 		    assertEquals(gmt, def);
-		    getServer().enterMode(Mode.Running);
+	        m_server.enterMode(Mode.Running);
 	        try{
 	            TimeZone tz = ApiStack.getInterface(TimeZone.class);
 	            assertEquals("Europe/Helsinki", tz.getID());
@@ -94,7 +94,7 @@ public class BasicServerTest extends BasicServerTestCase {
 	            ApiAlgs.getLog(this).trace(new Date());
 	            
 	        } finally{
-	        	getServer().leaveMode();
+	            m_server.leaveMode();
 	        }
 		}
 		{
@@ -147,7 +147,7 @@ public class BasicServerTest extends BasicServerTestCase {
 	}
 	
 	public void testProcedures(){
-		IPKExtensionPoint ep = getServer().getExtensionPoint(PKEPServerProcedures.class.getName());
+		IPKExtensionPoint ep = m_server.getExtensionPoint(PKEPServerProcedures.class.getName());
 		assertEquals(  BasicServerCorePlugin.class.getName(), ep.getPluginId());
 		
 		//test invoke procedure
@@ -181,7 +181,7 @@ public class BasicServerTest extends BasicServerTestCase {
                 pw.println("com.triniforce.server.srvapi.IBasicServer bs = ApiStack.getInterface(com.triniforce.server.srvapi.IBasicServer.class);");
                 pw.println("ApiAlgs.getLog(bs).trace(ApiStack.getApi().toString());");
                 pw.close();
-                getServer().executeBeanShell(script, false);
+                m_server.executeBeanShell(script, false);
             }	        
 	        
 	    }
@@ -190,7 +190,7 @@ public class BasicServerTest extends BasicServerTestCase {
 			File script = File.createTempFile("autoexec", ".js");
 			script.delete();
 
-			getServer().executeBeanShell(script);
+			m_server.executeBeanShell(script);
 		}
 		{//file with error
 			
@@ -201,7 +201,7 @@ public class BasicServerTest extends BasicServerTestCase {
 			pw.print("i = 10;");
 			pw.close();
 			incExpectedLogErrorCount(1);
-			getServer().executeBeanShell(script);
+			m_server.executeBeanShell(script);
 		}
 		{//good script
 			
@@ -225,7 +225,7 @@ public class BasicServerTest extends BasicServerTestCase {
 			api.setIntfImplementor(Handlers.class, hh);
 			ApiStack.pushApi(api);
 			try{
-				getServer().executeBeanShell(script);	
+				m_server.executeBeanShell(script);	
 			}finally{
 				ApiStack.popApi();
 			}
@@ -246,17 +246,17 @@ public class BasicServerTest extends BasicServerTestCase {
 	
 	public void testInterfaces(){
 		trace(Arrays.asList(TimeZone.getAvailableIDs()));
-		getServer().enterMode(Mode.Running);
+		m_server.enterMode(Mode.Running);
 		try{
 		    ApiStack.getInterface(ITaskExecutors.class);		    
 			assertEquals(ColumnType.LONG, IIdDef.Helper.getFieldDef().getType());
 		} finally{
-			getServer().leaveMode();
+			m_server.leaveMode();
 		}
 	}
 	
 	public void testGetCompletedProcedures(){
-		getServer().enterMode(Mode.Upgrade);
+		m_server.enterMode(Mode.Upgrade);
 		try{
 			ISrvSmartTranFactory trf = ApiStack.getInterface(ISrvSmartTranFactory.class);
 			trf.push();
@@ -274,7 +274,7 @@ public class BasicServerTest extends BasicServerTestCase {
 				trf.pop();
 			}
 		}finally{
-			getServer().leaveMode();
+			m_server.leaveMode();
 		}
 	}
 	

@@ -24,7 +24,7 @@ public class MDSDbTest extends BasicServerTestCase{
     	MDS mds = MDSDb.createFromResSet(null);
         assertNull(mds);
     	//
-        getServer().enterMode(Mode.Running);
+    	m_server.enterMode(Mode.Running);
         try{
             ISrvSmartTran  st = ApiStack.getInterface(ISrvSmartTran.class);
             ResSet rs = st.select(TIndexNames.class, new IName[]{TIndexNames.appName, TIndexNames.dbName}, new IName[]{}, new IName[]{});
@@ -73,7 +73,7 @@ public class MDSDbTest extends BasicServerTestCase{
             
             
         }finally{
-        	getServer().leaveMode();
+            m_server.leaveMode();
         }
         
         
