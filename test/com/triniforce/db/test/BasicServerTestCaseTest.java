@@ -89,43 +89,4 @@ public class BasicServerTestCaseTest extends TFTestCase {
 		
 		assertTrue(FINITED);
 	};
-
-	public static class RunningServerTestCase extends BasicServerTestCase{
-		
-		public RunningServerTestCase() {
-			super();
-			setName("test_FOO");
-		}
-		@Override
-		protected void setUp() throws Exception {
-			addPlugin(new TestPl());
-			super.setUp();
-			getServer().enterMode(Mode.Running);
-		}
-		
-		public void test_FOO() throws Exception {
-		}
-		
-		@Override
-		protected void tearDown() throws Exception {
-			getServer().leaveMode();
-			super.tearDown();
-		}
-	}
-	
-	public void testPerf(){
-		TestResult res = new TestResult();
-		RunningServerTestCase test1 = new RunningServerTestCase();
-		RunningServerTestCase test2 = new RunningServerTestCase();
-		long tst = System.nanoTime();
-		test1.run(res);
-		long tend = System.nanoTime();
-		trace(String.format("Exec 1 time: %10.3fms", (tend-tst)/1000000.));
-		tst = System.nanoTime();
-		test2.run(res);
-		tend = System.nanoTime();
-		trace(String.format("Exec 2 time: %10.3fms", (tend-tst)/1000000.));
-		
-		assertEquals(0, res.errorCount() + res.failureCount());
-	}
 }

@@ -122,7 +122,6 @@ public class MailerSrvTest extends BasicServerTestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
-		SMTP_PORT = ServerSetupTest.SMTP.getPort();
 		greenMail.start();
 		addPlugin(new MailerSrvPlugin());
 		super.setUp();
@@ -133,18 +132,13 @@ public class MailerSrvTest extends BasicServerTestCase {
 			getServer().leaveMode();
 		}
 		SENDING_ERROR = null;
-		
-		finitServerOnTearDown();
 
 	}
 	
 	@Override
 	protected void tearDown() throws Exception {
-		try{
-			super.tearDown();
-		}finally{
-			greenMail.stop();
-		}
+		super.tearDown();
+		greenMail.stop();
 	}
 	
 	@Override
@@ -302,7 +296,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 			getServer().leaveMode();
 		}
 		
-		getMailer().m_nextExecTime = 0L; // No Error timeoutst
+		getMailer().m_nextExecTime = 0L; // No Error timeouts
 		
 		//2 emails in queue
 		sendMailAttach("plain", "ss_2".getBytes());
