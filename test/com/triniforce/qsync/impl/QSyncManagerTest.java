@@ -84,7 +84,8 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 	static class TestSyncExt implements IQSyncManagerExternals{
 
         public IQSyncer getQSyncer(long qid, Long syncerId) {
-        	if(syncerId == 10001)
+        	long errId = ApiStack.getInterface(INamedDbId.class).createId("TestSyncExt.syncerError");
+        	if(syncerId == errId)
         		throw new EQSyncerNotFound("test");
 			return new TestQSyncer(qid, null);
         }
@@ -295,7 +296,9 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		}
 		
 		{ //QSyncExternal return exception
-			SrvApiAlgs2.getIServerTran().instantiateBL(TQSyncQueues.BL.class).registerQueue(12412, 10001, QSyncTaskStatus.SYNCED);
+			long errId = ApiStack.getInterface(INamedDbId.class).createId("TestSyncExt.syncerError");
+
+			SrvApiAlgs2.getIServerTran().instantiateBL(TQSyncQueues.BL.class).registerQueue(12412, errId, QSyncTaskStatus.SYNCED);
 			incExpectedLogErrorCount(1);
 			sm.onEveryMinute();
 				
