@@ -288,6 +288,9 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
 	
 	protected void setCoreApiInteraces_internal(Api api) {
 		
+		if (getPool().m_ds.isClosed()){
+			m_pool = null;
+		}
         m_coreApi.setIntfImplementor(IPooledConnection.class, getPool());
 		api.setIntfImplementor(IIdDef.class, new IdDef(ColumnType.LONG));
 		api.setIntfImplementor(ITime.class, m_bemu);
