@@ -334,10 +334,18 @@ public class CVRHandler implements ICVRHandler {
 		DSMetadata md = null;
 		IPKRootExtensionPoint root = ApiStack.getInterface(IBasicServer.class);
 		Collection<IPKExtension> providerExtensions = root.getExtensionPoint(PKEPDatasetProviders.class).getExtensions().values();
-		TFUtils.assertNotNull(req.getTarget(), "CollectionViewRequest.target");
+		if(null == req.getParentOf()){
+			TFUtils.assertNotNull(req.getTarget(), "CollectionViewRequest.target");
+		}
 		for (IPKExtension ipkExtension : providerExtensions) {
 			PKEPDatasetProvider provider = ipkExtension.getInstance();
-			md = provider.queryTarget(req.getTarget());
+			if(null != req.getParentOf()){
+				if( provider instanceof IQueryTargetById){
+					md = ((IQueryTargetById)provider).queryTargetById(req.getParentOf());
+				}
+			}else{
+				md = provider.queryTarget(req.getTarget());
+			}
 			if(null != md)
 				break;
 		}
