@@ -339,7 +339,7 @@ public class CVRHandler implements ICVRHandler {
 		}
 		for (IPKExtension ipkExtension : providerExtensions) {
 			PKEPDatasetProvider provider = ipkExtension.getInstance();
-			if(null != req.getParentOf()){
+			if(null == req.getTarget()){
 				if( provider instanceof IQueryTargetById){
 					md = ((IQueryTargetById)provider).queryTargetById(req.getParentOf());
 				}
