@@ -242,7 +242,6 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
         	}
         }
         m_server = null;
-        ApiAlgs.getLog(this).trace("server finited");
 	}
     
     protected boolean isNeededServerRestart() {
@@ -265,6 +264,15 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
 				Api api = new Api();
 				setCoreApiInteraces(api);
 				res = !api.getImplementors().isEmpty();
+			}
+			
+			if(!res){
+				IPooledConnection ipool = m_server.getCoreApi().getIntfImplementor(IPooledConnection.class);
+				if(ipool instanceof Pool){
+					Pool testPool = (Pool)ipool;
+					res = testPool.m_ds.isClosed();
+				}
+				
 			}
 			
 			
