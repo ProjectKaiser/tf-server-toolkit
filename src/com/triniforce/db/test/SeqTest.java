@@ -60,8 +60,8 @@ public class SeqTest extends TFTestCase {
         assertNotNull(f);
         FileInputStream testLog = new FileInputStream(f);
         FileOutputStream fOutPassed = new FileOutputStream(passedTests, true);
+        BufferedReader r = new BufferedReader(new InputStreamReader(testLog));
         try{
-            BufferedReader r = new BufferedReader(new InputStreamReader(testLog));
             while(r.ready()){
                 String str = r.readLine();
                 if(str.startsWith("#") || m_passed.contains(str))
@@ -104,6 +104,7 @@ public class SeqTest extends TFTestCase {
                 fOutPassed.flush();    
             }
         } finally{
+        	r.close();
             fOutPassed.close();           
             testLog.close();
         }
