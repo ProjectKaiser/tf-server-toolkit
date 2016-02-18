@@ -239,11 +239,12 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
         		}
         	}catch(Exception e){
         		ApiAlgs.getLog(this).trace("server finit error", e);
+        		fail();
         	}
         }
         m_server = null;
 	}
-    
+
     protected boolean isNeededServerRestart() {
 		if(m_bRestartOnSetup)
 			return true;
@@ -426,4 +427,5 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
     protected void finitServerOnTearDown(){
     	m_bFinitServer = true;
     }
+    
 }

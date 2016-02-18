@@ -94,7 +94,6 @@ public class PluginsLoader {
             }            
         }
         
-        @SuppressWarnings("resource")
 		URLClassLoader ucl = new URLClassLoader(urls.toArray(new URL[urls.size()]), this.getClass().getClassLoader());
         for(String mainClass: mainClasses){
             try {
