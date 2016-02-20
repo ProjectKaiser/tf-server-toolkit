@@ -9,8 +9,8 @@ adjustProperty('MavenPublishSnapshotUrl', combineUrl(MavenBaseUrl, 'triniforce-s
 adjustProperty('MavenPublishUsername', MavenUsername)
 adjustProperty('MavenPublishPassword', MavenPassword)
 
-  /////////////////////
- // Private methods //
+/////////////////////
+// Private methods //
 /////////////////////
 
 void adjustProperty(String propertyName, String defaultValue, boolean required = false) {
