@@ -32,7 +32,6 @@ public class RequestHandlerTest extends TFTestCase {
         public enum ENM1{V1, V2};
         
         public ENM1 method3(ENM1 in){
-        	ApiAlgs.getLog(this).trace(in);
 			return ENM1.V1;
         }
         

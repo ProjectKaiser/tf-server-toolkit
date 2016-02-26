@@ -12,9 +12,10 @@ import java.util.List;
 import com.triniforce.extensions.IPKExtension;
 import com.triniforce.extensions.PKExtensionPoint;
 import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor;
+import com.triniforce.server.plugins.kernel.ext.messagebus.PKMessageBus;
 import com.triniforce.server.srvapi.IBasicServer;
-import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
+import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.utils.ApiAlgs;
 
 public class PKEPAPIs  extends PKExtensionPoint{
@@ -35,16 +36,23 @@ public class PKEPAPIs  extends PKExtensionPoint{
     }
 
     public void initOrFinit(boolean init) {
+
         String errorText = init?"API initialization errror":"API finalization errror";
         List<IPKExtension> exs = new ArrayList<IPKExtension>(getExtensions().values());
         if(!init){
             Collections.reverse(exs);
         }
         
+    	IPKExtension extMb = getExtensions().get(PKMessageBus.class.getName());
+   		PKMessageBus mb = (PKMessageBus) (extMb == null? null : extMb.getInstance());
+        
         IBasicServer bs = (IBasicServer) getRootExtensionPoint();
+        
+        
         
         for(IPKExtension ex: exs){
             Object api = ex.getInstance();
+            
             if((init && api instanceof IInitApi) || (!init && api instanceof IFinitApi)){
                 try{
                     if(null != bs){
@@ -71,6 +79,12 @@ public class PKEPAPIs  extends PKExtensionPoint{
                     ApiAlgs.logError(this, errorText +": "+ api.getClass().getName(), e);
                 }
             }
+            
+            //subscribe after init
+            if(init  && null != mb){
+            	mb.subscribeByAnnotation(api);
+            }
+            
         }
     }
 

@@ -324,7 +324,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 	
 	public void testNextExecTime() throws InterruptedException{
 		SMTP_PORT = 52636;
-		m_bemu.setTimeSeq(50000, new long[]{10});
+		getBasicSrvApiEmu().setTimeSeq(50000, new long[]{10});
 		
 		sendMailAttach("plain", "ss".getBytes());
 		waitForMailer();

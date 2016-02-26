@@ -13,14 +13,17 @@ import org.jmock.Mockery;
 
 import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.server.plugins.kernel.DbQueue.DbRecord;
+import com.triniforce.server.plugins.kernel.tables.TDbQueues;
+import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.IDbQueue;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.IIdGenerator;
+import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
-import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.utils.Api;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
+import com.triniforce.utils.IName;
 import com.triniforce.utils.IProfiler;
 import com.triniforce.utils.IProfilerStack.PSI;
 
@@ -33,6 +36,9 @@ public class DbQueueTest extends BasicServerTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         m_server.enterMode(Mode.Running);
+        ISrvSmartTran tr = ApiStack.getInterface(ISrvSmartTran.class);
+        tr.delete(TDbQueues.class, new IName[]{}, new Object[]{});
+        ISrvSmartTranFactory.Helper.commitAndStartTran();
     }
 
     protected void tearDown() throws Exception {

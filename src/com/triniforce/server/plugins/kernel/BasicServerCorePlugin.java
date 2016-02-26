@@ -39,6 +39,7 @@ import com.triniforce.server.plugins.kernel.ext.api.Mailer;
 import com.triniforce.server.plugins.kernel.ext.api.PTRecurringTasks;
 import com.triniforce.server.plugins.kernel.ext.br.BackupRestoreDb;
 import com.triniforce.server.plugins.kernel.ext.br.BackupRestorePluginVersions;
+import com.triniforce.server.plugins.kernel.ext.messagebus.PKMessageBus;
 import com.triniforce.server.plugins.kernel.recurring.PKEPRecurringTasks;
 import com.triniforce.server.plugins.kernel.recurring.TRecurringTasks;
 import com.triniforce.server.plugins.kernel.services.PKEPServices;
@@ -153,6 +154,8 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 		
         //Sync manager
         putExtension(PKEPAPIs.class, QSyncManager.class);
+        
+        putExtension(PKEPAPIs.class, PKMessageBus.class);
 
 	}
 

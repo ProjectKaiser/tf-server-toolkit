@@ -41,7 +41,8 @@ public class TNamedDbIdTest extends BasicServerTestCase {
 	    ISrvSmartTran tr = ApiStack.getInterface(ISrvSmartTran.class);
 	    
         TNamedDbId dbId = (TNamedDbId) ApiStack.getInterface(INamedDbId.class);
-
+        
+        
 	    tr.insert(TNamedDbId.class, new IName[]{TNamedDbId.name, TNamedDbId.id}, new Object[]{key1, 1});
 	    tr.insert(TNamedDbId.class, new IName[]{TNamedDbId.name, TNamedDbId.id}, new Object[]{key2, 2});
 	    
@@ -52,6 +53,10 @@ public class TNamedDbIdTest extends BasicServerTestCase {
 	        assertNotNull(res.getObject(1));	        
 	        assertNull(res.getObject(2));
 	    }
+	    
+        //Since prev tests loads it
+        dbId.loadData();
+
 	    
 	    assertNotNull(dbId.queryId(key1));
 	    assertNotNull(dbId.queryId(key2));

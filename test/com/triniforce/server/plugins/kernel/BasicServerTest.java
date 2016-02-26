@@ -74,6 +74,10 @@ public class BasicServerTest extends BasicServerTestCase {
 		@Override
 		public void doRegistration() {
 		}
+
+		@Override
+		public void run() throws Exception {
+		}
 		
 	}  
 	

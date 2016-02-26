@@ -213,6 +213,7 @@ public class CVRHandler implements ICVRHandler {
 			FieldFunctionRequest ffReq) {
 		final String target = req.getTarget();
 		final String field = ffReq.getFieldName();
+		final Long parentId = req.getParentId();
 		IPKRootExtensionPoint root = ApiStack.getInterface(IBasicServer.class);
 		FieldFunction ff = root.getExtensionPoint(PKEPFieldFunctions.class).getExtension(ffReq.getFunctionName()).getInstance();
 		ff.init(new FieldFunction.IFieldFunctionCtx() {
@@ -221,6 +222,10 @@ public class CVRHandler implements ICVRHandler {
 			}
 			public String getField() {
 				return field;
+			}
+			@Override
+			public Long getParentId() {
+				return parentId;
 			}
 		});
 		return ff;
@@ -329,10 +334,18 @@ public class CVRHandler implements ICVRHandler {
 		DSMetadata md = null;
 		IPKRootExtensionPoint root = ApiStack.getInterface(IBasicServer.class);
 		Collection<IPKExtension> providerExtensions = root.getExtensionPoint(PKEPDatasetProviders.class).getExtensions().values();
-		TFUtils.assertNotNull(req.getTarget(), "CollectionViewRequest.target");
+		if(null == req.getParentOf()){
+			TFUtils.assertNotNull(req.getTarget(), "CollectionViewRequest.target");
+		}
 		for (IPKExtension ipkExtension : providerExtensions) {
 			PKEPDatasetProvider provider = ipkExtension.getInstance();
-			md = provider.queryTarget(req.getTarget());
+			if(null == req.getTarget()){
+				if( provider instanceof IQueryTargetById){
+					md = ((IQueryTargetById)provider).queryTargetById(req.getParentOf());
+				}
+			}else{
+				md = provider.queryTarget(req.getTarget());
+			}
 			if(null != md)
 				break;
 		}

@@ -27,8 +27,6 @@ import com.triniforce.server.plugins.kernel.ep.api.PKEPAPIPeriodicalTask;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.INamedDbId;
-import com.triniforce.server.srvapi.ISrvSmartTran;
-import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
@@ -358,30 +356,24 @@ public class QSyncManager extends PKEPAPIPeriodicalTask implements IQSyncManager
 	}
 
 	synchronized  public boolean onQueueChanged(Long qid) {
-		ISrvSmartTranFactory.Helper.push();
+		QSyncQueueInfo qinfo = getQueueInfo(qid);
+		if(null == qinfo)
+			return false;
+		
 		try{
-			QSyncQueueInfo qinfo = getQueueInfo(qid);
-			if(null == qinfo)
-				return false;
-			
-			try{
-				QueueExecutionInfo syncerInfo = getSyncerInfo(qid, qinfo.result.syncerId);
-				if(syncerInfo.m_currentTask != null){
-					ApiAlgs.getLog(this).trace("Task queue already started. Queue: "+qid);
-					return true;
-				}
-				
-				if(getRunningTasks() < getMaxNumberOfSyncTasks()){
-					long syncerId = qinfo.result.syncerId;
-					return startQueueTask(qid, syncerId, new RecordSync(this, syncerInfo.m_syncer, qid, syncerId));
-				}
-			}catch(Exception e){
-				ApiAlgs.getLog(this).error(e.getMessage(), e);
-				return false;
+			QueueExecutionInfo syncerInfo = getSyncerInfo(qid, qinfo.result.syncerId);
+			if(syncerInfo.m_currentTask != null){
+				ApiAlgs.getLog(this).trace("Task queue already started. Queue: "+qid);
+				return true;
 			}
-			ApiStack.getInterface(ISrvSmartTran.class).commit();
-		}finally{
-			ISrvSmartTranFactory.Helper.pop();
+			
+			if(getRunningTasks() < getMaxNumberOfSyncTasks()){
+				long syncerId = qinfo.result.syncerId;
+				return startQueueTask(qid, syncerId, new RecordSync(this, syncerInfo.m_syncer, qid, syncerId));
+			}
+		}catch(Exception e){
+			ApiAlgs.getLog(this).error(e.getMessage(), e);
+			return false;
 		}
 		return true;
 	}
@@ -426,7 +418,10 @@ public class QSyncManager extends PKEPAPIPeriodicalTask implements IQSyncManager
 		
 		ApiAlgs.getLog(this).trace("task completed. Status: " + result.status );
 		
-		startTasks(result.qid);
+		Long excludeQid = null;
+		if(!result.status.equals(QSyncTaskStatus.SYNCED))
+			excludeQid = result.qid; 
+		startTasks(excludeQid);
 	}
 
 	synchronized public QSyncQueueInfo getQueueInfo(long qid) {

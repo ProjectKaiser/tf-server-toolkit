@@ -352,6 +352,10 @@ public class TFTestCase extends TestCase {
 	public void countErrorLogs(boolean bCount) {
 		m_testLF.bCountErrors = bCount;
 	}
+
+	public boolean isCountErrorLogs() {
+		return m_testLF.bCountErrors;
+	}
 	
 	public static final BasicDataSource getDataSource(){
 		if(null == DATA_SOURCE){

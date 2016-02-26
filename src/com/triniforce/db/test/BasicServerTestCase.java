@@ -9,6 +9,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -89,7 +91,7 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
         }
     }
 	
-    protected BasicServerApiEmu m_bemu = new BasicServerApiEmu(); 
+    private BasicServerApiEmu m_bemu = new BasicServerApiEmu(); 
 
     public static class Pool implements IPooledConnection {
         
@@ -125,6 +127,10 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
 		public void setMaxIdle(int maxIdle) {
 			m_ds.setMaxIdle(maxIdle);
 		}
+
+		public void setDataSource(BasicDataSource dataSource) {
+			m_ds = dataSource;
+		}
     }
     
     protected int m_liUsers = 10000;
@@ -135,9 +141,34 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
 
     protected ArrayList<IPlugin> m_plugins;
 
-    protected BasicServer m_server;
+    protected static BasicServer m_server;
+
+    private static List<IPlugin> SERVER_INSTALLED_PLUGINS;
+    private static Comparator<IPlugin> PLUGIN_COMPARATOR = new Comparator<IPlugin>(){
+		@Override
+		public int compare(IPlugin o1, IPlugin o2) {
+			int res = o1.getClass().getName().compareTo(o2.getClass().getName());
+			if(0 == res){
+				String one = o1.getPluginName();
+				String two = o2.getPluginName();
+				if (one == null ^ two == null) {
+			        res = (one == null) ? -1 : 1;
+			    }
+
+				else if (one == null && two == null) {
+			        res = 0;
+			    }
+				else
+					res = one.compareTo(two); 
+			}
+			return res;
+		}
+    };;
 
     //protected SrvApiEmu m_emu = new SrvApiEmu();;
+
+    protected boolean m_bFinitServer = false;
+    protected boolean m_bRestartOnSetup = false;
 
     public BasicServerTestCase() {
         m_plugins = new ArrayList<IPlugin>();
@@ -147,42 +178,128 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
     protected boolean m_wasDbModificationNeeded = false; 
 
     public void setCurrentTimeMillis(long time){
-        m_bemu.setCurrentTimeMillis(time);
+        getBasicSrvApiEmu().setCurrentTimeMillis(time);
     }
     
-    protected void setUp() throws Exception {
-        super.setUp();  
-        m_bemu.setTimeSeq(BasicServerApiEmu.START_TIME, BasicServerApiEmu.TIME_OFFSETS);
-        try{
-            
-            if(getPool().m_ds.isClosed())
-                m_pool = null;
-                
-	        m_startNumActive = getPool().m_ds.getNumActive();        
-	
-	        m_coreApi = new Api();
-	
-	        setCoreApiInteraces(m_coreApi);
-	        
-	        m_server = createServer(m_coreApi, getPlugins());
-	        m_server.doRegistration();
-	        if(m_server.isDbModificationNeeded()){
-	            m_wasDbModificationNeeded = true;
-	        	m_server.doDbModification();
-	        }
-	        m_server.init();
-        } catch (Exception e) {
-        	trace(e);
-			super.tearDown();
-			throw e;
+    protected BasicServerApiEmu getBasicSrvApiEmu() {
+    	ITime res = getServer().getCoreApi().getIntfImplementor(ITime.class);
+//		ITime res = ApiStack.getInterface(ITime.class);
+		if(res instanceof BasicServerApiEmu){
+			return (BasicServerApiEmu) res;
 		}
+		return null;
+	}
+
+	protected void setUp() throws Exception {
+        super.setUp();  
+
+        if(isNeededServerRestart())
+        	finitServer();
+        
+        
+        if(null == m_server){
+	        try{
+	        	m_bemu = new BasicServerApiEmu();
+	            m_bemu.setTimeSeq(BasicServerApiEmu.START_TIME, BasicServerApiEmu.TIME_OFFSETS);
+	                
+		        m_startNumActive = getPool().m_ds.getNumActive();        
+		
+		        m_coreApi = new Api();
+		        setCoreApiInteraces_internal(m_coreApi);
+		        setCoreApiInteraces(m_coreApi);
+		        
+		        m_server = createServer(m_coreApi, getPlugins());
+		        m_server.doRegistration();
+		        if(m_server.isDbModificationNeeded()){
+		            m_wasDbModificationNeeded = true;
+		        	m_server.doDbModification();
+		        }
+		        m_server.init();
+		        SERVER_INSTALLED_PLUGINS = new ArrayList<IPlugin>(m_server.getPlugins());
+		        Collections.sort(SERVER_INSTALLED_PLUGINS, PLUGIN_COMPARATOR);
+	        } catch (Exception e) {
+	        	trace(e);
+				super.tearDown();
+				throw e;
+			}
+        }
+        
     }
 
-    protected BasicServer createServer(Api api, List<IPlugin> plugins) throws Exception {
+    private void finitServer() {
+        if( null != m_server){
+        	try{
+        		boolean bCount = isCountErrorLogs();
+        		countErrorLogs(false);
+        		try{
+        			m_server.stopAndFinit();
+        		}finally{
+	        		if(bCount)
+	        			countErrorLogs(true);
+        		}
+        	}catch(Exception e){
+        		ApiAlgs.getLog(this).trace("server finit error", e);
+        		fail();
+        	}
+        }
+        m_server = null;
+	}
+
+    protected boolean isNeededServerRestart() {
+		if(m_bRestartOnSetup)
+			return true;
+		boolean res = false; 
+		if(null != m_server){
+			List<IPlugin> plugins = getPlugins();
+			
+			for(IPlugin plugin : getPlugins()){
+				res = Collections.binarySearch(SERVER_INSTALLED_PLUGINS, plugin, PLUGIN_COMPARATOR) < 0;
+				if (res) break;
+			}
+			
+			if(res){
+				ApiAlgs.getLog(this).info("NEED_RESTART: " + plugins.toString());
+			}
+			
+			if(!res){
+				Api api = new Api();
+				setCoreApiInteraces(api);
+				res = !api.getImplementors().isEmpty();
+			}
+			
+			if(!res){
+				IPooledConnection ipool = m_server.getCoreApi().getIntfImplementor(IPooledConnection.class);
+				if(ipool instanceof Pool){
+					Pool testPool = (Pool)ipool;
+					res = testPool.m_ds.isClosed();
+				}
+				
+			}
+			
+			
+		}
+
+        if(getPool().m_ds.isClosed()){
+        	getPool().setDataSource(getDataSource());
+        	res = true;
+        }
+
+		
+		return res;
+	}
+
+	protected BasicServer createServer(Api api, List<IPlugin> plugins) throws Exception {
     	return new BasicServer(api, plugins);
 	}
 
 	protected void setCoreApiInteraces(Api api) {
+    }
+	
+	protected void setCoreApiInteraces_internal(Api api) {
+		
+		if (getPool().m_ds.isClosed()){
+			m_pool = null;
+		}
         m_coreApi.setIntfImplementor(IPooledConnection.class, getPool());
 		api.setIntfImplementor(IIdDef.class, new IdDef(ColumnType.LONG));
 		api.setIntfImplementor(ITime.class, m_bemu);
@@ -237,13 +354,12 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
     int m_startNumActive = 0;
     
     protected void tearDown() throws Exception {
-        if( null != m_server){
-            m_server.finit();
-        }
-        m_server = null;
-        m_coreApi = null;
-        m_plugins = null;
-        m_bemu = null;
+    	if(m_bFinitServer){
+    		finitServer();
+    	}
+//        m_coreApi = null;
+//        m_plugins = null;
+//        m_bemu = null;
         super.tearDown();
     }
 
@@ -303,4 +419,13 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
     		fail("Problems with extensions: \n" + strProblems);
     	}
     }
+    
+    protected void restartServerOnSetup(){
+    	m_bRestartOnSetup = true;
+    }
+    
+    protected void finitServerOnTearDown(){
+    	m_bFinitServer = true;
+    }
+    
 }

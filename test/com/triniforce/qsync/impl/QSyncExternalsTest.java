@@ -73,6 +73,7 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 			
 		}
 		
+		ext.waitForTaskCompletition();
 	}
 	
 	
