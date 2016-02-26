@@ -1,3 +1,5 @@
 /bin/
 /gradle/
+/.gradle/
 .project
+.classpath
