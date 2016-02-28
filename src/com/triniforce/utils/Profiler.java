@@ -43,6 +43,14 @@ public class Profiler implements IProfiler {
         }
 
         public void addItem(Item item) {
+        	if(null == item){
+        		ApiAlgs.getLog(this).error("Null item");
+        		return;
+        	}
+        	if(null == item.getName()){
+        		ApiAlgs.getLog(this).error("Null item name");
+        		return;
+        	}
             m_items.put(item.getName(), item);
         }
 

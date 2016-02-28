@@ -38,7 +38,9 @@ public class IdGeneratorTest extends BasicServerTestCase {
 		assertTrue(""+v, v >=  IdGenerator.MIN_GENERATED_KEY);
 		
 		for(int i=0; i<2*IdGenerator.KEY_CACHE_SIZE; i++){
-			assertEquals(v+i+1, gen.getKey());
+			long k = gen.getKey();
+			trace(k);
+			assertEquals(v+i+1, k);
 		}
 	}
 	
