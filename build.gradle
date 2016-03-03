@@ -10,7 +10,7 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-// Project configuration is used for Maven deploy:
+// Project configuration is used for Maven deploy: //
 group = 'com.triniforce.tf-server-toolkit'
 
 //version = "8.0${release?'':'-SNAPSHOT'}"
