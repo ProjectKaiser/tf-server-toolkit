@@ -9,6 +9,8 @@ import java.util.Arrays;
 
 import javax.mail.Address;
 import javax.mail.BodyPart;
+import javax.mail.Message.RecipientType;
+import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -192,6 +194,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 			assertEquals("default@mail.com", msg1.getFrom()[0].toString());
 			
 		}
+		
 	}
 
     private void waitForMailer() throws InterruptedException {
@@ -374,5 +377,58 @@ public class MailerSrvTest extends BasicServerTestCase {
 			getServer().leaveMode();
 		}
 		
+	}
+	
+	private void sendMail(String from, String to, String subject, String body){
+		getServer().enterMode(Mode.Running);
+		try{
+			MailData data = new Mailer.MailData(from, to, subject, body);
+			INamedDbId dbId = ApiStack.getInterface(INamedDbId.class);
+			long mailerId = dbId.createId(IMailer.class.getName());
+			
+			IDbQueue mailerQueue = IDbQueueFactory.Helper.getQueue(mailerId);
+			mailerQueue.put(data);
+			ApiAlgs.getLog(this).trace("Mail sent to queue: " + mailerId);
+			SrvApiAlgs2.getIServerTran().commit();
+		}finally{
+			getServer().leaveMode();
+		}
+	}
+	
+	public void testSendMail() throws InterruptedException, MessagingException {
+		
+		sendMail("a@mail.com", "x@mail.com","one recipient","zzz");
+		waitForMailer();
+		
+		assertEquals(greenMail.getReceivedMessages().length,1);
+		
+		MimeMessage msg = greenMail.getReceivedMessages()[0];
+		assertEquals("a@mail.com", msg.getFrom()[0].toString());
+		assertEquals("x@mail.com", msg.getRecipients(RecipientType.TO)[0].toString());
+		assertEquals("one recipient", msg.getSubject());
+		
+		//
+		sendMail("a@mail.com", "b@mail.com, c@mail.com","two recipients","zzz");
+		waitForMailer();
+		
+		assertEquals(greenMail.getReceivedMessages().length,3);
+		
+		MimeMessage msg1 = greenMail.getReceivedMessages()[1];
+		assertEquals("a@mail.com", msg1.getFrom()[0].toString());
+		assertEquals("b@mail.com", msg1.getRecipients(RecipientType.TO)[0].toString());
+		assertEquals("c@mail.com", msg1.getRecipients(RecipientType.TO)[1].toString());
+		assertEquals("two recipients", msg1.getSubject());
+		
+		MimeMessage msg2 = greenMail.getReceivedMessages()[2];
+		assertEquals("a@mail.com", msg2.getFrom()[0].toString());
+		assertEquals("b@mail.com", msg2.getRecipients(RecipientType.TO)[0].toString());
+		assertEquals("c@mail.com", msg2.getRecipients(RecipientType.TO)[1].toString());
+		assertEquals("two recipients", msg2.getSubject());
+		
+		//
+		sendMail("a@mail.com", "b@mail.com, c@mail.com,d@mail.com,e@mail.com","4 recipients","zzz");
+		waitForMailer();
+		
+		assertEquals(greenMail.getReceivedMessages().length,7);
 	}
 }
