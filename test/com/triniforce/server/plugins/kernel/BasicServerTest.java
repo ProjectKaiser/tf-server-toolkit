@@ -20,6 +20,7 @@ import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.dbo.DBOTableDef;
 import com.triniforce.dbo.PKEPDBObjects;
 import com.triniforce.extensions.IPKExtensionPoint;
+import com.triniforce.server.plugins.kernel.ep.br.PKEPBackupRestore;
 import com.triniforce.server.plugins.kernel.ep.sp.PKEPServerProcedures;
 import com.triniforce.server.plugins.kernel.ep.sp.ServerProcedure;
 import com.triniforce.server.srvapi.IBasicServer;
@@ -45,6 +46,13 @@ public class BasicServerTest extends BasicServerTestCase {
 	
 	public static interface IHandler{
 		public int execute(int a, int b);
+	}
+	
+	public void testInitFinit(){
+		getServer().getExtensionPoint(PKEPBackupRestore.class);
+		getServer().finit();
+		getServer().getExtensionPoint(PKEPBackupRestore.class);
+		getServer().init();
 	}
 	
 	public static class TestExtTab  extends DBOTableDef{

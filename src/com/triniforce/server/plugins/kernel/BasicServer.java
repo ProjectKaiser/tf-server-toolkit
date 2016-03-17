@@ -1092,7 +1092,6 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 
 	public void finit() {
 		initOrFinit(false);
-		getExtensionPoints().clear();
 	}
 
 	public List<IPlugin> getPlugins() {
