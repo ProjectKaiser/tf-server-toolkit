@@ -10,7 +10,7 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-// Project configuration is used for Maven deploy:
+/// Project configuration is used for Maven deploy:
 group = 'com.triniforce.tf-server-toolkit'
 
 version = tf_version + (tf_release ? '' : '-SNAPSHOT')
@@ -107,7 +107,7 @@ eclipse {
 		plusConfigurations += [configurations.providedCompile]
 	}
 	jdt.file.withProperties{
-   		it['org.eclipse.jdt.core.compiler.problem.rawTypeReference']='ignore'
+		it['org.eclipse.jdt.core.compiler.problem.rawTypeReference']='ignore'
 		it['org.eclipse.jdt.core.compiler.problem.uncheckedTypeOperation']='ignore'
 	}
 }
