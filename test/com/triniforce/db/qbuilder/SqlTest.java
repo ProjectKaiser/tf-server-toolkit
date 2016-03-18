@@ -130,7 +130,8 @@ public class SqlTest extends TFTestCase {
         }
     }
 
-    public void testOrderBy() {
+    @SuppressWarnings("null")
+	public void testOrderBy() {
 
         {// wrong table prefix
             Throwable t = null;
@@ -421,7 +422,8 @@ public class SqlTest extends TFTestCase {
         assertEquals(JoinType.LEFT_OUTER.toString(), "left outer join");
     }
 
-    public void testExceptions() {
+    @SuppressWarnings("null")
+	public void testExceptions() {
 
         {// same column
             QTable qt1 = new QTable("mytable", "t1");

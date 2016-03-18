@@ -46,8 +46,10 @@ public class DDLTestCase extends DBTestCase {
 			boolean bNotNull = rs.getString("IS_NULLABLE").equals("NO");
 			switch(t){
             case INT:
+            case LONG:
             case SMALLINT:
-            case FLOAT: 
+            case FLOAT:
+            case DOUBLE:
             case DATETIME:
             case BLOB:
             	f = FieldDef.createScalarField(fName, t, bNotNull);

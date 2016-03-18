@@ -46,6 +46,12 @@ public class ExprTest extends TFTestCase {
         super.tearDown();
     }
 	
+    
+    public void testIntegralConstant(){
+    	Integer ic = null;
+    	new Expr.IntegralConstant(ic);
+    }
+    
     public void testFunc(){
         {
             Func func = new Func(Expr.Funcs.Upper, new Expr.Param());

@@ -249,8 +249,10 @@ public class Expr {
         void init(Number num){
             if(null == num){
                 m_str = "null";
+            } else {
+            	m_str = num.toString();
             }
-            m_str = num.toString();
+
         }
         public IntegralConstant(Long num) {
             init(num);

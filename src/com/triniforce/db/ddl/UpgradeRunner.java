@@ -822,7 +822,8 @@ public class UpgradeRunner {
         return res;
     }
 
-    public static DbType getDbType(Connection conn) {
+    @SuppressWarnings("null")
+	public static DbType getDbType(Connection conn) {
         DbType res = DbType.OTHER;
         String strDbType = null;
 
