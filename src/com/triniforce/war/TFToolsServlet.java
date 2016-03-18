@@ -47,7 +47,7 @@ public class TFToolsServlet extends SOAPServlet {
 	private BasicServer m_server;
 	
 	public TFToolsServlet() {
-		super("", "", null);
+		super("http://soap.tftool.untill.eu/", "tftool", TFToolsServlet.class.getPackage());
 	}
 	
 

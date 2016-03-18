@@ -10,6 +10,10 @@
     <servlet>
         <servlet-name>TFToolsServlet</servlet-name>
         <servlet-class>com.triniforce.war.TFToolsServlet</servlet-class>
+        <init-param>
+	        <param-name>plugins</param-name>
+	        <param-value>ias.TestPlugin</param-value>
+        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>TFToolsServlet</servlet-name>
@@ -21,5 +25,7 @@
         <res-type>org.apache.commons.dbcp.BasicDataSource</res-type>
         <res-auth>Container</res-auth>
     </resource-ref>
+    
+    
 
 </web-app>
