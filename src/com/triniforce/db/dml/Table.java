@@ -16,6 +16,7 @@ import java.util.List;
 import com.triniforce.db.ddl.TableDef.FieldDef;
 import com.triniforce.db.dml.Table.Row.State;
 import com.triniforce.utils.IName;
+import com.triniforce.utils.TFUtils;
 
 public class Table {
 
@@ -211,6 +212,12 @@ public class Table {
             case INSERTED:
                 m_f[i] = v;
                 break;
+            case CANCELED:
+            	TFUtils.assertTrue(false, "Unexpected CANCELED");
+            	break;
+            case DELETED:
+            	TFUtils.assertTrue(false, "Unexpected DELETED");
+            	break;            	
             }
         }
 
@@ -232,6 +239,12 @@ public class Table {
             case INSERTED:
                 m_state = State.CANCELED;
                 break;
+            case CANCELED:
+            	TFUtils.assertTrue(false, "Unexpected CANCELED");
+            	break;
+            case DELETED:
+            	TFUtils.assertTrue(false, "Unexpected DELETED");
+            	break;            	
             }
         }
         
@@ -288,6 +301,9 @@ public class Table {
         case INSERTED:
             r.accept();
             break;
+        case INTACT:
+        	TFUtils.assertTrue(false, "Unexpected INTACT");
+        	break;            
         }            
     }
     

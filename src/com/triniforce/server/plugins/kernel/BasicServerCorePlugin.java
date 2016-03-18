@@ -295,6 +295,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
             		m_runningApi.getIntfImplementor(IDbQueueFactory.class));
 
             break;
+        case None:
         case Running:
             break;
         }

@@ -145,6 +145,7 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
 
     private static List<IPlugin> SERVER_INSTALLED_PLUGINS;
     private static Comparator<IPlugin> PLUGIN_COMPARATOR = new Comparator<IPlugin>(){
+		@SuppressWarnings("null")
 		@Override
 		public int compare(IPlugin o1, IPlugin o2) {
 			int res = o1.getClass().getName().compareTo(o2.getClass().getName());

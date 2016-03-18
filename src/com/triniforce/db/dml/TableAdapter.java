@@ -16,8 +16,8 @@ import java.util.List;
 
 import com.triniforce.db.ddl.TableDef;
 import com.triniforce.db.ddl.TableDef.FieldDef;
-import com.triniforce.db.ddl.TableDef.IndexDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
+import com.triniforce.db.ddl.TableDef.IndexDef;
 import com.triniforce.db.dml.Table.Row;
 import com.triniforce.utils.ApiAlgs;
 
@@ -167,6 +167,10 @@ public class TableAdapter {
                 }
                 delStmnt.addBatch();
                 break;
+            case CANCELED:
+            	break;
+            case INTACT:
+            	break;            	
             }
         }
         if (delStmnt != null)
