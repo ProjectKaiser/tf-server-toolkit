@@ -130,7 +130,6 @@ public class SqlTest extends TFTestCase {
         }
     }
 
-    @SuppressWarnings("null")
 	public void testOrderBy() {
 
         {// wrong table prefix
@@ -149,10 +148,11 @@ public class SqlTest extends TFTestCase {
                 .addCol("art1", "name")
 
                 );
+                fail();
             } catch (Err.EPrefixNotFound e) {
                 t = e;
+                assertEquals(t.getMessage(), "art1");
             }
-            assertEquals(t.getMessage(), "art1");
         }
 
         {// wrong Expr
@@ -422,7 +422,6 @@ public class SqlTest extends TFTestCase {
         assertEquals(JoinType.LEFT_OUTER.toString(), "left outer join");
     }
 
-    @SuppressWarnings("null")
 	public void testExceptions() {
 
         {// same column
@@ -475,7 +474,6 @@ public class SqlTest extends TFTestCase {
 
         }
         {// ..test description goes here...
-            EUnkonwnEqKind e = null;
             try {
                 new QSelect().joinLast(new QTable("articles", "art").addCol("name"))
                 .where(new WhereClause()
@@ -483,10 +481,10 @@ public class SqlTest extends TFTestCase {
                 .andCompare("art", "name", ">>")
                 
                 );
+                fail();
             } catch (EUnkonwnEqKind e_) {
-                e = e_;
+                assertEquals(">>", e_.getMessage());
             }
-            assertEquals(">>", e.getMessage());
         }
 
     }
