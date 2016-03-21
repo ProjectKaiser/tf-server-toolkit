@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.UUID;
 
 import junit.framework.TestCase;
 
@@ -162,6 +163,10 @@ public class TFTestCase extends TestCase {
         } catch (Exception e) {
             ApiAlgs.rethrowException(e);
         }        
+    }
+    
+    public String uuid(String prefix){
+    	return prefix + "_" + UUID.randomUUID().toString();
     }
     
     public static String getTfTestFolder(){
