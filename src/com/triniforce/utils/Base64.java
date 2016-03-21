@@ -1,5 +1,7 @@
 package com.triniforce.utils;
 
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * <p>Encodes and decodes to and from Base64 notation.</p>
@@ -518,6 +520,16 @@ public class Base64
     }   // end encodeObject
     
 
+	public static void closeIfNotNull(Closeable os) {
+		if (null != os) {
+			try {
+				os.close();
+			} catch (IOException e) {
+
+			}
+		}
+	}
+    
 
     /**
      * Serializes an object and returns the Base64-encoded
@@ -578,10 +590,10 @@ public class Base64
         }   // end catch
         finally
         {
-            try{ oos.close();   } catch( Exception e ){}
-            try{ gzos.close();  } catch( Exception e ){}
-            try{ b64os.close(); } catch( Exception e ){}
-            try{ baos.close();  } catch( Exception e ){}
+        	closeIfNotNull(oos);
+        	closeIfNotNull(gzos);
+        	closeIfNotNull(gzos);
+        	closeIfNotNull(baos);
         }   // end finally
         
         // Return value according to relevant encoding.
@@ -708,9 +720,9 @@ public class Base64
             }   // end catch
             finally
             {
-                try{ gzos.close();  } catch( Exception e ){}
-                try{ b64os.close(); } catch( Exception e ){}
-                try{ baos.close();  } catch( Exception e ){}
+            	closeIfNotNull(gzos);
+            	closeIfNotNull(gzos);
+            	closeIfNotNull(baos);
             }   // end finally
 
             // Return value according to relevant encoding.
@@ -1007,9 +1019,9 @@ public class Base64
                 }   // end catch
                 finally
                 {
-                    try{ baos.close(); } catch( Exception e ){}
-                    try{ gzis.close(); } catch( Exception e ){}
-                    try{ bais.close(); } catch( Exception e ){}
+                	closeIfNotNull(baos);
+                	closeIfNotNull(gzis);
+                	closeIfNotNull(bais);
                 }   // end finally
 
             }   // end if: gzipped
@@ -1057,8 +1069,8 @@ public class Base64
         }   // end catch
         finally
         {
-            try{ bais.close(); } catch( Exception e ){}
-            try{ ois.close();  } catch( Exception e ){}
+        	closeIfNotNull(bais);
+        	closeIfNotNull(ois);
         }   // end finally
         
         return obj;
@@ -1093,7 +1105,7 @@ public class Base64
         }   // end catch: IOException
         finally
         {
-            try{ bos.close(); } catch( Exception e ){}
+        	closeIfNotNull(bos);
         }   // end finally
         
         return success;
@@ -1126,7 +1138,7 @@ public class Base64
         }   // end catch: IOException
         finally
         {
-                try{ bos.close(); } catch( Exception e ){}
+        	closeIfNotNull(bos);
         }   // end finally
         
         return success;
@@ -1184,7 +1196,7 @@ public class Base64
         }   // end catch: IOException
         finally
         {
-            try{ bis.close(); } catch( Exception e) {}
+        	closeIfNotNull(bis);
         }   // end finally
         
         return decodedData;
@@ -1232,7 +1244,7 @@ public class Base64
         }   // end catch: IOException
         finally
         {
-            try{ bis.close(); } catch( Exception e) {}
+        	closeIfNotNull(bis);
         }   // end finally
         
         return encodedData;
@@ -1258,8 +1270,7 @@ public class Base64
             ex.printStackTrace();
         }   // end catch
         finally {
-            try { out.close(); }
-            catch( Exception ex ){}
+        	closeIfNotNull(out);
         }   // end finally    
     }   // end encodeFileToFile
 
@@ -1284,8 +1295,7 @@ public class Base64
             ex.printStackTrace();
         }   // end catch
         finally {
-            try { out.close(); }
-            catch( Exception ex ){}
+        	closeIfNotNull(out);
         }   // end finally    
     }   // end decodeFileToFile
     

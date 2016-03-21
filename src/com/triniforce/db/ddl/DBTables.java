@@ -155,10 +155,12 @@ public class DBTables {
 			int res = 0;
 			for(String column : idx.getColumns()){
 				ElementVerStored<FieldDef> e = td.getFields().findElement(column);
-				if(null == e)
+				if(null == e){
 					ApiAlgs.assertNotNull(e, td.getEntityName() + "." + column);
-				FieldDef fd = e.getElement();
-				res += fd.getSize();
+				} else {
+					FieldDef fd = e.getElement();
+					res += fd.getSize();
+				}
 			}
 			return res;
 		}

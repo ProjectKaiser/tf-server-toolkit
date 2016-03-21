@@ -158,8 +158,13 @@ public static class DPPProcPlugin extends DataPreparationProcedure implements IP
 				else if (one == null && two == null) {
 			        res = 0;
 			    }
-				else
-					res = one.compareTo(two); 
+				else{
+					if(null != one){
+						res = one.compareTo(two);
+					} else {
+						fail();
+					}
+				}
 			}
 			return res;
 		}

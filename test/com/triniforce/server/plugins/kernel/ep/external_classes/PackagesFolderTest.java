@@ -75,11 +75,14 @@ public class PackagesFolderTest extends TFTestCase {
                     break;
                 }
             }
-            assertNotNull(c);
-            Method m = c.getMethod("callClass3");
-            Object o = c.newInstance();
-            Object res = m.invoke(o);
-            assertEquals(2, res);
+            if(c == null){
+            	fail();
+            } else {
+				Method m = c.getMethod("callClass3");
+	            Object o = c.newInstance();
+	            Object res = m.invoke(o);
+	            assertEquals(2, res);
+            }
         }
 
     }

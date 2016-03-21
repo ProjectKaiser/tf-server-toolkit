@@ -127,7 +127,7 @@ public class StringSerializer {
         return ser.string2Object(data);
     }
     
-    protected static String objectToString(Object data, String serKey) {
+    public static String objectToString(Object data, String serKey) {
         ISerializer ser = m_serializers.get(serKey);
         TFUtils.assertNotNull(ser, "Wrong serKey " + serKey);
         return object2String(data, ser);

@@ -5,6 +5,8 @@
  */
 package com.triniforce.qsync.impl;
 
+import java.util.concurrent.ExecutionException;
+
 import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.qsync.impl.QSyncPlugin.TestSyncer;
 import com.triniforce.qsync.intf.IQSyncer;
@@ -19,11 +21,11 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
-		
 		addPlugin(new QSyncPlugin());
 		super.setUp();
 		
 		getServer().enterMode(Mode.Running);
+		
 	}
 	
 	@Override
@@ -60,24 +62,32 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 
 		ext.runSync(new Runnable(){
 			public void run() {
+//				ApiAlgs.getDevLog(this).trace("task started");
 				synchronized (obj) {
 					obj.notify();
 				}
+//				ApiAlgs.getDevLog(this).trace("task ending");
 			}
 		});
 		
+//		ApiAlgs.getDevLog(this).trace("test wait for nitification");
 		assertEquals(before+1, te.getTasksCount());
 		
 		synchronized (obj) {
 			obj.wait(0);
 			
 		}
+//		ApiAlgs.getDevLog(this).trace("test notified");
 		
 		ext.waitForTaskCompletition();
+//		ApiAlgs.getDevLog(this).trace("external compoleted");
+		
+		te.awatTermination(1000L);
+//		ApiAlgs.getDevLog(this).trace("executed terminated");
 	}
 	
 	
-	public void testRunTask() throws InterruptedException{
+	public void testRunTask() throws InterruptedException, ExecutionException{
 		QSyncExternals ext = new QSyncExternals();
 		synchronized (obj) {
 			ext.runSync(new Runnable(){
@@ -107,5 +117,10 @@ public class QSyncExternalsTest extends BasicServerTestCase {
 			obj.wait();
 		}
 		assertTrue(complete);
+		
+		
+		ext.waitForTaskCompletition();
+		ITaskExecutors te = ApiStack.getInterface(ITaskExecutors.class);
+		te.awatTermination(20L);
 	}
 }

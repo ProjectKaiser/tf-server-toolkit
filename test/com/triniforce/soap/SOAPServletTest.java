@@ -9,10 +9,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import javax.servlet.ReadListener;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.TransformerException;
@@ -33,6 +35,18 @@ public class SOAPServletTest extends TFTestCase {
 		public void write(int b) throws IOException {
 			BYTE_OUT.write(b);
 		}
+
+		@Override
+		public boolean isReady() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public void setWriteListener(WriteListener writeListener) {
+			// TODO Auto-generated method stub
+			
+		}
 		
 	}
 	
@@ -41,6 +55,24 @@ public class SOAPServletTest extends TFTestCase {
 		@Override
 		public int read() throws IOException {
 			return BYTE_IN.read();
+		}
+
+		@Override
+		public boolean isFinished() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public boolean isReady() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public void setReadListener(ReadListener readListener) {
+			// TODO Auto-generated method stub
+			
 		}
 		
 	}

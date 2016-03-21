@@ -273,14 +273,14 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
             
         	MimeMessage msg;
         	final InternetAddress fromAddr;
-        	final InternetAddress toAddr;
+        	final InternetAddress[] toAddr;
         	final MimeBodyPart attach;
             try {
             	if(null == from){
             		from = mailerSettings.getDefaultSender();
             	}
             	fromAddr = new InternetAddress(from);
-            	toAddr = new InternetAddress(to);
+            	toAddr = InternetAddress.parse(to);
            		attach = (null != attachment) ? settAttachment(attachFile, attachType, attachment, "") : null;
             	msg = createMessage(session, fromAddr, toAddr, subject, bodyType, body, attach);
             } catch (Throwable t) {
@@ -324,11 +324,11 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 	}
 
 
-	private MimeMessage createMessage(Session session, InternetAddress from, InternetAddress to, 
+	private MimeMessage createMessage(Session session, InternetAddress from, InternetAddress[] to, 
 			String subject, String bodyType, String body, MimeBodyPart attachment) throws MessagingException{
 		MimeMessage msg = new MimeMessage(session);
         msg.setFrom(from);
-        msg.setRecipient(RecipientType.TO, to);
+        msg.addRecipients(RecipientType.TO, to);
         msg.setSubject(subject, emailCharset);
         
         if(null == attachment){

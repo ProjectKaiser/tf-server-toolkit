@@ -822,30 +822,30 @@ public class UpgradeRunner {
         return res;
     }
 
-    public static DbType getDbType(Connection conn) {
+	public static DbType getDbType(Connection conn) {
         DbType res = DbType.OTHER;
         String strDbType = null;
 
         try {
             strDbType = conn.getMetaData().getDatabaseProductName();
+            if (strDbType.equals("Microsoft SQL Server")) //$NON-NLS-1$
+                res = DbType.MSSQL;
+            else if (strDbType.equals("Apache Derby")) //$NON-NLS-1$
+                res = DbType.DERBY;
+            else if (strDbType.equals("MySQL")) //$NON-NLS-1$
+                res = DbType.MYSQL;
+            else if (strDbType.equals("Oracle")) //$NON-NLS-1$
+                res = DbType.ORACLE;
+            else if (strDbType.startsWith("Firebird")) //$NON-NLS-1$
+                res = DbType.FIREBIRD;
+            else if (strDbType.startsWith("HSQL Database Engine")) //$NON-NLS-1$
+                res = DbType.HSQL;
+            else if (strDbType.startsWith("H2")) //$NON-NLS-1$
+                res = DbType.H2;        
+            return res;
         } catch (Exception e) {
-            ApiAlgs.rethrowException(e);
+            throw new RuntimeException(e);
         }
-        if (strDbType.equals("Microsoft SQL Server")) //$NON-NLS-1$
-            res = DbType.MSSQL;
-        else if (strDbType.equals("Apache Derby")) //$NON-NLS-1$
-            res = DbType.DERBY;
-        else if (strDbType.equals("MySQL")) //$NON-NLS-1$
-            res = DbType.MYSQL;
-        else if (strDbType.equals("Oracle")) //$NON-NLS-1$
-            res = DbType.ORACLE;
-        else if (strDbType.startsWith("Firebird")) //$NON-NLS-1$
-            res = DbType.FIREBIRD;
-        else if (strDbType.startsWith("HSQL Database Engine")) //$NON-NLS-1$
-            res = DbType.HSQL;
-        else if (strDbType.startsWith("H2")) //$NON-NLS-1$
-            res = DbType.H2;        
-        return res;
     }
 
     public String getDefaultConstraintName(String tabName, String colName)
