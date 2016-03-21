@@ -9,12 +9,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Date;
-import java.util.Hashtable;
 import java.util.List;
 
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.naming.spi.InitialContextFactory;
+import javax.naming.InitialContext;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -39,25 +36,14 @@ import com.triniforce.utils.ITime;
 
 public class TFToolsServletTest extends TFTestCase {
 	
-	
-	public static class MyInitialContextFactory implements InitialContextFactory {
-
-	    public Context getInitialContext(Hashtable<?, ?> arg0)
-	            throws NamingException {
-
-	        Context context = Mockito.mock(Context.class);
-	        Mockito.when(context.lookup("java:/comp/env")).thenReturn(context);
-	        Mockito.when(context.lookup("tftoolDb")).thenReturn(getDataSource());
-	        return context;
-	    }
-	}
-
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		System.setProperty(Context.INITIAL_CONTEXT_FACTORY, MyInitialContextFactory.class.getName());
+		InitialContext ic = new InitialContext();
 		
+        ic.createSubcontext("java:/comp/env");  
+		ic.bind("java:/comp/env/tftoolDb", getDataSource());
 	}
 	
 	static TestSvc p1 = Mockito.mock(TestSvc.class);
