@@ -19,7 +19,15 @@ import com.triniforce.utils.TFUtils;
 
 public class ClassParser {
     
-    private Package m_pkg;
+    private static final Comparator<PropDef> ALPHABETICAL_COMPARATOR = new Comparator<PropDef>(){
+
+		@Override
+		public int compare(PropDef o1, PropDef o2) {
+			return o1.getName().compareTo(o2.getName());
+		}
+    	
+    };
+	private Package m_pkg;
 
     public ClassParser(Package pkg) {
         m_pkg = pkg;
@@ -70,9 +78,10 @@ public class ClassParser {
         }
         
         PropertiesSequence propSeq = (PropertiesSequence) key.getAnnotation(PropertiesSequence.class);
+        Comparator<PropDef> comparator;
         if(null !=propSeq){
         	final String[]seq = propSeq.sequence();
-	        Collections.sort(res.getOwnProps(), new Comparator<PropDef>(){
+	        comparator =  new Comparator<PropDef>(){
 				public int compare(PropDef prop1, PropDef prop2) {
 					return pos(prop1) - pos(prop2); 
 				}
@@ -80,8 +89,11 @@ public class ClassParser {
 					int res = Arrays.asList(seq).indexOf(prop.getName());
 					return res < 0 ? seq.length : res;
 				}
-	        });
+	        };
+        }else{
+        	comparator = ALPHABETICAL_COMPARATOR;
         }
+        Collections.sort(res.getOwnProps(), comparator);
         
 //        for (Class innerCls : cls.getDeclaredClasses()) {
 //        	int modifiers = innerCls.getModifiers();

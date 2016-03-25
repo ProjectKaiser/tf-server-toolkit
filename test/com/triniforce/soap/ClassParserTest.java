@@ -153,6 +153,59 @@ public class ClassParserTest extends TFTestCase {
 		}
     }
     
+    public static class CWithoutSeq{
+    	int c,a,b,d;
+    	int c1,a1;
+
+		public int getA() {
+			return a;
+		}
+
+		public void setA(int a) {
+			this.a = a;
+		}
+
+		public int getB() {
+			return b;
+		}
+
+		public void setB(int b) {
+			this.b = b;
+		}
+
+		public int getC() {
+			return c;
+		}
+
+		public void setC(int c) {
+			this.c = c;
+		}
+
+		public int getD() {
+			return d;
+		}
+
+		public void setD(int d) {
+			this.d = d;
+		}
+
+		public int getC1() {
+			return c1;
+		}
+
+		public void setC1(int c1) {
+			this.c1 = c1;
+		}
+
+		public int getA1() {
+			return a1;
+		}
+
+		public void setA1(int a1) {
+			this.a1 = a1;
+		}
+    }
+    
     @Override
     public void test() throws Exception {
 
@@ -224,6 +277,17 @@ public class ClassParserTest extends TFTestCase {
         assertEquals("prop2", props.get(2).getName());
         assertEquals("prop4", props.get(3).getName());
         assertEquals("prop5", props.get(4).getName());
+        
+        ClassParser cp2 = new ClassParser(ClassParserTest.class.getPackage());
+        cDef = (ClassDef) cp2.parse(CWithoutSeq.class, m_lib, null);
+        props = cDef.getOwnProps();
+        assertEquals("a", props.get(0).getName());
+        assertEquals("a1", props.get(1).getName());
+        assertEquals("b", props.get(2).getName());
+        assertEquals("c", props.get(3).getName());
+        assertEquals("c1", props.get(4).getName());
+        assertEquals("d", props.get(5).getName());
+        
         
     }
     
