@@ -10,6 +10,11 @@ public class VUnknown {
     public VUnknown() {
     }
     
+    @Override
+    public String toString() {
+    	return "VUnknown";
+    }
+    
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (obj == null) return false;

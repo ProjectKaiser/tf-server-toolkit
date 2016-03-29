@@ -215,6 +215,10 @@ public class LongListResponse extends BasicResponse{
         m_values.set(calValueIdx(rowNum, colName.getName()), value);
     }
     
+    public void setCell(IName colName, Object value) throws IndexOutOfBoundsException{
+        m_values.set(calValueIdx(getRowsNumber() - 1, colName.getName()), value);
+    }
+    
     public void setStartFrom(int v) {
         m_startFrom = v;
     }
