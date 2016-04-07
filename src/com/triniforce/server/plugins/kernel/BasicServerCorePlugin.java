@@ -88,6 +88,7 @@ import com.triniforce.utils.ITime;
 import com.triniforce.utils.Profiler.INanoTimer;
 import com.triniforce.utils.Profiler.ProfilerStack;
 import com.triniforce.utils.TFUtils;
+import com.triniforce.war.BasicDiag;
 
 public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
 	
@@ -129,6 +130,8 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         		new DBOUpgProcedure(new BreakIdGenerator(m_miscIdGenerator)));
         
         putExtension(PKEPDBObjects.class, DBOVersion.class.getName(), new DBOVersion());
+        
+
      
 	}
 	
@@ -157,6 +160,7 @@ public class BasicServerCorePlugin extends TFPlugin implements IPlugin{
         
         putExtension(PKEPAPIs.class, PKMessageBus.class);
 
+		putExtension(PKEPAPIs.class, BasicDiag.class);
 	}
 
 	public String[] getDependencies() {
