@@ -1,0 +1,6 @@
+<Context>
+
+  <Resource name="tftoolHome" auth="Container" type="java.lang.String"
+               value="c:/workspace/tf_settings/tftool"/>
+
+</Context>
