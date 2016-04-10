@@ -142,6 +142,7 @@ public class TFUtils {
 	                    actual = Long.parseLong((String) actual);
 	                }catch(Throwable t){
 	                    ApiAlgs.getLog(TFUtils.class).info("parseLong() error: " + actual);
+	                    return false;
 	                }
 	            }
 	        }
@@ -545,13 +546,44 @@ public class TFUtils {
         throw new EUtils.EAssertNotNullFailed(MessageFormat.format("Unexpected null value for \"{0}\"",name)); //$NON-NLS-1$
     }
 
-    public static void assertEquals(Object expected, Object actual){
+    public static String msgPrefix(String prefix){
+    	return TFUtils.isEmptyString(prefix)?"" :prefix +": ";
+    }
+    
+    public static void assertEqualArrays(String prefix, Object expected[], Object actual[]){
+    	if(expected.length != actual.length){
+    		throw new EUtils.EAssertEqualsFailed(msgPrefix(prefix) + "different size", expected.length, actual.length);    		
+    	}
+		for (int idx = 0; idx < expected.length; idx++) {
+			assertEquals(prefix + "[" + idx+"]", expected[idx], actual[idx]);
+		}
+    }
+    
+    public static void assertEquals(String prefix, Object expected, Object actual){
         if( expected == actual ) return;
         if( expected == null || actual == null){
             throw new EUtils.EAssertEqualsFailed(expected, actual);
         }
-        if(expected.equals(actual)) return;
-        throw new EUtils.EAssertEqualsFailed(expected, actual);
+        if(expected instanceof List){
+        	expected = ((List)expected).toArray();
+        }
+        if(actual instanceof List){
+        	actual  = ((List)actual).toArray();
+        }        
+        if(expected instanceof Object[]){
+        	if(! (actual instanceof Object[])){
+        		throw new EUtils.EAssertEqualsFailed("Array vs not array", expected.getClass(), actual.getClass());        		
+        	}
+        	assertEqualArrays(prefix, (Object[])expected, (Object[])actual);
+        	return;
+        }
+        if(TFUtils.equals(expected, actual))return;
+        throw new EUtils.EAssertEqualsFailed(prefix, expected, actual);
+    	
+    }
+    
+    public static void assertEquals(Object expected, Object actual){
+    	assertEquals("", expected, actual);
     }
 
     public static void assertTrue(boolean expr, String msg){

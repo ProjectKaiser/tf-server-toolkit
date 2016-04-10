@@ -7,6 +7,7 @@ package com.triniforce.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import com.triniforce.db.test.TFTestCase;
@@ -53,6 +54,64 @@ public class TFUtilsTest extends TFTestCase {
         Short s =12120;
         assertEquals(s, TFUtils.asShort(l));
         assertEquals((Short)(short)10, TFUtils.asShort("10"));
+    }
+    
+    public void testEquals(){
+    	
+    	try{
+    		TFUtils.assertEquals(1, "aaa");
+    		fail();
+    	}catch(EUtils.EAssertEqualsFailed e){
+    		trace(e);
+    	}
+    	
+		// Array vs not array
+		try {
+			TFUtils.assertEquals(new Object[] { 1, 2, 3 }, "aaa");
+			fail();
+		} catch (EUtils.EAssertEqualsFailed e) {
+			trace(e);
+		}
+
+		// Different size
+		try {
+			TFUtils.assertEquals(new Object[] { 1, 2, 3 }, new Object[] { 1, 2 });
+			fail();
+		} catch (EUtils.EAssertEqualsFailed e) {
+			trace(e);
+		}
+		
+		// Different [1][1]
+		try {
+			TFUtils.assertEquals(new Object[] { 1, new Object[]{1, 2}}, new Object[] { 1, new Object[]{1, 3} });
+			fail();
+		} catch (EUtils.EAssertEqualsFailed e) {
+			trace(e);
+		}
+		
+		// Different [1].length
+		try {
+			TFUtils.assertEquals(new Object[] { 1, new Object[]{1, 2}}, new Object[] { 1, new Object[]{1, 3, 3} });
+			fail();
+		} catch (EUtils.EAssertEqualsFailed e) {
+			trace(e);
+		}
+		
+		
+		// Empty arrays differ
+		TFUtils.assertEquals(new Object[] { 1, new Object[]{}}, new Object[] { 1, new Object[]{} });
+		
+		// String equals Integer
+		TFUtils.assertEquals(new Object[] { 1, 2, 3 }, new Object[] { 1, "2", 3 });
+		
+		// Integer are same
+		TFUtils.assertEquals(new Object[] { 1, 2L, (short)(3)}, new Object[] { (short)1, 2, 3L});
+		
+		// List and array same
+		
+		TFUtils.assertEquals(new Object[] { 1, 2L, (short)(3)}, Arrays.asList(new Object[] { (short)1, 2, 3L}));
+		
+		
     }
     
     public void testFilePrintRead() throws IOException{

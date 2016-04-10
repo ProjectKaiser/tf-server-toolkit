@@ -32,8 +32,15 @@ public class EUtils {
     }
     public static class EAssertEqualsFailed extends EAssertionFailed {
         private static final long serialVersionUID = 1L;
+        public EAssertEqualsFailed(String msg) {
+        	super(msg);
+        }
+        public EAssertEqualsFailed(String prefix, Object expected, Object actual) {
+        	super(MessageFormat.format("{0}expected: <{1}> but: <{2}>"
+        			, TFUtils.msgPrefix(prefix), expected, actual));
+        }
         public EAssertEqualsFailed(Object expected, Object actual) {
-            super(MessageFormat.format("Objects are not equals {0}, {1}", expected, actual)); //$NON-NLS-1$);
+            this("", expected, actual);
         }
     }
     public static class EAssertNotNullFailed extends EAssertionFailed {
