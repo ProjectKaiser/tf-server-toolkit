@@ -54,20 +54,20 @@ public class LongListRequest extends SessionRequest{
      * <p>If def is {@link LongListRequest#MustHaveValueMarker} and argument does not exist or null then {@link EArgumentMustHaveValue} is thrown. 
      */
 
-    public static <T> T getArg(List args, int idx, String argName, Class<? extends T> cls, Object def){
+    public static <T> T getArg(List args, int idx, String argName, Class<? extends T> cls, T def){
         if(idx <0) throw new IllegalArgumentException("idx must be GE zero");
         if(args.size()<=idx){
             if( def == MustHaveValueMarker){
                 throw new EArgumentMustHaveValue(argName);
             }
-            return (T)def;
+            return def;
         }
         Object res = args.get(idx);
         if( null == res) {
             if( def == MustHaveValueMarker ){
                 throw new EArgumentMustHaveValue(argName);
             }
-            return null;
+            return def;
         }
         if(null != cls && !cls.isAssignableFrom(res.getClass())){
             throw new IllegalArgumentException("Incompatible type for argument '" + argName +"'. Expected " + cls.getName() + " but " + res.getClass());

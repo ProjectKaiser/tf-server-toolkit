@@ -30,6 +30,10 @@ import java.util.zip.ZipOutputStream;
 
 public class TFUtils {
 	
+	public interface IAssertParams{
+		void equal(Object... to);
+	}
+	
 	public static final String UTF8 = "UTF-8";
 	
 	public static String lineSeparator(){
@@ -559,6 +563,20 @@ public class TFUtils {
 		}
     }
     
+    public static IAssertParams assertParams(final Object... aexpected){
+    	final Object expected = (aexpected != null && aexpected.length == 1)?aexpected[0]: aexpected;
+    	IAssertParams res = new IAssertParams() {
+			@Override
+			public void equal(Object... to) {
+				Object actual = (to != null && to.length == 1)?to[0]: to;
+				assertEquals(expected, actual);
+				
+			}
+		};
+		return res;
+    	
+    }
+    
     public static void assertEquals(String prefix, Object expected, Object actual){
         if( expected == actual ) return;
         if( expected == null || actual == null){
@@ -579,8 +597,8 @@ public class TFUtils {
         }
         if(TFUtils.equals(expected, actual))return;
         throw new EUtils.EAssertEqualsFailed(prefix, expected, actual);
-    	
     }
+    
     
     public static void assertEquals(Object expected, Object actual){
     	assertEquals("", expected, actual);

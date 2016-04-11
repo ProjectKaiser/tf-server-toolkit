@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.triniforce.db.test.TFTestCase;
+import com.triniforce.utils.EUtils.EAssertEqualsFailed;
 
 public class TFUtilsTest extends TFTestCase {
     public static final String UNICODE_PATTERN = "۞∑русскийڧüöäë面伴";
@@ -55,6 +56,41 @@ public class TFUtilsTest extends TFTestCase {
         assertEquals(s, TFUtils.asShort(l));
         assertEquals((Short)(short)10, TFUtils.asShort("10"));
     }
+    
+	public void testAssertParams() {
+		TFUtils.assertParams(1, 2).equal(1, 2);
+		TFUtils.assertParams(1, 2L).equal(1, (short) 2);
+		TFUtils.assertParams(1, 2, 3).equal(1, "2", 3);
+
+		// 2 == "2" but not vice versa
+		try {
+			TFUtils.assertParams(1, "2").equal(1, 2);
+			fail();
+		} catch (EAssertEqualsFailed e) {
+		}
+
+		// Array vs list
+		{
+			TFUtils.assertParams(1, 2).equal(Arrays.asList(new Object[] { 1, 2 }));
+			try {
+				TFUtils.assertParams(1, 2, 3).equal(Arrays.asList(new Object[] { 1, 2 }));
+				fail();
+			} catch (EAssertEqualsFailed e) {
+			}
+		}
+
+		// List vs Array
+		{
+			TFUtils.assertParams(Arrays.asList(new Object[] { 1, 2 })).equal(1, 2);
+
+			try {
+				TFUtils.assertParams(Arrays.asList(new Object[] { 1, 2 })).equal(1, 2, 3);
+				fail();
+			} catch (EAssertEqualsFailed e) {
+			}
+		}
+
+	}
     
     public void testEquals(){
     	
