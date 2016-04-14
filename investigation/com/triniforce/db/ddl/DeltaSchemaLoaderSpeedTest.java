@@ -12,18 +12,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.triniforce.db.ddl.Delta.DeltaSchema;
+import com.triniforce.db.ddl.Delta.DBMetadata.IIndexLocNames;
 import com.triniforce.db.ddl.Delta.DeltaSchemaLoader;
 import com.triniforce.db.ddl.Delta.IDBNames;
-import com.triniforce.db.ddl.Delta.DBMetadata.IIndexLocNames;
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.utils.Api;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.IProfiler;
 import com.triniforce.utils.IProfilerStack;
-import com.triniforce.utils.Profiler;
 import com.triniforce.utils.IProfilerStack.PSI;
+import com.triniforce.utils.Profiler;
 import com.triniforce.utils.Profiler.INanoTimer;
 import com.triniforce.utils.Profiler.ProfilerStack;
 
@@ -82,11 +81,10 @@ public class DeltaSchemaLoaderSpeedTest extends TFTestCase {
 				return dbFullName;
 			}
 		});
-		DeltaSchema res;
 		PSI psi = ApiAlgs.getProfItem("test", "loadSchema");
 		try{
 			// тестируемый метод
-			res = loader.loadSchema(m_con, new IDBNames(){
+			loader.loadSchema(m_con, new IDBNames(){
 				public String getAppName(String dbName) {
 					return "T"+dbName;
 				}
