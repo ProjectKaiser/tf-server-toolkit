@@ -12,6 +12,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import com.triniforce.db.test.TFTestCase;
+import com.triniforce.utils.TFUtils;
 
 public class BasicServerJetty {
 	public static final int PORT = 8888;
@@ -52,8 +53,11 @@ public class BasicServerJetty {
 
 		System.setProperty("catalina.home", new File(".").getAbsolutePath());
 		
+		File fhome = new File(TFTestCase.getTfTestFolder(), "tftool");
+		TFUtils.copyStream(BasicServerJetty.class.getResourceAsStream("test_pligin.jar"), new File(new File(fhome, "plugins"), "test_pligin.jar"));
+		
 		new org.eclipse.jetty.plus.jndi.Resource(server, "BasicServerDb", TFTestCase.getDataSource());
-		new org.eclipse.jetty.plus.jndi.Resource(server, "BasicServerHome",new File(TFTestCase.getTfTestFolder(), "tftool").getAbsolutePath());
+		new org.eclipse.jetty.plus.jndi.Resource(server, "BasicServerHome",fhome.getAbsolutePath());
 
 		server.start();
 	}

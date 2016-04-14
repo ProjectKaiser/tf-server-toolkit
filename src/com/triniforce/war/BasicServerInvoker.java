@@ -6,6 +6,7 @@
 package com.triniforce.war;
 
 import com.triniforce.server.plugins.kernel.BasicServer;
+import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.soap.MultiClassServiceInvoker;
 import com.triniforce.soap.RequestHandler.IServiceInvoker;
@@ -25,7 +26,9 @@ public class BasicServerInvoker implements IServiceInvoker {
 	public Object invokeService(String method, Object... args) {
 		m_srv.enterMode(Mode.Running);
 		try{
-			return m_svcs.invokeService(method, args);
+			Object res = m_svcs.invokeService(method, args);
+			SrvApiAlgs2.getIServerTran().commit();
+			return res;
 		}finally{
 			m_srv.leaveMode();
 		}

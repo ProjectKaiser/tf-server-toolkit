@@ -77,7 +77,7 @@ public class SMTPTest extends TFTestCase {
 		MimeMessage msg = new MimeMessage(session);
 		msg.setFrom(new InternetAddress("ias@sigma-soft.spb.ru"));
 		msg.setRecipient(RecipientType.TO, new InternetAddress(
-				"bckbox@inbox.ru"));
+				"bckboxUNKNOWN@inbox.1231231ru"));
 		msg.setSubject("test2", "utf-8");
 		msg.setText("body2", "utf-8");
 		

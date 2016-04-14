@@ -13,13 +13,18 @@ import com.triniforce.war.UEPServiceEndoint;
 
 public class TestEP extends PKPlugin{
 	
-	public static class TestSvc{
+	public static class TestSvc implements ISvc1{
 		public void method_001(){
 			ApiAlgs.getLog(this).info("log me");
 		}
 
 		public long method_002(){
 			return ApiStack.getInterface(ITime.class).currentTimeMillis();
+		}
+
+		@Override
+		public String method1(int a) {
+			return "TESTRES: " + a;
 		}
 		
 	} 

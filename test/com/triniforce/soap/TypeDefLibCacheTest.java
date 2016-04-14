@@ -70,6 +70,7 @@ public class TypeDefLibCacheTest extends TFTestCase {
 	        GregorianCalendar gc = new GregorianCalendar(2002, 9, 9, 19, 0, 0);
 	        gc.setTimeZone(TimeZone.getTimeZone("GMT"));
 	        assertEquals(res, gc.getTime());
+	        res = (Date) sd.valueOf("2002-10-10");
 	        
 	        ScalarDef dec = scLib.get(BigDecimal.class);
 	        assertNotNull(dec);

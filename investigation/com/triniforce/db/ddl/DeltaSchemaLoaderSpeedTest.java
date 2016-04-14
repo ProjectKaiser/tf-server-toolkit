@@ -99,7 +99,7 @@ public class DeltaSchemaLoaderSpeedTest extends TFTestCase {
 			ApiAlgs.closeProfItem(psi);
 		}
 		
-		assertNotNull(res.getTables().get("TCOUNT_FREQUENCIES"));
+//		assertNotNull(res.getTables().get("TCOUNT_FREQUENCIES"));
 		// Вывод результатов профайлера на консоль
 		trace(ApiStack.getInterface(IProfiler.class).toString());
 	}
