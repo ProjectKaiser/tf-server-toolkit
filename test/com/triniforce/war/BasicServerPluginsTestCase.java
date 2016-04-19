@@ -16,7 +16,7 @@ public class BasicServerPluginsTestCase extends BasicServerTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		addPlugin(new TFToolsPlugin());
-		PluginsLoader plgLoader = new PluginsLoader(new File(getTfTestFolder(), BasicServerServlet.PLUGINS));
+		PluginsLoader plgLoader = new PluginsLoader(new File(getTfTestFolder(), BasicServerServlet.PLUGINS_FOLDER));
 		for (IPlugin plugin : plgLoader.loadPlugins()) {
 			addPlugin(plugin);
 		}

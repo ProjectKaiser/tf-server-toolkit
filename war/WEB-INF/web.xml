@@ -16,7 +16,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>BasicServerServlet</servlet-name>
-        <url-pattern>/bserv</url-pattern>
+        <url-pattern>/</url-pattern>
     </servlet-mapping>
     
     <servlet-mapping>
@@ -40,6 +40,11 @@
     <resource-ref>
         <res-ref-name>BasicServerHome</res-ref-name>
         <res-type>java.lang.String</res-type>
+        <res-auth>Container</res-auth>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>BasicServerPlugins</res-ref-name>
+        <res-type>java.util.List</res-type>
         <res-auth>Container</res-auth>
     </resource-ref>
     

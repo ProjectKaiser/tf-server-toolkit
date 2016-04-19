@@ -8,6 +8,7 @@ package com.triniforce.war;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -39,6 +40,7 @@ import com.triniforce.soap.SOAPServlet;
 import com.triniforce.soap.SoapInclude;
 import com.triniforce.utils.Api;
 import com.triniforce.utils.ApiAlgs;
+import com.triniforce.utils.TFUtils;
 
 public class BasicServerServlet extends SOAPServlet {
 	private static final long serialVersionUID = 1947781333414814776L;
@@ -48,11 +50,11 @@ public class BasicServerServlet extends SOAPServlet {
 	static final String CONTEXT = "java:/comp/env";
 	static final String DATABASE = "BasicServerDb";
 	static final String HOME = "BasicServerHome";
-	public static final String PLUGINS = "plugins";
+	static final String PLUGINS_ENV = "BasicServerPlugins";
+	static final String PLUGINS_FOLDER = "plugins";
 	private static final String SRV_PARAMS_FILE = "config.properties";
 	
-	List<Class<? extends IPlugin>> m_endpoints;
-	List<IPlugin> m_plugins;
+	List<IPlugin> m_plugins = new ArrayList<IPlugin>();
 	IPooledConnection m_pool;
 	private BasicServer m_server;
 	
@@ -75,14 +77,18 @@ public class BasicServerServlet extends SOAPServlet {
 				return;
 			}
 			
-			m_endpoints = new ArrayList<Class<?extends IPlugin>>();
-			m_plugins = new ArrayList<IPlugin>();
 			TFToolsPlugin plugin1 = new TFToolsPlugin();
 			plugin1.addServiceExtension(new BasicServerConfig(new File(homeFolder, SRV_PARAMS_FILE).getAbsolutePath()));
 			m_plugins.add(plugin1);
 			
-			PluginsLoader plgLoader = new PluginsLoader(new File(homeFolder, PLUGINS));
+			PluginsLoader plgLoader = new PluginsLoader(new File(homeFolder, PLUGINS_FOLDER));
 			m_plugins.addAll(plgLoader.loadPlugins());
+			
+			try{
+				Object envPlgs = envContext.lookup(PLUGINS_ENV);
+				m_plugins.addAll((Collection<? extends IPlugin>)envPlgs);
+			}catch(NamingException e){
+			}
 
 			BasicDataSource ds;
 			try{
@@ -179,8 +185,10 @@ public class BasicServerServlet extends SOAPServlet {
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		
-		super.doGet(request, response);
+		if("wsdl".equals(request.getQueryString()))
+			super.doGet(request, response);
+		else
+			TFUtils.copyStream(getClass().getResourceAsStream("bs.htm"), response.getOutputStream());
 	}
 
 }
