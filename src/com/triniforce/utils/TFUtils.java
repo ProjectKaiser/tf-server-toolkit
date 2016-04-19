@@ -20,6 +20,7 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ListIterator;
@@ -609,5 +610,10 @@ public class TFUtils {
             throw new EUtils.EAssertTrueFailed(msg);
         }
     }
+    
+    public static List list(Object... args){
+    	return Arrays.asList(args);
+    }
+    
 
 }

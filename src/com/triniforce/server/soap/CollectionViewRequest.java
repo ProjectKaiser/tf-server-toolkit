@@ -138,19 +138,23 @@ public class CollectionViewRequest extends LongListRequest {
         return m_target;
     }
     
-    public void addColumn(IName col){
+    public CollectionViewRequest addColumn(IName col){
         getColumns().add(col.getName());
+        return this;
     }
-    public void addColumn(String col){
+    public CollectionViewRequest addColumn(String col){
         getColumns().add(col);
+        return this;
     }
     
-    public void addWhere(IName col, Object value){
+    public CollectionViewRequest addWhere(IName col, Object value){
         getWhere().put(col.getName(), value);
+        return this;
     }
     
-    public void addWhere(String col, Object value){
+    public CollectionViewRequest addWhere(String col, Object value){
         getWhere().put(col, value);
+        return this;
     }
     
     public void addFunctionToIdColumn(Class function, String resultName){

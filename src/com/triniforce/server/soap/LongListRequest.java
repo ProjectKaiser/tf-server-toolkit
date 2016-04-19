@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.triniforce.soap.PropertiesSequence;
+import com.triniforce.utils.IName;
 import com.triniforce.utils.TFUtils;
 
 
@@ -107,6 +108,16 @@ public class LongListRequest extends SessionRequest{
     public <T> T getNamedParam(String paramName, Class<? extends T> cls, Object def){
     	return (T) getNamedParam(m_namedParams, paramName, cls, def);
     }
+    
+    public LongListRequest namedParam(String name, Object value){
+    	getNamedParams().put(name, value);
+    	return this;
+    }
+    
+    public LongListRequest namedParam(IName name, Object value){
+    	return namedParam(name.getName(), value);
+    }
+    
     
     public void setArgs(List<Object> args) {
         m_args = args;
