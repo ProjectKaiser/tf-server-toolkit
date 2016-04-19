@@ -38,6 +38,7 @@ processResources {
 		include '**/*.properties'
 		include '**/*.wiki'
 		include '**/*.bsh'
+		include '**/*.htm'
 	}
 }
 
