@@ -28,7 +28,7 @@ public class BasicServerClientTest extends TFTestCase {
 		super.tearDown();
 	}
 	public void ntest() throws Exception {
-		url = new URL("http","localhost", BasicServerJetty.PORT, "/bserv");
+		url = new URL("http","localhost", 8888, "/bserv");
 		ISvc1 res = (ISvc1) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{ISvc1.class}, new BasicServerClient(url, ISvc1.class));
 		assertEquals("TESTRES: 12341", res.method1(12341));
 	}

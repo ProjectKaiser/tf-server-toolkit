@@ -7,8 +7,13 @@
 }
 .richtext_padding {
     overflow: hidden;
-    padding: 0 4px 0 12px;
+    padding: 0 4px 0 12px;   
 }
+
+#regex_input{
+
+}
+
 textarea{
 width:100%;
 }
@@ -65,11 +70,11 @@ $(document).ready(function(){
             };
         
     $.ajax({
-        url:"../", 
+        url:"", 
         type:"POST",
         contentType:"text/json",
         data: $.toJSON(scriptData),
-//        dataType:"json",
+//        dataT ype:"json",
         success: function(res) {
         	var resObj = $.evalJSON(res);
             $("textarea#ta_result").val(resObj.result);
@@ -98,7 +103,7 @@ $(document).ready(function(){
 
 </script>
 
-<h1><a href="/">BASIC SERVER SCRIPT EXECUTIONER</a></h1>
+<h1><a href="">BASIC SERVER SCRIPT EXECUTOR</a></h1>
 
 <ul>
 <li><span>Save script (CTRL+S)</span></li>
@@ -117,7 +122,7 @@ $(document).ready(function(){
     <label>Type script</label>
     <div class="script_conio">></div>
     <div class="richtext_padding">
-        <textarea data-focus="#richtext_regex_container" spellcheck="false" id="ta_script" name="script" tabindex="1" rows="10" placeholder="insert your script here" autofocus="autofocus" wrap="true"></textarea>
+        <textarea data-focus="#richtext_regex_container" spellcheck="false" id="ta_script" name="script" tabindex="1" rows="25" placeholder="insert your script here" autofocus="autofocus" wrap="true"></textarea>
     </div>
 </div>
 
