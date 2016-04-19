@@ -109,13 +109,13 @@ public class LongListRequest extends SessionRequest{
     	return (T) getNamedParam(m_namedParams, paramName, cls, def);
     }
     
-    public LongListRequest namedParam(String name, Object value){
+    public LongListRequest addParam(String name, Object value){
     	getNamedParams().put(name, value);
     	return this;
     }
     
     public LongListRequest namedParam(IName name, Object value){
-    	return namedParam(name.getName(), value);
+    	return addParam(name.getName(), value);
     }
     
     
