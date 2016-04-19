@@ -15,7 +15,7 @@ import com.triniforce.utils.IName;
 import com.triniforce.utils.TFUtils;
 
 
-@PropertiesSequence( sequence = {"args", "startFrom", "limit", "params"})
+@PropertiesSequence( sequence = {"args", "startFrom", "limit", "namedParams"})
 public class LongListRequest extends SessionRequest{
     public static final String PROP_START_FROM = "startFrom"; //$NON-NLS-1$
     public static final String PROP_LIMIT = "limit"; //$NON-NLS-1$
