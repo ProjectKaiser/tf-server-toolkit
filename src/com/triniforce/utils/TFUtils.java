@@ -131,7 +131,6 @@ public class TFUtils {
 	    return 0L;
 	}
 
-	
 	public static boolean equals(Object expected, Object actual) {
 	    if (expected == actual)
 	        return true;

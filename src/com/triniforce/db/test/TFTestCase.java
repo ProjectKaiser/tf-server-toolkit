@@ -16,6 +16,8 @@ import java.util.Properties;
 import java.util.UUID;
 
 import junit.framework.TestCase;
+import net.sf.sojo.common.CompareResult;
+import net.sf.sojo.common.ObjectUtil;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.logging.Log;
@@ -341,6 +343,15 @@ public class TFTestCase extends TestCase {
     public void test() throws Exception {
     }
 
+    
+    public void assertObjectsEqual(Object expected, Object actual){
+    	ObjectUtil ou = new ObjectUtil();
+    	CompareResult cr = ou.compare(expected, actual);
+    	if(null != cr){
+    		TFUtils.assertTrue(false, cr.toString());
+    	}
+    }
+    
     public void trace(Object obj) {
         ApiAlgs.getLog(this).trace(obj);
     }
