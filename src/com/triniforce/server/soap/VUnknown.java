@@ -7,6 +7,8 @@ package com.triniforce.server.soap;
 
 public class VUnknown {
     
+	public static VUnknown unknown = new VUnknown();
+	
     public VUnknown() {
     }
     
