@@ -78,7 +78,7 @@ public class BasicServerServlet extends SOAPServlet {
 			}
 			
 			TFToolsPlugin plugin1 = new TFToolsPlugin();
-			plugin1.addServiceExtension(new BasicServerConfig(new File(homeFolder, SRV_PARAMS_FILE).getAbsolutePath()));
+			plugin1.addServiceExtension(new BasicServerConfig(homeFolder, new File(homeFolder, SRV_PARAMS_FILE).getAbsolutePath()));
 			m_plugins.add(plugin1);
 			
 			PluginsLoader plgLoader = new PluginsLoader(new File(homeFolder, PLUGINS_FOLDER));

@@ -5,6 +5,7 @@
  */
 package com.triniforce.war;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
@@ -16,8 +17,10 @@ import com.triniforce.war.api.IBasicServerConfig;
 public class BasicServerConfig implements IBasicServerConfig, IPKEPAPI {
 	
 	private String m_config;
+	private String m_home;
 
-	public BasicServerConfig(String config) {
+	public BasicServerConfig(File homeFolder, String config) {
+		m_home = homeFolder.getAbsolutePath();
 		m_config = config;
 	}
 
@@ -38,6 +41,11 @@ public class BasicServerConfig implements IBasicServerConfig, IPKEPAPI {
 		}
 		return props;
 		
+	}
+
+	@Override
+	public String getHomeFolder() {
+		return m_home;
 	}
 
 }

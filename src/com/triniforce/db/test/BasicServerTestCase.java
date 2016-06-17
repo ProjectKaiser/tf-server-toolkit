@@ -19,20 +19,20 @@ import java.util.Set;
 
 import org.apache.commons.dbcp.BasicDataSource;
 
-import com.triniforce.db.ddl.UpgradeRunner;
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
+import com.triniforce.db.ddl.UpgradeRunner;
 import com.triniforce.extensions.IPKExtensionBase;
 import com.triniforce.extensions.IPKExtensionPoint;
+import com.triniforce.extensions.PKPlugin;
 import com.triniforce.server.plugins.kernel.BasicServer;
 import com.triniforce.server.plugins.kernel.IdDef;
-import com.triniforce.server.srvapi.DataPreparationProcedure;
 import com.triniforce.server.srvapi.IBasicServer;
+import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.IIdDef;
 import com.triniforce.server.srvapi.IPlugin;
 import com.triniforce.server.srvapi.IPooledConnection;
 import com.triniforce.server.srvapi.ISORegistration;
-import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.utils.Api;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
@@ -41,14 +41,12 @@ import com.triniforce.utils.TFUtils;
 
 public class BasicServerTestCase extends TFTestCase {
     
-public static class DPPProcPlugin extends DataPreparationProcedure implements IPlugin{
+public static class DPPProcPlugin extends PKPlugin{
         
         public DPPProcPlugin() {
-            super("test");
         }
     
         public void doRegistration(ISORegistration reg) throws EDBObjectException {
-            reg.registerDataPreparationProcedure(this);
         }
     
         public String[] getDependencies() {

@@ -13,4 +13,6 @@ public interface IBasicServerConfig {
 
 
 	Properties getProperties();
+
+	String getHomeFolder();
 }
