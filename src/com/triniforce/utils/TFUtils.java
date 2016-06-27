@@ -19,12 +19,17 @@ import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -613,6 +618,66 @@ public class TFUtils {
     public static List list(Object... args){
     	return Arrays.asList(args);
     }
+    
+	public static Map<String, Object> arrayToMap(final Object[] namesValues) {
+		// odd number of parameters
+		if ((namesValues.length & 0x1) == 1)
+			throw new IllegalArgumentException("value"); //$NON-NLS-1$
+
+		return new AbstractMap<String, Object>() {
+
+			@Override
+			public Set<java.util.Map.Entry<String, Object>> entrySet() {
+				return new AbstractSet<java.util.Map.Entry<String, Object>>() {
+					@Override
+					public Iterator<java.util.Map.Entry<String, Object>> iterator() {
+						return new Iterator<java.util.Map.Entry<String, Object>>() {
+							int current = 0;
+
+							public boolean hasNext() {
+								return current < namesValues.length;
+							}
+
+							public java.util.Map.Entry<String, Object> next() {
+								final int idx = current;
+								current += 2;
+								return new java.util.Map.Entry<String, Object>() {
+									public String getKey() {
+										Object name = namesValues[idx];
+										String strName = null;
+										if (name instanceof String)
+											strName = (String) name;
+										else if (name instanceof IName)
+											strName = ((IName) name).getName();
+										else
+											throw new IllegalArgumentException("name"); //$NON-NLS-1$
+										return strName;
+									}
+
+									public Object getValue() {
+										return namesValues[idx + 1];
+									}
+
+									public Object setValue(Object arg0) {
+										throw new RuntimeException("not impelmented"); //$NON-NLS-1$
+									}
+								};
+							}
+
+							public void remove() {
+								throw new RuntimeException("not impelmented"); //$NON-NLS-1$
+							}
+						};
+					}
+
+					@Override
+					public int size() {
+						return namesValues.length / 2;
+					}
+				};
+			}
+		};
+	}
     
 
 }

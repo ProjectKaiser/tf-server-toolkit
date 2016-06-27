@@ -7,25 +7,27 @@ package com.triniforce.server.soap;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 
 import com.triniforce.soap.PropertiesSequence;
-import com.triniforce.utils.ApiAlgs;
+import com.triniforce.utils.TFUtils;
 
-@PropertiesSequence( sequence = {"parentId", "filetype", "fields", "lookupFields", "lookupValues", "orderBy"}) 
+@PropertiesSequence( sequence = {"args", "namedParams", "parentId", "filetype", "fields", "lookupFields", "whereExprs", "orderBy"}) 
 public class SelectRequest {
 
     private CollectionViewRequest m_cvr = new CollectionViewRequest();
-    String[] lookupFields={};
-    Object[] lookupValues={};
+    private Object[] args={};
+    private Object[] namedParams={};
+    private Object[] lookupFields={};    
+    private WhereExpr[] whereExprs={};
+    
+//    private WhereExpr[] whereExprs={};
+//    private FieldFunctionRequest[] functions={};
 
     public CollectionViewRequest toCollectionViewRequest() {
-        ApiAlgs.assertEquals(lookupValues.length, lookupFields.length);
-        HashMap<String, Object> map = new HashMap<String, Object>();
-        for (int i = 0; i < lookupFields.length; i++) {
-            map.put(lookupFields[i], lookupValues[i]);
-        }
-        m_cvr.setWhere(map);
+        m_cvr.setWhere(TFUtils.arrayToMap(lookupFields));
+        m_cvr.setArgs(Arrays.asList(getArgs()));
+        m_cvr.setNamedParams(TFUtils.arrayToMap(getNamedParams()));
+        m_cvr.setWhereExprs(Arrays.asList(getWhereExprs()));
         return m_cvr;
     }
 
@@ -58,21 +60,14 @@ public class SelectRequest {
         m_cvr.setColumns(Arrays.asList(fields));
     }
 
-    public String[] getLookupFields() {
+    public Object[] getLookupFields() {
         return lookupFields;
     }
 
-    public void setLookupFields(String[] lookupFields) {
+    public void setLookupFields(Object[] lookupFields) {
         this.lookupFields = lookupFields;
     }
 
-    public Object[] getLookupValues() {
-        return lookupValues;
-    }
-
-    public void setLookupValues(Object[] lookupValues) {
-        this.lookupValues = lookupValues;
-    }
 
     public Object[] getOrderBy() {
         return m_cvr.getOrderBy().toArray();
@@ -81,5 +76,29 @@ public class SelectRequest {
     public void setOrderBy(Object[] orderBy) {
         m_cvr.setOrderBy(Arrays.asList(orderBy));
     }
+
+	public Object[] getArgs() {
+		return args;
+	}
+
+	public void setArgs(Object[] args) {
+		this.args = args;
+	}
+
+	public WhereExpr[] getWhereExprs() {
+		return whereExprs;
+	}
+
+	public void setWhereExprs(WhereExpr[] whereExprs) {
+		this.whereExprs = whereExprs;
+	}
+
+	public Object[] getNamedParams() {
+		return namedParams;
+	}
+
+	public void setNamedParams(Object[] namedParams) {
+		this.namedParams = namedParams;
+	}
 
 }
