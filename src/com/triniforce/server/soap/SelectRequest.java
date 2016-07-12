@@ -17,14 +17,14 @@ public class SelectRequest {
     private CollectionViewRequest m_cvr = new CollectionViewRequest();
     private Object[] args={};
     private Object[] namedParams={};
-    private Object[] lookupFields={};    
+    private Object[] simpleWhere={};    
     private WhereExpr[] whereExprs={};
     
 //    private WhereExpr[] whereExprs={};
 //    private FieldFunctionRequest[] functions={};
 
     public CollectionViewRequest toCollectionViewRequest() {
-        m_cvr.setWhere(TFUtils.arrayToMap(lookupFields));
+        m_cvr.setWhere(TFUtils.arrayToMap(simpleWhere));
         m_cvr.setArgs(Arrays.asList(getArgs()));
         m_cvr.setNamedParams(TFUtils.arrayToMap(getNamedParams()));
         m_cvr.setWhereExprs(Arrays.asList(getWhereExprs()));
@@ -47,7 +47,7 @@ public class SelectRequest {
         m_cvr.setTarget(type);
     }
 
-    public String[] getFields() {
+    public String[] getColumns() {
         return toStringArray(m_cvr.getColumns());
     }
 
@@ -56,16 +56,16 @@ public class SelectRequest {
         return null;
     }
 
-    public void setFields(String[] fields) {
-        m_cvr.setColumns(Arrays.asList(fields));
+    public void setColumns(String[] columns) {
+        m_cvr.setColumns(Arrays.asList(columns));
     }
 
-    public Object[] getLookupFields() {
-        return lookupFields;
+    public Object[] getSimpleWhere() {
+        return simpleWhere;
     }
 
-    public void setLookupFields(Object[] lookupFields) {
-        this.lookupFields = lookupFields;
+    public void setSimpleWhere(Object[] simpleWhere) {
+        this.simpleWhere = simpleWhere != null ? simpleWhere : new Object[]{};
     }
 
 
@@ -90,7 +90,7 @@ public class SelectRequest {
 	}
 
 	public void setWhereExprs(WhereExpr[] whereExprs) {
-		this.whereExprs = whereExprs;
+		this.whereExprs = whereExprs != null ? whereExprs : new WhereExpr[]{};
 	}
 
 	public Object[] getNamedParams() {
