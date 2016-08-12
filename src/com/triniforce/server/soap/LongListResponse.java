@@ -50,7 +50,7 @@ public class LongListResponse extends BasicResponse{
             res.append(Arrays.toString(vals));
             res.append("\n");
         }
-        return res.toString();
+        return super.toString() + res.toString();
     }
     
     public int getSourceStatus() {

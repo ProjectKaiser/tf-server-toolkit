@@ -585,7 +585,7 @@ public class TFUtils {
     public static void assertEquals(String prefix, Object expected, Object actual){
         if( expected == actual ) return;
         if( expected == null || actual == null){
-            throw new EUtils.EAssertEqualsFailed(expected, actual);
+            throw new EUtils.EAssertEqualsFailed(prefix, expected, actual);
         }
         if(expected instanceof List){
         	expected = ((List)expected).toArray();

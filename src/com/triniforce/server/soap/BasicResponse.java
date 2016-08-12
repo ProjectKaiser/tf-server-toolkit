@@ -37,6 +37,14 @@ public class BasicResponse {
         m_SourceStatus = status;
     }
     
+    @Override
+    public String toString() {
+    	if(m_headers.size() > 0){
+    		return "Headers: " + m_headers.toString() + "\n";
+    	} else {
+    		return "";
+    	}
+    }
     
     
 }
