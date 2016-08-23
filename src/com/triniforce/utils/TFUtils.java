@@ -649,6 +649,8 @@ public class TFUtils {
 											strName = (String) name;
 										else if (name instanceof IName)
 											strName = ((IName) name).getName();
+										else if (name instanceof Class)
+											strName = ((Class) name).getName();
 										else
 											throw new IllegalArgumentException("name"); //$NON-NLS-1$
 										return strName;
