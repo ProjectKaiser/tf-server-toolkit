@@ -114,10 +114,6 @@ public class LongListRequest extends SessionRequest{
     	return this;
     }
     
-    public LongListRequest namedParam(IName name, Object value){
-    	return addParam(name.getName(), value);
-    }
-    
     public void setArgs(List<Object> args) {
         m_args = args;
     }
