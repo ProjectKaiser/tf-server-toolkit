@@ -11,7 +11,7 @@ import java.util.Collection;
 import com.triniforce.soap.PropertiesSequence;
 import com.triniforce.utils.TFUtils;
 
-@PropertiesSequence( sequence = {"args", "namedParams", "parentId", "filetype", "fields", "lookupFields", "whereExprs", "orderBy"}) 
+@PropertiesSequence( sequence = {"args", "namedParams", "parentId", "filetype", "columns", "simpleWhere", "whereExprs", "orderBy"}) 
 public class SelectRequest {
 
     private CollectionViewRequest m_cvr = new CollectionViewRequest();

@@ -622,7 +622,7 @@ public class TFUtils {
 	public static Map<String, Object> arrayToMap(final Object[] namesValues) {
 		// odd number of parameters
 		if ((namesValues.length & 0x1) == 1)
-			throw new IllegalArgumentException("value"); //$NON-NLS-1$
+			throw new IllegalArgumentException("Wrong namesValues length, must be even but:" + namesValues.length); //$NON-NLS-1$
 
 		return new AbstractMap<String, Object>() {
 
