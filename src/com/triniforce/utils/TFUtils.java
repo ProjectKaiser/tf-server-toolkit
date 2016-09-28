@@ -34,6 +34,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import com.triniforce.server.soap.VNone;
+
 public class TFUtils {
 	
 	public interface IAssertParams{
@@ -126,6 +128,7 @@ public class TFUtils {
 	
 	public static Long asLong(Object value){
 	    if( null == value )return null;
+	    if( VNone.none.equals(value))return null;
         if( value instanceof Number){
             return ((Number)value).longValue();
         }
