@@ -38,14 +38,12 @@ public class SOAPServletTest extends TFTestCase {
 
 		@Override
 		public boolean isReady() {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		@Override
 		public void setWriteListener(WriteListener writeListener) {
-			// TODO Auto-generated method stub
-			
+		
 		}
 		
 	}
@@ -59,20 +57,17 @@ public class SOAPServletTest extends TFTestCase {
 
 		@Override
 		public boolean isFinished() {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		@Override
 		public boolean isReady() {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		@Override
 		public void setReadListener(ReadListener readListener) {
-			// TODO Auto-generated method stub
-			
+
 		}
 		
 	}
