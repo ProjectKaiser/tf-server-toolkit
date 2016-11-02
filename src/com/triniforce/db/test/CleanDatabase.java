@@ -88,7 +88,11 @@ public class CleanDatabase {
 				while (rs.next()) {
 					String dbName = rs.getString("TABLE_NAME");
 					log.trace(String.format("Delete view %s.", dbName));
+					try{
 					conn.createStatement().execute("DROP VIEW " + dbName);
+					} catch(Exception e){
+						
+					}
 				}
 				conn.commit();
 		        
