@@ -89,7 +89,7 @@ public static class DPPProcPlugin extends PKPlugin{
         }
     }
 	
-    private BasicServerApiEmu m_bemu = new BasicServerApiEmu(); 
+    private static BasicServerApiEmu m_bemu; 
 
     public static class Pool implements IPooledConnection {
         
@@ -203,7 +203,7 @@ public static class DPPProcPlugin extends PKPlugin{
         if(null == m_server){
 	        try{
 	        	m_bemu = new BasicServerApiEmu();
-	            m_bemu.setTimeSeq(BasicServerApiEmu.START_TIME, BasicServerApiEmu.TIME_OFFSETS);
+//	            m_bemu.setTimeSeq(BasicServerApiEmu.START_TIME, BasicServerApiEmu.TIME_OFFSETS);
 	                
 		        m_startNumActive = getPool().m_ds.getNumActive();        
 		
@@ -226,6 +226,7 @@ public static class DPPProcPlugin extends PKPlugin{
 				throw e;
 			}
         }
+        m_bemu.setTimeSeq(BasicServerApiEmu.START_TIME, BasicServerApiEmu.TIME_OFFSETS);
         
     }
 
