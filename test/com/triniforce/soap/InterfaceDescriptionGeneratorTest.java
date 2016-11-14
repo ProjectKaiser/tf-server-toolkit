@@ -9,6 +9,7 @@ import java.beans.IntrospectionException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -412,7 +413,13 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         assertEquals("vMap", props.get(1).getName());
     }
     
-    public void testSerializeException() throws XPathExpressionException, UnsupportedEncodingException, DOMException, TransformerException{
+    static class ClsErrorGet{
+    	public void get() throws EParameterizedException{
+    		throw new EParameterizedException("ERROR528932", null, "CODE865846304");
+    	}
+    }
+    
+    public void testSerializeException() throws XPathExpressionException, UnsupportedEncodingException, DOMException, TransformerException, NoSuchMethodException, SecurityException{
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
         try{
             getException(3);
@@ -471,16 +478,35 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         	
         }
         {//Exception with SubCode
-        	 EParameterizedException e = new ESoap.EParameterizedException("msg", null, "CODE76473");
-             Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv12, e);
-             gen.writeDocument(System.out, res);
-             
-             XPathFactory xpf = XPathFactory.newInstance();  
-             XPath xp = xpf.newXPath();
-             Element e1 = (Element) xp.evaluate("/Envelope/Body/Fault/Code/Value", res, XPathConstants.NODE);
-             assertEquals("soap:Receiver", e1.getTextContent());
-             e1 = (Element) xp.evaluate("/Envelope/Body/Fault/Code/Subcode/Value", res, XPathConstants.NODE);
-             assertEquals("CODE76473", e1.getTextContent());
+        	{
+	        	 EParameterizedException e = new ESoap.EParameterizedException("msg", null, "CODE76473");
+	             Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv12, e);
+	             gen.writeDocument(System.out, res);
+	             
+	             XPathFactory xpf = XPathFactory.newInstance();  
+	             XPath xp = xpf.newXPath();
+	             Element e1 = (Element) xp.evaluate("/Envelope/Body/Fault/Code/Value", res, XPathConstants.NODE);
+	             assertEquals("soap:Receiver", e1.getTextContent());
+	             e1 = (Element) xp.evaluate("/Envelope/Body/Fault/Code/Subcode/Value", res, XPathConstants.NODE);
+	             assertEquals("CODE76473", e1.getTextContent());
+        	}
+			{
+				ClsErrorGet obj = new ClsErrorGet();
+				Method m = ClsErrorGet.class.getMethod("get", new Class[] {});
+
+				try {
+					m.invoke(obj, new Object[] {});
+				} catch (Exception e) {
+					Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv12, e);
+					gen.writeDocument(System.out, res);
+
+					XPathFactory xpf = XPathFactory.newInstance();
+					XPath xp = xpf.newXPath();
+					Element e1 = (Element) xp.evaluate("/Envelope/Body/Fault/Code/Subcode/Value", res,
+							XPathConstants.NODE);
+					assertEquals("CODE865846304", e1.getTextContent());
+				}
+			}
         }
     }
 

@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -762,13 +763,20 @@ public class InterfaceDescriptionGenerator {
                             .text("soap:Receiver")
                         .end();
             	
-            	if(throwable instanceof ESoap.EParameterizedException){
-            		ESoap.EParameterizedException ep = (EParameterizedException) throwable;
+            	ESoap.EParameterizedException ep=null;
+            	if(throwable instanceof InvocationTargetException && throwable.getCause() instanceof ESoap.EParameterizedException){
+            		ep = (EParameterizedException) throwable.getCause();
+            	}
+            	else if(throwable instanceof ESoap.EParameterizedException){
+            		ep = (EParameterizedException) throwable;
+            	}
+            	if(null != ep){
             		eCode.append("soap:Subcode")
-                    	.append("soap:Value")
-                    		.text(ep.getSubcode())
-                    	.end()
-                    .end();
+	                	.append("soap:Value")
+	                		.text(ep.getSubcode())
+	                	.end()
+	                .end();
+            		
             	}
             	
                     eCode.end()
