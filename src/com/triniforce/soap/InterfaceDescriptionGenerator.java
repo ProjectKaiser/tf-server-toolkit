@@ -51,6 +51,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
+import com.triniforce.soap.ESoap.EParameterizedException;
 import com.triniforce.soap.InterfaceDescription.MessageDef;
 import com.triniforce.soap.InterfaceDescription.Operation;
 import com.triniforce.soap.InterfaceDescriptionGenerator.ObjectConverter.TypedObject;
@@ -754,12 +755,23 @@ public class InterfaceDescriptionGenerator {
             Node_S body = createSoapDocument(soapNS);
             Node_S fault = body.append("soap:Fault"); 
             if(soapenv12.equals(soapNS)){
-                fault
+            	Node_S eCode = 
+            	fault
                     .append("soap:Code")
                         .append("soap:Value")
                             .text("soap:Receiver")
-                        .end()
-                    .end()
+                        .end();
+            	
+            	if(throwable instanceof ESoap.EParameterizedException){
+            		ESoap.EParameterizedException ep = (EParameterizedException) throwable;
+            		eCode.append("soap:Subcode")
+                    	.append("soap:Value")
+                    		.text(ep.getSubcode())
+                    	.end()
+                    .end();
+            	}
+            	
+                    eCode.end()
                     .append("soap:Reason")
                         .append("soap:Text")
                             .text(getCause(throwable).toString())

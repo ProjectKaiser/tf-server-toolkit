@@ -38,6 +38,7 @@ import org.xml.sax.SAXParseException;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.ESoap.EMethodNotFound;
+import com.triniforce.soap.ESoap.EParameterizedException;
 import com.triniforce.soap.ESoap.InvalidTypeName;
 import com.triniforce.soap.InterfaceDescription.Operation;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
@@ -468,6 +469,18 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
             Element env = (Element) xp.evaluate("/Envelope", res, XPathConstants.NODE);
             assertEquals(InterfaceDescriptionGenerator.soapenv, env.getBaseURI());*/
         	
+        }
+        {//Exception with SubCode
+        	 EParameterizedException e = new ESoap.EParameterizedException("CODE76473");
+             Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv12, e);
+             gen.writeDocument(System.out, res);
+             
+             XPathFactory xpf = XPathFactory.newInstance();  
+             XPath xp = xpf.newXPath();
+             Element e1 = (Element) xp.evaluate("/Envelope/Body/Fault/Code/Value", res, XPathConstants.NODE);
+             assertEquals("soap:Receiver", e1.getTextContent());
+             e1 = (Element) xp.evaluate("/Envelope/Body/Fault/Code/Subcode/Value", res, XPathConstants.NODE);
+             assertEquals("CODE76473", e1.getTextContent());
         }
     }
 
