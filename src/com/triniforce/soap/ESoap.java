@@ -88,7 +88,8 @@ public class ESoap {
 		private static final long serialVersionUID = -5178999668250524620L;
 		private String m_subcode;
 		
-		public EParameterizedException(String subcode) {
+		public EParameterizedException(String message, Throwable cause, String subcode) {
+			super(message, cause);
 			setSubcode(subcode);
 		}
 

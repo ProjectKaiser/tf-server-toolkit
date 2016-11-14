@@ -471,7 +471,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         	
         }
         {//Exception with SubCode
-        	 EParameterizedException e = new ESoap.EParameterizedException("CODE76473");
+        	 EParameterizedException e = new ESoap.EParameterizedException("msg", null, "CODE76473");
              Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv12, e);
              gen.writeDocument(System.out, res);
              
