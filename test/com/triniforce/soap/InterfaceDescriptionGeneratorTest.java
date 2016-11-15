@@ -495,7 +495,11 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 				Method m = ClsErrorGet.class.getMethod("get", new Class[] {});
 
 				try {
-					m.invoke(obj, new Object[] {});
+					try{
+						m.invoke(obj, new Object[] {});
+					}catch(Exception e){
+						ApiAlgs.rethrowException(e);
+					}
 				} catch (Exception e) {
 					Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv12, e);
 					gen.writeDocument(System.out, res);
@@ -504,6 +508,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 					XPath xp = xpf.newXPath();
 					Element e1 = (Element) xp.evaluate("/Envelope/Body/Fault/Code/Subcode/Value", res,
 							XPathConstants.NODE);
+					assertNotNull(e1);
 					assertEquals("CODE865846304", e1.getTextContent());
 				}
 			}

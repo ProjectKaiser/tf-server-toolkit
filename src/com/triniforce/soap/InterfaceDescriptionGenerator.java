@@ -70,6 +70,7 @@ import com.triniforce.soap.WsdlDescription.WsdlType;
 import com.triniforce.soap.WsdlDescription.WsdlType.Restriction;
 import com.triniforce.soap.WsdlDescription.WsdlTypeElement;
 import com.triniforce.utils.ApiAlgs;
+import com.triniforce.utils.ApiAlgs.RethrownException;
 import com.triniforce.utils.IName;
 import com.triniforce.utils.TFUtils;
 
@@ -763,17 +764,13 @@ public class InterfaceDescriptionGenerator {
                             .text("soap:Receiver")
                         .end();
             	
-            	ESoap.EParameterizedException ep=null;
-            	if(throwable instanceof InvocationTargetException && throwable.getCause() instanceof ESoap.EParameterizedException){
-            		ep = (EParameterizedException) throwable.getCause();
-            	}
-            	else if(throwable instanceof ESoap.EParameterizedException){
-            		ep = (EParameterizedException) throwable;
-            	}
-            	if(null != ep){
+            	Throwable ep = extractExceptionCause(throwable);
+
+            	if(ep instanceof ESoap.EParameterizedException){
+            		ESoap.EParameterizedException ep1 = (EParameterizedException) ep;
             		eCode.append("soap:Subcode")
 	                	.append("soap:Value")
-	                		.text(ep.getSubcode())
+	                		.text(ep1.getSubcode())
 	                	.end()
 	                .end();
             		
@@ -806,7 +803,16 @@ public class InterfaceDescriptionGenerator {
         return doc;
     }
     
-    private Throwable getCause(Throwable throwable) {
+    private Throwable extractExceptionCause(Throwable throwable) {
+    	Throwable ep=throwable;
+    	while((ep instanceof InvocationTargetException || ep instanceof RethrownException) && null != ep.getCause()){
+    		ep = ep.getCause();
+    	}
+    	
+    	return ep instanceof ESoap.EParameterizedException ? ep : throwable;
+	}
+
+	private Throwable getCause(Throwable throwable) {
     	while(null != throwable.getCause())
     		throwable = throwable.getCause();
 		return throwable;
