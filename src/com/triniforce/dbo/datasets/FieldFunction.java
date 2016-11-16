@@ -5,13 +5,14 @@
  */
 package com.triniforce.dbo.datasets;
 
-
+import java.util.Map;
 
 public abstract class FieldFunction {
     public interface IFieldFunctionCtx{
         String getField();
         String getTarget();
         Long getParentId();
+        Map<String, Object> getParams();
     }
     
     /**

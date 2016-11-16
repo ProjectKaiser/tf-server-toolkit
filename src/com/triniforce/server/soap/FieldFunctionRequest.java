@@ -5,6 +5,9 @@
  */
 package com.triniforce.server.soap;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.triniforce.soap.PropertiesSequence;
 import com.triniforce.utils.IName;
 
@@ -16,6 +19,7 @@ public class FieldFunctionRequest {
     protected String m_fieldName;
     protected String m_resultName;
     protected String m_functionName;
+    private Map<String, Object> m_params = new HashMap<String, Object>();
     
     public FieldFunctionRequest() {
     }
@@ -51,4 +55,22 @@ public class FieldFunctionRequest {
     public void setResultName(String resultName) {
         m_resultName = resultName;
     }
+	/**
+	 * @return not null
+	 */
+	public Map<String, Object> getParams() {
+		if(m_params == null){
+			m_params = new HashMap<String, Object>();
+		}
+		return m_params;
+	}
+	public void setParams(Map<String, Object> m_params) {
+		this.m_params = m_params;
+	}
+	
+	public FieldFunctionRequest addParam(String name, Object value){
+		getParams().put(name, value);
+		return this;
+	}
+	
 }

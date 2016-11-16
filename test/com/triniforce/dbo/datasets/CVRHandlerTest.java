@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import com.triniforce.db.dml.BasicResSet;
 import com.triniforce.db.dml.IResSet;
@@ -17,6 +18,7 @@ import com.triniforce.dbo.datasets.EDSException.ECVRColumnException.EColumnNotFo
 import com.triniforce.dbo.datasets.EDSException.ECVRColumnException.EColumnRequestedTwice;
 import com.triniforce.dbo.datasets.ICVRHandler.RSFlags;
 import com.triniforce.extensions.PKRootExtensionPoint;
+import com.triniforce.server.plugins.kernel.ep.view.PKEPFieldFunctions;
 import com.triniforce.server.soap.CollectionViewRequest;
 import com.triniforce.server.soap.FieldFunctionRequest;
 import com.triniforce.server.soap.LongListResponse;
@@ -29,7 +31,6 @@ public class CVRHandlerTest extends TFTestCase {
 
 	private Api api;
 	private PKRootExtensionPoint rootPoint;
-	private PKEPDatasetProviders provsPoint;
 
 	public void testFilter() {
 		List<WhereExpr> where = new ArrayList<WhereExpr>();
@@ -481,14 +482,39 @@ public class CVRHandlerTest extends TFTestCase {
 		}
 	}
 	
+	
+	Map<String, Object> testFfParams;
+	class TestFF extends FieldFunction{
+
+		@Override
+		public void init(IFieldFunctionCtx ctx) throws RuntimeException {
+			testFfParams = ctx.getParams();
+		}
+		
+		@Override
+		public Object exec(Object value) {
+			return "TestFF:" + value;
+		}
+		
+	}
+	
+	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		api = new Api();
 		rootPoint = new PKRootExtensionPoint();
-		provsPoint = new PKEPDatasetProviders();
-		provsPoint.putExtension(TestProvider.class);
-		rootPoint.putExtensionPoint(provsPoint);
+		{
+			PKEPDatasetProviders provsPoint;
+			provsPoint = new PKEPDatasetProviders();
+			provsPoint.putExtension(TestProvider.class);
+			rootPoint.putExtensionPoint(provsPoint);
+		}
+		{
+			PKEPFieldFunctions ffPoint = new PKEPFieldFunctions();
+			ffPoint.putExtension(this.new TestFF());
+			rootPoint.putExtensionPoint(ffPoint);
+		}
 		api.setIntfImplementor(IBasicServer.class, rootPoint);
 		ApiStack.pushApi(api);
 	}
@@ -499,37 +525,54 @@ public class CVRHandlerTest extends TFTestCase {
 		super.tearDown();
 	}
 	
-	public void testProcessAsLLR(){
-				CVRHandler h = new CVRHandler();
-				CollectionViewRequest req = new CollectionViewRequest();
-				req.setColumns(Arrays.asList("idx","name"));
-				{
-					req.setTarget("TestProvider_01");
-					LongListResponse res = h.processAsLLR(req);
-					assertNotNull(res);
-				}
-				
-				{
-					// provider make own filtering
-					FLAGS = DSMetadata.CAN_FILTER;
-					req.getWhere().put("idx", 3);
-					LongListResponse res = h.processAsLLR(req);
-					assertEquals(1, res.values().get(0));
-				}
-				{		
-					FLAGS = DSMetadata.CAN_SORT;
-					req.getWhere().clear();
-					req.getOrderBy().add(new CollectionViewRequest.DescField("name"));			
-					LongListResponse res = h.processAsLLR(req);
-					assertEquals(1, res.values().get(0));
-					assertTrue(MD_CLOSED);
-				}
-				{
-					MD_CHECKED = false;
-					LongListResponse res = h.processAsLLR(req);
-					assertTrue(res.values().isEmpty());
-				}
+	public void testFieldFunctions(){
+		CVRHandler h = new CVRHandler();
+		CollectionViewRequest req = new CollectionViewRequest();
+		req.setTarget("TestProvider_01");
+		req.setColumns(Arrays.asList("idx", "name"));
+		req.addFunctionToColumn("name", TestFF.class, "TestFF")
+			.addParam("param1", "param1Value")
+			.addParam("param2", "param2Value");
 		
-			}
+		testFfParams = null;
+		LongListResponse res = h.processAsLLR(req);
+		assertEquals(2, testFfParams.size());
+		assertEquals("param1Value", testFfParams.get("param1"));
+		assertEquals("param2Value", testFfParams.get("param2"));
+		trace(res);
+	}
+	
+	public void testProcessAsLLR(){
+		CVRHandler h = new CVRHandler();
+		CollectionViewRequest req = new CollectionViewRequest();
+		req.setColumns(Arrays.asList("idx", "name"));
+		{
+			req.setTarget("TestProvider_01");
+			LongListResponse res = h.processAsLLR(req);
+			assertNotNull(res);
+		}
+
+		{
+			// provider make own filtering
+			FLAGS = DSMetadata.CAN_FILTER;
+			req.getWhere().put("idx", 3);
+			LongListResponse res = h.processAsLLR(req);
+			assertEquals(1, res.values().get(0));
+		}
+		{
+			FLAGS = DSMetadata.CAN_SORT;
+			req.getWhere().clear();
+			req.getOrderBy().add(new CollectionViewRequest.DescField("name"));
+			LongListResponse res = h.processAsLLR(req);
+			assertEquals(1, res.values().get(0));
+			assertTrue(MD_CLOSED);
+		}
+		{
+			MD_CHECKED = false;
+			LongListResponse res = h.processAsLLR(req);
+			assertTrue(res.values().isEmpty());
+		}
+
+	}
 
 }

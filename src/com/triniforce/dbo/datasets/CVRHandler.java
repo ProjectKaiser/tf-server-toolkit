@@ -210,7 +210,7 @@ public class CVRHandler implements ICVRHandler {
 	}
 
 	public FieldFunction initFieldFunction(CollectionViewRequest req,
-			FieldFunctionRequest ffReq) {
+			final FieldFunctionRequest ffReq) {
 		final String target = req.getTarget();
 		final String field = ffReq.getFieldName();
 		final Long parentId = req.getParentId();
@@ -226,6 +226,10 @@ public class CVRHandler implements ICVRHandler {
 			@Override
 			public Long getParentId() {
 				return parentId;
+			}
+			@Override
+			public Map<String, Object> getParams() {
+				return ffReq.getParams();
 			}
 		});
 		return ff;
