@@ -25,6 +25,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.triniforce.server.srvapi.InitFinitTaskWrapper;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ICheckInterrupted;
 
@@ -198,17 +199,28 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
     private void reportAboutTooBigDelay(ScheduledExecutorTask t, long delayMs) {
     	ByteArrayOutputStream out = new ByteArrayOutputStream();
     	PrintStream print = new PrintStream(out);
-    	print.printf("Task \'%s\'have too big delay: %dms\n", t.getRunnableTask().getClass().getName(), delayMs);
+    	print.printf("Task \'%s\'have too big delay: %dms\n", getTaskName(t), delayMs);
     	SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss.SSS");
     	print.println("Time to start: " + df.format(new Date(t.m_nextStartMs)));
     	print.print("Other tasks in queue: ");
     	Iterator<ScheduledExecutorTask> i = m_taskQueue.iterator();
     	while(i.hasNext()){
-    		print.print(i.next().getRunnableTask().getClass().getName());
+    		print.print(getTaskName(i.next()));
     		print.print(", ");
     	}
     	print.print("\nCommands in queue : " + m_commandQueue.size());
 		ApiAlgs.getLog(this).info(out.toString());
+	}
+
+	private String getTaskName(ScheduledExecutorTask t) {
+		Runnable rt = t.getRunnableTask();
+		String res;
+		if(rt instanceof InitFinitTaskWrapper){
+			res = ((InitFinitTaskWrapper) rt).getTaskName();
+		}
+		else
+			res = rt.getClass().getName();	
+		return res;
 	}
 
 	@Override
