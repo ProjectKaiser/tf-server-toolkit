@@ -5,6 +5,11 @@
  */ 
 package com.triniforce.concurrent;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
@@ -20,6 +25,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ICheckInterrupted;
 
 
@@ -29,7 +35,9 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
 
     BlockingQueue<Cmd> m_commandQueue = new LinkedBlockingQueue<Cmd>();
     Queue<ScheduledExecutorTask> m_taskQueue = new PriorityQueue<ScheduledExecutorTask>();
-	private final Future<?> m_schedulerFuture; 
+	private final Future<?> m_schedulerFuture;
+
+	private long m_maxTaskDelay= EMPTY_TASK_QUEUE_TIMEOUT_MS; 
 
     
     abstract class Cmd implements Runnable{
@@ -141,6 +149,7 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
         long delayMs = paramTimeUnit.convert(delay, TimeUnit.MILLISECONDS);
         ScheduledExecutorTask t = new ScheduledExecutorTask(r, initialDelayMs, delayMs);
         m_commandQueue.offer(new CmdScheduleTask(t));
+        m_maxTaskDelay = Math.max(m_maxTaskDelay, delay);
         return t;
     }
 
@@ -149,15 +158,23 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
             ScheduledExecutorTask t = m_taskQueue.poll();
             long delayMs = (null == t) ? EMPTY_TASK_QUEUE_TIMEOUT_MS : t.getDelay(TimeUnit.MILLISECONDS); 
             if(delayMs > 0){
-                Cmd c = m_commandQueue.poll(delayMs, TimeUnit.MILLISECONDS);
-                if(null != c){
-                    //put task back
-                    if(null != t){
-                        m_taskQueue.add(t);
-                    }
-                    c.run();
-                    return true;
-                }
+            	if(delayMs > m_maxTaskDelay){
+            		reportAboutTooBigDelay(t, delayMs);
+            		t.calcNextStart();     
+            		m_taskQueue.add(t);
+            		return true;
+            	}
+            	else{
+	                Cmd c = m_commandQueue.poll(delayMs, TimeUnit.MILLISECONDS);
+	                if(null != c){
+	                    //put task back
+	                    if(null != t){
+	                        m_taskQueue.add(t);
+	                    }
+	                    c.run();
+	                    return true;
+	                }
+            	}
             }
             if(null == t){
                 return true;
@@ -182,7 +199,23 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
         return true;
     }
     
-    @Override
+    private void reportAboutTooBigDelay(ScheduledExecutorTask t, long delayMs) {
+    	ByteArrayOutputStream out = new ByteArrayOutputStream();
+    	PrintStream print = new PrintStream(out);
+    	print.printf("Task \'%s\'have too big delay: %dms\n", t.getRunnableTask().getClass().getName(), delayMs);
+    	SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss.SSS");
+    	print.println("Time to start: " + df.format(new Date(t.m_nextStartMs)));
+    	print.print("Other tasks in queue: ");
+    	Iterator<ScheduledExecutorTask> i = m_taskQueue.iterator();
+    	while(i.hasNext()){
+    		print.print(i.next().getRunnableTask().getClass().getName());
+    		print.print(", ");
+    	}
+    	print.print("\nCommands in queue : " + m_commandQueue.size());
+		ApiAlgs.getLog(this).info(out.toString());
+	}
+
+	@Override
     public void run() {
         while(internal_doIteration());
     }

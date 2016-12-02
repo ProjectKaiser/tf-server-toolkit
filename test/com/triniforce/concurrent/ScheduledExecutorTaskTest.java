@@ -190,5 +190,22 @@ public class ScheduledExecutorTaskTest extends TFTestCase {
     	}
         
     }
+    
+    public void testCompareTo(){
+    	ScheduledExecutorTask t1 = newTask(100, 100);
+    	t1.calcNextStart();
+    	ScheduledExecutorTask t2 = newTask(200, 100);
+    	t2.calcNextStart();
+    	ScheduledExecutorTask t3 = newTask( 50, 100);
+    	t3.calcNextStart();
+    	
+    	assertEquals(-1, t1.compareTo(t2));
+    	assertEquals( 1, t1.compareTo(t3));
+    	
+    	m_time = 50;
+    	t3.calcNextStart();
+    	assertEquals(-1, t1.compareTo(t3));
+    	
+    }
 
 }
