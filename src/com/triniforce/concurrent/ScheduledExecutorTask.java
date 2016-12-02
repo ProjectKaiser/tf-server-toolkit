@@ -132,5 +132,9 @@ public class ScheduledExecutorTask implements ScheduledFuture<Object>, Runnable 
         }
         m_runnableTask.run();
     }
+    
+    public long getDelayMs(){
+    	return m_delayMs;
+    }
 
 }
