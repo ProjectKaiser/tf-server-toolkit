@@ -37,7 +37,7 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
     Queue<ScheduledExecutorTask> m_taskQueue = new PriorityQueue<ScheduledExecutorTask>();
 	private final Future<?> m_schedulerFuture;
 
-	private long m_maxTaskDelay= EMPTY_TASK_QUEUE_TIMEOUT_MS; 
+	private long m_maxTaskDelay= 2*EMPTY_TASK_QUEUE_TIMEOUT_MS; 
 
     
     abstract class Cmd implements Runnable{
@@ -149,7 +149,7 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
         long delayMs = paramTimeUnit.convert(delay, TimeUnit.MILLISECONDS);
         ScheduledExecutorTask t = new ScheduledExecutorTask(r, initialDelayMs, delayMs);
         m_commandQueue.offer(new CmdScheduleTask(t));
-        m_maxTaskDelay = Math.max(m_maxTaskDelay, delay);
+        m_maxTaskDelay = Math.min(m_maxTaskDelay, 2*delay);
         return t;
     }
 
