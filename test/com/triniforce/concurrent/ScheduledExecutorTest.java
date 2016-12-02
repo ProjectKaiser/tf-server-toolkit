@@ -41,7 +41,7 @@ public class ScheduledExecutorTest extends TFTestCase {
     }
     
     
-    public void ntestReport() throws InterruptedException{
+    public void testReport() throws InterruptedException{
     	
         ScheduledExecutor se = new ScheduledExecutor(2,3);
         for(int i=0; i<5; i++){
@@ -56,6 +56,33 @@ public class ScheduledExecutorTest extends TFTestCase {
 			}, 0, 500, TimeUnit.MILLISECONDS);
         }
         se.awaitTermination(200000L, TimeUnit.MILLISECONDS);
+    }
+    
+    public void test2() throws InterruptedException{
+    	ScheduledExecutor se = new ScheduledExecutor(2,3);
+        assertNotNull(se.scheduleWithFixedDelay(new Runnable(){
+			@Override
+			public void run() {
+			}},5000 ,100, TimeUnit.MILLISECONDS));
+        assertNotNull(se.scheduleWithFixedDelay(new Runnable(){
+			@Override
+			public void run() {
+			}},5000 ,400, TimeUnit.MILLISECONDS));
+        assertNotNull(se.scheduleWithFixedDelay(new Runnable(){
+			@Override
+			public void run() {
+			}},5000 ,200, TimeUnit.MILLISECONDS));
+        assertNotNull(se.scheduleWithFixedDelay(new Runnable(){
+			@Override
+			public void run() {
+			}},5000 ,300, TimeUnit.MILLISECONDS));
+
+        Thread.sleep(100);
+        se.reportAboutTooBigDelay(new ScheduledExecutorTask(new Runnable(){
+			@Override
+			public void run() {
+			}
+        }, 0, 0), 100);
     }
 
 }

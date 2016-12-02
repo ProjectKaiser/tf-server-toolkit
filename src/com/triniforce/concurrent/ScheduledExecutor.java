@@ -9,7 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
@@ -157,8 +156,9 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
             if(delayMs > 0){
             	if(null != t && delayMs > 2 * t.getDelayMs()){
             		reportAboutTooBigDelay(t, delayMs);
-            		t.calcNextStart();     
-            		m_taskQueue.add(t);
+            		
+            		Cmd c = new CmdScheduleTask(t);
+    				m_commandQueue.add(c);
             		return true;
             	}
             	else{
@@ -196,20 +196,13 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
         return true;
     }
     
-    private void reportAboutTooBigDelay(ScheduledExecutorTask t, long delayMs) {
+    void reportAboutTooBigDelay(ScheduledExecutorTask t, long delayMs) {
     	ByteArrayOutputStream out = new ByteArrayOutputStream();
     	PrintStream print = new PrintStream(out);
-    	print.printf("Task \'%s\'have too big delay: %dms\n", getTaskName(t), delayMs);
     	SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss.SSS");
-    	print.println("Time to start: " + df.format(new Date(t.m_nextStartMs)));
-    	print.print("Other tasks in queue: ");
-    	Iterator<ScheduledExecutorTask> i = m_taskQueue.iterator();
-    	while(i.hasNext()){
-    		print.print(getTaskName(i.next()));
-    		print.print(", ");
-    	}
-    	print.print("\nCommands in queue : " + m_commandQueue.size());
+    	print.printf("Task \'%s\'have too big delay: %dms, time to start: %s", getTaskName(t), delayMs, df.format(new Date(t.m_nextStartMs)));
 		ApiAlgs.getLog(this).info(out.toString());
+		
 	}
 
 	private String getTaskName(ScheduledExecutorTask t) {
