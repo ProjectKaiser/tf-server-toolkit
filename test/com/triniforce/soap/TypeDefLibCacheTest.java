@@ -47,6 +47,7 @@ public class TypeDefLibCacheTest extends TFTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         m_parser = new ClassParser(this.getClass().getPackage());
+        m_parser.addNonParsedParent(EParameterizedException.class);
         m_lib = new TypeDefLibCache(m_parser);
         
         assertNotNull(m_lib.get(int.class));
@@ -153,7 +154,7 @@ public class TypeDefLibCacheTest extends TFTestCase {
     
     public void testClassDefLib(){
         HashMap<Type, TypeDef> clss = new HashMap<Type, TypeDef>();
-        ClassDefLib cLib = new TypeDefLibCache.ClassDefLib(m_parser, m_lib, clss, m_lib);
+        ClassDefLib cLib = new TypeDefLibCache.ClassDefLib(m_parser, m_lib, clss, m_lib);        
         ClassDef cd = (ClassDef) cLib.add(IA1.C1.class);
         assertNotNull(cd);
         assertSame(cd, cLib.add(IA1.C1.class));

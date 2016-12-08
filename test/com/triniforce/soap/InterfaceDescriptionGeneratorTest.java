@@ -934,6 +934,11 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         		assertEquals("Hand", e.getMessage());
         	}
         }
+        {
+        	InterfaceDescription res = gen.parse(null, new ArrayList<Class>(Arrays.asList(ITestCow.class)));
+        	Operation op = res.getOperation("testpkg_02_step");
+        	assertEquals("EMyow", op.getThrows().get(0).getName());
+        }
         
 //        {
 //        	List<InterfaceOperationDescription> operationDescs;

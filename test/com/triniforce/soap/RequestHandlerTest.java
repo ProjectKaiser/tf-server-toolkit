@@ -67,8 +67,6 @@ public class RequestHandlerTest extends TFTestCase {
         
         handler.exec(new ByteArrayInputStream(REQ1.getBytes("utf-8")), System.out);
         
-        handler.exec(null, System.out);
-        
 
         String REQ2 = 
             "<?xml version=\"1.0\" encoding=\"utf-8\"?> "+

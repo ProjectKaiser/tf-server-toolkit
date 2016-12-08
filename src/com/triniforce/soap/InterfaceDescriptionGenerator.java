@@ -194,8 +194,13 @@ public class InterfaceDescriptionGenerator {
         String opName = null == opDesc.getPkgPrefix() ? opDesc.getName() : String.format("%s_%s", opDesc.getPkgPrefix(), opDesc.getName());
         
         ArrayList<ClassDef> vthrows = new ArrayList<ClassDef>();
-        for(Type typ : opDesc.getThrows()){
-        	vthrows.add((ClassDef) lib.add(typ));
+        for(Type typ : opDesc.getThrows()){        	
+        	if(typ instanceof Class){
+        		Class cls = (Class) typ;
+        		if(EParameterizedException.class.isAssignableFrom(cls) && !cls.equals(EParameterizedException.class)){
+        			vthrows.add((ClassDef) lib.add(typ));
+        		}
+        	}
         }
         
         return new Operation(opName, inMsgType, outMsgType, vthrows);
