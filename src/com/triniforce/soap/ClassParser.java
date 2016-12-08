@@ -8,10 +8,13 @@ package com.triniforce.soap;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
@@ -28,9 +31,11 @@ public class ClassParser {
     	
     };
 	private Package m_pkg;
+	private HashMap<Class, List<String> > m_nonParsedParents;
 
     public ClassParser(Package pkg) {
         m_pkg = pkg;
+        m_nonParsedParents = new HashMap<Class, List<String> >();
     }
 
     public ClassDef parse(Class key, IDefLibrary lib, String typeName) {
@@ -39,13 +44,25 @@ public class ClassParser {
         
         ClassDef parentDef = null;
         Class superclass = key.getSuperclass(); 
-        if(null != superclass && (superclass.getPackage().equals(m_pkg) || superclass.getPackage().equals(cls.getPackage()))){
-        	TypeDef def = lib.add(superclass);
-        	if(def instanceof ClassDef)
-        		parentDef = (ClassDef) def;
-        	else{
-        		//throw new ESoap.InvalidTypeName(typeName);
+        List<String> parentProperties = Collections.EMPTY_LIST;
+        if(m_nonParsedParents.containsKey(superclass)){
+        	parentProperties = m_nonParsedParents.get(superclass);
+        	if(null == parentProperties){
+        		parentProperties = extractClassProperties(superclass);
+        		m_nonParsedParents.put(superclass, parentProperties);
         	}
+        }
+        else{
+	        if(null != superclass && (superclass.getPackage().equals(m_pkg) || superclass.getPackage().equals(cls.getPackage()))){
+	        	TypeDef def = lib.add(superclass);
+	        	if(def instanceof ClassDef){
+	        		parentDef = (ClassDef) def;
+	        		parentProperties = extractClassProperties(superclass);
+	        	}
+	        	else{
+	        		//throw new ESoap.InvalidTypeName(typeName);
+	        	}
+	        }
         }
         
         ClassDef res = new TypeDef.ClassDef(typeName, key, parentDef);
@@ -56,7 +73,7 @@ public class ClassParser {
             Method setter = setters.next();
             String name = setter.getName().substring(3);
             String lowerName = Character.toString(Character.toLowerCase(name.charAt(0))) + name.substring(1);
-            if(null != parentDef && null != parentDef.getProp(lowerName)){
+            if(parentProperties.contains(lowerName)){
                 // property from parent
                 continue;
             }
@@ -102,6 +119,25 @@ public class ClassParser {
 //		}
         
         return res;
+    }
+    
+    private List<String> extractClassProperties(Class cls){
+        Iterator<Method> setters = getSetters(cls);
+
+        ArrayList<String> res = new ArrayList<String>();
+        while(setters.hasNext()){
+            Method setter = setters.next();
+            String name = setter.getName().substring(3);
+            String lowerName = Character.toString(Character.toLowerCase(name.charAt(0))) + name.substring(1);
+
+            Type propType = setter.getGenericParameterTypes()[0];
+            Method getter = null;
+            getter = getGetter(cls, name, propType);
+            if(null != getter){
+            	res.add(lowerName);
+            }
+        }
+    	return res;
     }
 
     private Method getGetter(Class cls, String name, Type type){
@@ -172,6 +208,10 @@ public class ClassParser {
             m.getName().length() > 3 &&
             m.getGenericParameterTypes().length == 1;
     }
+
+	public void addNonParsedParent(Class class1) {
+		m_nonParsedParents.put(class1, null);
+	}
 
         
 }

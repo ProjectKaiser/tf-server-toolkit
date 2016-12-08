@@ -44,6 +44,7 @@ import com.triniforce.soap.ESoap.InvalidTypeName;
 import com.triniforce.soap.InterfaceDescription.Operation;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
 import com.triniforce.soap.InterfaceDescriptionGeneratorTest.Cls2.InnerObject;
+import com.triniforce.soap.InterfaceDescriptionGeneratorTest.TestSrv3.Error_00124;
 import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
@@ -182,6 +183,27 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         char run3();
         
         void run4(Map<String, Integer> arg0, Map arg1);
+        
+        public static class Error_00124 extends EParameterizedException{
+        	private int m_testCode;
+			public Error_00124() {
+				super("", null, "sc1");
+			}
+			public int getTestCode() {
+				return m_testCode;
+			}
+			public void setTestCode(int testCode) {
+				m_testCode = testCode;
+			}
+			private static final long serialVersionUID = 1L;}
+        public static class Error_10125 extends EParameterizedException{
+			public Error_10125() {
+				super("", null, "sc1");
+			}
+			private static final long serialVersionUID = 1L;}
+        
+        void run5() throws Error_00124; 
+        void run6() throws Error_00124, Error_10125; 
     }
     
     static Order DEFAULT_ORDER = null; 
@@ -280,6 +302,26 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         assertEquals("qualified", esch.getAttribute("elementFormDefault"));
         assertEquals("http://tempuri.org/", esch.getAttribute("targetNamespace"));
         
+        
+        assertTrue( (Boolean)xp.evaluate("./types/schema/complexType[@name=\'Error_00124\']", defs, XPathConstants.BOOLEAN));
+        Element efault = (Element) xp.evaluate("./types/schema/element[@type=\'tns:Error_00124\']", defs, XPathConstants.NODE);
+        assertEquals("fault1", efault.getAttribute("name"));
+        
+        assertTrue( (Boolean)xp.evaluate("./message[@name=\'Error_00124\']", defs, XPathConstants.BOOLEAN));
+        
+        assertTrue( (Boolean)xp.evaluate("./portType", defs, XPathConstants.BOOLEAN));
+        Element e1;
+		assertNotNull( e1 = (Element)xp.evaluate("./operation", port, XPathConstants.NODE));
+		assertEquals("run2", e1.getAttribute("name"));
+		assertTrue( (Boolean)xp.evaluate("./portType/operation[@name=\'run5\']", defs, XPathConstants.BOOLEAN));
+        assertNotNull( e1 = (Element)xp.evaluate("./operation[@name=\'run5\']/fault[@name=\'Error_00124\']", port, XPathConstants.NODE));
+		assertEquals("tns:Error_00124", e1.getAttribute("message"));
+		
+        
+		assertTrue( (Boolean)xp.evaluate("./binding/operation[@name=\'run5\']/fault[@name=\'Error_00124\']", defs, XPathConstants.BOOLEAN));
+        
+        efault = (Element) xp.evaluate("./types/schema/element[@type=\'tns:Error_10125\']", defs, XPathConstants.NODE);
+        assertEquals("fault", efault.getAttribute("name"));
         
     }
 
@@ -421,10 +463,11 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
     
     public void testSerializeException() throws XPathExpressionException, UnsupportedEncodingException, DOMException, TransformerException, NoSuchMethodException, SecurityException{
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        InterfaceDescription desc = gen.parse(null, I1.class);
         try{
             getException(3);
         }catch(Throwable e){
-            Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv, e);
+            Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv, e, desc, "fun");
             
             XPathFactory xpf = XPathFactory.newInstance();  
             XPath xp = xpf.newXPath();
@@ -446,7 +489,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         
         {   // SOAP 1.2
             Exception e = new Exception("ua-ua-ua");
-            Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv12, e);
+            Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv12, e, desc, "fun");
             
             XPathFactory xpf = XPathFactory.newInstance();  
             XPath xp = xpf.newXPath();
@@ -469,7 +512,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         }
         {	//ns is null
             Exception e = new Exception("Пишем по русски");
-            Document res = gen.serializeException(null, e);
+            Document res = gen.serializeException(null, e, desc, "fun");
             gen.writeDocument(System.out, res);
             /*XPathFactory xpf = XPathFactory.newInstance();  
             XPath xp = xpf.newXPath();
@@ -480,7 +523,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         {//Exception with SubCode
         	{
 	        	 EParameterizedException e = new ESoap.EParameterizedException("msg", null, "CODE76473");
-	             Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv12, e);
+	             Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv12, e, desc, "fun");
 	             gen.writeDocument(System.out, res);
 	             
 	             XPathFactory xpf = XPathFactory.newInstance();  
@@ -489,6 +532,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 	             assertEquals("soap:Receiver", e1.getTextContent());
 	             e1 = (Element) xp.evaluate("/Envelope/Body/Fault/Code/Subcode/Value", res, XPathConstants.NODE);
 	             assertEquals("CODE76473", e1.getTextContent());
+	             	             
         	}
 			{
 				ClsErrorGet obj = new ClsErrorGet();
@@ -501,7 +545,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 						ApiAlgs.rethrowException(e);
 					}
 				} catch (Exception e) {
-					Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv12, e);
+					Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv12, e, desc, "fun");
 					gen.writeDocument(System.out, res);
 
 					XPathFactory xpf = XPathFactory.newInstance();
@@ -512,6 +556,21 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 					assertEquals("CODE865846304", e1.getTextContent());
 				}
 			}
+        }
+        {
+        	InterfaceDescription desc2 = gen.parse(null, TestSrv3.class);
+        	Error_00124 err = new TestSrv3.Error_00124();
+        	err.setTestCode(6757);
+        	Document res = gen.serializeException(InterfaceDescriptionGenerator.soapenv, err, desc2, "run5");
+			XPathFactory xpf = XPathFactory.newInstance();
+			XPath xp = xpf.newXPath();
+            gen.writeDocument(System.out, res);
+
+			assertTrue((Boolean) xp.evaluate("/Envelope/Body/Fault/detail/Error_00124", res,
+					XPathConstants.BOOLEAN));
+			Element e1 = (Element) xp.evaluate("/Envelope/Body/Fault/detail/Error_00124/testCode", res,
+					XPathConstants.NODE);
+			assertEquals("6757", e1.getTextContent());
         }
     }
 

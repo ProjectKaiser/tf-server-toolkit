@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import java.util.TimeZone;
 
 import com.triniforce.db.test.TFTestCase;
+import com.triniforce.soap.ESoap.EParameterizedException;
 import com.triniforce.soap.IDefLibrary.ITypeNameGenerator;
 import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
@@ -165,6 +166,13 @@ public class TypeDefLibCacheTest extends TFTestCase {
         	assertNotNull(p1);
         	assertSame(p1.getType(), m_lib.get(Object.class));
         }
+        {
+        	ClassDef res = (ClassDef) cLib.add(Err11.class);
+        	assertNull(res.getParentDef());
+        	
+        	assertEquals(0, res.getProps().size());
+
+        }
     }
     
     static class arraYoFfloaT{
@@ -283,5 +291,12 @@ public class TypeDefLibCacheTest extends TFTestCase {
     public void testExtLib(){
     	TypeDef.ScalarDef res = (ScalarDef) m_lib.add(char.class);
     	assertNotNull(res);
+    }
+    
+    static class Err11 extends EParameterizedException{
+		public Err11(String message, Throwable cause, String subcode) {
+			super(null, null, null);
+		}
+		private static final long serialVersionUID = 1L;
     }
 }

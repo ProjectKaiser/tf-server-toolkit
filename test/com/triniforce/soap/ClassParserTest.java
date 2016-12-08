@@ -496,4 +496,37 @@ public class ClassParserTest extends TFTestCase {
     	ClassDef def2 = (ClassDef) m_lib.add(CChild2.class);
     	assertEquals(null, def2.getParentDef());
     }
+    
+    public static class CNonParsed{
+    	private int m_prop1;
+
+		public int getProp1() {
+			return m_prop1;
+		}
+
+		public void setProp1(int prop1) {
+			m_prop1 = prop1;
+		}
+    }
+    public static class CParsed extends CNonParsed{
+    	private int m_prop2;
+
+		public int getProp2() {
+			return m_prop2;
+		}
+
+		public void setProp2(int prop1) {
+			m_prop2 = prop1;
+		}
+    }
+    
+    public void testAddNonParsedParents(){
+    	m_cp.addNonParsedParent(CNonParsed.class);
+    	
+    	ClassDef res = m_cp.parse(CParsed.class, m_lib, null);
+    	assertNotNull(res.getProp("prop2"));
+    	assertNull(res.getProp("prop1"));
+    	
+    	assertNull(res.getParentDef());
+    }
 }

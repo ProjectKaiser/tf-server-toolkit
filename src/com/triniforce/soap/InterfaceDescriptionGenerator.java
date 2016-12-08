@@ -149,6 +149,7 @@ public class InterfaceDescriptionGenerator {
         	opDesc.setArgs(args);
         	opDesc.setResult(new NamedArg(mDesc.getName()+"Result", mDesc.getMethod().getGenericReturnType()));
         	opDesc.setPkgPrefix(pkgPrefix);
+        	opDesc.getThrows().addAll(Arrays.asList(mDesc.getMethod().getGenericExceptionTypes()));
         	methods.add(opDesc);
         }
         return methods;
@@ -190,9 +191,14 @@ public class InterfaceDescriptionGenerator {
             outMsgType.addParameter(opDesc.getResult().getName(), TypeDefLibCache.toClass(retType), lib.add(retType));
         }
         
-        String opName = null == opDesc.getPkgPrefix() ? opDesc.getName() : String.format("%s_%s", opDesc.getPkgPrefix(), opDesc.getName()); 
+        String opName = null == opDesc.getPkgPrefix() ? opDesc.getName() : String.format("%s_%s", opDesc.getPkgPrefix(), opDesc.getName());
         
-        return new Operation(opName, inMsgType, outMsgType);
+        ArrayList<ClassDef> vthrows = new ArrayList<ClassDef>();
+        for(Type typ : opDesc.getThrows()){
+        	vthrows.add((ClassDef) lib.add(typ));
+        }
+        
+        return new Operation(opName, inMsgType, outMsgType, vthrows);
     }
 
     static String wsdl = "http://schemas.xmlsoap.org/wsdl/";
@@ -304,7 +310,7 @@ public class InterfaceDescriptionGenerator {
 					}	
             }
         }
-        private String getTypeName(WsdlType type) {
+        public String getTypeName(WsdlType type) {
         	String ns = type.getNamespace(m_tns);
             String res = type.getTypeDef().getName();
             if(InterfaceDescriptionGenerator.schema.equals(ns)){
@@ -326,6 +332,7 @@ public class InterfaceDescriptionGenerator {
             
             Element eDefs = doc.createElement("wsdl:definitions");
             doc.appendChild(eDefs);
+            final TypeConverter typeConverter = new TypeConverter(true, m_targetNamespace);
             TFUtils.assertEquals(null,
             new Node_S(eDefs, null)
                 .attr("xmlns:soap", soap)
@@ -350,7 +357,16 @@ public class InterfaceDescriptionGenerator {
                                 .end();
                             }
                         })
-                        .append(desc.getWsdlTypes(), new TypeConverter(true, m_targetNamespace))
+                        .append(desc.getWsdlFaults(), new IConverter<WsdlTypeElement>(){
+							@Override
+							public void run(Node_S parent, WsdlTypeElement val) {
+                                parent.append("s:element")
+	                                .attr("name", val.getName())
+	                                .attr("type", typeConverter.getTypeName(val.getType()))
+	                            .end();								
+							}
+                        })
+                        .append(desc.getWsdlTypes(), typeConverter)
                     .end()
                 .end()
                 .append(desc.getMessages(), new IConverter<WsdlMessage>(){
@@ -360,6 +376,17 @@ public class InterfaceDescriptionGenerator {
                             .append("wsdl:part")
                                 .attr("name", "parameters")
                                 .attr("element", "tns:"+val.getElementName())
+                            .end()
+                        .end();
+                    }
+                })
+                .append(desc.getWsdlFaults(), new IConverter<WsdlTypeElement>(){
+                    public void run(Node_S parent, WsdlTypeElement val) {
+                        parent.append("wsdl:message")
+                            .attr("name", val.getType().getTypeDef().getName())
+                            .append("wsdl:part")
+                                .attr("name", "fault")
+                                .attr("element", "tns:"+val.getName())
                             .end()
                         .end();
                     }
@@ -376,6 +403,14 @@ public class InterfaceDescriptionGenerator {
                                 .append("wsdl:output")
                                     .attr("message", "tns:"+val.getOutput().getMessageName())
                                 .end()
+                                .append(val.getFaults(),  new IConverter<WsdlType>(){
+									@Override
+									public void run(Node_S parent, WsdlType val) {
+										parent.append("wsdl:fault")
+											.attr("name", val.getTypeDef().getName())
+											.attr("message", typeConverter.getTypeName(val));
+									}
+                                })
                             .end();
                         }
                     })
@@ -404,6 +439,18 @@ public class InterfaceDescriptionGenerator {
                                         .attr("use","literal")
                                     .end()
                                 .end()
+                                .append(val.getFaults(), new IConverter<WsdlType>(){
+									@Override
+									public void run(Node_S parent, WsdlType val) {
+										parent.append("wsdl:fault")
+											.attr("name", val.getTypeDef().getName())
+											.append("soap:fault")
+												.attr("name", val.getTypeDef().getName())
+												.attr("use","literal")
+											.end()
+										.end();
+									}                                	
+                                })
                             .end();
                         }
                     })
@@ -749,15 +796,16 @@ public class InterfaceDescriptionGenerator {
         
     }
 
-    public Document serializeException(String soapNS, Throwable throwable) {
+    public Document serializeException(String soapNS, Throwable throwable, InterfaceDescription desc, String method) {
         Document doc = null;
         try {
         	if(null == soapNS)
         		soapNS = soapenv;
             Node_S body = createSoapDocument(soapNS);
-            Node_S fault = body.append("soap:Fault"); 
+            Node_S fault = body.append("soap:Fault");
+            Node_S detail, eCode= null;
             if(soapenv12.equals(soapNS)){
-            	Node_S eCode = 
+            	eCode = 
             	fault
                     .append("soap:Code")
                         .append("soap:Value")
@@ -767,25 +815,20 @@ public class InterfaceDescriptionGenerator {
             	Throwable ep = extractExceptionCause(throwable);
 
             	if(ep instanceof ESoap.EParameterizedException){
-            		ESoap.EParameterizedException ep1 = (EParameterizedException) ep;
-            		eCode.append("soap:Subcode")
-	                	.append("soap:Value")
-	                		.text(ep1.getSubcode())
-	                	.end()
-	                .end();
             		
             	}
-            	
+            		detail = 
                     eCode.end()
                     .append("soap:Reason")
                         .append("soap:Text")
                             .text(getCause(throwable).toString())
                         .end()
                     .end()
-                    .append("soap:Detail")
-                    .end();
+                    .append("soap:Detail");
+                    detail.end();
             }
             else{
+        		detail = 
                 fault
                     .append("faultcode")
                         .text("soap:Server")
@@ -793,8 +836,27 @@ public class InterfaceDescriptionGenerator {
                     .append("faultstring")
                         .text(getCause(throwable).toString())
                     .end()
-                    .append("detail")
-                    .end();
+                    .append("detail");
+                    detail.end();
+            }
+            
+        	Throwable ep = extractExceptionCause(throwable);
+            if(ep instanceof ESoap.EParameterizedException){
+            	if(null != eCode){
+            		ESoap.EParameterizedException ep1 = (EParameterizedException) ep;
+            		eCode.append("soap:Subcode")
+	                	.append("soap:Value")
+	                		.text(ep1.getSubcode())
+	                	.end()
+	                .end();
+            	}
+            	
+                Operation op = findByName(desc.getOperations(), method);
+                if(null == op)
+                	throw new NoSuchElementException(method);
+                PropDef prop = op.getThrowByType(ep.getClass());
+                if(null != prop)
+                	detail.append(new TypedObject(prop, ep), new ObjectConverter(desc, m_targetNamespace));
             }
             doc = body.getDocument();
         } catch (Exception e) {
@@ -847,7 +909,9 @@ public class InterfaceDescriptionGenerator {
 			List<InterfaceOperationDescription> operationDescs, Package pkg, List<SoapInclude> soapIncs) {
     	
         InterfaceDescription res = new InterfaceDescription();
-        TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(pkg));
+        ClassParser parser = new ClassParser(pkg);
+        parser.addNonParsedParent(EParameterizedException.class);
+        TypeDefLibCache lib = new TypeDefLibCache(parser);
         for (InterfaceOperationDescription opDesc : operationDescs) {
             res.getOperations().add(parseOperation(opDesc, lib));
         }
