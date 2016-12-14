@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
@@ -92,6 +93,7 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
 				}
 			}
 		}
+
 	}
     
     public static class MyThreadFactory implements ThreadFactory{
@@ -177,9 +179,11 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
                 return true;
             }
             TaskWrapper tw = new  TaskWrapper(t);
+        	ApiAlgs.getLog(this).info("Execution for task: " + getTaskName(t));
             try{
                 submit(tw);
             }catch(RejectedExecutionException re){
+            	ApiAlgs.getLog(this).info("Rejected task: " + getTaskName(t));
                 //put task back
                 m_taskQueue.add(t);
                 //wait for any command and put it back
@@ -199,8 +203,8 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
     void reportAboutTooBigDelay(ScheduledExecutorTask t, long delayMs) {
     	ByteArrayOutputStream out = new ByteArrayOutputStream();
     	PrintStream print = new PrintStream(out);
-    	SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss.SSS");
-    	print.printf("Task \'%s\'have too big delay: %dms, time to start: %s", getTaskName(t), delayMs, df.format(new Date(t.m_nextStartMs)));
+    	SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault());
+    	print.printf("Task \'%s\' has too big delay: %dms, time to start: %s", getTaskName(t), delayMs, df.format(new Date(t.m_nextStartMs)));
 		ApiAlgs.getLog(this).info(out.toString());
 		
 	}
