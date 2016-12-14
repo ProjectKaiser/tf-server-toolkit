@@ -36,6 +36,7 @@ public class ClassParser {
     public ClassParser(Package pkg) {
         m_pkg = pkg;
         m_nonParsedParents = new HashMap<Class, List<String> >();
+        addNonParsedParent(Exception.class);
     }
 
     public ClassDef parse(Class key, IDefLibrary lib, String typeName) {

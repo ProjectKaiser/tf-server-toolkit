@@ -197,7 +197,8 @@ public class InterfaceDescriptionGenerator {
         for(Type typ : opDesc.getThrows()){        	
         	if(typ instanceof Class){
         		Class cls = (Class) typ;
-        		if(EParameterizedException.class.isAssignableFrom(cls) && !cls.equals(EParameterizedException.class)){
+        		if((EParameterizedException.class.isAssignableFrom(cls) && !cls.equals(EParameterizedException.class)) ||
+        				null != lib.get(typ)){
         			vthrows.add((ClassDef) lib.add(typ));
         		}
         	}
@@ -362,7 +363,8 @@ public class InterfaceDescriptionGenerator {
                                 .end();
                             }
                         })
-                        .append(desc.getWsdlFaults(), new IConverter<WsdlTypeElement>(){
+                        // RPC style for exception, Delphi doesn't understand document style
+                        /*.append(desc.getWsdlFaults(), new IConverter<WsdlTypeElement>(){
 							@Override
 							public void run(Node_S parent, WsdlTypeElement val) {
                                 parent.append("s:element")
@@ -370,7 +372,7 @@ public class InterfaceDescriptionGenerator {
 	                                .attr("type", typeConverter.getTypeName(val.getType()))
 	                            .end();								
 							}
-                        })
+                        })*/
                         .append(desc.getWsdlTypes(), typeConverter)
                     .end()
                 .end()
@@ -387,11 +389,12 @@ public class InterfaceDescriptionGenerator {
                 })
                 .append(desc.getWsdlFaults(), new IConverter<WsdlTypeElement>(){
                     public void run(Node_S parent, WsdlTypeElement val) {
+                    	String typename = val.getType().getTypeDef().getName();
                         parent.append("wsdl:message")
-                            .attr("name", val.getType().getTypeDef().getName())
+                            .attr("name", typename)
                             .append("wsdl:part")
-                                .attr("name", "fault")
-                                .attr("element", "tns:"+val.getName())
+                                .attr("name", typename)
+                                .attr("type", typeConverter.getTypeName(val.getType()))
                             .end()
                         .end();
                     }
@@ -855,6 +858,7 @@ public class InterfaceDescriptionGenerator {
 	                	.end()
 	                .end();
             	}
+            }
             	
                 Operation op = findByName(desc.getOperations(), method);
                 if(null == op)
@@ -862,7 +866,7 @@ public class InterfaceDescriptionGenerator {
                 PropDef prop = op.getThrowByType(ep.getClass());
                 if(null != prop)
                 	detail.append(new TypedObject(prop, ep), new ObjectConverter(desc, m_targetNamespace));
-            }
+            
             doc = body.getDocument();
         } catch (Exception e) {
             ApiAlgs.rethrowException(e);
@@ -917,14 +921,15 @@ public class InterfaceDescriptionGenerator {
         ClassParser parser = new ClassParser(pkg);
         parser.addNonParsedParent(EParameterizedException.class);
         TypeDefLibCache lib = new TypeDefLibCache(parser);
-        for (InterfaceOperationDescription opDesc : operationDescs) {
-            res.getOperations().add(parseOperation(opDesc, lib));
-        }
-        
+
         for(SoapInclude soapInc : soapIncs){
             for(Class extraCls : soapInc.extraClasses()){
                 lib.add(extraCls);
             }
+        }
+        
+        for (InterfaceOperationDescription opDesc : operationDescs) {
+            res.getOperations().add(parseOperation(opDesc, lib));
         }
         
         List<TypeDef> typeDefs = lib.getDefs();

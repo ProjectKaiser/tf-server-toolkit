@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.triniforce.db.test.TFTestCase;
+import com.triniforce.soap.ESoap.EParameterizedException;
 import com.triniforce.soap.InterfaceDescription.MessageDef;
 import com.triniforce.soap.InterfaceDescription.Operation;
 import com.triniforce.soap.InterfaceDescriptionTest.IWithError.EError2;
@@ -144,9 +145,9 @@ public class InterfaceDescriptionTest extends TFTestCase {
     }
     
     interface IWithError{
-    	public static class EError1 extends Exception{
+    	public static class EError1 extends EParameterizedException{
 			private static final long serialVersionUID = 1L;}
-    	public static class EError2 extends Exception{
+    	public static class EError2 extends EParameterizedException{
 			private static final long serialVersionUID = 1L;}
     	
     	void method() throws EError1, EError2;

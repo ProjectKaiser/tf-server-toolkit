@@ -174,7 +174,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 		}
     }
     
-    @SoapInclude(extraClasses={Cls2.InnerObject.class})
+    @SoapInclude(extraClasses={Cls2.InnerObject.class, TestSrv3.Error_00543.class})
     interface TestSrv3{
         Cls2 run1(Cls1 req);
         
@@ -203,7 +203,11 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 			private static final long serialVersionUID = 1L;}
         
         void run5() throws Error_00124; 
-        void run6() throws Error_00124, Error_10125; 
+        void run6() throws Error_00124, Error_10125;
+        
+        public static class Error_00543 extends Exception{
+			private static final long serialVersionUID = 1L;}
+        void run7() throws Error_00543; 
     }
     
     static Order DEFAULT_ORDER = null; 
@@ -304,14 +308,17 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         
         
         assertTrue( (Boolean)xp.evaluate("./types/schema/complexType[@name=\'Error_00124\']", defs, XPathConstants.BOOLEAN));
-        Element efault = (Element) xp.evaluate("./types/schema/element[@type=\'tns:Error_00124\']", defs, XPathConstants.NODE);
-        assertEquals("fault1", efault.getAttribute("name"));
+        //No element in schema for Exceptions
+        assertNull((Element) xp.evaluate("./types/schema/element[@type=\'tns:Error_00124\']", defs, XPathConstants.NODE));
         
-        assertTrue( (Boolean)xp.evaluate("./message[@name=\'Error_00124\']", defs, XPathConstants.BOOLEAN));
+        Element e1;
+        assertNotNull(e1= (Element)xp.evaluate("./message[@name=\'Error_00124\']", defs, XPathConstants.NODE));
+        Element epart = (Element)xp.evaluate("./part", e1, XPathConstants.NODE);
+        assertEquals("tns:Error_00124", epart.getAttribute("type"));
+        assertEquals("Error_00124", epart.getAttribute("name"));
         
         assertTrue( (Boolean)xp.evaluate("./portType", defs, XPathConstants.BOOLEAN));
-        Element e1;
-		assertNotNull( e1 = (Element)xp.evaluate("./operation", port, XPathConstants.NODE));
+        assertNotNull( e1 = (Element)xp.evaluate("./operation", port, XPathConstants.NODE));
 		assertEquals("run2", e1.getAttribute("name"));
 		assertTrue( (Boolean)xp.evaluate("./portType/operation[@name=\'run5\']", defs, XPathConstants.BOOLEAN));
         assertNotNull( e1 = (Element)xp.evaluate("./operation[@name=\'run5\']/fault[@name=\'Error_00124\']", port, XPathConstants.NODE));
@@ -320,9 +327,10 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         
 		assertTrue( (Boolean)xp.evaluate("./binding/operation[@name=\'run5\']/fault[@name=\'Error_00124\']", defs, XPathConstants.BOOLEAN));
         
-        efault = (Element) xp.evaluate("./types/schema/element[@type=\'tns:Error_10125\']", defs, XPathConstants.NODE);
-        assertEquals("fault", efault.getAttribute("name"));
-        
+        assertNull( xp.evaluate("./types/schema/element[@type=\'tns:Error_10125\']", defs, XPathConstants.NODE));
+
+        assertNotNull(e1= (Element)xp.evaluate("./message[@name=\'Error_00543\']", defs, XPathConstants.NODE));
+
     }
 
     private void print(Document doc) {
@@ -571,6 +579,11 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 			Element e1 = (Element) xp.evaluate("/Envelope/Body/Fault/detail/Error_00124/testCode", res,
 					XPathConstants.NODE);
 			assertEquals("6757", e1.getTextContent());
+			
+        	res = gen.serializeException(InterfaceDescriptionGenerator.soapenv, new TestSrv3.Error_00543(), desc2, "run7");
+        	gen.writeDocument(System.out, res);
+        	assertTrue((Boolean) xp.evaluate("/Envelope/Body/Fault/detail/Error_00543", res, XPathConstants.BOOLEAN));
+			
         }
     }
 
