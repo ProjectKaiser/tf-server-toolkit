@@ -179,7 +179,7 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
                 return true;
             }
             TaskWrapper tw = new  TaskWrapper(t);
-        	ApiAlgs.getLog(this).info("Execution for task: " + getTaskName(t));
+        	ApiAlgs.getLog(this).trace("Execution for task: " + getTaskName(t));
             try{
                 submit(tw);
             }catch(RejectedExecutionException re){
