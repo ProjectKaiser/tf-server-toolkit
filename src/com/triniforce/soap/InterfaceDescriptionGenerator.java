@@ -860,12 +860,14 @@ public class InterfaceDescriptionGenerator {
             	}
             }
             	
+            if(null != method && !method.isEmpty()){
                 Operation op = findByName(desc.getOperations(), method);
                 if(null == op)
                 	throw new NoSuchElementException(method);
                 PropDef prop = op.getThrowByType(ep.getClass());
                 if(null != prop)
                 	detail.append(new TypedObject(prop, ep), new ObjectConverter(desc, m_targetNamespace));
+            }
             
             doc = body.getDocument();
         } catch (Exception e) {

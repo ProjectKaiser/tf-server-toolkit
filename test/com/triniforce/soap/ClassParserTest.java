@@ -22,7 +22,9 @@ import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.testpkg_01.CChild1;
+import com.triniforce.soap.testpkg_01.CParent;
 import com.triniforce.soap.testpkg_02.CChild2;
+import com.triniforce.soap.testpkg_02.CChild3;
 import com.triniforce.utils.ApiAlgs;
 
 public class ClassParserTest extends TFTestCase {
@@ -490,11 +492,14 @@ public class ClassParserTest extends TFTestCase {
     }
     
     public void testExtending(){
+    	ClassDef def0 = (ClassDef) m_lib.add(CChild3.class);
+    	assertEquals(null, def0.getParentDef());
+    	
     	ClassDef def1 = (ClassDef) m_lib.add(CChild1.class);
     	assertEquals("CParent", def1.getParentDef().getName());
     	
     	ClassDef def2 = (ClassDef) m_lib.add(CChild2.class);
-    	assertEquals(null, def2.getParentDef());
+    	assertEquals(def1.getParentDef(), def2.getParentDef());
     }
     
     public static class CNonParsed{
@@ -528,5 +533,12 @@ public class ClassParserTest extends TFTestCase {
     	assertNull(res.getProp("prop1"));
     	
     	assertNull(res.getParentDef());
+    }
+    
+    public void testParseParent(){
+    	ClassDef pd = (ClassDef) m_lib.add(CParent.class);
+    	ClassDef res = m_cp.parse(CChild2.class, m_lib, "child1");
+    	assertSame(pd, res.getParentDef());
+    	
     }
 }

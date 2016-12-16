@@ -206,6 +206,7 @@ public class RequestHandlerTest extends TFTestCase {
     
     public void testDeserializeRequestError() throws UnsupportedEncodingException{
     	
+    	
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
         InterfaceDescription desc = gen.parse(null, TestService.class);
         RequestHandler handler = new RequestHandler(gen, desc, new RequestHandler.ReflectServiceInvoker(new TestService()));

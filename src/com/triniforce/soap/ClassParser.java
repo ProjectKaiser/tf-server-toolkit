@@ -54,7 +54,10 @@ public class ClassParser {
         	}
         }
         else{
-	        if(null != superclass && (superclass.getPackage().equals(m_pkg) || superclass.getPackage().equals(cls.getPackage()))){
+	        if(null != superclass && (
+	        		superclass.getPackage().equals(m_pkg) || 
+	        		superclass.getPackage().equals(cls.getPackage()) ||
+	        		null != lib.get(superclass))){
 	        	TypeDef def = lib.add(superclass);
 	        	if(def instanceof ClassDef){
 	        		parentDef = (ClassDef) def;
