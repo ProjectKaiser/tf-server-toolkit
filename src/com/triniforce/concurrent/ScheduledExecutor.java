@@ -38,18 +38,23 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
     Queue<ScheduledExecutorTask> m_taskQueue = new PriorityQueue<ScheduledExecutorTask>();
 	private final Future<?> m_schedulerFuture;
 
+	private long m_maxDelay=0L;
+
     abstract class Cmd implements Runnable{
                
     }
     
     class CmdExceptionOccured extends Cmd{
 
-        @Override
+        private ScheduledExecutorTask m_task;
+
+		@Override
         public void run() {
+        	ApiAlgs.getLog(ScheduledExecutor.class).error("Exception occured in " + getTaskName(m_task));
         }
         
         CmdExceptionOccured(ScheduledExecutorTask task){
-
+        	m_task = task;
         }
     }
     
@@ -62,9 +67,15 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
 
         @Override
         public void run() {
-        	if(null != m_task && m_task.calcNextStart()){
-        		m_taskQueue.add(m_task);
-        	}
+        	if(null == m_task)
+        		ApiAlgs.getLog(ScheduledExecutor.class).warn("task is null");
+        	else
+	        	if(m_task.calcNextStart()){
+	        		m_taskQueue.add(m_task);
+	        	}
+	        	else
+	        		ApiAlgs.getLog(ScheduledExecutor.class).warn("something wrong in calcNextStart()");
+        		
         }
     }
     
@@ -154,8 +165,16 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
     boolean internal_doIteration(){
         try {
             ScheduledExecutorTask t = m_taskQueue.poll();
+        	if(null == t){
+        		ApiAlgs.getLog(this).trace("All tasks in execution or end cycle");
+        	}
+        	
             long delayMs = (null == t) ? EMPTY_TASK_QUEUE_TIMEOUT_MS : t.getDelay(TimeUnit.MILLISECONDS); 
             if(delayMs > 0){
+            	if(delayMs > m_maxDelay)
+            		m_maxDelay = delayMs;
+            	
+            	
             	if(null != t && delayMs > 2 * t.getDelayMs()){
             		reportAboutTooBigDelay(t, delayMs);
             		
@@ -175,6 +194,10 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
 	                }
             	}
             }
+            else{
+            	ApiAlgs.getLog(this).trace("Task wait too long for execution: " + delayMs);
+            }
+            
             if(null == t){
                 return true;
             }
@@ -227,5 +250,9 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
 
 	public Future<?> getSchedulerFuture() {
 		return m_schedulerFuture;
+	}
+
+	public long getMaxDelay() {
+		return m_maxDelay;
 	}    
 }
