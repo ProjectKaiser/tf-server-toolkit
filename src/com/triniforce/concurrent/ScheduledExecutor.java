@@ -195,7 +195,8 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
             	}
             }
             else{
-            	ApiAlgs.getLog(this).trace("Task wait too long for execution: " + delayMs);
+            	if(delayMs < -100)
+            		ApiAlgs.getLog(this).trace("Task wait too long for execution: " + delayMs);
             }
             
             if(null == t){
