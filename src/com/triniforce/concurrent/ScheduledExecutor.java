@@ -39,6 +39,7 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
 	private final Future<?> m_schedulerFuture;
 
 	private long m_maxDelay=0L;
+	private Long m_maxTaskDelayBorder = 5 * 60 * 1000L;
 
     abstract class Cmd implements Runnable{
                
@@ -174,8 +175,9 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
             	if(delayMs > m_maxDelay)
             		m_maxDelay = delayMs;
             	
+            	long border = 2 * t.getDelayMs();
             	
-            	if(null != t && delayMs > 2 * t.getDelayMs()){
+            	if(null != t && delayMs > border ){
             		reportAboutTooBigDelay(t, delayMs);
             		
             		Cmd c = new CmdScheduleTask(t);
@@ -183,12 +185,18 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
             		return true;
             	}
             	else{
+            		if(m_commandQueue.isEmpty() && (delayMs > m_maxTaskDelayBorder)){
+            			ApiAlgs.getLog(this).trace("Potentially too big delay for scheduler:" + delayMs);
+            		}
+            			
+            		
 	                Cmd c = m_commandQueue.poll(delayMs, TimeUnit.MILLISECONDS);
 	                if(null != c){
 	                    //put task back
 	                    if(null != t){
 	                        m_taskQueue.add(t);
 	                    }
+	                    
 	                    c.run();
 	                    return true;
 	                }
@@ -200,6 +208,8 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
             }
             
             if(null == t){
+            	ApiAlgs.getLog(this).warn("No task to execute");
+            	ApiAlgs.getLog(this).debug("No task to execute");
                 return true;
             }
             TaskWrapper tw = new  TaskWrapper(t);
@@ -255,5 +265,9 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
 
 	public long getMaxDelay() {
 		return m_maxDelay;
-	}    
+	}
+	
+	public void setMaxTaskDelayBorder(long value){
+		m_maxTaskDelayBorder = value;
+	} 
 }
