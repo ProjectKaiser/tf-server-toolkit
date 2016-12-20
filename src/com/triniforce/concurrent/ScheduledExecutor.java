@@ -175,9 +175,7 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
             	if(delayMs > m_maxDelay)
             		m_maxDelay = delayMs;
             	
-            	long border = 2 * t.getDelayMs();
-            	
-            	if(null != t && delayMs > border ){
+            	if(null != t && delayMs > 2 * t.getDelayMs() ){
             		reportAboutTooBigDelay(t, delayMs);
             		
             		Cmd c = new CmdScheduleTask(t);
