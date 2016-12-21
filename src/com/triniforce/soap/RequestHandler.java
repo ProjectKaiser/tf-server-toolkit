@@ -82,7 +82,6 @@ public class RequestHandler {
     public void exec(InputStream input, OutputStream output){
         String soapNS = null;
     	
-        try {
         	boolean bLogErorRequest;
             Log log = ApiAlgs.getLog(this);
             bLogErorRequest = log.isTraceEnabled() && input.markSupported();
@@ -90,40 +89,41 @@ public class RequestHandler {
             	input.mark(LOG_BUF_SIZE);
             SOAPDocument in;
             try{
-            	in = m_gen.deserialize(m_desc, input);
-        	} catch (Exception e){
-            	ApiAlgs.getLog(this).error("service exception", e);
-                m_gen.writeDocument(output, m_gen.serializeException(soapNS, e));
-                if(bLogErorRequest){
-                	try {
-    					input.reset();
-    					byte[] buf = new byte[LOG_BUF_SIZE];
-    					input.read(buf);
-    					log.trace(new String(buf, "utf-8"));
-    				} catch (IOException e1) {
-    					ApiAlgs.getLog(this).error("Log request failed", e1);
-    				}
-                	
-                }
-        		return;
-        	} 
-            soapNS = in.m_soap;
-            Object res = m_invoker.invokeService(in.m_method, in.m_args);
-            SOAPDocument out = new SOAPDocument();
-            out.m_soap = soapNS;
-            out.m_method = in.m_method;
-            out.m_bIn = false;
-            out.m_args = new Object[]{res};
-            Document doc = m_gen.serialize(m_desc, out);
-            m_gen.writeDocument(output, doc);
-        } catch (Throwable e) {
-            try {
-            	ApiAlgs.getLog(this).trace("service exception", e);
-                m_gen.writeDocument(output, m_gen.serializeException(soapNS, e));
+	            try{
+	            	in = m_gen.deserialize(m_desc, input);
+	        	} catch (Exception e){
+	            	ApiAlgs.getLog(this).error("service exception", e);
+	                m_gen.writeDocument(output, m_gen.serializeException(soapNS, e, m_desc, ""));
+	                if(bLogErorRequest){
+	                	try {
+	    					input.reset();
+	    					byte[] buf = new byte[LOG_BUF_SIZE];
+	    					input.read(buf);
+	    					log.trace(new String(buf, "utf-8"));
+	    				} catch (IOException e1) {
+	    					ApiAlgs.getLog(this).error("Log request failed", e1);
+	    				}
+	                	
+	                }
+	                return;
+	        	} 
+	            try {
+		            soapNS = in.m_soap;
+		            Object res = m_invoker.invokeService(in.m_method, in.m_args);
+		            SOAPDocument out = new SOAPDocument();
+		            out.m_soap = soapNS;
+		            out.m_method = in.m_method;
+		            out.m_bIn = false;
+		            out.m_args = new Object[]{res};
+		            Document doc = m_gen.serialize(m_desc, out);
+		            m_gen.writeDocument(output, doc);
+		        } catch (Throwable e) {
+	            	ApiAlgs.getLog(this).trace("service exception", e);
+	                m_gen.writeDocument(output, m_gen.serializeException(soapNS, e, m_desc, in.m_method));
+		        }
             } catch (TransformerException e1) {
                 ApiAlgs.rethrowException(e1);
             }
-        }
     }
 
 	public InterfaceDescriptionGenerator getGen() {

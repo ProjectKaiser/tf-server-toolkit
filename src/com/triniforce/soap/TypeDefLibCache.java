@@ -414,7 +414,8 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         m_libs.add(new ArrayDefLib(this, m_arrays, this));
         m_libs.add(new MapDefLib(this, m_arrays, this));
         m_libs.add(m_extLib);
-        m_libs.add(new ClassDefLib(parser, this, m_classes, this));
+        ClassDefLib cdLib = new ClassDefLib(parser, this, m_classes, this);
+        m_libs.add(cdLib);
         m_uniqueNameGen = new UniqueNameGenerator();
     }
     

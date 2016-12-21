@@ -87,4 +87,8 @@ public class InitFinitTaskWrapper implements Runnable  {
         return true;
     }
 
+    
+    public String getTaskName(){
+    	return "TaskWrapper." + m_command.getClass().getName();
+    }
 }

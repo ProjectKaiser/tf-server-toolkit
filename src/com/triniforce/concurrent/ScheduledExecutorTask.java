@@ -74,9 +74,15 @@ public class ScheduledExecutorTask implements ScheduledFuture<Object>, Runnable 
 
     @Override
     public int compareTo(Delayed otherD) {
-        Long msOther = otherD.getDelay(TimeUnit.MILLISECONDS);
-        Long msMe = getDelay(TimeUnit.MILLISECONDS);
-        return msMe.compareTo(msOther);
+    	if(otherD instanceof ScheduledExecutorTask){
+    		ScheduledExecutorTask otherT = (ScheduledExecutorTask) otherD;
+        	return Long.valueOf(m_nextStartMs).compareTo(otherT.m_nextStartMs);
+    	}
+    	else{
+	        Long msOther = otherD.getDelay(TimeUnit.MILLISECONDS);
+	        Long msMe = getDelay(TimeUnit.MILLISECONDS);
+	        return msMe.compareTo(msOther);
+    	}        
     }
 
     @Override
@@ -125,6 +131,10 @@ public class ScheduledExecutorTask implements ScheduledFuture<Object>, Runnable 
             return;
         }
         m_runnableTask.run();
+    }
+    
+    public long getDelayMs(){
+    	return m_delayMs;
     }
 
 }

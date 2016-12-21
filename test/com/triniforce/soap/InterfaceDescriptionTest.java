@@ -8,14 +8,15 @@ package com.triniforce.soap;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import com.triniforce.db.test.TFTestCase;
-import com.triniforce.soap.InterfaceDescription;
-import com.triniforce.soap.InterfaceDescriptionGenerator;
-import com.triniforce.soap.WsdlDescription;
-import com.triniforce.soap.TypeDef;
+import com.triniforce.soap.ESoap.EParameterizedException;
 import com.triniforce.soap.InterfaceDescription.MessageDef;
+import com.triniforce.soap.InterfaceDescription.Operation;
+import com.triniforce.soap.InterfaceDescriptionTest.IWithError.EError2;
+import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.WsdlDescription.WsdlType;
@@ -116,6 +117,7 @@ public class InterfaceDescriptionTest extends TFTestCase {
         static class Cls1{
         }
     } 
+
     
     @SuppressWarnings("unchecked")
     public void testGetTypeByName(){
@@ -140,6 +142,42 @@ public class InterfaceDescriptionTest extends TFTestCase {
         assertNotNull(td);
         sd = (ScalarDef) td; 
         assertEquals(Short.class.getName(), sd.getType());
+    }
+    
+    interface IWithError{
+    	public static class EError1 extends EParameterizedException{
+			private static final long serialVersionUID = 1L;}
+    	public static class EError2 extends EParameterizedException{
+			private static final long serialVersionUID = 1L;}
+    	
+    	void method() throws EError1, EError2;
+    	void method2() throws EError2;
+    }
+    
+    static class EError3 extends EError2{
+		private static final long serialVersionUID = 1L;
+    }
+    public void testError(){
+        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        InterfaceDescription desc = gen.parse(null, IWithError.class);
+        
+        Operation op1 = desc.getOperation("method");
+        List<ClassDef> res = op1.getThrows();
+        assertNotNull(res);
+        
+        TypeDef td = desc.getType(IWithError.EError1.class);
+        assertNotNull(td);
+        
+        PropDef pd = op1.getThrowByType(IWithError.EError1.class);
+        assertNotNull(pd);
+        assertEquals("EError1", pd.getName());
+        assertEquals("EError1", pd.getType().getName());
+        pd = op1.getThrowByType(IWithError.EError2.class);
+        assertEquals("EError2", pd.getType().getName());
+        pd = op1.getThrowByType(EError3.class);
+        assertEquals("EError2", pd.getType().getName());
+        
+
     }
     
     @SuppressWarnings("unchecked")

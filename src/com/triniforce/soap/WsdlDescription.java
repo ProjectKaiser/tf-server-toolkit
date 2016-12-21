@@ -8,6 +8,7 @@ package com.triniforce.soap;
 import java.lang.reflect.Type;
 import java.util.AbstractCollection;
 import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -189,11 +190,11 @@ public class WsdlDescription {
     }
     
     Collection<WsdlTypeElement> getWsdlTypeElements(){
-        return new WsdlSequence(new AbstractList<PropDef>(){
+    	return new WsdlSequence(new AbstractList<PropDef>(){
             @Override
             public PropDef get(int arg0) {
-                Operation op = m_iDesc.getOperations().get(arg0/2);
-                return op.getProps().get(arg0 & 1);
+	                Operation op = m_iDesc.getOperations().get(arg0/2);
+	                return op.getProps().get(arg0 & 1);
             }
 
             @Override
@@ -238,6 +239,7 @@ public class WsdlDescription {
             String getName();
             WsdlMessage getInput();
             WsdlMessage getOutput();
+			Collection<WsdlType> getFaults();
         }
         String getName();
         List<WsdlOperation> getOperations();
@@ -286,6 +288,14 @@ public class WsdlDescription {
                                     }
                                 };
                             }
+							@Override
+							public Collection<WsdlType> getFaults() {
+								ArrayList<WsdlType> res = new ArrayList<WsdlType>();
+								for (ClassDef cd : op.getThrows()) {
+									res.add(new WsdlType(cd));
+								}
+								return res;
+							}
                         };
                     }
 
@@ -315,4 +325,22 @@ public class WsdlDescription {
             
         };
     }
+
+	public Collection<WsdlTypeElement> getWsdlFaults() {
+		final HashSet<ClassDef> faults = new HashSet<ClassDef>();
+    	for (Operation op : m_iDesc.getOperations()) {
+    		faults.addAll(op.getThrows());
+		}
+    	
+    	ArrayList<WsdlTypeElement> res = new ArrayList<WsdlTypeElement>();
+    	int i=0;
+    	for (ClassDef f : faults) {
+    		String name = "fault";
+    		if(i>0)
+    			name = name + i;
+			res.add(new WsdlTypeElement(name, f, true, 0));
+			i++;
+		}
+		return res;
+	}
 }

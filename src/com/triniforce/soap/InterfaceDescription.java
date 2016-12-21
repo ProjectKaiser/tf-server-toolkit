@@ -8,11 +8,11 @@ package com.triniforce.soap;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 
-import com.triniforce.soap.TypeDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.utils.ApiAlgs;
@@ -22,16 +22,22 @@ public class InterfaceDescription implements Serializable{
 
     public static class Operation extends ClassDef  implements Serializable{
         private static final long serialVersionUID = 3333941812114708363L;
+		private List<ClassDef> m_throws;
         
         public Operation() {
             super();
         }
         
         public Operation(String name, MessageDef reqType, MessageDef resType) {
+            this(name, reqType, resType, Collections.EMPTY_LIST);
+        }
+        
+        public Operation(String name, MessageDef reqType, MessageDef resType, List<ClassDef> vthrows) {
             super(name, null);
             List<PropDef> props = getOwnProps();
             props.add(new PropDef(name, reqType, null, null));
             props.add(new PropDef(name+"Response", resType, null, null));
+            m_throws = vthrows;
         }
 
         public MessageDef getRequestType() {
@@ -40,6 +46,27 @@ public class InterfaceDescription implements Serializable{
         public MessageDef getResponseType() {
             return (MessageDef) getProps().get(1).getType();
         }
+
+		public List<ClassDef> getThrows() {
+			return m_throws;
+		}
+
+		public PropDef getThrowByType(Class class1) {
+			for (ClassDef cd : m_throws) {
+				Class<?> cls;
+				try {
+					cls = Class.forName(cd.getType());
+					if(cls.isAssignableFrom(class1)){
+						return new PropDef(cd.getName(),cd, null, null);
+					}
+				} catch (ClassNotFoundException e) {
+					ApiAlgs.rethrowException(e);
+				}
+			}
+			return null;
+			
+			
+		}
     }
     
     static class MessageDef extends ClassDef implements Serializable{

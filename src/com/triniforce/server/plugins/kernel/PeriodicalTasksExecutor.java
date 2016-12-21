@@ -5,10 +5,11 @@
  */
 package com.triniforce.server.plugins.kernel;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import com.triniforce.concurrent.ScheduledExecutor;
 import com.triniforce.server.srvapi.BasicServerTask;
 import com.triniforce.server.srvapi.ITaskExecutors;
 import com.triniforce.server.srvapi.InitFinitTaskWrapper;
@@ -81,7 +82,16 @@ public class PeriodicalTasksExecutor implements IFinitable {
 
     public static final int TASKS_TIMEOUT_MS = 1000 * 30;
     public void init() {
-        m_te.addExecutor(ITaskExecutors.periodicalTaskExecutorKey, new ScheduledExecutor(2, 8));
+        m_te.addExecutor(ITaskExecutors.periodicalTaskExecutorKey, Executors.newScheduledThreadPool(8, new ThreadFactory(){
+        	int num = 0;
+
+			@Override
+			public Thread newThread(Runnable r) {
+				return new Thread(r, "scheduler" + num++);
+			}
+        	
+        }));
+//        m_te.addExecutor(ITaskExecutors.periodicalTaskExecutorKey, new ScheduledExecutor(2, 8));
     }
     public void finit() {
         getTe().shutdownNow();

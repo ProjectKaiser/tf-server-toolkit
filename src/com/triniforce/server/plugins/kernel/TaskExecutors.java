@@ -29,7 +29,7 @@ public class TaskExecutors implements ITaskExecutors{
     
     public static int MAX_NORMAL_THREADS = 100;
 
-	Map<ExecutorKey, ThreadPoolExecutor> m_executors = new HashMap<ExecutorKey, ThreadPoolExecutor>();
+	Map<ExecutorKey, ExecutorService> m_executors = new HashMap<ExecutorKey, ExecutorService>();
 	Integer m_executed = 0;
 	
     public TaskExecutors() {
@@ -42,8 +42,8 @@ public class TaskExecutors implements ITaskExecutors{
         );
     }
 	
-	public ThreadPoolExecutor addExecutor(ExecutorKey executorKey,
-	        ThreadPoolExecutor executor) {
+	public ExecutorService addExecutor(ExecutorKey executorKey,
+			ExecutorService executor) {
 	    m_executors.put(executorKey, executor);
 	    return executor;
 	}
@@ -71,7 +71,7 @@ public class TaskExecutors implements ITaskExecutors{
     }
 
     public Future execute(ExecutorKey executorKey, InitFinitTask task) throws EExecutorNotFound{
-        ThreadPoolExecutor executor = m_executors.get(executorKey);
+    	ExecutorService executor = m_executors.get(executorKey);
         if(null == executor){
             throw new EExecutorNotFound(executorKey);
         }
@@ -83,14 +83,15 @@ public class TaskExecutors implements ITaskExecutors{
         return res;
     }
 
-    public ThreadPoolExecutor getExecutor(ExecutorKey key) {
+    public ExecutorService getExecutor(ExecutorKey key) {
         return m_executors.get(key);
     }
 
     public int getCompletedTasksCount() {
         int res = 0;
-        for(ThreadPoolExecutor es: m_executors.values()){
-            res += es.getCompletedTaskCount();
+        for(ExecutorService es: m_executors.values()){
+        	if(es instanceof ThreadPoolExecutor)
+        		res += ((ThreadPoolExecutor)es).getCompletedTaskCount();
         }
         return res;
     }

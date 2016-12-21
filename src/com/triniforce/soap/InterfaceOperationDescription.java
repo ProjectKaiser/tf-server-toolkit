@@ -44,6 +44,7 @@ public class InterfaceOperationDescription {
 	private String m_pkgPrefix;
 	private String m_name;
 	private List<NamedArg> m_args;
+	private List<Type> m_throws = new ArrayList<Type>();
 	private NamedArg m_result;
 	public String getName() {
 		return m_name;
@@ -84,9 +85,17 @@ public class InterfaceOperationDescription {
 		m_args.add(Math.min(pos, m_args.size()), new NamedArg(name, type));
 	}
 	
+	public void addThrow(Type v){
+		m_throws.add(v);
+	}
+	
 	@Override
 	public String toString() {
 		return m_name;
+	}
+
+	public List<Type> getThrows() {
+		return m_throws;
 	}
 	
 }

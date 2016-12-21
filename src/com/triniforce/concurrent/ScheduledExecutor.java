@@ -5,6 +5,11 @@
  */ 
 package com.triniforce.concurrent;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
@@ -20,30 +25,38 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.triniforce.server.srvapi.InitFinitTaskWrapper;
+import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ICheckInterrupted;
 
 
+@Deprecated
 public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledExecutorService, Runnable{
 
     public static final int EMPTY_TASK_QUEUE_TIMEOUT_MS = 1000 * 60;
 
     BlockingQueue<Cmd> m_commandQueue = new LinkedBlockingQueue<Cmd>();
     Queue<ScheduledExecutorTask> m_taskQueue = new PriorityQueue<ScheduledExecutorTask>();
-	private final Future<?> m_schedulerFuture; 
+	private final Future<?> m_schedulerFuture;
 
-    
+	private long m_maxDelay=0L;
+	private Long m_maxTaskDelayBorder = 5 * 60 * 1000L;
+
     abstract class Cmd implements Runnable{
                
     }
     
     class CmdExceptionOccured extends Cmd{
 
-        @Override
+        private ScheduledExecutorTask m_task;
+
+		@Override
         public void run() {
+        	ApiAlgs.getLog(ScheduledExecutor.class).error("Exception occured in " + getTaskName(m_task));
         }
         
         CmdExceptionOccured(ScheduledExecutorTask task){
-
+        	m_task = task;
         }
     }
     
@@ -56,9 +69,15 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
 
         @Override
         public void run() {
-        	if(null != m_task && m_task.calcNextStart()){
-        		m_taskQueue.add(m_task);
-        	}
+        	if(null == m_task)
+        		ApiAlgs.getLog(ScheduledExecutor.class).warn("task is null");
+        	else
+	        	if(m_task.calcNextStart()){
+	        		m_taskQueue.add(m_task);
+	        	}
+	        	else
+	        		ApiAlgs.getLog(ScheduledExecutor.class).warn("something wrong in calcNextStart()");
+        		
         }
     }
     
@@ -87,6 +106,7 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
 				}
 			}
 		}
+
 	}
     
     public static class MyThreadFactory implements ThreadFactory{
@@ -147,25 +167,56 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
     boolean internal_doIteration(){
         try {
             ScheduledExecutorTask t = m_taskQueue.poll();
+        	if(null == t){
+        		ApiAlgs.getLog(this).trace("All tasks in execution or end cycle");
+        	}
+        	
             long delayMs = (null == t) ? EMPTY_TASK_QUEUE_TIMEOUT_MS : t.getDelay(TimeUnit.MILLISECONDS); 
             if(delayMs > 0){
-                Cmd c = m_commandQueue.poll(delayMs, TimeUnit.MILLISECONDS);
-                if(null != c){
-                    //put task back
-                    if(null != t){
-                        m_taskQueue.add(t);
-                    }
-                    c.run();
-                    return true;
-                }
+            	if(delayMs > m_maxDelay)
+            		m_maxDelay = delayMs;
+            	
+            	if(null != t && delayMs > 2 * t.getDelayMs() ){
+            		reportAboutTooBigDelay(t, delayMs);
+            		
+            		Cmd c = new CmdScheduleTask(t);
+    				m_commandQueue.add(c);
+            		return true;
+            	}
+            	else{
+            		if(m_commandQueue.isEmpty() && (delayMs > m_maxTaskDelayBorder)){
+            			ApiAlgs.getLog(this).trace("Potentially too big delay for scheduler:" + delayMs);
+            		}
+            			
+            		
+	                Cmd c = m_commandQueue.poll(delayMs, TimeUnit.MILLISECONDS);
+	                if(null != c){
+	                    //put task back
+	                    if(null != t){
+	                        m_taskQueue.add(t);
+	                    }
+	                    
+	                    c.run();
+	                    return true;
+	                }
+            	}
             }
+            else{
+            	if(delayMs < -100)
+            		ApiAlgs.getLog(this).trace("Task wait too long for execution: " + delayMs);
+            }
+            
             if(null == t){
+            	ApiAlgs.getLog(this).warn("No task to execute");
+            	ApiAlgs.getLog(this).debug("No task to execute");
                 return true;
             }
             TaskWrapper tw = new  TaskWrapper(t);
+        	ApiAlgs.getLog(this).trace("Execution for task: " + getTaskName(t));
             try{
                 submit(tw);
             }catch(RejectedExecutionException re){
+            	ApiAlgs.getLog(this).info("Rejected task: " + getTaskName(t));
                 //put task back
                 m_taskQueue.add(t);
                 //wait for any command and put it back
@@ -177,17 +228,45 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
         } catch (InterruptedException e) {
             return false;
         } catch (RuntimeException r){
-            r.printStackTrace();
+        	ApiAlgs.getLog(this).error("Scheduler runtime error", r);
         }
         return true;
     }
     
-    @Override
+    void reportAboutTooBigDelay(ScheduledExecutorTask t, long delayMs) {
+    	ByteArrayOutputStream out = new ByteArrayOutputStream();
+    	PrintStream print = new PrintStream(out);
+    	SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault());
+    	print.printf("Task \'%s\' has too big delay: %dms, time to start: %s", getTaskName(t), delayMs, df.format(new Date(t.m_nextStartMs)));
+		ApiAlgs.getLog(this).info(out.toString());
+		
+	}
+
+	private String getTaskName(ScheduledExecutorTask t) {
+		Runnable rt = t.getRunnableTask();
+		String res;
+		if(rt instanceof InitFinitTaskWrapper){
+			res = ((InitFinitTaskWrapper) rt).getTaskName();
+		}
+		else
+			res = rt.getClass().getName();	
+		return res;
+	}
+
+	@Override
     public void run() {
         while(internal_doIteration());
     }
 
 	public Future<?> getSchedulerFuture() {
 		return m_schedulerFuture;
-	}    
+	}
+
+	public long getMaxDelay() {
+		return m_maxDelay;
+	}
+	
+	public void setMaxTaskDelayBorder(long value){
+		m_maxTaskDelayBorder = value;
+	} 
 }

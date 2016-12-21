@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import java.util.TimeZone;
 
 import com.triniforce.db.test.TFTestCase;
+import com.triniforce.soap.ESoap.EParameterizedException;
 import com.triniforce.soap.IDefLibrary.ITypeNameGenerator;
 import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
@@ -46,6 +47,7 @@ public class TypeDefLibCacheTest extends TFTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         m_parser = new ClassParser(this.getClass().getPackage());
+        m_parser.addNonParsedParent(EParameterizedException.class);
         m_lib = new TypeDefLibCache(m_parser);
         
         assertNotNull(m_lib.get(int.class));
@@ -152,7 +154,7 @@ public class TypeDefLibCacheTest extends TFTestCase {
     
     public void testClassDefLib(){
         HashMap<Type, TypeDef> clss = new HashMap<Type, TypeDef>();
-        ClassDefLib cLib = new TypeDefLibCache.ClassDefLib(m_parser, m_lib, clss, m_lib);
+        ClassDefLib cLib = new TypeDefLibCache.ClassDefLib(m_parser, m_lib, clss, m_lib);        
         ClassDef cd = (ClassDef) cLib.add(IA1.C1.class);
         assertNotNull(cd);
         assertSame(cd, cLib.add(IA1.C1.class));
@@ -164,6 +166,13 @@ public class TypeDefLibCacheTest extends TFTestCase {
         	PropDef p1 = res.getProp("val2");
         	assertNotNull(p1);
         	assertSame(p1.getType(), m_lib.get(Object.class));
+        }
+        {
+        	ClassDef res = (ClassDef) cLib.add(Err11.class);
+        	assertNull(res.getParentDef());
+        	
+        	assertEquals(0, res.getProps().size());
+
         }
     }
     
@@ -283,5 +292,12 @@ public class TypeDefLibCacheTest extends TFTestCase {
     public void testExtLib(){
     	TypeDef.ScalarDef res = (ScalarDef) m_lib.add(char.class);
     	assertNotNull(res);
+    }
+    
+    static class Err11 extends EParameterizedException{
+		public Err11(String message, Throwable cause, String subcode) {
+			super(null, null, null);
+		}
+		private static final long serialVersionUID = 1L;
     }
 }
