@@ -30,6 +30,7 @@ import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ICheckInterrupted;
 
 
+@Deprecated
 public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledExecutorService, Runnable{
 
     public static final int EMPTY_TASK_QUEUE_TIMEOUT_MS = 1000 * 60;
@@ -227,7 +228,7 @@ public class ScheduledExecutor extends ThreadPoolExecutor implements ScheduledEx
         } catch (InterruptedException e) {
             return false;
         } catch (RuntimeException r){
-            r.printStackTrace();
+        	ApiAlgs.getLog(this).error("Scheduler runtime error", r);
         }
         return true;
     }

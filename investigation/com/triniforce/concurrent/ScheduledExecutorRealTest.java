@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.utils.ICheckInterrupted;
 
+@Deprecated
 public class ScheduledExecutorRealTest extends TFTestCase {
 	
 	final int N_THREADS = 1000;

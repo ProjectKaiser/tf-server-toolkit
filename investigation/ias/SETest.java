@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import com.triniforce.concurrent.ScheduledExecutor;
 import com.triniforce.db.test.TFTestCase;
 
+@Deprecated
 public class SETest extends TFTestCase {
 
 	

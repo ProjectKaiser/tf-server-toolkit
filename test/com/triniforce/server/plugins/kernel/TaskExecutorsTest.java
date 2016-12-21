@@ -10,19 +10,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.server.srvapi.ITaskExecutors;
-import com.triniforce.server.srvapi.InitFinitTask;
 import com.triniforce.server.srvapi.ITaskExecutors.ExecutorKey;
 import com.triniforce.server.srvapi.ITaskExecutors.LongTaskExecutorKey;
 import com.triniforce.server.srvapi.ITaskExecutors.PeriodicalTaskExecutorKey;
 import com.triniforce.server.srvapi.ITaskExecutors.ShortTaskExecutorKey;
+import com.triniforce.server.srvapi.InitFinitTask;
 import com.triniforce.utils.ICheckInterrupted;
 
 public class TaskExecutorsTest extends TFTestCase {
@@ -148,7 +148,7 @@ public class TaskExecutorsTest extends TFTestCase {
         te.shutdownNow();
         te.awatTermination(1000);
         for(ExecutorKey key: te.executorKeys()){
-            ThreadPoolExecutor e = te.getExecutor(key);
+        	ExecutorService e = te.getExecutor(key);
             assertTrue(e.isTerminated());
         }
         assertEquals(2, te.getTasksCount());

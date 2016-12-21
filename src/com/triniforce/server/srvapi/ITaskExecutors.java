@@ -8,9 +8,9 @@ package com.triniforce.server.srvapi;
 
 import java.text.MessageFormat;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Intended to submit tasks periodically. If task with such key exists in internal map it is ignored.
@@ -25,7 +25,7 @@ public interface ITaskExecutors {
     
     Future execute(ExecutorKey executorKey, InitFinitTask task) throws RejectedExecutionException;
 	Set<ExecutorKey> executorKeys();
-	ThreadPoolExecutor getExecutor(ExecutorKey key);
+	ExecutorService getExecutor(ExecutorKey key);
 	void shutdownNow();
 	
 	int getCompletedTasksCount();

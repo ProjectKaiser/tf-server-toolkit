@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.triniforce.db.test.TFTestCase;
 
-
+@Deprecated
 public class ScheduledExecutorTest extends TFTestCase {
     
     @Override
@@ -55,7 +55,7 @@ public class ScheduledExecutorTest extends TFTestCase {
 				}
 			}, 0, 500, TimeUnit.MILLISECONDS);
         }
-        se.awaitTermination(200000L, TimeUnit.MILLISECONDS);
+        se.awaitTermination(2000L, TimeUnit.MILLISECONDS);
     }
     
     public void test2() throws InterruptedException{
