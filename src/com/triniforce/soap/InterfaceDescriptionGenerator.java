@@ -882,7 +882,7 @@ public class InterfaceDescriptionGenerator {
     		ep = ep.getCause();
     	}
     	
-    	return ep instanceof ESoap.EParameterizedException ? ep : throwable;
+    	return ep;
 	}
 
 	private Throwable getCause(Throwable throwable) {

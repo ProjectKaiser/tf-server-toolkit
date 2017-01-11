@@ -23,6 +23,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.ScheduledFuture;
 
 import org.joda.time.DateTimeZone;
 
@@ -1405,6 +1406,12 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	
 	public void setRunDPProcedure(boolean v){
 		m_bRunDPProcedures = v;
+	}
+
+
+	@Override
+	public ScheduledFuture<?> getPeriodicalTaskFeature(Class<?> clsTask) {
+		return m_ptExecutor.getTaskFeature(clsTask);
 	}
 
 }

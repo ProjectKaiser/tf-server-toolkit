@@ -30,6 +30,7 @@ public class SAXHandler {
         int      m_propIdx;
         Object[] m_props;
         private boolean m_bNull;
+		private String m_name;
         
         static final Object DEFAULT_OBJECT = new Object();
         
@@ -44,11 +45,13 @@ public class SAXHandler {
                 if(!objDef.isNullable())
                     throw new ESoap.ENonNullableObject(name, objDef.getType());
             }
-            else{
+            //else{
                 m_bNull = bNull;
                 
                 setType(objDef);
-            }
+            //}
+            m_name = name;
+            //m_objDef = objDef;
         }
 
         @SuppressWarnings("unchecked")
@@ -81,6 +84,9 @@ public class SAXHandler {
                     if(null != m_props)
                         res = m_props[0];
                 }
+            }
+            if(res == null && !m_objDef.isNullable()){
+            	throw new ESoap.ENonNullableObject(m_name, m_objDef.getType());
             }
             return res;
         }

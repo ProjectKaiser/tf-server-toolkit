@@ -207,6 +207,8 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         
         public static class Error_00543 extends Exception{
 			private static final long serialVersionUID = 1L;}
+        public static class Error_00544 extends Error_00543{
+			private static final long serialVersionUID = 1L;}
         void run7() throws Error_00543; 
     }
     
@@ -581,6 +583,10 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 			assertEquals("6757", e1.getTextContent());
 			
         	res = gen.serializeException(InterfaceDescriptionGenerator.soapenv, new TestSrv3.Error_00543(), desc2, "run7");
+        	gen.writeDocument(System.out, res);
+        	assertTrue((Boolean) xp.evaluate("/Envelope/Body/Fault/detail/Error_00543", res, XPathConstants.BOOLEAN));
+
+        	res = gen.serializeException(InterfaceDescriptionGenerator.soapenv, new ApiAlgs.RethrownException(new TestSrv3.Error_00544()), desc2, "run7");
         	gen.writeDocument(System.out, res);
         	assertTrue((Boolean) xp.evaluate("/Envelope/Body/Fault/detail/Error_00543", res, XPathConstants.BOOLEAN));
 			

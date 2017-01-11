@@ -27,6 +27,7 @@ import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.extensions.PKPlugin;
 import com.triniforce.server.plugins.kernel.BasicServer;
 import com.triniforce.server.plugins.kernel.IdDef;
+import com.triniforce.server.srvapi.DataPreparationProcedure;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.IIdDef;
@@ -47,6 +48,7 @@ public static class DPPProcPlugin extends PKPlugin{
         }
     
         public void doRegistration(ISORegistration reg) throws EDBObjectException {
+        	reg.registerDataPreparationProcedure(new DataPreparationProcedure(getClass().getName(), ""));
         }
     
         public String[] getDependencies() {
@@ -86,6 +88,10 @@ public static class DPPProcPlugin extends PKPlugin{
         }
 
         public void doExtensionPointsRegistration() {
+        }
+        
+        public void run(){
+        	
         }
     }
 	

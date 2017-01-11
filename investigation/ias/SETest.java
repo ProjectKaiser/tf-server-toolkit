@@ -5,9 +5,14 @@
  */
 package ias;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import com.triniforce.concurrent.ScheduledExecutor;
 import com.triniforce.db.test.TFTestCase;
 
 @Deprecated
@@ -60,21 +65,44 @@ public class SETest extends TFTestCase {
 	
 	@Override
 	public void test() throws Exception {
-		ScheduledExecutor se = new ScheduledExecutor(8, 8);
-		for(int i=0; i<4; i++)
-			se.scheduleWithFixedDelay(new Task1(20L), 100, 100, TimeUnit.MILLISECONDS);
-		for(int i=0; i<4; i++)
-			se.scheduleWithFixedDelay(new Task2(40L), 200, 200, TimeUnit.MILLISECONDS);
-		for(int i=0; i<4; i++)
-			se.scheduleWithFixedDelay(new Task3(80L), 300, 300, TimeUnit.MILLISECONDS);
-		for(int i=0; i<4; i++)
-			se.scheduleWithFixedDelay(new Task4(60L), 2000, 2000, TimeUnit.MILLISECONDS);
+		ScheduledExecutorService se = Executors.newScheduledThreadPool(8, new ThreadFactory(){
+        	int num = 0;
 
-		Thread.sleep(5 * 1000);
+			@Override
+			public Thread newThread(Runnable r) {
+				return new Thread(r, "scheduler" + num++);
+			}
+        	
+        });
+		List<ScheduledFuture> feats = new ArrayList<ScheduledFuture>();
+		
+		for(int i=0; i<4; i++)
+			feats.add(se.scheduleWithFixedDelay(new Task1(20L), 100, 100, TimeUnit.MILLISECONDS));
+		for(int i=0; i<4; i++)
+			feats.add(se.scheduleWithFixedDelay(new Task2(40L), 200, 200, TimeUnit.MILLISECONDS));
+		for(int i=0; i<4; i++)
+			feats.add(se.scheduleWithFixedDelay(new Task3(80L), 300, 300, TimeUnit.MILLISECONDS));
+		for(int i=0; i<4; i++)
+			feats.add(se.scheduleWithFixedDelay(new Task4(60L), 2000, 2000, TimeUnit.MILLISECONDS));
+
+		for(int i = 0 ; i< 500; i++){
+			int canceled = 0, done=0;
+			
+			for (ScheduledFuture scheduledFuture : feats) {
+				if(scheduledFuture.isCancelled())
+					canceled ++;
+				if(scheduledFuture.isDone())
+					done ++;
+				trace("delay: " + scheduledFuture.getDelay(TimeUnit.MILLISECONDS));
+				
+			}
+			trace("Cancelled: " + canceled + ", done: " + done);
+			Thread.sleep(1000);
+		}
+		
+		
 		se.shutdownNow();
 		assertTrue(se.awaitTermination(1000, TimeUnit.MILLISECONDS));
-		
-		trace("Max delay : " + se.getMaxDelay());
 
 	}
 }

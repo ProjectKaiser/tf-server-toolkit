@@ -8,6 +8,7 @@ package com.triniforce.server.srvapi;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 
 import com.triniforce.db.ddl.TableDef.EReferenceError;
 import com.triniforce.extensions.IPKRootExtensionPoint;
@@ -127,7 +128,8 @@ public interface IBasicServer extends IPKRootExtensionPoint {
      * @return
      */
     IService.State queryServiceState(long id);
-  
+ 
+    ScheduledFuture<?> getPeriodicalTaskFeature(Class<?> clsTask);
 }
 
 

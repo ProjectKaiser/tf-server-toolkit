@@ -5,8 +5,11 @@
  */
 package com.triniforce.server.plugins.kernel;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
@@ -21,6 +24,7 @@ import com.triniforce.utils.IFinitable;
 public class PeriodicalTasksExecutor implements IFinitable {
 
     private final TaskExecutors m_te = new TaskExecutors();
+    Map<Class, ScheduledFuture> m_periodicalTasks = new HashMap<Class, ScheduledFuture>();
 
     public PeriodicalTasksExecutor(){
     }
@@ -76,8 +80,10 @@ public class PeriodicalTasksExecutor implements IFinitable {
     public void scheduleWithFixedDelay(BasicPeriodicalTask command,
             long initialDelay, long delay, TimeUnit unit) {
         ScheduledExecutorService spe = (ScheduledExecutorService) getTe().getExecutor(ITaskExecutors.periodicalTaskExecutorKey);
-        spe.scheduleWithFixedDelay(new PeriodicalTaskWrapper(command),
+        ScheduledFuture<?> feature = spe.scheduleWithFixedDelay(new PeriodicalTaskWrapper(command),
                 initialDelay, delay, unit);
+        m_periodicalTasks.put(command.getClass(), feature);
+
     }
 
     public static final int TASKS_TIMEOUT_MS = 1000 * 30;
@@ -100,5 +106,8 @@ public class PeriodicalTasksExecutor implements IFinitable {
     public ITaskExecutors getTe() {
         return m_te;
     }
+	public ScheduledFuture<?> getTaskFeature(Class clsCmd) {
+		return m_periodicalTasks.get(clsCmd);
+	}
 
 }

@@ -22,6 +22,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import com.triniforce.db.test.TFTestCase;
+import com.triniforce.soap.ESoap.ENonNullableObject;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
 import com.triniforce.soap.SAXHandler.CurrentObject;
 import com.triniforce.soap.SoapHandlerTest.IService.Cls2;
@@ -263,7 +264,7 @@ public class SoapHandlerTest extends TFTestCase {
             assertEquals(new QName("anything").toString(), e.getMessage());
         }
         
-        assertNull(obj.toObject());
+//        assertNull(obj.toObject());
         
         obj.setStringValue("672742");
         assertEquals(672742, obj.toObject());
@@ -407,6 +408,16 @@ public class SoapHandlerTest extends TFTestCase {
         entry.setValue("value");
         obj.setPropValue(entry);
         
+        {
+        	obj = new CurrentObject(qn, lib.add(int.class));
+        	try{
+        		obj.toObject();
+        		fail();
+        	}
+        	catch( ENonNullableObject e){
+        		
+        	}
+        }
         
     }
 
@@ -851,7 +862,7 @@ public class SoapHandlerTest extends TFTestCase {
         "  <soap:Body>"+
         "    <method1 xmlns=\"http://tempuri.org/\">"+
         "      <arg1>s=\"a&gt;&lt;b\"</arg1>"+
-        "      <arg0></arg0>"+
+        "      <arg0>1</arg0>"+
         "    </method1>"+
         "  </soap:Body>"+
         "</soap:Envelope>";
@@ -864,7 +875,7 @@ public class SoapHandlerTest extends TFTestCase {
         "  <soap:Body>"+
         "    <method1 xmlns=\"http://tempuri.org/\">"+
         "      <arg1>a\nb\nc</arg1>"+
-        "      <arg0></arg0>"+
+        "      <arg0>2</arg0>"+
         "    </method1>"+
         "  </soap:Body>"+
         "</soap:Envelope>";
@@ -876,7 +887,7 @@ public class SoapHandlerTest extends TFTestCase {
         "  <soap:Body>"+
         "    <method1 xmlns=\"http://tempuri.org/\">"+
         "      <arg1>a\n>\r\nb</arg1>"+
-        "      <arg0></arg0>"+
+        "      <arg0>3</arg0>"+
         "    </method1>"+
         "  </soap:Body>"+
         "</soap:Envelope>";
@@ -894,6 +905,7 @@ public class SoapHandlerTest extends TFTestCase {
         assertEquals("a\n>\nb", res.m_args[1]);
         
         assertEquals("         a        ", deserialize(gen, desc,"         a        "));
+        assertEquals("", deserialize(gen, desc,""));
 
     }
 
@@ -908,7 +920,7 @@ public class SoapHandlerTest extends TFTestCase {
 	        "  <soap:Body>"+
 	        "    <method1 xmlns=\"http://tempuri.org/\">"+
 	        "      <arg1>%s</arg1>"+
-	        "      <arg0></arg0>"+
+	        "      <arg0>6</arg0>"+
 	        "    </method1>"+
 	        "  </soap:Body>"+
 	        "</soap:Envelope>", string);
