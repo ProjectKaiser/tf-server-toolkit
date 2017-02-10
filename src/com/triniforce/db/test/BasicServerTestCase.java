@@ -48,7 +48,7 @@ public static class DPPProcPlugin extends PKPlugin{
         }
     
         public void doRegistration(ISORegistration reg) throws EDBObjectException {
-        	reg.registerDataPreparationProcedure(new DataPreparationProcedure(getClass().getName(), ""));
+        	reg.registerDataPreparationProcedure(new DataPreparationProcedure());
         }
     
         public String[] getDependencies() {
