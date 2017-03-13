@@ -5,38 +5,50 @@
  */
 package com.triniforce.db.test;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.triniforce.utils.ApiAlgs;
+
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
-import org.apache.commons.logging.Log;
-
-import com.triniforce.db.test.TFTestCase.TestLogFactory;
-import com.triniforce.utils.ApiAlgs;
-
 public class TFTestCaseTest2 extends TestCase {
 
-	public void testLogFactory() {
-		new TFTestCase();
-		TestLogFactory lf = new TFTestCase.TestLogFactory();
-		Log log = lf.getInstance(getName());
-		assertEquals(0, lf.getErrorCount());
+	public void testLogFactory() throws Exception {
+		TFTestCase test = new TFTestCase(){
+			@Override
+			public void test() throws Exception {
+				Log log = LogFactory.getFactory().getInstance(TFTestCaseTest2.class);
+				log.error("this is an error 1");
+			}
+		};
+		test.setUp();
+		assertEquals(0, test.getErrorCount());
+		
 
-		log.error("this is an error 1");
-		log.error("this is an error 2");
-		log.error("this is an error 3");
+		test.test();
+		test.test();
+		test.test();
+//		log.error("this is an error 1");
+//		log.error("this is an error 2");
+//		log.error("this is an error 3");
 
-		assertEquals(3, lf.getErrorCount());
+		assertEquals(3, test.getErrorCount());
 
-		log.error("err4", new Exception());
+		test.test();
+//		log.error("err4", new Exception());
 
-		assertEquals(4, lf.getErrorCount());
+		assertEquals(4, test.getErrorCount());
 
-		lf.bCountErrors = false;
+		test.countErrorLogs(false);
 
-		log.error("this is an error 5");
-		log.error("this is an error 6", new Exception());
+		test.test();
+		test.test();
+//		log.error("this is an error 5");
+//		log.error("this is an error 6", new Exception());
 
-		assertEquals(4, lf.getErrorCount());
+		assertEquals(4, test.getErrorCount());
 
 	}
 
@@ -65,18 +77,5 @@ public class TFTestCaseTest2 extends TestCase {
 		ApiAlgs.getLog(this).error("reason to throw No2");
 		test.tearDown();
 
-	}
-
-	public void testLL() throws InterruptedException {
-		new TFTestCase();
-		// LogFactory.FACTORY_PROPERTY = TestLogFactory.class.getName();
-		Thread t = new Thread() {
-			@Override
-			public void run() {
-				ApiAlgs.getLog(this).error("my error");
-			}
-		};
-		t.start();
-		t.join();
 	}
 }

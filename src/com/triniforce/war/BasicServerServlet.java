@@ -57,6 +57,7 @@ public class BasicServerServlet extends SOAPServlet {
 	List<IPlugin> m_plugins = new ArrayList<IPlugin>();
 	IPooledConnection m_pool;
 	private BasicServer m_server;
+	private BasicDataSource m_ds;
 	
 	public BasicServerServlet() {
 		super("http://soap.tftool.untill.eu/", "tftool", BasicServerServlet.class.getPackage());
@@ -90,17 +91,16 @@ public class BasicServerServlet extends SOAPServlet {
 			}catch(NamingException e){
 			}
 
-			BasicDataSource ds;
 			try{
-				ds = (BasicDataSource)envContext.lookup(DATABASE);
+				m_ds = (BasicDataSource)envContext.lookup(DATABASE);
 			}catch(NamingException e){
 				Properties props = new Properties();
 				props.put("driverClassName", "org.apache.derby.jdbc.EmbeddedDriver");
 				File fDb = new File(homeFolder, "DB");
 				props.put("url", "jdbc:derby:"+fDb.getAbsolutePath()+";create=true");
-				ds = (BasicDataSource) BasicDataSourceFactory.createDataSource(props);
+				m_ds = (BasicDataSource) BasicDataSourceFactory.createDataSource(props);
 			}
-			m_pool = new TFPooledConnection(ds, MAX_ACTIVE_CONNECTIONS);
+			m_pool = new TFPooledConnection(m_ds, MAX_ACTIVE_CONNECTIONS);
 		} catch (NamingException e) {
 			ApiAlgs.rethrowException(e);
 		} catch (Exception e) {
@@ -189,6 +189,13 @@ public class BasicServerServlet extends SOAPServlet {
 			super.doGet(request, response);
 		else
 			TFUtils.copyStream(getClass().getResourceAsStream("bs.htm"), response.getOutputStream());
+	}
+	
+	@Override
+	public void destroy() {
+		m_server.stopAndFinit();
+
+		super.destroy();
 	}
 
 }

@@ -58,23 +58,27 @@ public class BasicServerServletTest extends TFTestCase {
 		BasicServerServlet srv = new BasicServerServlet();
 		ServletConfig cfg = Mockito.mock(ServletConfig.class);
 		srv.init(cfg);
-		
-		assertNotNull(srv.getService());
-		
-		InterfaceDescription desc = srv.getInterfaceDescription();
-		assertNotNull(desc.getOperation("testpkg_method_001"));
-//		assertEquals("testpkg_method_001", ops.get(0).getName());
-		
-        assertEquals( "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":null}",
-        		exec(srv, "{\"jsonrpc\":\"2.0\",\"method\":\"testpkg_method_001\",\"params\":[],\"id\":1}"));
-		
-//		Mockito.verify(TestEP.p1).method_001();
-		
-		JSONParser p = new JSONParser();
-		
-		String resp = exec(srv, "{\"jsonrpc\":\"2.0\",\"method\":\"testpkg_method_002\",\"params\":[],\"id\":1}");
-		JSONObject obj = (JSONObject) p.parse(resp);
-		new Date((Long) obj.get("result"));
+		try{
+			assertNotNull(srv.getService());
+			
+			InterfaceDescription desc = srv.getInterfaceDescription();
+			assertNotNull(desc.getOperation("testpkg_method_001"));
+	//		assertEquals("testpkg_method_001", ops.get(0).getName());
+			
+	        assertEquals( "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":null}",
+	        		exec(srv, "{\"jsonrpc\":\"2.0\",\"method\":\"testpkg_method_001\",\"params\":[],\"id\":1}"));
+			
+	//		Mockito.verify(TestEP.p1).method_001();
+			
+			JSONParser p = new JSONParser();
+			
+			String resp = exec(srv, "{\"jsonrpc\":\"2.0\",\"method\":\"testpkg_method_002\",\"params\":[],\"id\":1}");
+			JSONObject obj = (JSONObject) p.parse(resp);
+			new Date((Long) obj.get("result"));
+		}
+		finally{
+			srv.destroy();
+		}
 		
 		{
 			
@@ -83,6 +87,7 @@ public class BasicServerServletTest extends TFTestCase {
 			sc.unbind("tftoolDb");
 			BasicServerServlet srv2 = new BasicServerServlet();
 			srv2.init(cfg);
+			srv2.destroy();
 			
 		}
 	}

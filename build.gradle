@@ -54,7 +54,6 @@ dependencies {
 	compile 'commons-logging:commons-logging:1.1.1'
 
 	compile(group: 'log4j', name: 'log4j', version: '1.2.16')
-	compile(group: 'net.sourceforge.jtds', name: 'jtds', version: '1.2.4')
 	compile(group: 'org.beanshell', name: 'bsh', version: '2.0b4')
 	compile(group: 'org.dbunit', name: 'dbunit', version: '2.4.9'){
 		 exclude group: 'junit', module: 'junit'
@@ -73,9 +72,9 @@ dependencies {
 	compile 'org.apache.poi:poi:3.10.1'
 
 	compile 'org.apache.httpcomponents:httpclient:4.3.6'
-	
 
-	testCompile 'org.firebirdsql.jdbc:jaybird-jdk16:2.2.4'
+	testCompile 'net.sourceforge.jtds:jtds:1.2.4'
+    	testCompile 'org.firebirdsql.jdbc:jaybird-jdk16:2.2.4'
 	testCompile(group: 'junit', name: 'junit', version: '3.8.2', force: true)
 	testCompile(group: 'mysql', name: 'mysql-connector-java', version: '5.1.16')
 	testCompile 'com.google.guava:guava:19.0-rc2'

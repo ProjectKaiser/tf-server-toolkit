@@ -15,15 +15,13 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.UUID;
 
-import junit.framework.TestCase;
-import net.sf.sojo.common.CompareResult;
-import net.sf.sojo.common.ObjectUtil;
-
 import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogConfigurationException;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.spi.LoggingEvent;
 
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.server.plugins.kernel.IdDef;
@@ -34,120 +32,14 @@ import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.TFUtils;
 
+import junit.framework.TestCase;
+import net.sf.sojo.common.CompareResult;
+import net.sf.sojo.common.ObjectUtil;
+
 /**
  * Installs ILogger interface
  */
 public class TFTestCase extends TestCase {
-	
-	public static class TestLogFactory extends org.apache.commons.logging.impl.LogFactoryImpl{
-
-		private int m_errCount=0;
-		public boolean bCountErrors=true;
-
-		public int getErrorCount() {
-			return m_errCount;
-		}
-		
-		public static class TestLog implements Log {
-
-			private TestLogFactory m_lf;
-			private Log m_log;
-
-			public TestLog(TestLogFactory factory, Log log) {
-				m_log = log;
-				m_lf = factory;
-			}
-
-			public void debug(Object arg0) {
-				m_log.debug(arg0);
-			}
-
-			public void debug(Object arg0, Throwable arg1) {
-				m_log.debug(arg0, arg1);
-			}
-
-			public void error(Object arg0) {
-				if(m_lf.bCountErrors){
-					m_lf.m_errCount++;
-					m_log.error(arg0);
-				}
-				else
-					trace(arg0);
-			}
-			
-			public void error(Object arg0, Throwable arg1) {
-				if(m_lf.bCountErrors){
-					m_lf.m_errCount++;
-					m_log.error(arg0, arg1);
-				}
-				else 
-					trace(arg0, arg1);
-			}
-
-			public void fatal(Object arg0) {
-				m_log.fatal(arg0);
-			}
-
-			public void fatal(Object arg0, Throwable arg1) {
-				m_log.fatal(arg0, arg1);
-			}
-
-			public void info(Object arg0) {
-				m_log.info(arg0);
-			}
-
-			public void info(Object arg0, Throwable arg1) {
-				m_log.info(arg0, arg1);
-			}
-
-			public boolean isDebugEnabled() {
-				return m_log.isDebugEnabled();
-			}
-
-			public boolean isErrorEnabled() {
-				return m_log.isErrorEnabled();
-			}
-
-			public boolean isFatalEnabled() {
-				return m_log.isFatalEnabled();
-			}
-
-			public boolean isInfoEnabled() {
-				return m_log.isInfoEnabled();
-			}
-
-			public boolean isTraceEnabled() {
-				return m_log.isTraceEnabled();
-			}
-
-			public boolean isWarnEnabled() {
-				return m_log.isWarnEnabled();
-			}
-
-			public void trace(Object arg0) {
-				m_log.trace(arg0);
-			}
-
-			public void trace(Object arg0, Throwable arg1) {
-				m_log.trace(arg0, arg1);
-			}
-
-			public void warn(Object arg0) {
-				m_log.warn(arg0);
-			}
-
-			public void warn(Object arg0, Throwable arg1) {
-				m_log.warn(arg0, arg1);
-			}
-
-		}
-		
-		@Override
-		public Log getInstance(String arg0) throws LogConfigurationException {
-			return new TestLog(this, super.getInstance(arg0));
-		}
-		
-	}
 
     public final static String TF_TEST_FOLDER_EX = "TRINIFORCE_TEST_FOLDER";
     public final static String TOOLKIT_TEST_FOLDER = "TF_SERVER_TOOLKIT_TEST_FOLDER";
@@ -256,24 +148,56 @@ public class TFTestCase extends TestCase {
         return getTestProperties().getProperty(key, def);
     }
 
-	private TestLogFactory m_testLF;    
+	private LogFactory m_testLF;    
 
     protected int m_apiStackCnt;
     
-    static boolean log4jConfigured = false;
+	private static ErrorCounter errCounter;
+    
+    protected static boolean log4jConfigured = false;
+    
+    public class ErrorCounter extends AppenderSkeleton{
+        protected int m_errorCnt = 0;
+        protected boolean bCountErrors = true;
+
+
+		@Override
+		public void close() {
+		}
+
+		@Override
+		public boolean requiresLayout() {
+			return false;
+		}
+
+		@Override
+		protected void append(LoggingEvent event) {
+			if(event.getLevel().isGreaterOrEqual(Level.ERROR) && bCountErrors){
+				m_errorCnt ++;
+			}
+		}
+    	
+    } 
     
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         
-        if(! log4jConfigured){
+//        if(! log4jConfigured){
             PropertyConfigurator.configure(new File(TFTestCase.getTfTestFolder(), LOG4J_FILE).toString());
+            
+            errCounter = new ErrorCounter();
+            Logger.getRootLogger().addAppender(errCounter);
             log4jConfigured = true;
-        }
+//        }
+        
+        errCounter.m_errorCnt = 0;
+        errCounter.bCountErrors = true;
         
         m_apiStackCnt = ApiStack.getThreadApiContainer().getStack().size();
         Api api = new Api();
-        m_testLF = new TestLogFactory();
+//        m_testLF = new TestLogFactory();
+        m_testLF = LogFactory.getFactory();
         api.setIntfImplementor(LogFactory.class, m_testLF);
         api.setIntfImplementor(IDatabaseInfo.class, DBTestCase.getDbInfo());
         api.setIntfImplementor(IIdDef.class, new IdDef(ColumnType.LONG));
@@ -327,7 +251,7 @@ public class TFTestCase extends TestCase {
     protected void checkResources(){
         assertEquals("ApiStack damaged", m_apiStackCnt, ApiStack.getThreadApiContainer().getStack()
                 .size());        
-        assertEquals("log errors in test", m_expectedLogErrorCount, m_testLF.getErrorCount());        
+        assertEquals("log errors in test", m_expectedLogErrorCount, getErrorCount());        
     }
     
     @Override
@@ -366,11 +290,11 @@ public class TFTestCase extends TestCase {
     }
 
 	public void countErrorLogs(boolean bCount) {
-		m_testLF.bCountErrors = bCount;
+		errCounter.bCountErrors = bCount;
 	}
 
 	public boolean isCountErrorLogs() {
-		return m_testLF.bCountErrors;
+		return errCounter.bCountErrors;
 	}
 	
 	public static final BasicDataSource getDataSource(){
@@ -397,6 +321,10 @@ public class TFTestCase extends TestCase {
 			DATA_SOURCE.close();
 			DATA_SOURCE = null;
 		}
+	}
+
+	public int getErrorCount() {
+		return errCounter.m_errorCnt;
 	}
 
 }

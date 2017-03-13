@@ -51,6 +51,7 @@ public class TFUtilsLogsTest extends TFTestCase {
             TFUtilsLogs.configureLog("", this.getClass(), "");
             fail();
         } catch(RuntimeException e){}
+        log4jConfigured = false;
         
         File fTest = getTmpFolder(this);
         {
