@@ -64,6 +64,7 @@ public class MiscDbTest extends DBTestCase {
         System.out.println(sel);
         
         {//select {fn Upper("max")}       
+        	trace(sel.toString());
             PreparedStatement stmt = getConnection().prepareStatement(sel.toString());
             stmt.setString(1, "max".toUpperCase());
             ResultSet rs = stmt.executeQuery();

@@ -130,6 +130,8 @@ public class DBTestCase extends TFTestCase {
             res = UpgradeRunner.DbType.HSQL;
         else if (url.startsWith("jdbc:h2:"))
             res = UpgradeRunner.DbType.H2;        
+        else if (url.startsWith("jdbc:sqlserver"))
+            res = UpgradeRunner.DbType.MSSQL;        
         
 
         return res;
