@@ -18,12 +18,12 @@ public class IReporterTest extends TestCase {
     @Override    
     protected void setUp() throws Exception {
         super.setUp();
-        rep = IReporter.Helper.push(context);
+        rep = IReporterHelper.push(context);
     }
 
     @Override
     protected void tearDown() throws Exception {
-        IReporter.Helper.pop();
+        IReporterHelper.pop();
         super.tearDown();
     }
     
@@ -77,8 +77,8 @@ public class IReporterTest extends TestCase {
             }}
         );
         
-        IReporter.Helper.report("MyFile", "MyPos", "");
-        IReporter.Helper.report("MyFile", "MyPos2", null);
+        IReporterHelper.report("MyFile", "MyPos", "");
+        IReporterHelper.report("MyFile", "MyPos2", null);
         rep.report("MyFile", "MyPos3", 123L);
         rep.report("MyFile", "MyPos4", new MyClass().setName("probe"));        
         
