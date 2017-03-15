@@ -1,4 +1,4 @@
-ext.tf_version = '50.0'
+ext.tf_version = '51.0'
 ext.tf_release = false
 ext.tf_vendor = 'Triniforce.com'
 
