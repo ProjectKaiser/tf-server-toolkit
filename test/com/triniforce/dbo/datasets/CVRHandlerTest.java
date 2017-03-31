@@ -108,7 +108,7 @@ public class CVRHandlerTest extends TFTestCase {
 		public Object exec(Object value) {
 			return counter++;
 		}
-	}
+	}	
 	
 	static Object testSrc[][] = {
 			{1, "string_01", 99.99}, 
@@ -118,6 +118,25 @@ public class CVRHandlerTest extends TFTestCase {
 			{5, "string_06", 59.99},
 			{6, "string_06", 29.99},
 			{7, "string_06", 59.99}};
+	
+	static double test_discounts[] = {
+			0.3,
+			0.15,
+			0.16,
+			0.20,
+			0.22,
+			0.21,
+			0.23
+	};
+	
+	static class TestFun1 extends FieldFunction{
+		
+		@Override
+		public Object exec(Object value) {			
+			return test_discounts[((Number)value).intValue()-1];
+		}
+		
+	} 
 
 	public static  IResSet getRS() {
 		return new BasicResSet(){
@@ -327,6 +346,36 @@ public class CVRHandlerTest extends TFTestCase {
 			assertEquals(4, res.getObject(1));
 			assertTrue(res.next());
 			assertEquals(5, res.getObject(1));
+		}
+	}
+	
+	public void testOrderFilterByFF(){
+		CVRHandler h = new CVRHandler();
+		RSFlags flags = new ICVRHandler.RSFlags(DSMetadata.CAN_SORT | DSMetadata.CAN_FILTER);
+
+		{ // Order by FF
+			CollectionViewRequest req = new CollectionViewRequest();
+			req.setColumns(Arrays.asList("idx", "name", "price"));
+			req.getFunctions().add(new FieldFunctionRequest("idx", TestFun1.class.getName(), "testing_discount"));
+			req.getOrderBy().add("testing_discount");
+			IResSet res = h.process(getRS(), flags, req, Arrays.asList((FieldFunction)new TestFun1()));
+			List<Integer> ids = new ArrayList<Integer>();
+			while(res.next()){
+				ids.add((Integer) res.getObject("idx"));
+			}
+			assertEquals(Arrays.asList(2,3,4,6,5,7,1), ids);
+		}
+		{ // Filter by FF
+			CollectionViewRequest req = new CollectionViewRequest();
+			req.setColumns(Arrays.asList("idx", "name", "price"));
+			req.getFunctions().add(new FieldFunctionRequest("idx", TestFun1.class.getName(), "testing_discount"));
+			req.getWhere().put("testing_discount", 0.20);
+			IResSet res = h.process(getRS(), flags, req, Arrays.asList((FieldFunction)new TestFun1()));
+			List<Integer> ids = new ArrayList<Integer>();
+			while(res.next()){
+				ids.add((Integer) res.getObject("idx"));
+			}
+			assertEquals(Arrays.asList(4), ids);
 		}
 	}
 	
