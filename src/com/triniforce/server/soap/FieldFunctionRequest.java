@@ -14,7 +14,7 @@ import com.triniforce.utils.IName;
 /**
  * This class is used by CollectionViewRequest
  */
-@PropertiesSequence( sequence = {"functionName", "fieldName", "resultName"})
+@PropertiesSequence( sequence = {"functionName", "fieldName", "resultName", "params"})
 public class FieldFunctionRequest {
     protected String m_fieldName;
     protected String m_resultName;
