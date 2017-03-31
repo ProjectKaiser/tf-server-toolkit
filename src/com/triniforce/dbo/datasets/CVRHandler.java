@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.triniforce.db.dml.IResSet;
 import com.triniforce.extensions.IPKExtension;
@@ -148,15 +149,18 @@ public class CVRHandler implements ICVRHandler {
 	
 	public IResSet process(IResSet rs, RSFlags flags, CollectionViewRequest req, List<FieldFunction> ffs){
 		List<String> resColumns = new ArrayList<String>(req.getColumns());
+		List<String> ffResColumns = new ArrayList<String>();
 		for (FieldFunctionRequest ffReq : req.getFunctions()) {
-			resColumns.add(getFFResName(ffReq));	
+			ffResColumns.add(getFFResName(ffReq));
 		}
+		resColumns.addAll(ffResColumns);
+		
 		
 		List<WhereExpr> where = (List<WhereExpr>) getWhereExprs(req);
-		if(isFilterNeeded(flags, where)){
+		if(isFilterNeeded(flags, where, req.getWhere().keySet(), ffResColumns)){
 			rs = filter(rs, where, req.getFunctions(), ffs);
 		}
-		if(isOrderNeeded(flags, req.getOrderBy())){
+		if(isOrderNeeded(flags, req.getOrderBy(), ffResColumns)){
 			rs = order(rs, req.getOrderBy(), req.getFunctions(), ffs);
 		}
 		
@@ -189,8 +193,8 @@ public class CVRHandler implements ICVRHandler {
 		return res;
 	}
 
-	private boolean isFilterNeeded(RSFlags flags, List<WhereExpr> where) {
-		return !(flags.m_bFilter || where.isEmpty());
+	private boolean isFilterNeeded(RSFlags flags, List<WhereExpr> where, Set<String> whereKeys, List<String> ffResColumns) {
+		return (!(flags.m_bFilter || where.isEmpty())) || intersects(whereKeys, ffResColumns);
 		
 	}
 
@@ -198,8 +202,16 @@ public class CVRHandler implements ICVRHandler {
 		return (!rsColumns.equals(reqColumns)) || (0!=req.getStartFrom() || 0!=req.getLimit());
 	}
 
-	private boolean isOrderNeeded(RSFlags flags, List<Object> orderBy) {
-		return !(flags.m_bSort | orderBy.isEmpty());
+	private boolean isOrderNeeded(RSFlags flags, List<Object> orderBy, List<String> ffResColumns) {
+		return (!(flags.m_bSort | orderBy.isEmpty())) || intersects(orderColumns(orderBy), ffResColumns);
+	}
+
+	private boolean intersects(Collection<String> list1, Collection<String> list2) {
+		for (String l2 : list2) {
+			if(list1.contains(l2))
+				return true;
+		}
+		return false;
 	}
 
 	public List<FieldFunction> initFieldFunctions(CollectionViewRequest req) {
