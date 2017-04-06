@@ -32,7 +32,7 @@ import com.triniforce.utils.TFUtils;
  *  Variant 1
  *  
  *  OlEvalCVRConvertor conv = new OlEvalCVRConvertor(CollectionViewRequest cvr);
- *  OlEval f = conv.getOlFilter();
+ *  OlEval f = conv.getOlEval();
  *  
  *  Variant 2
  *  
@@ -40,7 +40,7 @@ import com.triniforce.utils.TFUtils;
  *  conv.addWhereExpr(WhereExpr expr);
  *  conv.addEquals(String name, Object value);
  *  ...
- *  OlFilter f = conv.getOlEval();
+ *  OlEval f = conv.getOlEval();
  * </pre>
  *  
  * 
