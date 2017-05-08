@@ -74,7 +74,9 @@ public class SelectRequest {
     }
 
     public void setOrderBy(Object[] orderBy) {
-        m_cvr.setOrderBy(Arrays.asList(orderBy));
+    	if(null != orderBy){
+    		m_cvr.setOrderBy(Arrays.asList(orderBy));
+    	}
     }
 
 	public Object[] getArgs() {
