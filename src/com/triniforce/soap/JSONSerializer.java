@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Stack;
 
 import net.sf.sojo.core.UniqueIdGenerator;
@@ -23,10 +24,13 @@ import org.json.simple.parser.ContentHandler;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.triniforce.soap.InterfaceDescription.MessageDef;
+import com.triniforce.soap.InterfaceDescription.Operation;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
 import com.triniforce.soap.JSONSerializer.KeyFinder.Element.Type;
 import com.triniforce.soap.SAXHandler.CurrentObject;
 import com.triniforce.soap.TypeDef.ScalarDef;
+import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.utils.ApiAlgs;
 
 public class JSONSerializer {
@@ -151,7 +155,26 @@ public class JSONSerializer {
 	}
 	
 	public void serialize(InterfaceDescription desc, SOAPDocument soap, OutputStream out) throws IOException{
-		JsonRpc obj = new JsonRpcMessage("2.0", soap.m_method, soap.m_args, 1);
+		Operation op = desc.getOperation(soap.m_method);
+		MessageDef mdef = soap.m_bIn ? op.getRequestType() : op.getResponseType();
+		List<PropDef> props = mdef.getProps();
+		if(props.size() != soap.m_args.length){
+			throw new ESoap.EWrongArgumentNumber(soap.m_method);
+		}
+		Object[] mobj = new Object[soap.m_args.length];
+		int i =0 ;
+		for(PropDef pd : props){
+			Object value;
+			if(pd.getRawType().equals(java.util.Date.class.getName())){
+				value = ((ScalarDef)pd.getType()).stringValue(soap.m_args[i]);
+			}
+			else{
+				value = soap.m_args[i];
+			}
+			mobj[i] = value;
+			i++;
+		}
+		JsonRpc obj = new JsonRpcMessage("2.0", soap.m_method, mobj, 1);
 		serializeObject(obj, out);
 	}
 	

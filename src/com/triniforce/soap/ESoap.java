@@ -105,5 +105,13 @@ public class ESoap {
 		}
 		
 	} 
+	
+	static class EWrongArgumentNumber extends EInterfaceElementException{
+		private static final long serialVersionUID = -1013138408903976951L;
+
+		public EWrongArgumentNumber(String method) {
+	        super(method);
+	    }
+	}
 
 }

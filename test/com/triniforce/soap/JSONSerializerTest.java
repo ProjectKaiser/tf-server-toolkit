@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,6 +32,15 @@ public class JSONSerializerTest extends TFTestCase {
 	})
 	static class Service001{
 		public String method_001(int v1, int v2){
+			return null;
+		}
+		
+		
+		public String method_0011(int v1, int v2, String v3){
+			return null;
+		}
+
+		public String method_0012(int v1){
 			return null;
 		}
 
@@ -73,6 +84,8 @@ public class JSONSerializerTest extends TFTestCase {
 		public void method_007(String v){}
 		
 		public void method_008(TObj1 v){}
+		
+		public void method_dt01(Date arg1){}
 	}
 	
 	static class Prop01{
@@ -87,24 +100,44 @@ public class JSONSerializerTest extends TFTestCase {
 		}
 	}
 
-	public void testSerialize() throws IOException {
+	public void testSerialize() throws IOException, ParseException {
 		InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
 		InterfaceDescription desc = gen.parse(null, Service001.class);
 		JSONSerializer srz = new JSONSerializer();
 		
 		
-		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_001\",\"params\":[124],\"id\":1}", serialize(srz, desc, 124));
-		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_001\",\"params\":[515],\"id\":1}", serialize(srz, desc, 515));
-		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_001\",\"params\":[515,634,\"turbo\"],\"id\":1}", serialize(srz, desc, 515, 634, "turbo"));
+		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_0012\",\"params\":[124],\"id\":1}", 
+				serialize(srz, desc, "method_0012", 124));
+		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_0012\",\"params\":[515],\"id\":1}", 
+				serialize(srz, desc, "method_0012", 515));
+		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_0011\",\"params\":[515,634,\"turbo\"],\"id\":1}", 
+				serialize(srz, desc, "method_0011", 515, 634, "turbo"));
 //		assertEquals( "{\"jsonrpc\":\"2.0\",\"params\":[515,{\"~unique-id~\":\"0\",\"value\":\"val_0012\",\"class\":\"com.triniforce.soap.JSONSerializerTest$1\"}],\"method\":\"method_001\",\"id\":1}", serialize(srz, desc, 515, new Prop01(){{setValue("val_0012");}}));
-		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_001\",\"params\":[515,{\"value\":\"val_0012\"}],\"id\":1}", serialize(srz, desc, 515, new Prop01(){{setValue("val_0012");}}));
+		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_001\",\"params\":[515,{\"value\":\"val_0012\"}],\"id\":1}", 
+				serialize(srz, desc, 515, new Prop01(){{setValue("val_0012");}}));
+		
+		Date dt = new GregorianCalendar(2005, 1, 12).getTime();
+		String str = serialize(srz, desc, "method_dt01", dt);
+		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_dt01\",\"params\":[\"2005-02-11T21:00:00.000Z\"],\"id\":1}", str);
+		
+		SOAPDocument res = srz.deserialize(desc, new ByteArrayInputStream(str.getBytes()));
+		
+		assertEquals(dt, res.m_args[0]);
+		
+		
 	}
 
 	private String serialize(JSONSerializer srz, InterfaceDescription desc,
 			Object ... values) throws IOException {
+		return serialize(srz, desc, "method_001", values);
+	}
+	
+	private String serialize(JSONSerializer srz, InterfaceDescription desc, String method,
+			Object ... values) throws IOException {
 		SOAPDocument soap = new InterfaceDescriptionGenerator.SOAPDocument();
-		soap.m_method = "method_001";
+		soap.m_method = method;
 		soap.m_args = values;
+		soap.m_bIn = true;
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		srz.serialize(desc, soap, out);
 		return out.toString("utf-8");
