@@ -9,7 +9,7 @@ import com.triniforce.utils.StringSerializer;
 
 public class InvJsonTest extends TFTestCase{
 	
-	
+	//
 	public static class MyClass{
 		private String s;
 		private int i;
