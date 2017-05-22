@@ -1112,6 +1112,12 @@ public class InterfaceDescriptionGenerator {
 	}
 
 	private Error exceptionToError(Throwable e) {
+		if(e instanceof RethrownException){
+			e = e.getCause();
+		} else if ( (e instanceof RuntimeException) && (null != e.getCause()) ){
+			e = e.getCause();
+		}
+		
 		int code; 
 		if(e instanceof ESoap.EMethodNotFound)
 			code = -32601;
@@ -1125,7 +1131,7 @@ public class InterfaceDescriptionGenerator {
 		PrintWriter writer = new PrintWriter(strBuffer);
 		e.printStackTrace(writer);
 		writer.close();
-		return new JSONSerializer.JsonRpcError.Error(code, e.toString(), strBuffer.getBuffer().toString());
+		return new JSONSerializer.JsonRpcError.Error(code, e.toString(), "");
 	}
 
     
