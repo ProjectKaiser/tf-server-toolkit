@@ -29,7 +29,6 @@ public class SETest extends TFTestCase {
 			try {
 				Thread.sleep(slp);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}		
@@ -45,7 +44,6 @@ public class SETest extends TFTestCase {
 			try {
 				Thread.sleep(slp);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}		
