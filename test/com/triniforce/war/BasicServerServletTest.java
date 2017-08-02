@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Date;
+import java.util.Hashtable;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -38,8 +39,10 @@ public class BasicServerServletTest extends TFTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		
-		InitialContext ic = new InitialContext();
+		Hashtable<String, Object> env = new Hashtable<String, Object>();
+		env.put(Context.INITIAL_CONTEXT_FACTORY, 
+		        "com.sun.jndi.ldap.LdapCtxFactory");
+		InitialContext ic = new InitialContext(env);
 		
         ic.createSubcontext("java:/comp/env");  
 		ic.bind("java:/comp/env/BasicServerDb", getDataSource());

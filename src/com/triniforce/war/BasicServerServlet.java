@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -69,7 +70,10 @@ public class BasicServerServlet extends SOAPServlet {
 	public void init(ServletConfig arg0) throws ServletException {
 		try {
 			InitialContext initContext;
-			initContext = new InitialContext();
+			Hashtable<String, Object> env = new Hashtable<String, Object>();
+			env.put(Context.INITIAL_CONTEXT_FACTORY, 
+			        "com.sun.jndi.ldap.LdapCtxFactory");
+			initContext = new InitialContext(env);
 			Context envContext  = (Context)initContext.lookup(CONTEXT);
 			File homeFolder = new File((String)envContext.lookup(HOME));
 			
