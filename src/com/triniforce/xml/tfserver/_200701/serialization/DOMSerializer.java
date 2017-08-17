@@ -158,7 +158,7 @@ public class DOMSerializer implements NamespaceContext{
     public static DatatypeFactory TYPE_FACTORY;
     
     public static TransformerFactory       TRANSFORMER_FACTORY = TransformerFactory.newInstance();
-    public static DocumentBuilderFactory   DOCBUILDER_FACTORY = DocumentBuilderFactory.newInstance();
+    public static DocumentBuilderFactory   DOCBUILDER_FACTORY =  DocumentBuilderFactory.newInstance("com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl", DOMSerializer.class.getClassLoader());
     public static SchemaFactory            SCHEMA_FACTORY = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
     public static XPathFactory             XPATH_FACTORY = XPathFactory.newInstance();
 
@@ -252,7 +252,7 @@ public class DOMSerializer implements NamespaceContext{
     }
 
     public VObject createVObject(Element vObjElement) throws DOMException, ParseException, XPathExpressionException{
-        String type = ((Element)vObjElement).getAttribute(VOBJECT_TYPE_TAG);
+        String type = vObjElement.getAttribute(VOBJECT_TYPE_TAG);
         
         NodeList childs = vObjElement.getChildNodes();
         ArrayList<NamedVar> vals = new ArrayList<NamedVar>();
@@ -451,7 +451,8 @@ public class DOMSerializer implements NamespaceContext{
         return doc;
     }
 
-    public String getNamespaceURI(String pref) {
+    @Override
+	public String getNamespaceURI(String pref) {
         
         String prefs[] = {"soap", "tf", "wsdl", "xsd", "xsd1"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
         String namespaces[] = {
@@ -465,11 +466,13 @@ public class DOMSerializer implements NamespaceContext{
         return idx < 0 ? null : namespaces[idx];
     }
 
-    public String getPrefix(String arg0) {
+    @Override
+	public String getPrefix(String arg0) {
         return null;
     }
 
-    public Iterator getPrefixes(String arg0) {
+    @Override
+	public Iterator getPrefixes(String arg0) {
         return null;
     }
     
@@ -501,7 +504,7 @@ public class DOMSerializer implements NamespaceContext{
 
     public NamedVar createNamedVar(Element node) throws DOMException, ParseException, XPathExpressionException {
         return new NamedVar(
-                ((Element)node).getAttribute(VNAMEDVAR_NAME_TAG),
+                node.getAttribute(VNAMEDVAR_NAME_TAG),
                 createVariantObject((Element) ((Element)node.getElementsByTagName(VNAMEDVAR_VALUE_TAG).item(0)).getElementsByTagName("*").item(0))                 //$NON-NLS-1$
         );
     }
