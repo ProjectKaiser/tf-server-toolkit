@@ -86,7 +86,7 @@ public class Delta {
             return realDbTableName;
 		}
 		
-		Map<String, Collection<FieldDef>> getFields(Set<String> tabNames, IDBNames dbNames) throws SQLException{
+		public Map<String, Collection<FieldDef>> getFields(Set<String> tabNames, IDBNames dbNames) throws SQLException{
 			HashMap<String, Collection<FieldDef>> res = 
 				new HashMap<String, Collection<FieldDef>>();
 			for(String tName : tabNames){
