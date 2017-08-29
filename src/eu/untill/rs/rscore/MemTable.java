@@ -73,7 +73,7 @@ public class MemTable implements IMemTable {
 		}
 		
 		public Long getId() {
-			String idName = ApiStack.getInterface(IIdDef.class).getFieldDef().getName();
+			String idName = IIdDef.Helper.getFieldDef().getName();
 			return ((Number) getField(idName)).longValue();//$NON-NLS-1$
 		}
 		
