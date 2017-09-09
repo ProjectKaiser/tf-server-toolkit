@@ -311,7 +311,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         
         assertTrue( (Boolean)xp.evaluate("./types/schema/complexType[@name=\'Error_00124\']", defs, XPathConstants.BOOLEAN));
         //No element in schema for Exceptions
-        assertNull((Element) xp.evaluate("./types/schema/element[@type=\'tns:Error_00124\']", defs, XPathConstants.NODE));
+        assertNull(xp.evaluate("./types/schema/element[@type=\'tns:Error_00124\']", defs, XPathConstants.NODE));
         
         Element e1;
         assertNotNull(e1= (Element)xp.evaluate("./message[@name=\'Error_00124\']", defs, XPathConstants.NODE));
@@ -873,7 +873,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         	
         	trace(res);
         	assertTrue(res, res.contains("\"error\":{"));
-        	assertTrue(res, res.contains("\"code\":-32601"));
+        	assertTrue(res, res.contains("\"code\":405"));
         	
         }
     }

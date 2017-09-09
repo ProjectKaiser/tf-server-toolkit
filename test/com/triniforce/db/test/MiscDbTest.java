@@ -10,14 +10,14 @@ package com.triniforce.db.test;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-import junit.framework.AssertionFailedError;
-
 import com.triniforce.db.ddl.TableDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.qbuilder.Expr;
 import com.triniforce.db.qbuilder.QSelect;
 import com.triniforce.db.qbuilder.QTable;
 import com.triniforce.db.qbuilder.WhereClause;
+
+import junit.framework.AssertionFailedError;
 
 /**
  * Test issues with keys
@@ -63,6 +63,8 @@ public class MiscDbTest extends DBTestCase {
         sel.where(where);
         System.out.println(sel);
         
+        
+        // FIXME: Does not work for MSSQL
         {//select {fn Upper("max")}       
         	trace(sel.toString());
             PreparedStatement stmt = getConnection().prepareStatement(sel.toString());

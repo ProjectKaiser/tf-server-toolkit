@@ -100,6 +100,9 @@ public class JSONSerializerTest extends TFTestCase {
 		}
 	}
 
+	// FIXME: fails
+	// junit.framework.ComparisonFailure: expected:<..."params":["2005-02-1[1T21]:00:00.000Z"],"id":1...> but was:<..."params":["2005-02-1[2T00]:00:00.000Z"],"id":1...>
+	
 	public void testSerialize() throws IOException, ParseException {
 		InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
 		InterfaceDescription desc = gen.parse(null, Service001.class);

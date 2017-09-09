@@ -10,17 +10,29 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.utils.ApiAlgs;
 
 public class RequestHandlerTest extends TFTestCase {
+	
+	public static class MyRTException extends RuntimeException {
+        public static String RTErrorText = UUID.randomUUID().toString();
+		private static final long serialVersionUID = 1L;
+
+		public MyRTException() {
+			super(RTErrorText);
+		}
+
+	}
     
 	@SoapInclude(extraClasses={TestService.C2.class})
     public static class TestService{
         public int method1(String arg0){
            return 2008; 
         }
+        
         
         public static class C1{}
         public static class C2 extends C1{}
@@ -41,6 +53,10 @@ public class RequestHandlerTest extends TFTestCase {
         
         public String method_charset(){
         	return "привет мир";
+        }
+        
+        public String methodRTException(){
+        	throw new MyRTException();
         }
 
         public void methodDecimal(BigDecimal v){
@@ -183,25 +199,33 @@ public class RequestHandlerTest extends TFTestCase {
         
     }
     
-    public void testExecJson() throws UnsupportedEncodingException{
+    String execJson(String inStr) throws UnsupportedEncodingException{
     	InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
         InterfaceDescription desc = gen.parse(null, TestService.class);
         RequestHandler handler = new RequestHandler(gen, desc, new RequestHandler.ReflectServiceInvoker(new TestService()));
         
-        {
-	        String REQ1 =
-	        		"{\"jsonrpc\":\"2.0\", \"method\":\"method1\",\"params\":[\"test_string\"]}";
-	        handler.execJson(new ByteArrayInputStream(REQ1.getBytes("utf-8")), System.out);
-        }
-        {
-        	ByteArrayOutputStream byte_out = new ByteArrayOutputStream();
-        	String REQ1 =
-	        		"{\"jsonrpc\":\"2.0\", \"method\":\"method_charset\",\"params\":[]}";
-	        handler.execJson(new ByteArrayInputStream(REQ1.getBytes("utf-8")), byte_out);
-	        
-	        String res = new String(byte_out.toByteArray(), "utf-8");
-	        assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"привет мир\"}", res);
-        }
+      	ByteArrayOutputStream byte_out = new ByteArrayOutputStream();
+       	handler.execJson(new ByteArrayInputStream(inStr.getBytes("utf-8")), byte_out);
+        return new String(byte_out.toByteArray(), "utf-8");
+    }
+    
+    public void testExecJson() throws UnsupportedEncodingException{
+    	{
+    		String res = execJson("{\"jsonrpc\":\"2.0\", \"method\":\"method1\",\"params\":[\"test_string\"]}");
+    		assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":2008}", res);
+    	}
+    	{
+    		String res = execJson("{\"jsonrpc\":\"2.0\", \"method\":\"method_charset\",\"params\":[]}");
+    		assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"привет мир\"}", res);
+    	}    	
+    	
+    	
+    	{
+    		String res = execJson("{\"jsonrpc\":\"2.0\", \"method\":\"methodRTException\",\"params\":[]}");
+    		assertTrue(res.contains(MyRTException.RTErrorText));
+    		assertTrue(res.contains("500"));
+    		trace(res);
+    	}
     }
     
     public void testDeserializeRequestError() throws UnsupportedEncodingException{

@@ -5,9 +5,26 @@
  */
 package com.triniforce.utils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 
+import com.triniforce.utils.ApiAlgs.RethrownException;
+
 public class EUtils {
+	
+	public static Throwable unwrap(Throwable t){
+		if(null == t){
+			return t;
+		}
+		if(null == t.getCause()){
+			return t;
+		}
+		if(t.getClass().equals(RuntimeException.class) || t.getClass().equals(RethrownException.class) || t.getClass().equals(InvocationTargetException.class)){
+			return unwrap(t.getCause());
+		}
+		return t;
+	}
+	
 	
     public static class ENotSupportedPrefix extends RuntimeException {
         private static final long serialVersionUID = 1L;

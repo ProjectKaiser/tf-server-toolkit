@@ -42,9 +42,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import net.sf.sojo.interchange.json.JsonParserException;
-import net.sf.sojo.interchange.json.JsonSerializer;
-
 import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -71,8 +68,12 @@ import com.triniforce.soap.WsdlDescription.WsdlType.Restriction;
 import com.triniforce.soap.WsdlDescription.WsdlTypeElement;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiAlgs.RethrownException;
+import com.triniforce.utils.EUtils;
 import com.triniforce.utils.IName;
 import com.triniforce.utils.TFUtils;
+
+import net.sf.sojo.interchange.json.JsonParserException;
+import net.sf.sojo.interchange.json.JsonSerializer;
 
 public class InterfaceDescriptionGenerator {
     
@@ -269,7 +270,8 @@ public class InterfaceDescriptionGenerator {
             m_bShowName = bShowName;   
             m_tns = tns;
         }
-        public void run(Node_S parent, WsdlType val) {
+        @Override
+		public void run(Node_S parent, WsdlType val) {
             Node_S t = parent.append(val.isComplex() ? "s:complexType" : "s:simpleType");
             if(m_bShowName)
                 t.attr("name", val.getTypeDef().getName());
@@ -285,7 +287,8 @@ public class InterfaceDescriptionGenerator {
             if(!elements.isEmpty()){
 	            t.append("s:sequence")
 	                .append(elements, new IConverter<WsdlTypeElement>(){
-	                    public void run(Node_S parent, WsdlTypeElement val) {
+	                    @Override
+						public void run(Node_S parent, WsdlTypeElement val) {
 	                        int maxOccur = val.getMaxOccur();
 	                        String sMaxOccur = maxOccur == -1 ? "unbounded" : Integer.toString(maxOccur);
 	                        Node_S e = parent.append("s:element")
@@ -355,7 +358,8 @@ public class InterfaceDescriptionGenerator {
                     	.attr("elementFormDefault", "qualified")
                     	.attr("targetNamespace", m_targetNamespace)
                         .append(desc.getWsdlTypeElements(), new IConverter<WsdlTypeElement>(){
-                            public void run(Node_S parent, WsdlTypeElement val) {
+                            @Override
+							public void run(Node_S parent, WsdlTypeElement val) {
                                 TypeConverter tc = new TypeConverter(false, m_targetNamespace);
                                 parent.append("s:element")
                                     .attr("name", val.getName())
@@ -377,7 +381,8 @@ public class InterfaceDescriptionGenerator {
                     .end()
                 .end()
                 .append(desc.getMessages(), new IConverter<WsdlMessage>(){
-                    public void run(Node_S parent, WsdlMessage val) {
+                    @Override
+					public void run(Node_S parent, WsdlMessage val) {
                         parent.append("wsdl:message")
                             .attr("name", val.getMessageName())
                             .append("wsdl:part")
@@ -388,7 +393,8 @@ public class InterfaceDescriptionGenerator {
                     }
                 })
                 .append(desc.getWsdlFaults(), new IConverter<WsdlTypeElement>(){
-                    public void run(Node_S parent, WsdlTypeElement val) {
+                    @Override
+					public void run(Node_S parent, WsdlTypeElement val) {
                     	String typename = val.getType().getTypeDef().getName();
                         parent.append("wsdl:message")
                             .attr("name", typename)
@@ -402,7 +408,8 @@ public class InterfaceDescriptionGenerator {
                 .append("wsdl:portType")
                     .attr("name", m_serviceName + "Soap")
                     .append(desc.getWsdlPort().getOperations(), new IConverter<WsdlOperation>(){
-                        public void run(Node_S parent, WsdlOperation val) {
+                        @Override
+						public void run(Node_S parent, WsdlOperation val) {
                             parent.append("wsdl:operation")
                                 .attr("name", val.getName())
                                 .append("wsdl:input")
@@ -430,7 +437,8 @@ public class InterfaceDescriptionGenerator {
                         .attr("transport", "http://schemas.xmlsoap.org/soap/http")
                     .end()
                     .append(desc.getWsdlPort().getOperations(), new IConverter<WsdlOperation>(){
-                        public void run(Node_S parent, WsdlOperation val) {
+                        @Override
+						public void run(Node_S parent, WsdlOperation val) {
                             parent.append("wsdl:operation")
                                 .attr("name", val.getName())
                                 .append("soap:operation")
@@ -470,7 +478,8 @@ public class InterfaceDescriptionGenerator {
                         .attr("transport", "http://schemas.xmlsoap.org/soap/http")
                     .end()
                     .append(desc.getWsdlPort().getOperations(), new IConverter<WsdlOperation>(){
-                        public void run(Node_S parent, WsdlOperation val) {
+                        @Override
+						public void run(Node_S parent, WsdlOperation val) {
                             parent.append("wsdl:operation")
                                 .attr("name", val.getName())
                                 .append("soap12:operation")
@@ -526,6 +535,7 @@ public class InterfaceDescriptionGenerator {
 
     public SOAPDocument deserialize(InterfaceDescription desc, InputStream source) throws ParserConfigurationException, SAXException, IOException {
     	return deserialize(desc, source, new IParser(){
+			@Override
 			public void parse(InputStream source, SoapHandler handler) throws SAXException, IOException, ParserConfigurationException {
 		        SAXParser parser = getParser();
 		        parser.parse(new InputSource(source), handler);
@@ -574,6 +584,7 @@ public class InterfaceDescriptionGenerator {
 	static final AttributesImpl EMPTY_ATTRS = new AttributesImpl();
     class JsonParser implements IParser{
 		
+		@Override
 		public void parse(InputStream source, SoapHandler handler) throws SAXException, IOException {
 			callStartSoapHeaders(handler);
 			
@@ -722,7 +733,8 @@ public class InterfaceDescriptionGenerator {
             
         }
         
-        @SuppressWarnings("unchecked")
+        @Override
+		@SuppressWarnings("unchecked")
         public void run(Node_S parent, TypedObject val) {
             Node_S e = parent.append(val.getPropName());
             if(bSetNS){
@@ -1112,26 +1124,22 @@ public class InterfaceDescriptionGenerator {
 	}
 
 	private Error exceptionToError(Throwable e) {
-		if(e instanceof RethrownException){
-			e = e.getCause();
-		} else if ( (e instanceof RuntimeException) && (null != e.getCause()) ){
-			e = e.getCause();
-		}
+		e = EUtils.unwrap(e);
 		
 		int code; 
 		if(e instanceof ESoap.EMethodNotFound)
-			code = -32601;
+			code = 405; // Method not allowed
 		else if(e instanceof ESoap.EUnknownElement)
-			code = -32602;
+			code = 400; // Bad request
 		else if(e instanceof JsonParserException)
-			code = -32700;
+			code = 400;
 		else 
-			code = -32600;
+			code = 500;
 		StringWriter strBuffer = new StringWriter();
 		PrintWriter writer = new PrintWriter(strBuffer);
 		e.printStackTrace(writer);
 		writer.close();
-		return new JSONSerializer.JsonRpcError.Error(code, e.toString(), "");
+		return new JSONSerializer.JsonRpcError.Error(code, e.getMessage() +" (" + e.getClass().getName()+")", "");
 	}
 
     

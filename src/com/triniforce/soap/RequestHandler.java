@@ -35,6 +35,7 @@ public class RequestHandler {
 		public ReflectServiceInvoker(Object service) {
 			this.service = service;
 		}
+		@Override
 		public Object invokeService(String method, Object... args) {
 			try {
 				return invokeService(getMethod(method), args);
