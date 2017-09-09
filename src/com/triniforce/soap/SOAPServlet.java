@@ -16,10 +16,6 @@ import javax.xml.transform.TransformerException;
 
 import org.w3c.dom.Document;
 
-import com.triniforce.soap.InterfaceDescription;
-import com.triniforce.soap.InterfaceDescriptionGenerator;
-import com.triniforce.soap.InterfaceOperationDescription;
-import com.triniforce.soap.RequestHandler;
 import com.triniforce.soap.RequestHandler.IServiceInvoker;
 import com.triniforce.utils.ApiAlgs;
 
@@ -86,6 +82,7 @@ import com.triniforce.utils.ApiAlgs;
 	/* (non-Java-doc)
 	 * @see javax.servlet.http.HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doRequest(request, response);
 	}  	
@@ -93,6 +90,7 @@ import com.triniforce.utils.ApiAlgs;
 	/* (non-Java-doc)
 	 * @see javax.servlet.http.HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doRequest(request, response);
 	}   
@@ -133,9 +131,10 @@ import com.triniforce.utils.ApiAlgs;
 			RequestHandler reqHandler = new RequestHandler(m_gen, m_desc, serviceInvoker);
 			ByteArrayOutputStream outBuf = new ByteArrayOutputStream();
 			
+			int status = HttpServletResponse.SC_OK;
 			if("text/json".equals(request.getContentType().toLowerCase())){
 	            response.setContentType("text/json; charset=utf-8");
-	            reqHandler.execJson(in, outBuf);
+	            status = reqHandler.execJson(in, outBuf);
 			}
 			else{
 	            response.setContentType("text/xml; charset=utf-8");
@@ -147,7 +146,7 @@ import com.triniforce.utils.ApiAlgs;
 			out.write(ba, 0, ba.length);
 			response.setContentLength(ba.length);
 			outBuf.close();
-			response.setStatus(HttpServletResponse.SC_OK);
+			response.setStatus(status);
 			response.flushBuffer();
 		}
 	}

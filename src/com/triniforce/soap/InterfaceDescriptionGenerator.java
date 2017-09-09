@@ -1123,7 +1123,7 @@ public class InterfaceDescriptionGenerator {
 		return new String(out.toByteArray(), "utf-8");
 	}
 
-	private Error exceptionToError(Throwable e) {
+	public static Error exceptionToError(Throwable e) {
 		e = EUtils.unwrap(e);
 		
 		int code; 

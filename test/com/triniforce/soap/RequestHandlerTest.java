@@ -199,6 +199,21 @@ public class RequestHandlerTest extends TFTestCase {
         
     }
     
+    String checkJson(String inStr, String outStr, int code) throws UnsupportedEncodingException{
+    	InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        InterfaceDescription desc = gen.parse(null, TestService.class);
+        RequestHandler handler = new RequestHandler(gen, desc, new RequestHandler.ReflectServiceInvoker(new TestService()));
+        
+      	ByteArrayOutputStream byte_out = new ByteArrayOutputStream();
+       	int acode = handler.execJson(new ByteArrayInputStream(inStr.getBytes("utf-8")), byte_out);
+        String res = new String(byte_out.toByteArray(), "utf-8");
+        if(null != outStr){
+        	assertEquals(outStr, res);
+        }
+        assertEquals(code, acode);
+        return res;
+    }
+    
     String execJson(String inStr) throws UnsupportedEncodingException{
     	InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
         InterfaceDescription desc = gen.parse(null, TestService.class);
@@ -211,21 +226,33 @@ public class RequestHandlerTest extends TFTestCase {
     
     public void testExecJson() throws UnsupportedEncodingException{
     	{
-    		String res = execJson("{\"jsonrpc\":\"2.0\", \"method\":\"method1\",\"params\":[\"test_string\"]}");
-    		assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":2008}", res);
+    		String inStr = "{\"jsonrpc\":\"2.0\", \"method\":\"method1\",\"params\":[\"test_string\"]}";
+    		String outStr = "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":2008}";
+    		checkJson(inStr, outStr, 200);
     	}
     	{
-    		String res = execJson("{\"jsonrpc\":\"2.0\", \"method\":\"method_charset\",\"params\":[]}");
-    		assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"привет мир\"}", res);
+    		String inStr = "{\"jsonrpc\":\"2.0\", \"method\":\"method_charset\",\"params\":[]}";
+    		String outStr = "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"привет мир\"}";
+    		checkJson(inStr, outStr, 200);
     	}    	
     	
-    	
+    	// Exception
     	{
-    		String res = execJson("{\"jsonrpc\":\"2.0\", \"method\":\"methodRTException\",\"params\":[]}");
+       		String inStr = "{\"jsonrpc\":\"2.0\", \"method\":\"methodRTException\",\"params\":[]}";
+    		String outStr = null;
+    		String res = checkJson(inStr, outStr, 500);
     		assertTrue(res.contains(MyRTException.RTErrorText));
     		assertTrue(res.contains("500"));
-    		trace(res);
     	}
+    	
+    	// Wrong method
+    	{
+       		String inStr = "{\"jsonrpc\":\"2.0\", \"method\":\"wrongMethod\",\"params\":[]}";
+    		String outStr = null;
+    		String res = checkJson(inStr, outStr, 405);
+    		assertTrue(res.contains(ESoap.EMethodNotFound.class.getName()));
+    	}
+    	
     }
     
     public void testDeserializeRequestError() throws UnsupportedEncodingException{

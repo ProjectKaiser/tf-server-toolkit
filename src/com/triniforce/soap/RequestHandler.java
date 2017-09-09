@@ -16,6 +16,7 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.logging.Log;
@@ -139,25 +140,29 @@ public class RequestHandler {
 		return m_invoker;
 	}
 
-	public void execJson(InputStream input, OutputStream output) {
+	public int execJson(InputStream input, OutputStream output) {
         String str = null;
-        try{
-			try {
-	            SOAPDocument in = m_gen.deserializeJson(m_desc, input);
-	            Object res = m_invoker.invokeService(in.m_method, in.m_args);
-	            str = m_gen.serializeJson(m_desc, res);
-	        } catch (Throwable e) {
-	            str = m_gen.serializeJsonException(e);
-	        }
-			finally{
-	            OutputStreamWriter writer = new OutputStreamWriter(output, Charset.forName("UTF-8"));
-	            writer.write(str);
-	            writer.close();
+        int code = HttpServletResponse.SC_OK;
+		try {
+            SOAPDocument in = m_gen.deserializeJson(m_desc, input);
+            Object res = m_invoker.invokeService(in.m_method, in.m_args);
+            str = m_gen.serializeJson(m_desc, res);
+        } catch (Throwable e) {
+            try {
+				str = m_gen.serializeJsonException(e);
+			} catch (IOException e1) {
+				e1.printStackTrace();
 			}
-        } catch(Exception e){
-        	ApiAlgs.rethrowException(e);
+            code = InterfaceDescriptionGenerator.exceptionToError(e).getCode();
         }
+        OutputStreamWriter writer = new OutputStreamWriter(output, Charset.forName("UTF-8"));
+        
+        try {
+			writer.write(str);
+	        writer.close();
+		} catch (IOException e) {
+		}
+        return code;
 	}
-
 
 }
