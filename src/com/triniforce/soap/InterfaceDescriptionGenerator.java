@@ -1139,7 +1139,7 @@ public class InterfaceDescriptionGenerator {
 		PrintWriter writer = new PrintWriter(strBuffer);
 		e.printStackTrace(writer);
 		writer.close();
-		return new JSONSerializer.JsonRpcError.Error(code, e.getMessage() +" (" + e.getClass().getName()+")", "");
+		return new JSONSerializer.JsonRpcError.Error(code, e.getClass().getName() + ": " + e.getMessage(), "");
 	}
 
     
