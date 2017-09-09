@@ -23,7 +23,7 @@ public interface ISrvSmartTranFactory extends IModeAny {
                     .getInterface(ISrvSmartTran.class);
             tran.commit();
         }
-
+        
         public static void pop() {
             ISrvSmartTranFactory tf = ApiStack
                     .getInterface(ISrvSmartTranFactory.class);

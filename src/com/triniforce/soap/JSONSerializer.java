@@ -15,11 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Stack;
 
-import net.sf.sojo.core.UniqueIdGenerator;
-import net.sf.sojo.core.filter.ClassPropertyFilter;
-import net.sf.sojo.core.filter.ClassPropertyFilterHandlerImpl;
-import net.sf.sojo.interchange.json.JsonSerializer;
-
 import org.json.simple.parser.ContentHandler;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -32,6 +27,11 @@ import com.triniforce.soap.SAXHandler.CurrentObject;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.utils.ApiAlgs;
+
+import net.sf.sojo.core.UniqueIdGenerator;
+import net.sf.sojo.core.filter.ClassPropertyFilter;
+import net.sf.sojo.core.filter.ClassPropertyFilterHandlerImpl;
+import net.sf.sojo.interchange.json.JsonSerializer;
 
 public class JSONSerializer {
 	public static class JsonRpc extends LinkedHashMap<String, Object>{
@@ -144,6 +144,7 @@ public class JSONSerializer {
 	private JsonSerializer js;
 	
 	public JSONSerializer() {
+		
 		js = new JsonSerializer();
 		final ClassPropertyFilter pf = new ClassPropertyFilter(JsonRpc.class);
 		pf.addProperty(UniqueIdGenerator.UNIQUE_ID_PROPERTY);
@@ -249,22 +250,27 @@ public class JSONSerializer {
 
 
 
+		@Override
 		public void startJSON() throws ParseException, IOException {
 		}
+		@Override
 		public void endJSON() throws ParseException, IOException {;
 
 		}
 
+		@Override
 		public boolean startObject() throws ParseException, IOException {
 			startStackElement(new Element(Element.Type.Object, ""));
 			m_bSetType=false;
 			return true;
 		}
+		@Override
 		public boolean endObject() throws ParseException, IOException {
 			endStackElement(Element.Type.Object);
 			return true;
 		}
 		
+		@Override
 		public boolean startObjectEntry(String arg0) throws ParseException,
 				IOException {
 			if(null != m_method){
@@ -289,6 +295,7 @@ public class JSONSerializer {
 			startStackElement(new Element(Element.Type.Entry, m_entry));
 			return true;
 		}
+		@Override
 		public boolean endObjectEntry() throws ParseException, IOException {
 			Element tag = endStackElement(Element.Type.Entry);
 			ApiAlgs.assertTrue(Element.Type.Entry.equals(tag.m_type), tag.toString());
@@ -326,6 +333,7 @@ public class JSONSerializer {
 		}	
 		
 		
+		@Override
 		public boolean startArray() throws ParseException, IOException {
 			Element top = m_stk.peek();
 			String arrName = "value";
@@ -336,6 +344,7 @@ public class JSONSerializer {
 			return true;
 		}
 		
+		@Override
 		public boolean endArray() throws ParseException, IOException {
 			endStackElement(Element.Type.Array);
 			return true;
@@ -377,9 +386,9 @@ public class JSONSerializer {
 			return res;
 		}
 		
+		@Override
 		public boolean primitive(Object arg0) throws ParseException,
 				IOException {
-			ApiAlgs.getLog(this).trace(arg0);
 			Element top = m_stk.peek();
 			if(State.Arguments.equals(m_state)){
 				if(Element.Type.Array.equals(top.m_type)){
