@@ -6,6 +6,7 @@
 package com.triniforce.server.plugins.kernel;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import com.triniforce.db.ddl.TableDef;
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
@@ -17,6 +18,7 @@ import com.triniforce.server.srvapi.ISORegistration;
 import com.triniforce.server.srvapi.UpgradeProcedure;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.utils.Api;
+import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.IEntity;
 import com.triniforce.utils.ApiStack;
 
@@ -58,6 +60,15 @@ public class ServerTest extends DBTestCase {
 
 		public void setMaxIdle(int maxIdle) {
 //			fail();
+		}
+
+		@Override
+		public void close() {
+			try {
+				m_conn.close();
+			} catch (SQLException e) {
+				ApiAlgs.rethrowException(e);
+			}
 		}        
     }
 
