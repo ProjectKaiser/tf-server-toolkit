@@ -21,4 +21,5 @@ public interface IPooledConnection extends IModeAny{
     int getMaxIdle();
     int getNumIdle();
     void setMaxIdle(int maxIdle);
+    void close();
 }    

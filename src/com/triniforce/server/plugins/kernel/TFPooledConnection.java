@@ -58,5 +58,14 @@ public class TFPooledConnection implements IPooledConnection{
     public void setMaxIdle(int maxIdle) {
         m_ds.setMaxIdle(maxIdle);
     }
+
+	@Override
+	public void close() {
+		try {
+			m_ds.close();
+		} catch (SQLException e) {
+			ApiAlgs.rethrowException(e);
+		}
+	}
     
 }

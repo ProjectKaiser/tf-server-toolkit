@@ -135,6 +135,15 @@ public static class DPPProcPlugin extends PKPlugin{
 		public void setDataSource(BasicDataSource dataSource) {
 			m_ds = dataSource;
 		}
+		
+		@Override
+		public void close() {
+			try {
+				m_ds.close();
+			} catch (SQLException e) {
+				ApiAlgs.rethrowException(e);
+			}
+		}
     }
     
     protected int m_liUsers = 10000;
