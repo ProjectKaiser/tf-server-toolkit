@@ -130,6 +130,25 @@ public class SOAPServletTest extends TFTestCase {
 		
 		assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":4.5}", new String (BYTE_OUT.toByteArray()));
 		
+		{
+			BYTE_OUT = new ByteArrayOutputStream();
+			setSoapReq("{\"jsonrpc\":\"2.0\",\"method\":\"method\",\"params\":[3,6],\"id\":1}");
+			ctx.checking(new Expectations(){{
+				one(req).getInputStream(); will(returnValue(new TestIn()));
+				one(req).getContentType(); will(returnValue("application/json"));
+				
+				allowing(res).getOutputStream(); will(returnValue(new TestOut()));
+
+				one(res).setContentType(with(any(String.class)));
+				one(res).setContentLength(with(any(int.class)));
+				one(res).setStatus(HttpServletResponse.SC_OK);
+				one(res).flushBuffer();
+				
+			}});
+			srv.doServiceCall(req, res);
+			assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":4.5}", new String (BYTE_OUT.toByteArray()));
+		}
+		
 	}
 	
 	private void setSoapReq(String method) throws TransformerException, IOException {

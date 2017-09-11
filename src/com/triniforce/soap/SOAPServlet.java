@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -112,6 +114,8 @@ import com.triniforce.utils.ApiAlgs;
 			doServiceCall(request, response);
 		}
 	}
+	
+	enum ProtocolType{JSON, SOAP};
 
 	protected void doServiceCall(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    //LATER gmp: limit total size of buffer?
@@ -132,7 +136,9 @@ import com.triniforce.utils.ApiAlgs;
 			ByteArrayOutputStream outBuf = new ByteArrayOutputStream();
 			
 			int status = HttpServletResponse.SC_OK;
-			if("text/json".equals(request.getContentType().toLowerCase())){
+			ProtocolType protocol = getProtocolType(request.getContentType().toLowerCase());
+			
+			if(ProtocolType.JSON.equals(protocol)){
 	            response.setContentType("text/json; charset=utf-8");
 	            status = reqHandler.execJson(in, outBuf);
 			}
@@ -151,6 +157,31 @@ import com.triniforce.utils.ApiAlgs;
 		}
 	}
 	
+	static Pattern PROTOCOL_PTTRN = Pattern.compile("(application|text)\\/(json|xml).*");
+	public static class EUnsupportedContent extends RuntimeException{
+		public EUnsupportedContent(String str) {
+			super(str);
+		}
+
+		private static final long serialVersionUID = 1L;
+	}
+	
+	private ProtocolType getProtocolType(String str) {
+		Matcher m = PROTOCOL_PTTRN.matcher(str);
+		if(m.matches()){
+			ProtocolType res;
+			if(m.group(2).equals("json")){
+				res = ProtocolType.JSON;
+			}
+			else 
+				res = ProtocolType.SOAP;		
+			return res;
+		}
+		else{
+			throw new EUnsupportedContent(str);
+		}
+	}
+
 	protected RequestHandler getHandler(){
 		IServiceInvoker serviceInvoker = m_service instanceof IServiceInvoker ? (IServiceInvoker) m_service 
 				: new RequestHandler.ReflectServiceInvoker(m_service);
