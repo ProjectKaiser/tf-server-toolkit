@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.triniforce.soap.PropertiesSequence;
 
+// FIXME: json answer does not follow this sequence
 @PropertiesSequence( sequence = {"columns", "rows"})
 public class SelectResponse {
     private List<String> columns;
