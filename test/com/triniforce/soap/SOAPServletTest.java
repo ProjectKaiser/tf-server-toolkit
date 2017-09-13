@@ -26,9 +26,15 @@ import com.triniforce.db.test.TFTestCase;
 
 public class SOAPServletTest extends TFTestCase {
 	
-	static ByteArrayOutputStream BYTE_OUT = new ByteArrayOutputStream(); 
+	static ByteArrayOutputStream BYTE_OUT = null; 
 	static ByteArrayInputStream BYTE_IN;
 
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		BYTE_OUT = new ByteArrayOutputStream();
+	}
+	
 	static class TestOut extends ServletOutputStream{
 
 		@Override
@@ -80,6 +86,7 @@ public class SOAPServletTest extends TFTestCase {
 		
 		public static class EP{
 			public float method(int a, int b){ return ((float)a + (float)b) / 2.0f;}
+			public float methodEx(int a, int b)throws Exception { throw new IOException();}
 		}
 
 		@Override
@@ -148,6 +155,41 @@ public class SOAPServletTest extends TFTestCase {
 			srv.doServiceCall(req, res);
 			assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":4.5}", new String (BYTE_OUT.toByteArray()));
 		}
+		
+	}
+	
+	public void testJSONRequestEx() throws ServletException, IOException, TransformerException{
+		
+		Mockery ctx = new Mockery();
+		final ServletConfig cfg = ctx.mock(ServletConfig.class);
+
+		ctx.checking(new Expectations(){{
+		}});
+		
+		srv.init(cfg);
+		
+		final HttpServletRequest req = ctx.mock(HttpServletRequest.class);
+		final HttpServletResponse res = ctx.mock(HttpServletResponse.class);
+		
+		setSoapReq("{\"jsonrpc\":\"2.0\",\"method\":\"methodEx\",\"params\":[3,6],\"id\":1}");
+
+		
+		ctx.checking(new Expectations(){{
+			one(req).getInputStream(); will(returnValue(new TestIn()));
+			one(req).getContentType(); will(returnValue("text/json"));
+			
+			allowing(res).getOutputStream(); will(returnValue(new TestOut()));
+
+			one(res).setContentType(with(any(String.class)));
+			one(res).setContentLength(with(any(int.class)));
+			one(res).setStatus(500);
+			one(res).flushBuffer();
+			
+		}});
+		srv.doServiceCall(req, res);
+		System.out.write(BYTE_OUT.toByteArray());
+		
+		assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"error\":{\"message\":\"java.io.IOException: null\",\"code\":500,\"stackTrace\":\"\"}}", new String (BYTE_OUT.toByteArray()));
 		
 	}
 	

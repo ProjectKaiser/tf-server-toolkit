@@ -1123,18 +1123,22 @@ public class InterfaceDescriptionGenerator {
 		return new String(out.toByteArray(), "utf-8");
 	}
 
+	public static int HTTP_ERROR_METHOD_NOT_FOUND = 405;
+	public static int HTTP_ERROR_BAD_REQUEST = 400;
+	public static int HTTP_ERROR_SERVER_INTERNAL = 500;
+	
 	public static Error exceptionToError(Throwable e) {
 		e = EUtils.unwrap(e);
 		
 		int code; 
 		if(e instanceof ESoap.EMethodNotFound)
-			code = 405; // Method not allowed
+			code = HTTP_ERROR_METHOD_NOT_FOUND;
 		else if(e instanceof ESoap.EUnknownElement)
-			code = 400; // Bad request
+			code = HTTP_ERROR_BAD_REQUEST; // Bad request
 		else if(e instanceof JsonParserException)
-			code = 400;
+			code = HTTP_ERROR_BAD_REQUEST;
 		else 
-			code = 500;
+			code = HTTP_ERROR_SERVER_INTERNAL;
 		StringWriter strBuffer = new StringWriter();
 		PrintWriter writer = new PrintWriter(strBuffer);
 		e.printStackTrace(writer);
