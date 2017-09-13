@@ -27,8 +27,58 @@ public abstract class WhereExpr {
     
     abstract public Set<String> calcColumnNames();
     
+    public abstract static class AbstractExprJoin extends WhereExpr{
+        public abstract List<WhereExpr> ggetExprs();
+        
+		@Override
+		public Set<String> calcColumnNames() {
+            Set<String> res = new HashSet<String>();
+            for(WhereExpr e: ggetExprs()){
+                res.addAll(e.calcColumnNames());
+            }
+            return res;
+		}
+
+		public abstract boolean ggetAndJoin();
+    }
+    
+    
+    @PropertiesSequence( sequence = {"andJoin", "exprs"})
+    public static class ExprJoin extends AbstractExprJoin{
+    	
+    	private boolean andJoin = true;
+    	private List<WhereExpr> exprs = new ArrayList<WhereExpr>();
+
+		@Override
+		public List<WhereExpr> ggetExprs() {
+			return getExprs();
+		}
+
+		@Override
+		public boolean ggetAndJoin() {
+			return isAndJoin();
+		}
+
+		public boolean isAndJoin() {
+			return andJoin;
+		}
+
+		public void setAndJoin(boolean andJoin) {
+			this.andJoin = andJoin;
+		}
+
+		public List<WhereExpr> getExprs() {
+			return exprs;
+		}
+
+		public void setExprs(List<WhereExpr> exprs) {
+			this.exprs = exprs;
+		}
+    	
+    }
+    
     @PropertiesSequence( sequence = {"colExprs"}) 
-    public static class ExprColumnOr extends WhereExpr{
+    public static class ExprColumnOr extends AbstractExprJoin{
         private List<ColumnExpr> m_colExprs = new ArrayList<ColumnExpr>();
 
         public List<ColumnExpr> getColExprs() {
@@ -47,6 +97,14 @@ public abstract class WhereExpr {
             return res;
 
         }
+		@Override
+		public List<WhereExpr> ggetExprs() {
+			return (List<WhereExpr>)(List<?>)m_colExprs;
+		}
+		@Override
+		public boolean ggetAndJoin() {
+			return false;
+		}
     }
     
     /**

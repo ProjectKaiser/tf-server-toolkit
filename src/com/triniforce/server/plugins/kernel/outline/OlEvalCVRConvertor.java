@@ -18,9 +18,9 @@ import com.triniforce.eval.OlExprColumn;
 import com.triniforce.server.soap.CollectionViewRequest;
 import com.triniforce.server.soap.ExprV.ExprVColumn;
 import com.triniforce.server.soap.WhereExpr;
+import com.triniforce.server.soap.WhereExpr.AbstractExprJoin;
 import com.triniforce.server.soap.WhereExpr.ColumnExpr;
 import com.triniforce.server.soap.WhereExpr.ExprBetween;
-import com.triniforce.server.soap.WhereExpr.ExprColumnOr;
 import com.triniforce.server.soap.WhereExpr.ExprIn;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.TFUtils;
@@ -130,13 +130,13 @@ public class OlEvalCVRConvertor {
         
         TFUtils.assertNotNull(aExpr, "expr is null");
         TFUtils.assertTrue(level <= 5, "Too deep recursion level");
-        if(aExpr instanceof ExprColumnOr){
-            ExprColumnOr colsOr = (ExprColumnOr) aExpr;
-            if(null != colsOr.getColExprs()){
+        if(aExpr instanceof AbstractExprJoin){
+        	AbstractExprJoin exprJoin = (AbstractExprJoin) aExpr;
+            if(null != exprJoin.ggetExprs()){
                 OlEval or = new OlEval();
-                or.setAndConcatenation(false);
-                or.setNot(colsOr.isNot());
-                for(ColumnExpr ce: colsOr.getColExprs()){
+                or.setAndConcatenation(exprJoin.ggetAndJoin());
+                or.setNot(exprJoin.isNot());
+                for(WhereExpr ce: exprJoin.ggetExprs()){
                     addToEval(or, ce, level++);
                 }
                 eval.addEval(or);
