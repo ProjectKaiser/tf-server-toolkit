@@ -697,6 +697,7 @@ public class ServerImplTest extends ServerTest {
 		    		one(plg).finit();
 		    		exactly(6).of(plg).popApi(with(any(Mode.class)), with(any(ApiStack.class)));
 		    		one(log).error(with(any(String.class)), with(any(RuntimeException.class)));
+		    		allowing(log).info(with(any(String.class)));
 		        }});
 		    	
 		    	srv.finit();
