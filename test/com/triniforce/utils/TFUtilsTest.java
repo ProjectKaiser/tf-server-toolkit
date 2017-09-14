@@ -16,15 +16,15 @@ import com.triniforce.utils.EUtils.EAssertEqualsFailed;
 public class TFUtilsTest extends TFTestCase {
     public static final String UNICODE_PATTERN = "۞∑русскийڧüöäë面伴";
     
-    public void test_firstMatchGroups(){
-    	assertEquals(0, TFUtils.firstMatchGroups(null, null).size());
-    	assertEquals(0, TFUtils.firstMatchGroups("", null).size());
-    	assertEquals(0, TFUtils.firstMatchGroups(null, "").size());
-    	assertEquals(0, TFUtils.firstMatchGroups(null, "").size());
+    public void test_firstMatchedGroups(){
+    	assertEquals(0, TFUtils.firstMatchedGroups(null, null).length);
+    	assertEquals(0, TFUtils.firstMatchedGroups("", null).length);
+    	assertEquals(0, TFUtils.firstMatchedGroups(null, "").length);
+    	assertEquals(0, TFUtils.firstMatchedGroups(null, "").length);
     	
-    	assertEquals(Arrays.asList("t"), TFUtils.firstMatchGroups("text", "t"));
-    	assertEquals(Arrays.asList("=?UTF-8?B?", "UTF-8"), TFUtils.firstMatchGroups(" =?UTF-8?B?0JHQu9Cw0L3QuiDQt9Cw0Y", "=\\?(UTF-8)\\?B\\?"));
-    	assertEquals(Arrays.asList("=?koi8-r?B?", "koi8-r"), TFUtils.firstMatchGroups("=?koi8-r?B?0JHQu9Cw0L3QuiDQt9Cw0Y", "^=\\?([^?]*)\\?B\\?"));
+    	assertEquals(Arrays.asList("t"), Arrays.asList(TFUtils.firstMatchedGroups("text", "t")));
+    	assertEquals(Arrays.asList("=?UTF-8?B?", "UTF-8"), Arrays.asList(TFUtils.firstMatchedGroups(" =?UTF-8?B?0JHQu9Cw0L3QuiDQt9Cw0Y", "=\\?(UTF-8)\\?B\\?")));
+    	assertEquals(Arrays.asList("=?koi8-r?B?", "koi8-r"), Arrays.asList(TFUtils.firstMatchedGroups("=?koi8-r?B?0JHQu9Cw0L3QuiDQt9Cw0Y", "^=\\?([^?]*)\\?B\\?")));
     	
     }
     

@@ -61,14 +61,14 @@ public class TFUtils {
 		}
 	}
 	
-	public static List<String> firstMatchGroups(String text, String regexp){
-		List<String> res = new ArrayList<String>();
+	public static String[] firstMatchedGroups(String text, String regexp){
 		if(null == text){
-			return res;
+			return new String[]{};
 		}
 		if(null == regexp){
-			return res;
-		}		
+			return new String[]{};
+		}
+		List<String> res = new ArrayList<String>();
 		Pattern pattern = Pattern.compile(regexp);
 		Matcher matcher = pattern.matcher(text);
 		while (matcher.find()) {
@@ -77,7 +77,7 @@ public class TFUtils {
 			}
 			break;
 		}
-		return res;
+		return res.toArray(new String[res.size()]);
 	}
 	
 	public static byte[] stringToBytes(String str){
