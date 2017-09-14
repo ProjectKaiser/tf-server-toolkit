@@ -16,6 +16,18 @@ import com.triniforce.utils.EUtils.EAssertEqualsFailed;
 public class TFUtilsTest extends TFTestCase {
     public static final String UNICODE_PATTERN = "۞∑русскийڧüöäë面伴";
     
+    public void test_firstMatchGroups(){
+    	assertEquals(0, TFUtils.firstMatchGroups(null, null).size());
+    	assertEquals(0, TFUtils.firstMatchGroups("", null).size());
+    	assertEquals(0, TFUtils.firstMatchGroups(null, "").size());
+    	assertEquals(0, TFUtils.firstMatchGroups(null, "").size());
+    	
+    	assertEquals(Arrays.asList("t"), TFUtils.firstMatchGroups("text", "t"));
+    	assertEquals(Arrays.asList("=?UTF-8?B?", "UTF-8"), TFUtils.firstMatchGroups(" =?UTF-8?B?0JHQu9Cw0L3QuiDQt9Cw0Y", "=\\?(UTF-8)\\?B\\?"));
+    	assertEquals(Arrays.asList("=?koi8-r?B?", "koi8-r"), TFUtils.firstMatchGroups("=?koi8-r?B?0JHQu9Cw0L3QuiDQt9Cw0Y", "^=\\?([^?]*)\\?B\\?"));
+    	
+    }
+    
     public void test_string_bytes(){
     	assertNull(TFUtils.stringToBytes(null));
     	assertNull(TFUtils.bytesToString(null));
@@ -47,7 +59,7 @@ public class TFUtilsTest extends TFTestCase {
     public void testAsLong(){
         Short s = 10;
         assertEquals((Long)10L, TFUtils.asLong(s));
-        assertEquals((Long)10L, TFUtils.asLong((Long)10L));
+        assertEquals((Long)10L, TFUtils.asLong(10L));
         assertEquals((Long)10L, TFUtils.asLong("10"));
     }
     public void testAsShort(){

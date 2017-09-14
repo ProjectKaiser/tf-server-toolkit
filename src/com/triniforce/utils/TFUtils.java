@@ -30,6 +30,8 @@ import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -57,6 +59,25 @@ public class TFUtils {
 		} catch (UnsupportedEncodingException e) {
 			return new String(bytes);
 		}
+	}
+	
+	public static List<String> firstMatchGroups(String text, String regexp){
+		List<String> res = new ArrayList<String>();
+		if(null == text){
+			return res;
+		}
+		if(null == regexp){
+			return res;
+		}		
+		Pattern pattern = Pattern.compile(regexp);
+		Matcher matcher = pattern.matcher(text);
+		while (matcher.find()) {
+			for (int i = 0; i < matcher.groupCount() + 1; i++) {
+				res.add(matcher.group(i));				
+			}
+			break;
+		}
+		return res;
 	}
 	
 	public static byte[] stringToBytes(String str){
@@ -638,14 +659,17 @@ public class TFUtils {
 						return new Iterator<java.util.Map.Entry<String, Object>>() {
 							int current = 0;
 
+							@Override
 							public boolean hasNext() {
 								return current < namesValues.length;
 							}
 
+							@Override
 							public java.util.Map.Entry<String, Object> next() {
 								final int idx = current;
 								current += 2;
 								return new java.util.Map.Entry<String, Object>() {
+									@Override
 									public String getKey() {
 										Object name = namesValues[idx];
 										String strName = null;
@@ -660,16 +684,19 @@ public class TFUtils {
 										return strName;
 									}
 
+									@Override
 									public Object getValue() {
 										return namesValues[idx + 1];
 									}
 
+									@Override
 									public Object setValue(Object arg0) {
 										throw new RuntimeException("not impelmented"); //$NON-NLS-1$
 									}
 								};
 							}
 
+							@Override
 							public void remove() {
 								throw new RuntimeException("not impelmented"); //$NON-NLS-1$
 							}
