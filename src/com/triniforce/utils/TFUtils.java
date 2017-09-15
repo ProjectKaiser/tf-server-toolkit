@@ -50,6 +50,15 @@ public class TFUtils {
 		return System.getProperty("line.separator");
 	}
 	
+	
+	public static String coalesceString(String src, String defaultValue){
+		if(TFUtils.isEmptyString(src)){
+			return defaultValue;
+		}
+		return src;
+		
+	}
+	
 	public static String bytesToString(byte bytes[]){
 		if(null == bytes){
 			return null;
