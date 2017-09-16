@@ -277,12 +277,12 @@ public class TFTestCase extends TestCase {
     }
     
     public void trace(Object obj) {
-        ApiAlgs.getLog(this).trace(obj);
+        ApiAlgs.getLog(this).debug(obj);
     }
     
     @Deprecated
     public void dtrace(Object obj){
-        ApiAlgs.getDevLog(this).trace(obj);
+        ApiAlgs.getDevLog(this).debug(obj);
     }
 
     public void trace(String msg, Object... args) {
