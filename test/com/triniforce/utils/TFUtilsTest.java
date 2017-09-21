@@ -16,6 +16,15 @@ import com.triniforce.utils.EUtils.EAssertEqualsFailed;
 public class TFUtilsTest extends TFTestCase {
     public static final String UNICODE_PATTERN = "۞∑русскийڧüöäë面伴";
     
+    public void test_coalesce(){
+    	Integer iTest = 1234455;
+    	assertEquals("", TFUtils.coalesce(null, ""));
+    	assertEquals("a", TFUtils.coalesce(null, "a"));
+    	assertEquals(iTest, TFUtils.coalesce(null, iTest));
+    	assertEquals(null, TFUtils.coalesce(null, null));
+    	assertEquals("aa", TFUtils.coalesce("aa", null));
+    	assertEquals("", TFUtils.coalesce("", "bb"));
+    }
     
     public void test_coalesceString(){
     	assertEquals("", TFUtils.coalesceString(null, ""));

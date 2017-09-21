@@ -51,6 +51,10 @@ public class TFUtils {
 	}
 	
 	
+	public static Object coalesce(Object src, Object defaultValue){
+		return null != src? src : defaultValue;
+	}
+	
 	public static String coalesceString(String src, String defaultValue){
 		if(TFUtils.isEmptyString(src)){
 			return defaultValue;
