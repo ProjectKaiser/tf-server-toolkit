@@ -1201,4 +1201,25 @@ public class UpgradeRunnerTest extends DDLTestCase {
 	
 	}
     
+	static class TestDropCoumn2 extends TableDef{
+		public TestDropCoumn2() {
+			super();
+			addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
+			addField(2, FieldDef.createScalarField("f2", ColumnType.INT, true));
+			addPrimaryKey(3, "pk", new String[]{"f1"});
+			deleteIndex(4, "pk");
+			deleteField(5, "f1");
+			addField(6, FieldDef.createScalarField("f3", ColumnType.LONG, true));
+		}
+		
+	}
+	
+	public void testDropCoumn() throws EReferenceError, SQLException{
+		HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
+		TestDropCoumn2 def1 = new TestDropCoumn2();
+   		desired.put(def1.getEntityName(), def1);
+       	DBTables db = new DBTables(m_as, desired);
+    	m_player.run(db.getCommandList());
+    	
+	}
 }

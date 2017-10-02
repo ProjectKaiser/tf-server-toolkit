@@ -409,5 +409,26 @@ public class DBTablesTest extends TestCase {
         
         tabs.remove("unkTab");
     }
+    
+	static class TestDropCoumn2 extends TableDef{
+		public TestDropCoumn2() {
+			super();
+			addField(1, FieldDef.createScalarField("f1", ColumnType.INT, true));
+			addField(2, FieldDef.createScalarField("f2", ColumnType.INT, true));
+			addPrimaryKey(3, "pk", new String[]{"f1"});
+			deleteIndex(4, "pk");
+			deleteField(5, "f1");
+			addField(6, FieldDef.createScalarField("f3", ColumnType.LONG, true));
+		}
+	}
+    
+    public void testRemovedFieldWithIndex(){
+        DBTables tabs = new DBTables();
+        tabs.setMaxIndexSize(10); // Check index size
+        tabs.setActualState(new TestAS(m_as));
+        tabs.add(new TestDropCoumn2());
+    	List<DBOperation> cl = tabs.getCommandList(); // No exception
+    	assertEquals(4, cl.size());    
+    }
    
 }

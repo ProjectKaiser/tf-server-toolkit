@@ -154,7 +154,9 @@ public class DBTables {
 		private int indexSize(TableDef td, IndexDef idx) {
 			int res = 0;
 			for(String column : idx.getColumns()){
-				ElementVerStored<FieldDef> e = td.getFields().findElement(column);
+				ElementVerStored<FieldDef> e = td.getFields().find(td.getFields().m_addedElements.iterator(), 
+						new IElementDef.NameCondition(column));
+//				ElementVerStored<FieldDef> e = td.getFields().findElement(column);
 				if(null == e){
 					ApiAlgs.assertNotNull(e, td.getEntityName() + "." + column);
 				} else {
