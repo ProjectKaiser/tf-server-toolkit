@@ -63,9 +63,10 @@ public class Expr {
         }
     }
 
-    public enum Funcs { Upper("Upper");
+    public enum Funcs { Upper("UCASE");
         private final String m_str;
-        public String toString(){
+        @Override
+		public String toString(){
             return m_str;
         }
         Funcs(String str) {
