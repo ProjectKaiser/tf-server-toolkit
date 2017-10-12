@@ -29,11 +29,13 @@ public class ExprTest extends TFTestCase {
         Api api = new Api();
         api.setIntfImplementor(IDatabaseInfo.class, new IDatabaseInfo() {
             
-            public String getIdentifierQuoteString() {
+            @Override
+			public String getIdentifierQuoteString() {
                 return "\"";
             }
             
-            public DbType getDbType() {
+            @Override
+			public DbType getDbType() {
                 return null;
             }
         });
@@ -55,11 +57,11 @@ public class ExprTest extends TFTestCase {
     public void testFunc(){
         {
             Func func = new Func(Expr.Funcs.Upper, new Expr.Param());
-            assertEquals( func.toString(), "{fn Upper(?)}");
+            assertEquals( func.toString(), "{fn UCASE(?)}");
         }
         {
             Func func = new Func(Expr.Funcs.Upper, new Expr.Column("t1", "name"));
-            assertEquals( func.toString(), "{fn Upper(t1.\"NAME\")}");           
+            assertEquals( func.toString(), "{fn UCASE(t1.\"NAME\")}");           
         }
         {
             Expr.Compare cmp = new Expr.Compare(
@@ -67,7 +69,7 @@ public class ExprTest extends TFTestCase {
                     , Expr.EqKind.EQ
                     ,new Expr.Param()
             );
-            assertEquals( cmp.toString(), "{fn Upper(t2.\"NAME1\")} = ?");
+            assertEquals( cmp.toString(), "{fn UCASE(t2.\"NAME1\")} = ?");
         }
 
     }

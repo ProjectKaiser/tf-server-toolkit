@@ -53,7 +53,7 @@ public class TFUtilsLogsTest extends TFTestCase {
         } catch(RuntimeException e){}
         log4jConfigured = false;
         
-        File fTest = getTmpFolder(this);
+        File fTest = getTmpFolder(this, "testConfigureLog");
         {
             TFUtils.delTree(fTest, true);
             assertTrue(fTest.mkdir());

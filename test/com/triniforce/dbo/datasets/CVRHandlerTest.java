@@ -142,9 +142,11 @@ public class CVRHandlerTest extends TFTestCase {
 		return new BasicResSet(){
 			int row = -1;
 			
+			@Override
 			public Object getObject(int i) {
 				return testSrc[row][i-1];
 			}
+			@Override
 			public boolean next() {
 				if(row == testSrc.length)
 					return false;
@@ -152,13 +154,16 @@ public class CVRHandlerTest extends TFTestCase {
 				return row != testSrc.length;
 			}
 
+			@Override
 			public List<String> getColumns() {
 				return Arrays.asList("idx", "name", "price");
 			}
-            public Object getSoapObject(int columnIndex){
+            @Override
+			public Object getSoapObject(int columnIndex){
                 return getObject(columnIndex);
             }
-            public boolean first() {
+            @Override
+			public boolean first() {
                 return false;
             }
 			
@@ -585,6 +590,31 @@ public class CVRHandlerTest extends TFTestCase {
 		
 		testFfParams = null;
 		LongListResponse res = h.processAsLLR(req);
+		// FIXME: test fails in batch
+		/*
+java.lang.NullPointerException
+	at com.triniforce.dbo.datasets.CVRHandlerTest.testFieldFunctions(CVRHandlerTest.java:588)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at junit.framework.TestCase.runTest(TestCase.java:164)
+	at junit.framework.TestCase.runBare(TestCase.java:130)
+	at junit.framework.TestResult$1.protect(TestResult.java:106)
+	at junit.framework.TestResult.runProtected(TestResult.java:124)
+	at junit.framework.TestResult.run(TestResult.java:109)
+	at junit.framework.TestCase.run(TestCase.java:120)
+	at junit.framework.TestSuite.runTest(TestSuite.java:230)
+	at junit.framework.TestSuite.run(TestSuite.java:225)
+	at org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestReference.run(JUnit3TestReference.java:131)
+	at org.eclipse.jdt.internal.junit.runner.TestExecution.run(TestExecution.java:38)
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:459)
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:675)
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.run(RemoteTestRunner.java:382)
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.main(RemoteTestRunner.java:192)
+
+ 
+		 */
 		assertEquals(2, testFfParams.size());
 		assertEquals("param1Value", testFfParams.get("param1"));
 		assertEquals("param2Value", testFfParams.get("param2"));

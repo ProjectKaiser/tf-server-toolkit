@@ -100,9 +100,6 @@ public class JSONSerializerTest extends TFTestCase {
 		}
 	}
 
-	// FIXME: fails on long run
-	// junit.framework.ComparisonFailure: expected:<..."params":["2005-02-1[1T21]:00:00.000Z"],"id":1...> but was:<..."params":["2005-02-1[2T00]:00:00.000Z"],"id":1...>
-	
 	public void testSerialize() throws IOException, ParseException {
 		InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
 		InterfaceDescription desc = gen.parse(null, Service001.class);
@@ -121,6 +118,9 @@ public class JSONSerializerTest extends TFTestCase {
 		
 		Date dt = new GregorianCalendar(2005, 1, 12).getTime();
 		String str = serialize(srz, desc, "method_dt01", dt);
+
+		// FIXME: fails on long run
+		// junit.framework.ComparisonFailure: expected:<..."params":["2005-02-1[1T21]:00:00.000Z"],"id":1...> but was:<..."params":["2005-02-1[2T00]:00:00.000Z"],"id":1...>
 		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_dt01\",\"params\":[\"2005-02-11T21:00:00.000Z\"],\"id\":1}", str);
 		
 		SOAPDocument res = srz.deserialize(desc, new ByteArrayInputStream(str.getBytes()));

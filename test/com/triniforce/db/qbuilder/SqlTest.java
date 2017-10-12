@@ -23,10 +23,12 @@ public class SqlTest extends TFTestCase {
 		Api api = new Api();
 		api.setIntfImplementor(IDatabaseInfo.class, new IDatabaseInfo() {
 			
+			@Override
 			public String getIdentifierQuoteString() {
 				return "\"";
 			}
 			
+			@Override
 			public DbType getDbType() {
 				return null;
 			}
@@ -267,7 +269,7 @@ public class SqlTest extends TFTestCase {
                     )
             );
             sel.where(where);
-            assertEquals("select t.\"NAME\" as t_name from myTable t where ( {fn Upper(t.\"NAME\")} = ? )", sel.toString());
+            assertEquals("select t.\"NAME\" as t_name from myTable t where ( {fn UCASE(t.\"NAME\")} = ? )", sel.toString());
         }
         
         // wrong first table in where clause

@@ -51,7 +51,8 @@ public class ServerImplTest extends ServerTest {
     /* (non-Javadoc)
      * @see junit.framework.TestCase#setUp()
      */
-    protected void setUp() throws Exception {
+    @Override
+	protected void setUp() throws Exception {
         super.setUp();
     }
 
@@ -62,31 +63,42 @@ public class ServerImplTest extends ServerTest {
     public void testServer() throws Throwable {
         
         IPlugin testPlugin = new IPlugin(){
-            public void doRegistration(ISORegistration reg){}
-            public String[] getDependencies() {
+            @Override
+			public void doRegistration(ISORegistration reg){}
+            @Override
+			public String[] getDependencies() {
                 return null;
             }
-            public String getPluginName() {
+            @Override
+			public String getPluginName() {
                 return null;
             }
-            public String getProviderName() {
+            @Override
+			public String getProviderName() {
                 return null;
             }
+			@Override
 			public void popApi(Mode mode, ApiStack stk) {
 			}
+			@Override
 			public void prepareApi() {
 			}
+			@Override
 			public void pushApi(Mode mode, ApiStack stk) {
 			}
+			@Override
 			public void finit() {
 				
 			}
+			@Override
 			public void init() {
 
 			}
-            public void doRegistration() {
+            @Override
+			public void doRegistration() {
             }
-            public void doExtensionPointsRegistration() {
+            @Override
+			public void doExtensionPointsRegistration() {
             }
         };      
         {
@@ -698,10 +710,10 @@ public class ServerImplTest extends ServerTest {
 		    		exactly(6).of(plg).popApi(with(any(Mode.class)), with(any(ApiStack.class)));
 		    		one(log).error(with(any(String.class)), with(any(RuntimeException.class)));
 		    		allowing(log).info(with(any(String.class)));
+		    		allowing(log).trace(with(any(String.class)));
 		        }});
-		    	
+
 		    	srv.finit();
-		    	
 		    	ctx.assertIsSatisfied();
 	    	} finally{
 	    		ApiStack.popApi();

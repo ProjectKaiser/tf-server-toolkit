@@ -47,47 +47,58 @@ public static class DPPProcPlugin extends PKPlugin{
         public DPPProcPlugin() {
         }
     
-        public void doRegistration(ISORegistration reg) throws EDBObjectException {
+        @Override
+		public void doRegistration(ISORegistration reg) throws EDBObjectException {
         	reg.registerDataPreparationProcedure(new DataPreparationProcedure());
         }
     
-        public String[] getDependencies() {
+        @Override
+		public String[] getDependencies() {
             return null;
         }
     
-        public String getPluginName() {
+        @Override
+		public String getPluginName() {
             return null;
         }
     
-        public String getProviderName() {
+        @Override
+		public String getProviderName() {
             return null;
         }
 
-        public void popApi(Mode mode, ApiStack stk) {
+        @Override
+		public void popApi(Mode mode, ApiStack stk) {
            
         }
 
-        public void prepareApi() {
+        @Override
+		public void prepareApi() {
             
         }
 
-        public void pushApi(Mode mode, ApiStack apiStack) {
+        @Override
+		public void pushApi(Mode mode, ApiStack apiStack) {
             
         }
         
         public void finitApi(){
         }
 
-        public void finit() {
+        @Override
+		public void finit() {
         }
 
-        public void init() {
+        @Override
+		public void init() {
         }
 
-        public void doRegistration() {
+        @Override
+		public void doRegistration() {
         }
 
-        public void doExtensionPointsRegistration() {
+        @Override
+		public void doExtensionPointsRegistration() {
         }
         
         public void run(){
@@ -108,26 +119,31 @@ public static class DPPProcPlugin extends PKPlugin{
             m_ds.setMaxActive(50);
         }
 
-        public Connection getPooledConnection() throws SQLException {
+        @Override
+		public Connection getPooledConnection() throws SQLException {
             Connection con = m_ds.getConnection();
             con.setAutoCommit(false);
             m_conStack.put(con, Thread.currentThread().getStackTrace());
             return con;
         }
 
-        public void returnConnection(Connection con) throws SQLException {
+        @Override
+		public void returnConnection(Connection con) throws SQLException {
             m_conStack.remove(con);
             con.close();
         }
 
+		@Override
 		public int getMaxIdle() {
 			return m_ds.getMaxIdle();
 		}
 
+		@Override
 		public int getNumIdle() {
 			return m_ds.getNumIdle();
 		}
 
+		@Override
 		public void setMaxIdle(int maxIdle) {
 			m_ds.setMaxIdle(maxIdle);
 		}
@@ -208,6 +224,7 @@ public static class DPPProcPlugin extends PKPlugin{
 		return null;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
         super.setUp();  
 
@@ -345,6 +362,7 @@ public static class DPPProcPlugin extends PKPlugin{
 
     protected void addPlugin(IPlugin plugin) {
         m_plugins.add(plugin);
+    	m_bRestartOnSetup = true;
     }
 
     protected void checkResourcesConnections(){
@@ -372,7 +390,8 @@ public static class DPPProcPlugin extends PKPlugin{
     
     int m_startNumActive = 0;
     
-    protected void tearDown() throws Exception {
+    @Override
+	protected void tearDown() throws Exception {
     	if(m_bFinitServer){
     		finitServer();
     	}
