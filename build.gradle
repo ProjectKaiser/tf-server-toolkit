@@ -1,7 +1,3 @@
-ext.tf_version = '53.0'
-ext.tf_release = false
-ext.tf_vendor = 'Triniforce.com'
-
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
@@ -10,11 +6,11 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
+version = new File('version').text
+ext.tf_vendor = 'Triniforce.com'
+
 /// Project configuration is used for Maven deploy:
 group = 'com.triniforce.tf-server-toolkit'
-
-version = tf_version + (tf_release ? '' : '-SNAPSHOT')
-
 
 // Get dynamic environment settings
 apply from: 'config.gradle'
@@ -166,10 +162,10 @@ jar {
 	manifest {
 		attributes(
 			"Specification-Title": project.name,
-			"Specification-Version": tf_version,
+			"Specification-Version": version,
 			"Specification-Vendor": tf_vendor,
 			"Implementation-Title": project.name,
-			"Implementation-Version": tf_version,
+			"Implementation-Version": "$version (${new Date().format('yyyy-MM-dd')})",
 			"Implementation-Vendor": tf_vendor
 		)
 	}
