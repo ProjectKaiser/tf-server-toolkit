@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
+import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
 import com.triniforce.soap.testpkg_01.CChild1;
 import com.triniforce.soap.testpkg_01.CParent;
 import com.triniforce.soap.testpkg_02.CChild2;
@@ -35,7 +37,7 @@ public class ClassParserTest extends TFTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        m_cp = new ClassParser(ClassParserTest.class.getPackage());
+        m_cp = new ClassParser(ClassParserTest.class.getPackage(), Collections.EMPTY_MAP);
         m_lib = new TypeDefLibCache(m_cp);
     }
     
@@ -280,7 +282,7 @@ public class ClassParserTest extends TFTestCase {
         assertEquals("prop4", props.get(3).getName());
         assertEquals("prop5", props.get(4).getName());
         
-        ClassParser cp2 = new ClassParser(ClassParserTest.class.getPackage());
+        ClassParser cp2 = new ClassParser(ClassParserTest.class.getPackage(), Collections.EMPTY_MAP);
         cDef = (ClassDef) cp2.parse(CWithoutSeq.class, m_lib, null);
         props = cDef.getOwnProps();
         assertEquals("a", props.get(0).getName());
@@ -539,6 +541,48 @@ public class ClassParserTest extends TFTestCase {
     	ClassDef pd = (ClassDef) m_lib.add(CParent.class);
     	ClassDef res = m_cp.parse(CChild2.class, m_lib, "child1");
     	assertSame(pd, res.getParentDef());
+    	
+    }
+    
+    static class Custom01{}
+    static class O01{
+    	private Custom01 m_value;
+
+		public Custom01 getValue() {
+			return m_value;
+		}
+
+		public void setValue(Custom01 value) {
+			m_value = value;
+		}
+    } 
+    
+    public void testClassParser(){
+    	final Custom01 c01 = new Custom01();
+    	HashMap<Type, CustomSerializer> srzs = new HashMap<Type, CustomSerializer>();
+    	srzs.put(Custom01.class, new CustomSerializer(String.class, new IGetSet(){
+			@Override
+			public Object get(Object obj) {
+				O01 _obj = (O01) obj;
+				assertSame(c01, _obj.getValue());
+				return "customized";
+			}
+
+			@Override
+			public void set(Object obj, Object value) {
+				// TODO Auto-generated method stub
+				
+			}
+    		
+    	}));
+        ClassParser cp = new ClassParser(ClassParserTest.class.getPackage(), srzs);
+        TypeDefLibCache lib = new TypeDefLibCache(cp);
+        
+        ClassDef def = cp.parse(O01.class, lib, "typeName-1");
+        
+        O01 obj = new O01();
+        obj.setValue(c01);
+        assertEquals("customized", def.getProp("value").get(obj));
     	
     }
 }

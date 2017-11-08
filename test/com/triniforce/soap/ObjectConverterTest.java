@@ -5,6 +5,7 @@
  */ 
 package com.triniforce.soap;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -67,7 +68,7 @@ public class ObjectConverterTest extends TFTestCase {
     @Override
     public void test() throws Exception {
     	{
-	        TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(this.getClass().getPackage()));
+	        TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(this.getClass().getPackage(), Collections.EMPTY_MAP));
 	        InterfaceDescription desc = new InterfaceDescription();
 	        desc.getTypes().add(lib.add(Cls1.class));
 	        desc.getTypes().add(lib.add(Cls2.class));

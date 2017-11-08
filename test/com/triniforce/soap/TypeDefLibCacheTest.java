@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -46,7 +47,7 @@ public class TypeDefLibCacheTest extends TFTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        m_parser = new ClassParser(this.getClass().getPackage());
+        m_parser = new ClassParser(this.getClass().getPackage(), Collections.EMPTY_MAP);
         m_parser.addNonParsedParent(EParameterizedException.class);
         m_lib = new TypeDefLibCache(m_parser);
         

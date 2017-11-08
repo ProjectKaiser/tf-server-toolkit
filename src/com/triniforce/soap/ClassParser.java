@@ -15,9 +15,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
+import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
 import com.triniforce.utils.TFUtils;
 
 public class ClassParser {
@@ -32,11 +34,13 @@ public class ClassParser {
     };
 	private Package m_pkg;
 	private HashMap<Class, List<String> > m_nonParsedParents;
+	private Map<Type, CustomSerializer> m_customSrzs;
 
-    public ClassParser(Package pkg) {
+    public ClassParser(Package pkg, Map<Type, CustomSerializer> customSrzs) {
         m_pkg = pkg;
         m_nonParsedParents = new HashMap<Class, List<String> >();
         addNonParsedParent(Exception.class);
+        m_customSrzs = customSrzs;
     }
 
     public ClassDef parse(Class key, IDefLibrary lib, String typeName) {
@@ -88,10 +92,18 @@ public class ClassParser {
                 if(null != getter){
 //                if(!Modifier.isStatic(getter.getModifiers()) && 
 //                        propType.equals(getter.getGenericReturnType())){
+                	CustomSerializer customSrz = m_customSrzs.get(propType);
+                	IGetSet getset;
+					if(null != customSrz){
+                		getset = customSrz.m_getSet;
+                		propType = customSrz.m_cls;
+                	}
+                	else{
+                		getset = new ClassDef.CDGetSet(cls.getName(), getter.getName(), setter.getName());
+                	}
                     Class propCls = TypeDefLibCache.toClass(propType);
                     TypeDef td = lib.add(propType);
-                    PropDef propDef = new PropDef(lowerName, td, propCls.getName(), 
-                            new ClassDef.CDGetSet(cls.getName(), getter.getName(), setter.getName()));
+                    PropDef propDef = new PropDef(lowerName, td, propCls.getName(), getset);
                     res.getOwnProps().add(propDef);
                 }
 //            } catch (SecurityException e) {

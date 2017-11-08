@@ -7,8 +7,10 @@ package com.triniforce.soap;
 
 import java.beans.IntrospectionException;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +51,7 @@ import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
+import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
 import com.triniforce.soap.testpkg_01.Hand;
 import com.triniforce.soap.testpkg_01.ITestHorse;
 import com.triniforce.soap.testpkg_02.ITestBird;
@@ -70,6 +73,19 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         }
     }
     
+    public static class O1{
+    	private ICustom1 m_val;
+
+		public ICustom1 getVal() {
+			return m_val;
+		}
+
+		public void setVal(ICustom1 val) {
+			m_val = val;
+		}
+    }
+    interface ICustom1{}
+    
     @SoapInclude(extraClasses={ExtraInc.class, Cls1.class, Cls2.class})
     interface TestSrv2{
         void method1();
@@ -78,6 +94,8 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         void method4(int arg);
         void method5(int[] arg);
         void method6(int arg0, int arg1);
+        void method7(ICustom1 i1);
+        void method8(O1 i1);
     }
     
     static class Cls1{
@@ -908,6 +926,119 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         	assertEquals("unknownMethod_0023", e.getMessage());
         }
 
+    }
+    
+    public void testAddCustomSrz(){
+        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        gen.addCustomSerializer(ICustom1.class, new IGetSet() {
+			@Override
+			public Object get(Object obj) {
+				return 75757;
+			}
+
+			@Override
+			public void set(Object obj, Object value) {
+				
+			}
+		}, int.class);
+        InterfaceDescription desc = gen.parse(null, TestSrv2.class);
+        
+        {
+	        Operation op1 = desc.getOperation("method7");
+	        PropDef inReq = op1.getProp("method7");
+	        ClassDef cdReq = (ClassDef) inReq.getType();
+	        PropDef arg0 = cdReq.getProp("arg0");
+	        assertNotNull(arg0);
+	        assertEquals(75757, arg0.get(new Object[]{
+	        		new ICustom1(){}
+	        		}));
+        }
+        {
+	        Operation op1 = desc.getOperation("method8");
+	        PropDef inReq = op1.getProp("method8");
+	        ClassDef cdReq = (ClassDef) inReq.getType();
+	        PropDef arg0 = cdReq.getProp("arg0");
+	        ClassDef cd1 = (ClassDef) arg0.getType();
+	        PropDef prop1 = cd1.getProp("val");
+	        assertNotNull(prop1);
+	        O1 obj1 = new O1();
+	        obj1.setVal(new ICustom1(){});
+	        assertEquals(75757, prop1.get(obj1));
+        }
+        
+    }
+    
+    public void testCustomSerialization() throws XPathExpressionException, TransformerException, ParserConfigurationException, SAXException, IOException{
+        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        gen.addCustomSerializer(ICustom1.class, new IGetSet() {
+			@Override
+			public Object get(Object obj) {
+				return 75757;
+			}
+
+			@Override
+			public void set(Object obj, Object value) {
+				assertEquals(75757, value);
+				if(obj.getClass().isArray()){
+					Array.set(obj, 0, new ICustom1(){});
+				}
+				else{
+					O1 o1 = (O1) obj;
+					o1.setVal(new ICustom1(){});
+				}
+			}
+		}, int.class);
+        InterfaceDescription desc = gen.parse(null, TestSrv2.class);    	
+        {
+
+	        SOAPDocument soapDoc = new InterfaceDescriptionGenerator.SOAPDocument();
+	        soapDoc.m_method = "method7";
+	        soapDoc.m_args = new Object[]{new ICustom1(){}};
+	        soapDoc.m_bIn = true;
+	        soapDoc.m_soap = "http://schemas.xmlsoap.org/soap/envelope/";
+	        
+	        Document doc = gen.serialize(desc, soapDoc);
+	        
+	        XPathFactory xpf = XPathFactory.newInstance();  
+	        XPath xp = xpf.newXPath();
+	        
+	        print(doc);
+	        Element res = (Element) xp.evaluate("/Envelope/Body/method7/arg0", doc, XPathConstants.NODE);
+	        assertEquals("75757", res.getTextContent());
+	        
+	        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+	        gen.writeDocument(stream, doc);
+	        
+	        SOAPDocument dsrzd = gen.deserialize(desc, new ByteArrayInputStream(stream.toByteArray()));
+	
+	    	assertTrue(dsrzd.m_args[0] instanceof ICustom1);
+    	}
+    	{
+	        SOAPDocument soapDoc = new InterfaceDescriptionGenerator.SOAPDocument();
+	        soapDoc.m_method = "method8";
+	        O1 o1 = new O1();
+	        o1.setVal(new ICustom1(){});
+	        soapDoc.m_args = new Object[]{o1};
+	        soapDoc.m_bIn = true;
+	        soapDoc.m_soap = "http://schemas.xmlsoap.org/soap/envelope/";
+	        
+	        Document doc = gen.serialize(desc, soapDoc);
+    		
+	        XPathFactory xpf = XPathFactory.newInstance();  
+	        XPath xp = xpf.newXPath();
+	        
+	        print(doc);
+	        Element res = (Element) xp.evaluate("/Envelope/Body/method8/arg0/val", doc, XPathConstants.NODE);
+	        assertEquals("75757", res.getTextContent());
+	        
+	        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+	        gen.writeDocument(stream, doc);
+	        
+	        SOAPDocument dsrzd = gen.deserialize(desc, new ByteArrayInputStream(stream.toByteArray()));
+	
+	        o1 = (O1) dsrzd.m_args[0];
+	    	assertTrue(o1.getVal() instanceof ICustom1);
+    	}
     }
     
     interface ITest_01{

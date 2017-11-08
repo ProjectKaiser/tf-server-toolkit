@@ -15,6 +15,7 @@ import java.util.NoSuchElementException;
 
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
+import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
 import com.triniforce.utils.ApiAlgs;
 
 public class InterfaceDescription implements Serializable{
@@ -79,21 +80,38 @@ public class InterfaceDescription implements Serializable{
 
 			private String m_prop;
 
+			private IGetSet m_customSrz;
+
             public MsgPropGetSet(String name, int index) {
                 m_index = index;
                 m_prop = name;
             }
             
-            public Object get(Object obj) {
+            public MsgPropGetSet(String name, int index, IGetSet customSrz) {
+                m_index = index;
+                m_prop = name;
+                m_customSrz = customSrz;
+			}
+
+			public Object get(Object obj) {
             	try{
-            		return Array.get(obj, m_index);
+            		Object result = Array.get(obj, m_index);
+            		if(null!= m_customSrz){
+            			result = m_customSrz.get(result);
+            		}
+            		return result;
             	} catch(IndexOutOfBoundsException e){
             		throw new NoSuchElementException(m_prop);  
             	}
             }
 
             public void set(Object obj, Object value) {
-                Array.set(obj, m_index, value);
+        		if(null!= m_customSrz){
+        			m_customSrz.set(obj, value);
+        		}
+        		else{
+        			Array.set(obj, m_index, value);
+        		}
             }
             
         } 
@@ -106,6 +124,11 @@ public class InterfaceDescription implements Serializable{
             List<PropDef> props = getOwnProps(); 
             props.add(new PropDef(name, typeDef, rawType.getName(), new MsgPropGetSet(name, props.size())));            
         }
+
+		public void addParameter(String name, Class rawType, TypeDef typeDef, IGetSet customSrz) {
+            List<PropDef> props = getOwnProps(); 
+            props.add(new PropDef(name, typeDef, rawType.getName(), new MsgPropGetSet(name, props.size(), customSrz)));            
+		}
         
     }
     
