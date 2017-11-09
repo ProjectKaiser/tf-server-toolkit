@@ -47,7 +47,7 @@ public class TypeDefLibCacheTest extends TFTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        m_parser = new ClassParser(this.getClass().getPackage(), Collections.EMPTY_MAP);
+        m_parser = new ClassParser(this.getClass().getPackage(), Collections.EMPTY_LIST);
         m_parser.addNonParsedParent(EParameterizedException.class);
         m_lib = new TypeDefLibCache(m_parser);
         

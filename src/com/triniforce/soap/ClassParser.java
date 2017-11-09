@@ -15,7 +15,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
@@ -34,9 +33,9 @@ public class ClassParser {
     };
 	private Package m_pkg;
 	private HashMap<Class, List<String> > m_nonParsedParents;
-	private Map<Type, CustomSerializer> m_customSrzs;
+	private List<ICustomSerializer> m_customSrzs;
 
-    public ClassParser(Package pkg, Map<Type, CustomSerializer> customSrzs) {
+    public ClassParser(Package pkg, List<ICustomSerializer> customSrzs) {
         m_pkg = pkg;
         m_nonParsedParents = new HashMap<Class, List<String> >();
         addNonParsedParent(Exception.class);
@@ -92,11 +91,13 @@ public class ClassParser {
                 if(null != getter){
 //                if(!Modifier.isStatic(getter.getModifiers()) && 
 //                        propType.equals(getter.getGenericReturnType())){
-                	CustomSerializer customSrz = m_customSrzs.get(propType);
+                	ICustomSerializer customSrz= null;
+                	if(propType instanceof Class)
+                		customSrz = ICustomSerializer.find(m_customSrzs, (Class) propType);
                 	IGetSet getset;
 					if(null != customSrz){
-                		getset = customSrz.m_getSet;
-                		propType = customSrz.m_cls;
+                		getset = customSrz.getGetSet(getter, setter);
+                		propType = customSrz.getTargetType();
                 	}
                 	else{
                 		getset = new ClassDef.CDGetSet(cls.getName(), getter.getName(), setter.getName());
@@ -135,9 +136,9 @@ public class ClassParser {
 //		}
         
         return res;
-    }
-    
-    private List<String> extractClassProperties(Class cls){
+    }   
+
+	private List<String> extractClassProperties(Class cls){
         Iterator<Method> setters = getSetters(cls);
 
         ArrayList<String> res = new ArrayList<String>();

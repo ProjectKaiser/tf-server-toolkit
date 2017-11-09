@@ -37,7 +37,7 @@ public class ClassParserTest extends TFTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        m_cp = new ClassParser(ClassParserTest.class.getPackage(), Collections.EMPTY_MAP);
+        m_cp = new ClassParser(ClassParserTest.class.getPackage(), Collections.EMPTY_LIST);
         m_lib = new TypeDefLibCache(m_cp);
     }
     
@@ -282,7 +282,7 @@ public class ClassParserTest extends TFTestCase {
         assertEquals("prop4", props.get(3).getName());
         assertEquals("prop5", props.get(4).getName());
         
-        ClassParser cp2 = new ClassParser(ClassParserTest.class.getPackage(), Collections.EMPTY_MAP);
+        ClassParser cp2 = new ClassParser(ClassParserTest.class.getPackage(), Collections.EMPTY_LIST);
         cDef = (ClassDef) cp2.parse(CWithoutSeq.class, m_lib, null);
         props = cDef.getOwnProps();
         assertEquals("a", props.get(0).getName());
@@ -559,22 +559,21 @@ public class ClassParserTest extends TFTestCase {
     
     public void testClassParser(){
     	final Custom01 c01 = new Custom01();
-    	HashMap<Type, CustomSerializer> srzs = new HashMap<Type, CustomSerializer>();
-    	srzs.put(Custom01.class, new CustomSerializer(String.class, new IGetSet(){
+    	List<ICustomSerializer> srzs = new ArrayList<ICustomSerializer>();
+    	srzs.add(new ICustomSerializer<Custom01, String>(Custom01.class, String.class){
+
 			@Override
-			public Object get(Object obj) {
-				O01 _obj = (O01) obj;
-				assertSame(c01, _obj.getValue());
+			String serialize(Custom01 value) {
 				return "customized";
 			}
 
 			@Override
-			public void set(Object obj, Object value) {
+			Custom01 deserialize(String value) {
 				// TODO Auto-generated method stub
-				
+				return null;
 			}
     		
-    	}));
+    	});
         ClassParser cp = new ClassParser(ClassParserTest.class.getPackage(), srzs);
         TypeDefLibCache lib = new TypeDefLibCache(cp);
         

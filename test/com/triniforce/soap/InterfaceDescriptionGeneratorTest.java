@@ -930,17 +930,19 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
     
     public void testAddCustomSrz(){
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
-        gen.addCustomSerializer(ICustom1.class, new IGetSet() {
+        gen.addCustomSerializer(new ICustomSerializer<ICustom1, Integer>(ICustom1.class, Integer.class) {
+
 			@Override
-			public Object get(Object obj) {
+			Integer serialize(ICustom1 value) {
 				return 75757;
 			}
 
 			@Override
-			public void set(Object obj, Object value) {
-				
+			ICustom1 deserialize(Integer value) {
+				// TODO Auto-generated method stub
+				return null;
 			}
-		}, int.class);
+		});
         InterfaceDescription desc = gen.parse(null, TestSrv2.class);
         
         {
@@ -970,24 +972,20 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
     
     public void testCustomSerialization() throws XPathExpressionException, TransformerException, ParserConfigurationException, SAXException, IOException{
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
-        gen.addCustomSerializer(ICustom1.class, new IGetSet() {
+        gen.addCustomSerializer(new ICustomSerializer<ICustom1, Integer>(ICustom1.class, Integer.class) {
+
 			@Override
-			public Object get(Object obj) {
+			Integer serialize(ICustom1 value) {
 				return 75757;
 			}
 
 			@Override
-			public void set(Object obj, Object value) {
-				assertEquals(75757, value);
-				if(obj.getClass().isArray()){
-					Array.set(obj, 0, new ICustom1(){});
-				}
-				else{
-					O1 o1 = (O1) obj;
-					o1.setVal(new ICustom1(){});
-				}
+			ICustom1 deserialize(Integer value) {
+				assertEquals(Integer.valueOf(75757), value);
+				return new ICustom1(){};
 			}
-		}, int.class);
+		});
+
         InterfaceDescription desc = gen.parse(null, TestSrv2.class);    	
         {
 

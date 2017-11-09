@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -62,7 +61,6 @@ import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
-import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
 import com.triniforce.soap.WsdlDescription.WsdlMessage;
 import com.triniforce.soap.WsdlDescription.WsdlPort.WsdlOperation;
 import com.triniforce.soap.WsdlDescription.WsdlType;
@@ -85,7 +83,7 @@ public class InterfaceDescriptionGenerator {
     private SAXParserFactory m_SAXParserFactory;
     private DocumentBuilderFactory m_documentBuilderFactory;
     private TransformerFactory m_transformerFactory;
-    Map<Type, CustomSerializer> m_customSerializers = new HashMap<Type, CustomSerializer>();
+    List<ICustomSerializer> m_customSerializers = new ArrayList<ICustomSerializer>();
 
     public InterfaceDescriptionGenerator() {
         this("http://tempuri.org/", "ServerName");
@@ -186,10 +184,11 @@ public class InterfaceDescriptionGenerator {
         MessageDef inMsgType = new InterfaceDescription.MessageDef(opDesc.getName());
         for(NamedArg arg: opDesc.getArgs()){
         	Type argType = arg.getType();
-            CustomSerializer customSrz = m_customSerializers.get(argType);
+            ICustomSerializer customSrz = ICustomSerializer.find(m_customSerializers, 
+            		TypeDefLibCache.toClass(argType));
             if(null != customSrz){
-                TypeDef def = lib.add(customSrz.m_cls);            
-            	inMsgType.addParameter(arg.getName(), TypeDefLibCache.toClass(argType), def, customSrz.m_getSet);
+                TypeDef def = lib.add(customSrz.getTargetType());            
+            	inMsgType.addParameter(arg.getName(), TypeDefLibCache.toClass(argType), def, customSrz);
             }
             else{
                 TypeDef def = lib.add(argType);            
@@ -1157,8 +1156,8 @@ public class InterfaceDescriptionGenerator {
 		return new JSONSerializer.JsonRpcError.Error(code, e.getClass().getName() + ": " + e.getMessage(), "");
 	}
 
-	public <T> void addCustomSerializer(Class<T> clsFrom, IGetSet iCustomSerializer, Class clsTo) {
-		m_customSerializers.put(clsFrom, new CustomSerializer(clsTo, iCustomSerializer));
+	public <T> void addCustomSerializer(ICustomSerializer iCustomSerializer) {
+		m_customSerializers.add(iCustomSerializer);
 	}
 
     

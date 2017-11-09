@@ -328,7 +328,7 @@ public class SoapHandlerTest extends TFTestCase {
         assertEquals(null, obj.toObject());
         
         
-        TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(this.getClass().getPackage(), Collections.EMPTY_MAP));
+        TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(this.getClass().getPackage(), Collections.EMPTY_LIST));
         TypeDef def = lib.add(TestCls1.class);
 
         obj = new CurrentObject(qn, def);
