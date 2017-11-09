@@ -33,9 +33,9 @@ public class ClassParser {
     };
 	private Package m_pkg;
 	private HashMap<Class, List<String> > m_nonParsedParents;
-	private List<ICustomSerializer> m_customSrzs;
+	private List<CustomSerializer> m_customSrzs;
 
-    public ClassParser(Package pkg, List<ICustomSerializer> customSrzs) {
+    public ClassParser(Package pkg, List<CustomSerializer> customSrzs) {
         m_pkg = pkg;
         m_nonParsedParents = new HashMap<Class, List<String> >();
         addNonParsedParent(Exception.class);
@@ -91,9 +91,9 @@ public class ClassParser {
                 if(null != getter){
 //                if(!Modifier.isStatic(getter.getModifiers()) && 
 //                        propType.equals(getter.getGenericReturnType())){
-                	ICustomSerializer customSrz= null;
+                	CustomSerializer customSrz= null;
                 	if(propType instanceof Class)
-                		customSrz = ICustomSerializer.find(m_customSrzs, (Class) propType);
+                		customSrz = CustomSerializer.find(m_customSrzs, (Class) propType);
                 	IGetSet getset;
 					if(null != customSrz){
                 		getset = customSrz.getGetSet(getter, setter);

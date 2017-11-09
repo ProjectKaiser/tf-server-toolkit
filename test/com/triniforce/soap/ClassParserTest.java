@@ -559,8 +559,8 @@ public class ClassParserTest extends TFTestCase {
     
     public void testClassParser(){
     	final Custom01 c01 = new Custom01();
-    	List<ICustomSerializer> srzs = new ArrayList<ICustomSerializer>();
-    	srzs.add(new ICustomSerializer<Custom01, String>(Custom01.class, String.class){
+    	List<CustomSerializer> srzs = new ArrayList<CustomSerializer>();
+    	srzs.add(new CustomSerializer<Custom01, String>(Custom01.class, String.class){
 
 			@Override
 			String serialize(Custom01 value) {

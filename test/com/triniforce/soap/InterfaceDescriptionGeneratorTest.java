@@ -930,7 +930,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
     
     public void testAddCustomSrz(){
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
-        gen.addCustomSerializer(new ICustomSerializer<ICustom1, Integer>(ICustom1.class, Integer.class) {
+        gen.addCustomSerializer(new CustomSerializer<ICustom1, Integer>(ICustom1.class, Integer.class) {
 
 			@Override
 			Integer serialize(ICustom1 value) {
@@ -972,7 +972,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
     
     public void testCustomSerialization() throws XPathExpressionException, TransformerException, ParserConfigurationException, SAXException, IOException{
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
-        gen.addCustomSerializer(new ICustomSerializer<ICustom1, Integer>(ICustom1.class, Integer.class) {
+        gen.addCustomSerializer(new CustomSerializer<ICustom1, Integer>(ICustom1.class, Integer.class) {
 
 			@Override
 			Integer serialize(ICustom1 value) {

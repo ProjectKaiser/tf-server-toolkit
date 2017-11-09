@@ -10,24 +10,24 @@ import java.util.ArrayList;
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
 
-public class ICustomSerializerTest extends TFTestCase {
+public class CustomSerializerTest extends TFTestCase {
 	
 	interface IType1{}
 	interface IType2 extends IType1{}
 	interface IType3{}
 
 	public void testFind() {
-		ArrayList<ICustomSerializer> srzs = new ArrayList<ICustomSerializer>();
-		assertNull(ICustomSerializer.find(srzs, IType1.class));
+		ArrayList<CustomSerializer> srzs = new ArrayList<CustomSerializer>();
+		assertNull(CustomSerializer.find(srzs, IType1.class));
 
 		add(srzs, IType1.class);
-		assertNotNull(ICustomSerializer.find(srzs, IType1.class));
-		assertNull(ICustomSerializer.find(srzs, IType3.class));
-		assertNotNull(ICustomSerializer.find(srzs, IType2.class));
+		assertNotNull(CustomSerializer.find(srzs, IType1.class));
+		assertNull(CustomSerializer.find(srzs, IType3.class));
+		assertNotNull(CustomSerializer.find(srzs, IType2.class));
 	}
 
-	private <T>void add(ArrayList<ICustomSerializer> srzs, Class<T> cls) {
-		srzs.add(new ICustomSerializer<T, String>(cls, String.class) {
+	private <T>void add(ArrayList<CustomSerializer> srzs, Class<T> cls) {
+		srzs.add(new CustomSerializer<T, String>(cls, String.class) {
 			@Override
 			String serialize(T value) {
 				return null;
@@ -54,7 +54,7 @@ public class ICustomSerializerTest extends TFTestCase {
 	
 	public void testGetGetSet() throws NoSuchMethodException, SecurityException{
 		final IType1 rest = new IType1(){};
-		ICustomSerializer<IType1, String> ts = new ICustomSerializer<IType1, String>(IType1.class, String.class){
+		CustomSerializer<IType1, String> ts = new CustomSerializer<IType1, String>(IType1.class, String.class){
 
 			@Override
 			String serialize(IType1 value) {

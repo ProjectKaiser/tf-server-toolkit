@@ -83,7 +83,7 @@ public class InterfaceDescriptionGenerator {
     private SAXParserFactory m_SAXParserFactory;
     private DocumentBuilderFactory m_documentBuilderFactory;
     private TransformerFactory m_transformerFactory;
-    List<ICustomSerializer> m_customSerializers = new ArrayList<ICustomSerializer>();
+    List<CustomSerializer> m_customSerializers = new ArrayList<CustomSerializer>();
 
     public InterfaceDescriptionGenerator() {
         this("http://tempuri.org/", "ServerName");
@@ -184,7 +184,7 @@ public class InterfaceDescriptionGenerator {
         MessageDef inMsgType = new InterfaceDescription.MessageDef(opDesc.getName());
         for(NamedArg arg: opDesc.getArgs()){
         	Type argType = arg.getType();
-            ICustomSerializer customSrz = ICustomSerializer.find(m_customSerializers, 
+            CustomSerializer customSrz = CustomSerializer.find(m_customSerializers, 
             		TypeDefLibCache.toClass(argType));
             if(null != customSrz){
                 TypeDef def = lib.add(customSrz.getTargetType());            
@@ -1156,7 +1156,7 @@ public class InterfaceDescriptionGenerator {
 		return new JSONSerializer.JsonRpcError.Error(code, e.getClass().getName() + ": " + e.getMessage(), "");
 	}
 
-	public <T> void addCustomSerializer(ICustomSerializer iCustomSerializer) {
+	public <T> void addCustomSerializer(CustomSerializer iCustomSerializer) {
 		m_customSerializers.add(iCustomSerializer);
 	}
 

@@ -109,7 +109,7 @@ public class InterfaceDescription implements Serializable{
             props.add(new PropDef(name, typeDef, rawType.getName(), new MsgPropGetSet(name, props.size())));            
         }
 
-		public void addParameter(String name, Class rawType, TypeDef typeDef, ICustomSerializer<?, ?> customSrz) {
+		public void addParameter(String name, Class rawType, TypeDef typeDef, CustomSerializer<?, ?> customSrz) {
             List<PropDef> props = getOwnProps(); 
             IGetSet getset = new MsgPropGetSet(name, props.size());
             getset = customSrz.getGetSet(getset);

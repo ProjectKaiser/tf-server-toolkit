@@ -12,11 +12,11 @@ import java.util.List;
 import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
 import com.triniforce.utils.ApiAlgs;
 
-public abstract class ICustomSerializer<From, To>{
+public abstract class CustomSerializer<From, To>{
 	private Class<From> m_fromCls;
 	private Class<To> m_toCls;
 
-	public ICustomSerializer(Class<From> fromCls, Class<To> toCls) {
+	public CustomSerializer(Class<From> fromCls, Class<To> toCls) {
 		m_fromCls = fromCls;
 		m_toCls = toCls;
 	}
@@ -76,8 +76,8 @@ public abstract class ICustomSerializer<From, To>{
 		return m_fromCls;
 	}
 
-	public static ICustomSerializer find(List<ICustomSerializer> customSerializers, Class argType) {
-		for (ICustomSerializer srz : customSerializers) {
+	public static CustomSerializer find(List<CustomSerializer> customSerializers, Class argType) {
+		for (CustomSerializer srz : customSerializers) {
 			if(srz.getSourceType().isAssignableFrom(argType))
 				return srz;
 		}
