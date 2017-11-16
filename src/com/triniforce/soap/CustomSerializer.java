@@ -21,8 +21,8 @@ public abstract class CustomSerializer<From, To>{
 		m_toCls = toCls;
 	}
 	
-	abstract To serialize(From value);
-	abstract From deserialize(To value);
+	public abstract To serialize(From value);
+	public abstract From deserialize(To value);
 	
 	IGetSet getGetSet(final Method getter, final Method setter){
 		return getGetSet(new IGetSet(){

@@ -301,4 +301,10 @@ public class TypeDefLibCacheTest extends TFTestCase {
 		}
 		private static final long serialVersionUID = 1L;
     }
+    
+    public void testGet(){
+    	String res1 = m_lib.get(com.triniforce.soap.testpkg_01.DuplicatedName.class, "DuplicatedName", false);
+    	String res2 = m_lib.get(com.triniforce.soap.testpkg_02.DuplicatedName.class, "DuplicatedName", false);
+    	assertFalse(res1.equals(res2));
+    }
 }

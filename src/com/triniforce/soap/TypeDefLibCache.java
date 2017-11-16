@@ -86,7 +86,7 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
             TypeDef res = get(type);
             if(null == res){
             	Class cls = toClass(type);
-            	String name = m_nameGen.get(type, cls.getSimpleName(), true);
+            	String name = m_nameGen.get(type, cls.getSimpleName(), false);
 				if(cls.isEnum())
 					res = new TypeDef.EnumDef(name, (Class) type);
 				else{

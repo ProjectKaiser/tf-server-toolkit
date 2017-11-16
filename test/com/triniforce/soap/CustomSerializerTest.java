@@ -29,12 +29,12 @@ public class CustomSerializerTest extends TFTestCase {
 	private <T>void add(ArrayList<CustomSerializer> srzs, Class<T> cls) {
 		srzs.add(new CustomSerializer<T, String>(cls, String.class) {
 			@Override
-			String serialize(T value) {
+			public String serialize(T value) {
 				return null;
 			}
 
 			@Override
-			T deserialize(String value) {
+			public T deserialize(String value) {
 				return null;
 			}
 		});
@@ -57,12 +57,12 @@ public class CustomSerializerTest extends TFTestCase {
 		CustomSerializer<IType1, String> ts = new CustomSerializer<IType1, String>(IType1.class, String.class){
 
 			@Override
-			String serialize(IType1 value) {
+			public String serialize(IType1 value) {
 				return "serialized";
 			}
 
 			@Override
-			IType1 deserialize(String value) {
+			public IType1 deserialize(String value) {
 				return rest;
 			}
 			

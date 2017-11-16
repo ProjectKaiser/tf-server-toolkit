@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,6 @@ import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
-import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
 import com.triniforce.soap.testpkg_01.CChild1;
 import com.triniforce.soap.testpkg_01.CParent;
 import com.triniforce.soap.testpkg_02.CChild2;
@@ -563,12 +561,12 @@ public class ClassParserTest extends TFTestCase {
     	srzs.add(new CustomSerializer<Custom01, String>(Custom01.class, String.class){
 
 			@Override
-			String serialize(Custom01 value) {
+			public String serialize(Custom01 value) {
 				return "customized";
 			}
 
 			@Override
-			Custom01 deserialize(String value) {
+			public Custom01 deserialize(String value) {
 				// TODO Auto-generated method stub
 				return null;
 			}
