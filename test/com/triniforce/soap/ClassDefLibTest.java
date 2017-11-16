@@ -9,8 +9,6 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
 
-import org.jmock.Mockery;
-
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDefLibCache.ClassDefLib;

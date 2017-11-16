@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
+import com.triniforce.soap.TypeDefLibCache.ClassDefLib;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.testpkg_01.CChild1;
 import com.triniforce.soap.testpkg_01.CParent;
@@ -452,10 +454,12 @@ public class ClassParserTest extends TFTestCase {
     static class Cls1010{}
     
     public void testParseInnerType(){
-     	assertEquals("Cls1010", m_lib.add(Cls101.Cls1010.class).getName());
+    	HashMap<Type, TypeDef> map = new HashMap<Type, TypeDef>();
+    	ClassDefLib cdlib = new TypeDefLibCache.ClassDefLib(m_cp, m_lib, map, m_lib, false);
+     	assertEquals("Cls1010", cdlib.add(Cls101.Cls1010.class).getName());
      	
      	try{
-     		ApiAlgs.getLog(this).trace(m_lib.add(Cls1010.class).getName());
+     		ApiAlgs.getLog(this).trace(cdlib.add(Cls1010.class).getName());
      		fail();
      	} catch(ESoap.InvalidTypeName e){
      		assertTrue(e.getMessage(), e.getMessage().contains("Cls1010"));
