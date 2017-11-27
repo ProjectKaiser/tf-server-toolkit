@@ -16,6 +16,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.json.simple.parser.ParseException;
 
@@ -116,18 +117,22 @@ public class JSONSerializerTest extends TFTestCase {
 		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_001\",\"params\":[515,{\"value\":\"val_0012\"}],\"id\":1}", 
 				serialize(srz, desc, 515, new Prop01(){{setValue("val_0012");}}));
 		
-		Date dt = new GregorianCalendar(2005, 1, 12).getTime();
-		String str = serialize(srz, desc, "method_dt01", dt);
-
-		// FIXME: fails on long run
-		// junit.framework.ComparisonFailure: expected:<..."params":["2005-02-1[1T21]:00:00.000Z"],"id":1...> but was:<..."params":["2005-02-1[2T00]:00:00.000Z"],"id":1...>
-		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_dt01\",\"params\":[\"2005-02-11T21:00:00.000Z\"],\"id\":1}", str);
-		
-		SOAPDocument res = srz.deserialize(desc, new ByteArrayInputStream(str.getBytes()));
-		
-		assertEquals(dt, res.m_args[0]);
-		
-		
+		TimeZone tz0 = TimeZone.getDefault();
+		try{
+			TimeZone.setDefault(TimeZone.getTimeZone("GMT+3"));
+			Date dt = new GregorianCalendar(2005, 1, 12).getTime();
+			String str = serialize(srz, desc, "method_dt01", dt);
+	
+			assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_dt01\",\"params\":[\"2005-02-11T21:00:00.000Z\"],\"id\":1}", str);
+			
+			SOAPDocument res = srz.deserialize(desc, new ByteArrayInputStream(str.getBytes()));
+			
+			assertEquals(dt, res.m_args[0]);
+			
+			
+		}finally{
+			TimeZone.setDefault(tz0);
+		}
 	}
 
 	private String serialize(JSONSerializer srz, InterfaceDescription desc,

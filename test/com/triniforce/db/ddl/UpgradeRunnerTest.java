@@ -542,7 +542,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
     	String t1Name = "TestPlayer.testRun1", t1DBName;
     	String t2Name = "TestPlayer.testRun2", t2DBName;
     	String t3Name = "TestPlayer.testRun3", t3DBName;
-    	String t4Name = "TestPlayer.testRun4", t4DBName;
+    	String t4Name = "TestPlayer.testRun4";
 		TableDef t1, t2, t3;
     	{	//t1 = (col1, col2, pk1)
     		t1 = new TableDef(t1Name);
@@ -653,7 +653,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
             }
         }
         
-    	{	//t3 = (col1, index)
+        if(getDbType().equals(DbType.MSSQL)){	//t3 = (col1, index)
     		TableDef t4 = new TableDef(t4Name);
     		desired.put(t4.getEntityName(), t4);
     		t4.addModification(1, new AddColumnOperation(FieldDef.createScalarField("col1", ColumnType.INT, true)));
