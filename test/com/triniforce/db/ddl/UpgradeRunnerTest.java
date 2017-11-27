@@ -512,6 +512,24 @@ public class UpgradeRunnerTest extends DDLTestCase {
             assertEquals(MessageFormat.format("ALTER TABLE {0} ADD CONSTRAINT {1} UNIQUE ({2})", 
             		dbName, m_as.getIndexDbName(m_player.getFullIndexName(dbName, "nuIndex", IndexDef.TYPE.INDEX)), getQuoted("INT_FIELD")), sql);
         }
+        {
+        	HashMap<String, String> opts = new HashMap<String, String>();
+        	opts.put("Option1", "OFF");
+        	opts.put("Option5", "ON");
+        	AddIndexOperation op = new AddIndexOperation(IndexDef.createIndex("nuIndex2", Arrays.asList("INT_FIELD"), false, true, false, 
+        			Arrays.asList("Col12", "Col13"), opts));
+        	String sql = m_player.getOperationString(new DBOperation(tabName, op));
+        	assertEquals(
+        			MessageFormat.format("CREATE   INDEX {0} ON {1} ({2}) INCLUDE ({3}, {4}) WITH (Option1=OFF, Option5=ON)",
+        					m_as.getIndexDbName(m_player.getFullIndexName(dbName, "nuIndex2", IndexDef.TYPE.INDEX)), 
+        					dbName,
+        					getQuoted("INT_FIELD"),
+        					getQuoted("COL12"),
+        					getQuoted("COL13") ),        					
+        			sql);
+        	
+            
+        }
 		m_as.removeTable(tabName);    	    	
     }
     
@@ -524,6 +542,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
     	String t1Name = "TestPlayer.testRun1", t1DBName;
     	String t2Name = "TestPlayer.testRun2", t2DBName;
     	String t3Name = "TestPlayer.testRun3", t3DBName;
+    	String t4Name = "TestPlayer.testRun4", t4DBName;
 		TableDef t1, t2, t3;
     	{	//t1 = (col1, col2, pk1)
     		t1 = new TableDef(t1Name);
@@ -633,7 +652,23 @@ public class UpgradeRunnerTest extends DDLTestCase {
                 assertEquals(vt1, m_as.getVersion(t1.getEntityName()));
             }
         }
-    }
+        
+    	{	//t3 = (col1, index)
+    		TableDef t4 = new TableDef(t4Name);
+    		desired.put(t4.getEntityName(), t4);
+    		t4.addModification(1, new AddColumnOperation(FieldDef.createScalarField("col1", ColumnType.INT, true)));
+    		t4.addModification(2, new AddColumnOperation(FieldDef.createScalarField("col2", ColumnType.SMALLINT, true)));
+    		HashMap<String, String> opts = new HashMap<String,String>();
+    		opts.put("SORT_IN_TEMPDB", "OFF");
+    		opts.put("ONLINE", "OFF");
+    		t4.addModification(3, new AddIndexOperation(IndexDef.createIndex("IDX_COMPLEX1", Arrays.asList("col1"), false, 
+    				true, false, Arrays.asList("col2"), opts)));
+        	DBTables db = new DBTables(m_as, desired);
+    		List<DBOperation> cl = db.getCommandList();
+    		m_player.run(cl);
+    	}    
+    	
+	}
     
     public void testGetCreateOperationString() throws Exception
 	{
