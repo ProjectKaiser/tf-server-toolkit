@@ -530,6 +530,16 @@ public class UpgradeRunnerTest extends DDLTestCase {
         	
             
         }
+        {
+        	
+        	AddIndexOperation op = new AddIndexOperation(IndexDef.createIndex("ORIGINAL_INDEX_NAME_91249149291343", Arrays.asList("INT_FIELD"), false, true, false, 
+        			null, null, true));
+        	String sql = m_player.getOperationString(new DBOperation(tabName, op));
+        	IActualState as = m_player.getActualState();
+        	assertEquals("ORIGINAL_INDEX_NAME_91249149291343", 
+        			as.getIndexDbName(m_player.getFullIndexName(as.getDBName(tabName), "ORIGINAL_INDEX_NAME_91249149291343", IndexDef.TYPE.INDEX)));
+        	assertEquals("CREATE   INDEX ORIGINAL_INDEX_NAME_91249149291343 ON t_testgetoperationstring (\"INT_FIELD\")", sql);
+        }
 		m_as.removeTable(tabName);    	    	
     }
     

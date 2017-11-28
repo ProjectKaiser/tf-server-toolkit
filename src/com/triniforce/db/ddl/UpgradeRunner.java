@@ -794,7 +794,10 @@ public class UpgradeRunner {
 		String fullName = getFullIndexName(dbName, index.getName(), index.getType());
 		if(!op.isDbIndexName()){
 			if(bNew){
-		    	res = m_actualState.generateIndexName(fullName);
+				if(index.isOriginalDbName())
+					res = index.getName();
+				else
+					res = m_actualState.generateIndexName(fullName);
 		    	m_actualState.addIndexName(fullName, res);
 			}
 			else{

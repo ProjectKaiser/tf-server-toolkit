@@ -503,10 +503,12 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
         boolean m_bClustered = false;
 		private List<String> m_includeCols;
 		private Map<String, String> m_relationalOptions;
+		private boolean m_bOriginalName;
                 
         private IndexDef(String name, TYPE type, List<String> columns, boolean bUnique, 
                 boolean bAscending, boolean bActive, String parentTab, String parentIndex, 
-                boolean bClustered, List<String> includeCols, Map<String, String> relationalIndexOptions){
+                boolean bClustered, List<String> includeCols, Map<String, String> relationalIndexOptions, 
+                boolean bOriginalName){
             m_name = name;
             m_type = type;
             m_columns = columns;
@@ -518,13 +520,14 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
             m_bClustered = bClustered;
             m_includeCols = includeCols;
             m_relationalOptions = relationalIndexOptions;
+            m_bOriginalName = bOriginalName;
         }
         
         private IndexDef(String name, TYPE type, List<String> columns, boolean bUnique, 
                 boolean bAscending, boolean bActive, String parentTab, String parentIndex, 
                 boolean bClustered){
         	this(name, type, columns,  bUnique, bAscending,  bActive,  parentTab,  parentIndex, 
-                     bClustered, null, null);
+                     bClustered, null, null, false);
         }
 
         public void setType(TYPE type) {
@@ -591,7 +594,16 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
         		List<String> includeCols, Map<String, String> relationalIndexOptions){
             if(columns.isEmpty())                
                 throw new TableDef.EInvalidDefinitionArgument("columns"); //$NON-NLS-1$
-            return new IndexDef(name, TYPE.INDEX, columns, bUnique, bAsc, true, null, null, bClustered, includeCols, relationalIndexOptions);
+            return new IndexDef(name, TYPE.INDEX, columns, bUnique, bAsc, true, null, null, bClustered, 
+            		includeCols, relationalIndexOptions, false);
+        }
+        
+        public static IndexDef createIndex(String name, List<String> columns, boolean bUnique, boolean bAsc, boolean bClustered, 
+        		List<String> includeCols, Map<String, String> relationalIndexOptions, boolean bOriginalName){
+            if(columns.isEmpty())                
+                throw new TableDef.EInvalidDefinitionArgument("columns"); //$NON-NLS-1$
+            return new IndexDef(name, TYPE.INDEX, columns, bUnique, bAsc, true, null, null, bClustered, 
+            		includeCols, relationalIndexOptions, bOriginalName);
         }
         
         public List<String> getColumns() {
@@ -658,6 +670,10 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
 
 		public Map<String, String> getRelationalOptions() {
 			return m_relationalOptions;
+		}
+		
+		public boolean isOriginalDbName(){
+			return m_bOriginalName;
 		}
 
     }
