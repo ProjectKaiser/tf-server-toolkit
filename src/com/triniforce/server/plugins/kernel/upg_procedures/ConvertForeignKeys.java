@@ -62,6 +62,11 @@ public class ConvertForeignKeys  extends UpgradeProcedure {
                                     String dbFullName) {
                                 return dbFullName;
                             }
+
+							@Override
+							public boolean bUseOriginalIndexNames() {
+								return false;
+							}
                         }, dbName);
                 for (IndexDef fk : fks) {
                     exec(st, getDelForeignKeyString(pl, dbName, fk.getName()));

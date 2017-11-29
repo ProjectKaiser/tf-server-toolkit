@@ -93,6 +93,11 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 						}
 						return dbFullName;
 					}
+
+					@Override
+					public boolean bUseOriginalIndexNames() {
+						return false;
+					}
 					
 				});
 		//DeltaSchema sch = loader.loadSchema(getConnection());

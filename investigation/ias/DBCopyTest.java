@@ -69,6 +69,11 @@ public class DBCopyTest extends TFTestCase {
 							String dbFullName) {
 						return dbFullName;
 					}
+
+					@Override
+					public boolean bUseOriginalIndexNames() {
+						return false;
+					}
 					
 				});
 //				loader = new Delta.DeltaSchemaLoader(Arrays.asList("purchase_order"));

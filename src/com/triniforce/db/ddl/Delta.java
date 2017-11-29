@@ -112,6 +112,7 @@ public class Delta {
 		
 		public interface IIndexLocNames{
 			String getShortName(String dbTabName, String dbFullName);
+			boolean bUseOriginalIndexNames();
 		}
 		
 		static class IndexObjectFactory implements IObjectFactory<IndexTemporary> {
@@ -159,7 +160,8 @@ public class Delta {
 					if (IndexDef.TYPE.INDEX.equals(m_type)) {
 						res.m_bAsc = !"B".equals(rs.getString("ASC_OR_DESC"));
 						res.m_bUnique = !rs.getBoolean("NON_UNIQUE");
-						res.m_bOriginalName = indexName.equals(idxDbName);
+						if(m_indexLocNames.bUseOriginalIndexNames())
+							res.m_bOriginalName = indexName.equals(idxDbName);
 					} else if (IndexDef.TYPE.FOREIGN_KEY.equals(m_type)) {
 						String pkTabName = rs.getString("PKTABLE_NAME");
 						res.m_parentTab = m_dbNames.getAppName(pkTabName);
@@ -392,6 +394,13 @@ public class Delta {
 				}
 				return dbFullName;
 			}
+
+			@Override
+			public boolean bUseOriginalIndexNames() {
+				return true;
+			}
+			
+			
 		}
 
 		public DeltaSchemaLoader(List<String> tabs, IIndexLocNames indexLocNames) {
