@@ -148,9 +148,9 @@ import com.triniforce.utils.ApiAlgs;
 			}
 			
 			byte[] ba = outBuf.toByteArray();
+			response.setContentLength(ba.length);
 			ServletOutputStream out = response.getOutputStream(); 
 			out.write(ba, 0, ba.length);
-			response.setContentLength(ba.length);
 			outBuf.close();
 			response.setStatus(status);
 			response.flushBuffer();

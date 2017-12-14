@@ -17,7 +17,7 @@ public class CustomSerializerTest extends TFTestCase {
 	interface IType3{}
 
 	public void testFind() {
-		ArrayList<CustomSerializer> srzs = new ArrayList<CustomSerializer>();
+		ArrayList<CustomSerializer<?,?>> srzs = new ArrayList<CustomSerializer<?,?>>();
 		assertNull(CustomSerializer.find(srzs, IType1.class));
 
 		add(srzs, IType1.class);
@@ -26,7 +26,7 @@ public class CustomSerializerTest extends TFTestCase {
 		assertNotNull(CustomSerializer.find(srzs, IType2.class));
 	}
 
-	private <T>void add(ArrayList<CustomSerializer> srzs, Class<T> cls) {
+	private <T>void add(ArrayList<CustomSerializer<?,?>> srzs, Class<T> cls) {
 		srzs.add(new CustomSerializer<T, String>(cls, String.class) {
 			@Override
 			public String serialize(T value) {

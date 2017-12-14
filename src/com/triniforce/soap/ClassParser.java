@@ -33,9 +33,9 @@ public class ClassParser {
     };
 	private Package m_pkg;
 	private HashMap<Class, List<String> > m_nonParsedParents;
-	private List<CustomSerializer> m_customSrzs;
+	private List<CustomSerializer<?,?>> m_customSrzs;
 
-    public ClassParser(Package pkg, List<CustomSerializer> customSrzs) {
+    public ClassParser(Package pkg, List<CustomSerializer<?,?>> customSrzs) {
         m_pkg = pkg;
         m_nonParsedParents = new HashMap<Class, List<String> >();
         addNonParsedParent(Exception.class);

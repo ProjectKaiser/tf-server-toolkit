@@ -57,7 +57,8 @@ public class WsdlTypeElementTest extends TFTestCase {
 	
 	@Override
 	public void test() throws Exception {
-		TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(getClass().getPackage(), Collections.EMPTY_LIST));
+		TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(getClass().getPackage(), 
+				Collections.EMPTY_LIST), Collections.EMPTY_LIST);
 		ClassDef def = (ClassDef) lib.add(C1.class);
 		WsdlTypeElement res = new WsdlDescription.WsdlTypeElement("n1", def.getProp("prop").getType(), true, 1);;
 		assertFalse(res.isNillable());

@@ -83,7 +83,7 @@ public class InterfaceDescriptionGenerator {
     private SAXParserFactory m_SAXParserFactory;
     private DocumentBuilderFactory m_documentBuilderFactory;
     private TransformerFactory m_transformerFactory;
-    List<CustomSerializer> m_customSerializers = new ArrayList<CustomSerializer>();
+    List<CustomSerializer<?,?>> m_customSerializers = new ArrayList<CustomSerializer<?,?>>();
 
     public InterfaceDescriptionGenerator() {
         this("http://tempuri.org/", "ServerName");
@@ -184,7 +184,7 @@ public class InterfaceDescriptionGenerator {
         MessageDef inMsgType = new InterfaceDescription.MessageDef(opDesc.getName());
         for(NamedArg arg: opDesc.getArgs()){
         	Type argType = arg.getType();
-            CustomSerializer customSrz = CustomSerializer.find(m_customSerializers, 
+            CustomSerializer<?,?> customSrz = CustomSerializer.find(m_customSerializers, 
             		TypeDefLibCache.toClass(argType));
             if(null != customSrz){
                 TypeDef def = lib.add(customSrz.getTargetType());            
@@ -944,7 +944,7 @@ public class InterfaceDescriptionGenerator {
         InterfaceDescription res = new InterfaceDescription();
         ClassParser parser = new ClassParser(pkg, m_customSerializers);
         parser.addNonParsedParent(EParameterizedException.class);
-        TypeDefLibCache lib = new TypeDefLibCache(parser);
+        TypeDefLibCache lib = new TypeDefLibCache(parser, m_customSerializers);
 
         for(SoapInclude soapInc : soapIncs){
             for(Class extraCls : soapInc.extraClasses()){

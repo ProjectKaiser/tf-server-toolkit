@@ -68,7 +68,8 @@ public class ObjectConverterTest extends TFTestCase {
     @Override
     public void test() throws Exception {
     	{
-	        TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(this.getClass().getPackage(), Collections.EMPTY_LIST));
+	        TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(this.getClass().getPackage(), 
+	        		Collections.EMPTY_LIST), Collections.EMPTY_LIST);
 	        InterfaceDescription desc = new InterfaceDescription();
 	        desc.getTypes().add(lib.add(Cls1.class));
 	        desc.getTypes().add(lib.add(Cls2.class));

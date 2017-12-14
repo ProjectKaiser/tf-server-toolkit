@@ -94,6 +94,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         void method7(ICustom1 i1);
         void method8(O1 i1);
         void method9(O3 i2);
+        void method10(Map<String,ICustom1> i2);
     }
     
     static class Cls1{
@@ -1141,6 +1142,33 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 	        ICustom2 c2 =  _o3.getIc2(); 
 	        assertEquals("fffddd", c2.v);
 	    	
+    	}
+    	
+        {
+
+	        SOAPDocument soapDoc = new InterfaceDescriptionGenerator.SOAPDocument();
+	        soapDoc.m_method = "method10";
+	        HashMap<String, ICustom1> map = new HashMap<String, ICustom1>();
+	        map.put("key3525235", new ICustom1(){});
+	        soapDoc.m_args = new Object[]{map};
+	        soapDoc.m_bIn = true;
+	        soapDoc.m_soap = "http://schemas.xmlsoap.org/soap/envelope/";
+	        
+	        Document doc = gen.serialize(desc, soapDoc);
+	        
+	        XPathFactory xpf = XPathFactory.newInstance();  
+	        XPath xp = xpf.newXPath();
+	        
+	        print(doc);
+	        Element res = (Element) xp.evaluate("/Envelope/Body/method10/arg0/value/value", doc, XPathConstants.NODE);
+	        assertEquals("75757", res.getTextContent());
+	        
+	        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+	        gen.writeDocument(stream, doc);
+	        
+	        SOAPDocument dsrzd = gen.deserialize(desc, new ByteArrayInputStream(stream.toByteArray()));
+	
+	    	assertTrue(dsrzd.m_args[0] instanceof Map);
     	}
     }
     

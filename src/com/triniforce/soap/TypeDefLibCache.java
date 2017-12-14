@@ -24,8 +24,10 @@ import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
+import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiAlgs.SimpleName;
+import com.triniforce.utils.TFUtils;
 import com.triniforce.utils.UniqueNameGenerator;
 
 public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
@@ -206,39 +208,60 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         private IDefLibrary m_parent;
         private Map<TypeDef, ArrayDef> m_maps;
 		private ITypeNameGenerator m_nameGen;
-        public MapDefLib(IDefLibrary parent, Map<TypeDef, ArrayDef> m_arrays, ITypeNameGenerator gen) {
+		private List<CustomSerializer<?, ?>> m_customSrzs;
+        public MapDefLib(IDefLibrary parent, Map<TypeDef, ArrayDef> m_arrays, ITypeNameGenerator gen, 
+        		List<CustomSerializer<?,?>> customSrzs) {
             m_parent = parent;
             m_maps   = m_arrays;
             m_nameGen = gen;
+            m_customSrzs = customSrzs;
         }
         
         static class MapComponentDef extends ClassDef{
             private static final long serialVersionUID = -7007326289948350308L;
-            public MapComponentDef(TypeDef keyDef, TypeDef valDef) {
+			private CustomSerializer<?, ?> m_keyCs;
+			private CustomSerializer<?, ?> m_valCs;
+            public MapComponentDef(TypeDef keyDef, TypeDef valDef, CustomSerializer<?, ?> keyCs, CustomSerializer<?, ?>valCs) {
                 super(entryName(keyDef, valDef), MapEntry.class);
                 try {
-                    getOwnProps().add(new PropDef("key", keyDef, keyDef.getType(),
-                            new ClassDef.CDGetSet(Map.Entry.class.getName(), "getKey", MapEntry.class.getName(), "setKey")));
-                    getOwnProps().add(new PropDef("value", valDef, valDef.getType(),
-                            new ClassDef.CDGetSet(Map.Entry.class.getName(), "getValue", "setValue")));
+                	IGetSet keyGs = createGetSet("getKey", "setKey", keyCs);
+                	IGetSet valGs = createGetSet("getValue", "setValue", valCs);
+                    getOwnProps().add(new PropDef("key", keyDef, keyDef.getType(), keyGs));
+                    getOwnProps().add(new PropDef("value", valDef, valDef.getType(), valGs));
+                    m_keyCs = keyCs;
+                    m_valCs = valCs;
                 } catch (Exception e) {
                     ApiAlgs.rethrowException(e);
                 }
             }
             
-            @Override
+            private IGetSet createGetSet(String getter, String setter, CustomSerializer<?, ?> customSrz) {
+            	IGetSet res = new ClassDef.CDGetSet(Map.Entry.class.getName(), getter, MapEntry.class.getName(), setter);
+            	if(null != customSrz)
+            		res = customSrz.getGetSet(res);
+            	return res;
+			}
+
+			@Override
             public boolean equals(Object arg0) {
                 if(!(arg0 instanceof MapComponentDef))
                     return false;
                 MapComponentDef other = (MapComponentDef)arg0;
                 return 
                     getKeyDef().equals(other.getKeyDef()) &&
-                    getValueDef().equals(other.getValueDef());
+                    getValueDef().equals(other.getValueDef()) &&
+                    TFUtils.equals(m_keyCs, other.m_keyCs) &&
+                    TFUtils.equals(m_valCs, other.m_valCs);
             }
             
             @Override
             public int hashCode() {
-                return getKeyDef().hashCode() + getValueDef().hashCode();
+                int res = getKeyDef().hashCode() + getValueDef().hashCode();
+                if(null != m_keyCs)
+                	res += m_keyCs.hashCode();
+                if(null != m_valCs)
+                	res += m_valCs.hashCode();
+                return res;
             }
             
             TypeDef getKeyDef(){
@@ -309,8 +332,25 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
             if(null == tkey)
                 return null;
             
-            return bAddKey ? new MapComponentDef(m_parent.add(tkey), m_parent.add(tval)) :
-                new MapComponentDef(m_parent.get(tkey), m_parent.get(tval));
+            CustomSerializer<?, ?> keySrz = CustomSerializer.find(m_customSrzs, tkey);
+            CustomSerializer<?, ?> valSrz = CustomSerializer.find(m_customSrzs, tval);
+            if(null!= keySrz)
+            	tkey = keySrz.getTargetType();
+            if(null!= valSrz)
+            	tval = valSrz.getTargetType();
+            
+            TypeDef keyDef, valDef;
+            if(bAddKey){
+            	keyDef = m_parent.add(tkey);
+            	valDef = m_parent.add(tval);
+            }
+            else{
+            	keyDef = m_parent.get(tkey);
+            	valDef = m_parent.get(tval);
+            	
+            }
+            
+            return new MapComponentDef(keyDef, valDef, keySrz, valSrz);
         }
     }
         
@@ -412,14 +452,14 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
 	private UniqueNameGenerator m_uniqueNameGen;
 	private ExternalDefLib m_extLib;
 
-    public TypeDefLibCache(ClassParser parser) {
+    public TypeDefLibCache(ClassParser parser, List<CustomSerializer<?, ?>> customSrzs) {
         m_libs = new ArrayList<IDefLibrary>();
         m_arrays = new HashMap<TypeDef, ArrayDef>();
         m_classes = new HashMap<Type, TypeDef>();
         m_extLib = new ExternalDefLib();
         m_libs.add(new ScalarDefLib());
         m_libs.add(new ArrayDefLib(this, m_arrays, this));
-        m_libs.add(new MapDefLib(this, m_arrays, this));
+        m_libs.add(new MapDefLib(this, m_arrays, this, customSrzs));
         m_libs.add(m_extLib);
         ClassDefLib cdLib = new ClassDefLib(parser, this, m_classes, this);
         m_libs.add(cdLib);

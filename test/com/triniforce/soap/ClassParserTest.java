@@ -38,7 +38,7 @@ public class ClassParserTest extends TFTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         m_cp = new ClassParser(ClassParserTest.class.getPackage(), Collections.EMPTY_LIST);
-        m_lib = new TypeDefLibCache(m_cp);
+        m_lib = new TypeDefLibCache(m_cp, Collections.EMPTY_LIST);
     }
     
     static class C1{}
@@ -330,7 +330,7 @@ public class ClassParserTest extends TFTestCase {
         arr = (ArrayDef) m_lib.add(Object[].class);
         assertEquals(Object.class.getName(), arr.getComponentType().getType());
 
-        m_lib = new TypeDefLibCache(m_cp);
+        m_lib = new TypeDefLibCache(m_cp, Collections.EMPTY_LIST);
         
         t1 = IL1.class.getMethod("fun3", (Class[])null).getGenericReturnType();
         MapDef mapDef = (MapDef) m_lib.add(t1);
@@ -561,7 +561,7 @@ public class ClassParserTest extends TFTestCase {
     
     public void testClassParser(){
     	final Custom01 c01 = new Custom01();
-    	List<CustomSerializer> srzs = new ArrayList<CustomSerializer>();
+    	List<CustomSerializer<?,?>> srzs = new ArrayList<CustomSerializer<?,?>>();
     	srzs.add(new CustomSerializer<Custom01, String>(Custom01.class, String.class){
 
 			@Override
@@ -577,7 +577,7 @@ public class ClassParserTest extends TFTestCase {
     		
     	});
         ClassParser cp = new ClassParser(ClassParserTest.class.getPackage(), srzs);
-        TypeDefLibCache lib = new TypeDefLibCache(cp);
+        TypeDefLibCache lib = new TypeDefLibCache(cp, Collections.EMPTY_LIST);
         
         ClassDef def = cp.parse(O01.class, lib, "typeName-1");
         

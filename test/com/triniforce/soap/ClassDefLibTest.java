@@ -17,7 +17,7 @@ public class ClassDefLibTest extends TFTestCase {
 
 	public void testAdd() {
 		ClassParser parser = new ClassParser(getClass().getPackage(), Collections.EMPTY_LIST);
-		TypeDefLibCache parent = new TypeDefLibCache(parser);
+		TypeDefLibCache parent = new TypeDefLibCache(parser, Collections.EMPTY_LIST);
 		HashMap<Type, TypeDef> map = new HashMap<Type, TypeDef>();
 		
 		ClassDefLib lib = new TypeDefLibCache.ClassDefLib(parser, parent, map, parent);

@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimeZone;
 
 import com.triniforce.db.test.TFTestCase;
@@ -49,7 +50,7 @@ public class TypeDefLibCacheTest extends TFTestCase {
         super.setUp();
         m_parser = new ClassParser(this.getClass().getPackage(), Collections.EMPTY_LIST);
         m_parser.addNonParsedParent(EParameterizedException.class);
-        m_lib = new TypeDefLibCache(m_parser);
+        m_lib = new TypeDefLibCache(m_parser, Collections.EMPTY_LIST);
         
         assertNotNull(m_lib.get(int.class));
         assertNotNull(m_lib.add(int.class));
@@ -181,8 +182,51 @@ public class TypeDefLibCacheTest extends TFTestCase {
     	
     }
     
+    interface ICustom1{}
+    interface ICustom2{}
+    static class CSrz1 extends CustomSerializer<ICustom1, String>{
+
+		public CSrz1() {
+			super(ICustom1.class, String.class);
+		}
+
+		@Override
+		public String serialize(ICustom1 value) {
+			return "----customized----";
+		}
+
+		@Override
+		public ICustom1 deserialize(String value) {
+			assertEquals("----customized----", value);
+			return new ICustom1(){};
+		}
+    	
+    } 
+    
+    static class CSrz2 extends CustomSerializer<ICustom2, String>{
+
+		public CSrz2() {
+			super(ICustom2.class, String.class);
+		}
+
+		@Override
+		public String serialize(ICustom2 value) {
+			return "FFFF";
+		}
+
+		@Override
+		public ICustom2 deserialize(String value) {
+			assertEquals("FFFF", value);
+			return new ICustom2(){};
+		}
+    	
+    } 
+    
     interface ISrv{
     	void method_01(Map<String, Short> arg);
+    	void method_02(Map<ICustom1, ICustom2> arg);
+    	void method_03(Map<String, String> arg1, Map<String, ICustom1> arg2);
+    	
     }
     
     static class MapOfObjectByObject{}
@@ -191,7 +235,10 @@ public class TypeDefLibCacheTest extends TFTestCase {
     public void testMapDefLib() throws NoSuchMethodException, SecurityException{
         assertEquals("MapOfObjectByObject", m_lib.add(MapOfObjectByObject.class).getName());
         
-        MapDefLib mapLib = new TypeDefLibCache.MapDefLib(m_lib, m_lib.m_arrays, m_lib);
+        List<CustomSerializer<?,?>> customs = new ArrayList<CustomSerializer<?,?>>();
+        customs.addAll(Arrays.asList(new CSrz1(), new CSrz2()));
+        MapDefLib mapLib = new TypeDefLibCache.MapDefLib(m_lib, m_lib.m_arrays, m_lib, customs);
+        
         
         {
 	        MapDef md = (MapDef) mapLib.add(Map.class);
@@ -230,6 +277,36 @@ public class TypeDefLibCacheTest extends TFTestCase {
         	assertNotNull(defs.keySet().toString(), cd);
         	cd = defs.get("MapEntryShortByString");
         	assertNotNull(defs.keySet().toString(),cd);
+        }
+        
+        
+        {
+        	Method m1 = ISrv.class.getMethod("method_02", Map.class);
+        	ArrayDef res = mapLib.add(m1.getGenericParameterTypes()[0]);
+        	ClassDef mcd = (ClassDef) res.getPropDef().getType();
+        	PropDef keyProp = mcd.getProp("key");
+        
+        	Map<ICustom1, ICustom2> map = new HashMap<ICustom1, ICustom2>();
+        	
+        	map.put(new ICustom1(){}, new ICustom2(){});
+        	Set<Entry> set = (Set) res.getPropDef().get(map);
+        	Entry entry0 = set.iterator().next();
+        	assertEquals("----customized----", keyProp.get(entry0));
+        	assertEquals("FFFF", mcd.getProp("value").get(entry0));
+        	
+        	assertEquals("string", keyProp.getType().getName());
+        	assertEquals("string", mcd.getProp("value").getType().getName());
+        }
+        {
+        	Map<String, ICustom1> map = new HashMap<String, ICustom1>();
+        	map.put("fff", new ICustom1(){});
+        	Entry entry0 = map.entrySet().iterator().next();
+        	
+        	Method m1 = ISrv.class.getMethod("method_03", Map.class, Map.class);
+        	mapLib.add(m1.getGenericParameterTypes()[0]);// Add MapStringByString
+        	ArrayDef res = mapLib.add(m1.getGenericParameterTypes()[1]);// Add MapICustomByString
+        	ClassDef mcd = (ClassDef) res.getPropDef().getType();
+        	assertEquals("----customized----", mcd.getProp("value").get(entry0));
         }
         
         

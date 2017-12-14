@@ -7,6 +7,7 @@ package com.triniforce.soap;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.List;
 
 import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
@@ -76,9 +77,10 @@ public abstract class CustomSerializer<From, To>{
 		return m_fromCls;
 	}
 
-	public static CustomSerializer find(List<CustomSerializer> customSerializers, Class argType) {
+	public static CustomSerializer<?,?> find(List<CustomSerializer<?,?>> customSerializers, Type argType) {
+		Class argCls = TypeDefLibCache.toClass(argType);
 		for (CustomSerializer srz : customSerializers) {
-			if(srz.getSourceType().isAssignableFrom(argType))
+			if(srz.getSourceType().isAssignableFrom(argCls))
 				return srz;
 		}
 		return null;
