@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 import com.triniforce.db.ddl.DBTables.DBOperation;
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
@@ -530,7 +531,8 @@ public class UpgradeRunner {
                         .getOperation();
                 String dbIndexName = getDbIndexName(dbName, addIdx, true);
                 sql = getCreateIndexOperationString(addIdx.getColumns(), dbName, 
-                		dbIndexName, addIdx.isUnique(), addIdx.isAscending(), addIdx.isClustered());
+                		dbIndexName, addIdx.isUnique(), addIdx.isAscending(), addIdx.isClustered(),
+                		addIdx.getIndex().getIncludeCols(), addIdx.getIndex().getRelationalOptions());
             } else if (op.getOperation() instanceof DeleteColumnOperation) {
                 DeleteColumnOperation delCol = (DeleteColumnOperation) op
                         .getOperation();
@@ -601,7 +603,8 @@ public class UpgradeRunner {
     }
 
     public String getCreateIndexOperationString(List<String> cols, String dbTabName, 
-    		String dbIndexName, boolean bUnique, boolean bAsc, boolean bClustered) {
+    		String dbIndexName, boolean bUnique, boolean bAsc, boolean bClustered, 
+    		List<String> colsIncl, Map<String, String> opts) {
         ArrayList<String> colSpec = new ArrayList<String>();
         for (String col : cols) {
             colSpec
@@ -609,6 +612,8 @@ public class UpgradeRunner {
                             .format(
                                     "{0} {1}", col, bAsc ? "ASC" : "DESC")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
+        String sqlInclude = colsIncl == null || colsIncl.isEmpty() ? "" : " INCLUDE (" + colList(colsIncl) + ")";
+        String sqlOpts = null == opts || opts.isEmpty() ? "" : " WITH " + optionsMapToString(opts);
         String sql;
         if(bUnique){
         	sql = MessageFormat
@@ -619,11 +624,27 @@ public class UpgradeRunner {
         else{
             sql = MessageFormat
                     .format(
-                            "CREATE {0} {4} INDEX {1} ON {2} ({3})", 
+                            "CREATE {0} {4} INDEX {1} ON {2} ({3}){5}{6}", 
                             bUnique ? "UNIQUE" : "", dbIndexName, dbTabName, colList(cols),  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-                            m_dbType.equals(DbType.MSSQL) && bClustered ? "CLUSTERED" : "");
+                            m_dbType.equals(DbType.MSSQL) && bClustered ? "CLUSTERED" : "",
+                            sqlInclude, sqlOpts);
         }
 		return sql;
+	}
+
+	private String optionsMapToString(Map<String, String> opts) {
+		StringBuffer res = new StringBuffer();
+		boolean bFirst = true;
+		res.append("(");
+		for(Map.Entry<String, String> entry : opts.entrySet()){
+			if(!bFirst){
+				res.append(", ");
+			}
+			res.append(entry.getKey() + "="+entry.getValue());
+			bFirst = false;
+		}
+		res.append(")");
+		return res.toString();
 	}
 
 	public String getDeleteIndexOperationString(IndexDef.TYPE type, String dbTabName, String dbIndexName, boolean isUnique) {
@@ -773,7 +794,10 @@ public class UpgradeRunner {
 		String fullName = getFullIndexName(dbName, index.getName(), index.getType());
 		if(!op.isDbIndexName()){
 			if(bNew){
-		    	res = m_actualState.generateIndexName(fullName);
+				if(index.isOriginalDbName())
+					res = index.getName();
+				else
+					res = m_actualState.generateIndexName(fullName);
 		    	m_actualState.addIndexName(fullName, res);
 			}
 			else{

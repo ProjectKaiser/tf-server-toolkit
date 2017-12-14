@@ -73,20 +73,27 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         private ClassParser m_parser;
         private IDefLibrary m_parent;
 		private ITypeNameGenerator m_nameGen;
+		private boolean m_bAllowDuplicates;
 
         public ClassDefLib(ClassParser parser, IDefLibrary parent, 
         		Map<Type, TypeDef> m_classes, ITypeNameGenerator gen) {
+        	this(parser, parent, m_classes, gen, true);
+        }
+        
+        public ClassDefLib(ClassParser parser, IDefLibrary parent, 
+        		Map<Type, TypeDef> m_classes, ITypeNameGenerator gen, boolean bAllowDuplicates) {
             m_parser = parser;
             m_parent = parent;
             m_cache = m_classes;
             m_nameGen = gen;
+            m_bAllowDuplicates = bAllowDuplicates;
         }
         
         public TypeDef add(Type type) {
             TypeDef res = get(type);
             if(null == res){
             	Class cls = toClass(type);
-            	String name = m_nameGen.get(type, cls.getSimpleName(), true);
+            	String name = m_nameGen.get(type, cls.getSimpleName(), !m_bAllowDuplicates);
 				if(cls.isEnum())
 					res = new TypeDef.EnumDef(name, (Class) type);
 				else{

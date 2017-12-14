@@ -5,6 +5,8 @@
  */
 package com.triniforce.soap;
 
+import java.util.Collections;
+
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.WsdlDescription.WsdlTypeElement;
@@ -55,7 +57,7 @@ public class WsdlTypeElementTest extends TFTestCase {
 	
 	@Override
 	public void test() throws Exception {
-		TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(getClass().getPackage()));
+		TypeDefLibCache lib = new TypeDefLibCache(new ClassParser(getClass().getPackage(), Collections.EMPTY_LIST));
 		ClassDef def = (ClassDef) lib.add(C1.class);
 		WsdlTypeElement res = new WsdlDescription.WsdlTypeElement("n1", def.getProp("prop").getType(), true, 1);;
 		assertFalse(res.isNillable());

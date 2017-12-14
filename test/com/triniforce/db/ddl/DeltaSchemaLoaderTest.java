@@ -23,6 +23,7 @@ import com.triniforce.db.ddl.Delta.DeltaSchema;
 import com.triniforce.db.ddl.Delta.DeltaSchemaLoader;
 import com.triniforce.db.ddl.Delta.EditTabCmd;
 import com.triniforce.db.ddl.Delta.IDBNames;
+import com.triniforce.db.ddl.TableDef.ElementVerStored;
 import com.triniforce.db.ddl.TableDef.FieldDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.ddl.TableDef.IndexDef;
@@ -66,6 +67,13 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 		ts.add(tabDef);
         //createTableIfNeeded(tabDef, m_as);
 		
+		tabDef = new TableDef("DeltaSchemaLoaderTest3");
+		tabDef.addStringField(1, "field1", ColumnType.NVARCHAR, 100, false, null);
+		tabDef.addModification(2, new AddIndexOperation(IndexDef.createIndex("DeltaSchemaLoaderTest3_ORIGINAL_DB_NAME", 
+				Arrays.asList("field1"), false, true, false, null, null, true)));
+		ts.add(tabDef);
+
+		
         UpgradeRunner pl = new UpgradeRunner(getConnection(), m_as);
         pl.run(ts.getCommandList());
         con.commit();
@@ -76,7 +84,7 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 //			return;
 		
 		DeltaSchemaLoader loader = new Delta.DeltaSchemaLoader(
-				Arrays.asList("DeltaSchemaLoaderTest1","DeltaSchemaLoaderTest2", "UnkTable1"),
+				Arrays.asList("DeltaSchemaLoaderTest1","DeltaSchemaLoaderTest2", "UnkTable1","DeltaSchemaLoaderTest3"),
 				new IIndexLocNames(){
 					public String getShortName(String dbTabName,
 							String dbFullName) {
@@ -84,6 +92,11 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 							return dbFullName.substring(dbTabName.length()+1);
 						}
 						return dbFullName;
+					}
+
+					@Override
+					public boolean bUseOriginalIndexNames() {
+						return false;
 					}
 					
 				});
@@ -169,6 +182,22 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 		assertEquals("DeltaSchemaLoaderTest1", index.getParentTable());
 //		if(!getDbType().equals(DbType.MYSQL))
 //			assertEquals("IDX_02", index.getParentIndex());
+		
+		
+		
+		{// test index db name
+			DeltaSchemaLoader loader2 = new Delta.DeltaSchemaLoader(
+					Arrays.asList("DeltaSchemaLoaderTest3"),
+					new DeltaSchemaLoader.OlapIndexLocNames());
+			DeltaSchema tabs2 = loader2.loadSchema(getConnection(), dbInfoFromAS(m_as));
+			tab = tabs2.getTables().get("DeltaSchemaLoaderTest3");
+			assertNotNull(tab);
+			IndexDef idx0 = tab.getIndices().getElement(0);
+			assertEquals("DeltaSchemaLoaderTest3_ORIGINAL_DB_NAME", idx0.getName());
+			ElementVerStored<IndexDef> res = tab.getIndices().findElement("DeltaSchemaLoaderTest3_ORIGINAL_DB_NAME");
+			assertNotNull(res);
+			assertTrue(idx0.isOriginalDbName());
+		}
 	}
 
 	

@@ -112,6 +112,7 @@ public class Delta {
 		
 		public interface IIndexLocNames{
 			String getShortName(String dbTabName, String dbFullName);
+			boolean bUseOriginalIndexNames();
 		}
 		
 		static class IndexObjectFactory implements IObjectFactory<IndexTemporary> {
@@ -155,10 +156,12 @@ public class Delta {
 
 					String idxDbName = rs.getString(m_fname); 
 					String indexName = m_indexLocNames.getShortName(m_tabName, idxDbName);
-					IndexTemporary res = new IndexTemporary(indexName, m_type);
+					IndexTemporary res = new IndexTemporary(indexName, m_type);					
 					if (IndexDef.TYPE.INDEX.equals(m_type)) {
 						res.m_bAsc = !"B".equals(rs.getString("ASC_OR_DESC"));
 						res.m_bUnique = !rs.getBoolean("NON_UNIQUE");
+						if(m_indexLocNames.bUseOriginalIndexNames())
+							res.m_bOriginalName = indexName.equals(idxDbName);
 					} else if (IndexDef.TYPE.FOREIGN_KEY.equals(m_type)) {
 						String pkTabName = rs.getString("PKTABLE_NAME");
 						res.m_parentTab = m_dbNames.getAppName(pkTabName);
@@ -391,6 +394,13 @@ public class Delta {
 				}
 				return dbFullName;
 			}
+
+			@Override
+			public boolean bUseOriginalIndexNames() {
+				return true;
+			}
+			
+			
 		}
 
 		public DeltaSchemaLoader(List<String> tabs, IIndexLocNames indexLocNames) {
@@ -446,6 +456,7 @@ public class Delta {
 			boolean m_bAsc, m_bUnique;
 
 			String m_tabName;
+			boolean m_bOriginalName = false;
 
 			public IndexTemporary(String name, TYPE type) {
 				m_name = name;
@@ -460,9 +471,10 @@ public class Delta {
 				else if (IndexDef.TYPE.FOREIGN_KEY.equals(m_type))
 					res = IndexDef.foreignKey(m_name, m_cols, m_parentTab,
 							m_parentKey);
-				else
+				else{
 					res = IndexDef.createIndex(m_name, m_cols, m_bUnique,
-							m_bAsc, false);
+							m_bAsc, false, null, null, m_bOriginalName);
+				}
 				return res;
 			}
 		}
@@ -640,11 +652,15 @@ public class Delta {
 						}
 						else{
 							String key;
-							if(value.getType().equals(IndexDef.TYPE.PRIMARY_KEY))
-								key = value.getType().toString();
-							else
-								key = "";
-							key += ": " + value.getColumns().toString().toLowerCase();
+							if(value.isOriginalDbName())
+								key = value.getName();
+							else{
+								if(value.getType().equals(IndexDef.TYPE.PRIMARY_KEY))
+									key = value.getType().toString();
+								else
+									key = "";
+								key += ": " + value.getColumns().toString().toLowerCase();
+							}
 							return key;
 						}
 						

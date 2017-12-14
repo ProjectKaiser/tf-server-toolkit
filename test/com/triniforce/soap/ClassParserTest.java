@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
+import com.triniforce.soap.TypeDefLibCache.ClassDefLib;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.testpkg_01.CChild1;
 import com.triniforce.soap.testpkg_01.CParent;
@@ -35,7 +37,7 @@ public class ClassParserTest extends TFTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        m_cp = new ClassParser(ClassParserTest.class.getPackage());
+        m_cp = new ClassParser(ClassParserTest.class.getPackage(), Collections.EMPTY_LIST);
         m_lib = new TypeDefLibCache(m_cp);
     }
     
@@ -280,7 +282,7 @@ public class ClassParserTest extends TFTestCase {
         assertEquals("prop4", props.get(3).getName());
         assertEquals("prop5", props.get(4).getName());
         
-        ClassParser cp2 = new ClassParser(ClassParserTest.class.getPackage());
+        ClassParser cp2 = new ClassParser(ClassParserTest.class.getPackage(), Collections.EMPTY_LIST);
         cDef = (ClassDef) cp2.parse(CWithoutSeq.class, m_lib, null);
         props = cDef.getOwnProps();
         assertEquals("a", props.get(0).getName());
@@ -452,10 +454,12 @@ public class ClassParserTest extends TFTestCase {
     static class Cls1010{}
     
     public void testParseInnerType(){
-     	assertEquals("Cls1010", m_lib.add(Cls101.Cls1010.class).getName());
+    	HashMap<Type, TypeDef> map = new HashMap<Type, TypeDef>();
+    	ClassDefLib cdlib = new TypeDefLibCache.ClassDefLib(m_cp, m_lib, map, m_lib, false);
+     	assertEquals("Cls1010", cdlib.add(Cls101.Cls1010.class).getName());
      	
      	try{
-     		ApiAlgs.getLog(this).trace(m_lib.add(Cls1010.class).getName());
+     		ApiAlgs.getLog(this).trace(cdlib.add(Cls1010.class).getName());
      		fail();
      	} catch(ESoap.InvalidTypeName e){
      		assertTrue(e.getMessage(), e.getMessage().contains("Cls1010"));
@@ -539,6 +543,47 @@ public class ClassParserTest extends TFTestCase {
     	ClassDef pd = (ClassDef) m_lib.add(CParent.class);
     	ClassDef res = m_cp.parse(CChild2.class, m_lib, "child1");
     	assertSame(pd, res.getParentDef());
+    	
+    }
+    
+    static class Custom01{}
+    static class O01{
+    	private Custom01 m_value;
+
+		public Custom01 getValue() {
+			return m_value;
+		}
+
+		public void setValue(Custom01 value) {
+			m_value = value;
+		}
+    } 
+    
+    public void testClassParser(){
+    	final Custom01 c01 = new Custom01();
+    	List<CustomSerializer> srzs = new ArrayList<CustomSerializer>();
+    	srzs.add(new CustomSerializer<Custom01, String>(Custom01.class, String.class){
+
+			@Override
+			public String serialize(Custom01 value) {
+				return "customized";
+			}
+
+			@Override
+			public Custom01 deserialize(String value) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+    		
+    	});
+        ClassParser cp = new ClassParser(ClassParserTest.class.getPackage(), srzs);
+        TypeDefLibCache lib = new TypeDefLibCache(cp);
+        
+        ClassDef def = cp.parse(O01.class, lib, "typeName-1");
+        
+        O01 obj = new O01();
+        obj.setValue(c01);
+        assertEquals("customized", def.getProp("value").get(obj));
     	
     }
 }

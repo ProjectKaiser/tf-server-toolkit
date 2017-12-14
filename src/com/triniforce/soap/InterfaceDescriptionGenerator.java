@@ -83,6 +83,7 @@ public class InterfaceDescriptionGenerator {
     private SAXParserFactory m_SAXParserFactory;
     private DocumentBuilderFactory m_documentBuilderFactory;
     private TransformerFactory m_transformerFactory;
+    List<CustomSerializer> m_customSerializers = new ArrayList<CustomSerializer>();
 
     public InterfaceDescriptionGenerator() {
         this("http://tempuri.org/", "ServerName");
@@ -182,8 +183,17 @@ public class InterfaceDescriptionGenerator {
     private Operation parseOperation(InterfaceOperationDescription opDesc, TypeDefLibCache lib) {
         MessageDef inMsgType = new InterfaceDescription.MessageDef(opDesc.getName());
         for(NamedArg arg: opDesc.getArgs()){
-            TypeDef def = lib.add(arg.getType());
-            inMsgType.addParameter(arg.getName(), TypeDefLibCache.toClass(arg.getType()), def);
+        	Type argType = arg.getType();
+            CustomSerializer customSrz = CustomSerializer.find(m_customSerializers, 
+            		TypeDefLibCache.toClass(argType));
+            if(null != customSrz){
+                TypeDef def = lib.add(customSrz.getTargetType());            
+            	inMsgType.addParameter(arg.getName(), TypeDefLibCache.toClass(argType), def, customSrz);
+            }
+            else{
+                TypeDef def = lib.add(argType);            
+            	inMsgType.addParameter(arg.getName(), TypeDefLibCache.toClass(arg.getType()), def);
+            }
         }
         
         MessageDef outMsgType = new MessageDef(opDesc.getName() + "Response");
@@ -932,7 +942,7 @@ public class InterfaceDescriptionGenerator {
 			List<InterfaceOperationDescription> operationDescs, Package pkg, List<SoapInclude> soapIncs) {
     	
         InterfaceDescription res = new InterfaceDescription();
-        ClassParser parser = new ClassParser(pkg);
+        ClassParser parser = new ClassParser(pkg, m_customSerializers);
         parser.addNonParsedParent(EParameterizedException.class);
         TypeDefLibCache lib = new TypeDefLibCache(parser);
 
@@ -1144,6 +1154,10 @@ public class InterfaceDescriptionGenerator {
 		e.printStackTrace(writer);
 		writer.close();
 		return new JSONSerializer.JsonRpcError.Error(code, e.getClass().getName() + ": " + e.getMessage(), "");
+	}
+
+	public <T> void addCustomSerializer(CustomSerializer iCustomSerializer) {
+		m_customSerializers.add(iCustomSerializer);
 	}
 
     

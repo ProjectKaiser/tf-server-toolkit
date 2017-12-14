@@ -15,6 +15,7 @@ import java.util.NoSuchElementException;
 
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
+import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
 import com.triniforce.utils.ApiAlgs;
 
 public class InterfaceDescription implements Serializable{
@@ -83,17 +84,18 @@ public class InterfaceDescription implements Serializable{
                 m_index = index;
                 m_prop = name;
             }
-            
-            public Object get(Object obj) {
+
+			public Object get(Object obj) {
             	try{
-            		return Array.get(obj, m_index);
+            		Object result = Array.get(obj, m_index);
+            		return result;
             	} catch(IndexOutOfBoundsException e){
             		throw new NoSuchElementException(m_prop);  
             	}
             }
 
             public void set(Object obj, Object value) {
-                Array.set(obj, m_index, value);
+        		Array.set(obj, m_index, value);
             }
             
         } 
@@ -106,6 +108,13 @@ public class InterfaceDescription implements Serializable{
             List<PropDef> props = getOwnProps(); 
             props.add(new PropDef(name, typeDef, rawType.getName(), new MsgPropGetSet(name, props.size())));            
         }
+
+		public void addParameter(String name, Class rawType, TypeDef typeDef, CustomSerializer<?, ?> customSrz) {
+            List<PropDef> props = getOwnProps(); 
+            IGetSet getset = new MsgPropGetSet(name, props.size());
+            getset = customSrz.getGetSet(getset);
+            props.add(new PropDef(name, typeDef, rawType.getName(), getset));            
+		}
         
     }
     

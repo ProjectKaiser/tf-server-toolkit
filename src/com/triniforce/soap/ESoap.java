@@ -76,7 +76,7 @@ public class ESoap {
 		}
 	}
 	
-	static class EFaultCode extends RuntimeException{
+	public static class EFaultCode extends RuntimeException{
 		private static final long serialVersionUID = -4043284967003240415L;
 
 		public EFaultCode(String faultstring) {

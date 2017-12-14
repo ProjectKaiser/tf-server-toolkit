@@ -18,6 +18,7 @@ import java.util.List;
 
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
+import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
 import com.triniforce.utils.TFUtils;
 
 public class ClassParser {
@@ -32,11 +33,13 @@ public class ClassParser {
     };
 	private Package m_pkg;
 	private HashMap<Class, List<String> > m_nonParsedParents;
+	private List<CustomSerializer> m_customSrzs;
 
-    public ClassParser(Package pkg) {
+    public ClassParser(Package pkg, List<CustomSerializer> customSrzs) {
         m_pkg = pkg;
         m_nonParsedParents = new HashMap<Class, List<String> >();
         addNonParsedParent(Exception.class);
+        m_customSrzs = customSrzs;
     }
 
     public ClassDef parse(Class key, IDefLibrary lib, String typeName) {
@@ -88,10 +91,20 @@ public class ClassParser {
                 if(null != getter){
 //                if(!Modifier.isStatic(getter.getModifiers()) && 
 //                        propType.equals(getter.getGenericReturnType())){
+                	CustomSerializer customSrz= null;
+                	if(propType instanceof Class)
+                		customSrz = CustomSerializer.find(m_customSrzs, (Class) propType);
+                	IGetSet getset;
+					if(null != customSrz){
+                		getset = customSrz.getGetSet(getter, setter);
+                		propType = customSrz.getTargetType();
+                	}
+                	else{
+                		getset = new ClassDef.CDGetSet(cls.getName(), getter.getName(), setter.getName());
+                	}
                     Class propCls = TypeDefLibCache.toClass(propType);
                     TypeDef td = lib.add(propType);
-                    PropDef propDef = new PropDef(lowerName, td, propCls.getName(), 
-                            new ClassDef.CDGetSet(cls.getName(), getter.getName(), setter.getName()));
+                    PropDef propDef = new PropDef(lowerName, td, propCls.getName(), getset);
                     res.getOwnProps().add(propDef);
                 }
 //            } catch (SecurityException e) {
@@ -123,9 +136,9 @@ public class ClassParser {
 //		}
         
         return res;
-    }
-    
-    private List<String> extractClassProperties(Class cls){
+    }   
+
+	private List<String> extractClassProperties(Class cls){
         Iterator<Method> setters = getSetters(cls);
 
         ArrayList<String> res = new ArrayList<String>();

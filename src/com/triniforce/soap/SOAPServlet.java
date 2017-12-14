@@ -157,7 +157,7 @@ import com.triniforce.utils.ApiAlgs;
 		}
 	}
 	
-	static Pattern PROTOCOL_PTTRN = Pattern.compile("(application|text)\\/(json|xml).*");
+	static Pattern PROTOCOL_PTTRN = Pattern.compile("(application|text)\\/(json|xml|soap\\+xml).*");
 	public static class EUnsupportedContent extends RuntimeException{
 		public EUnsupportedContent(String str) {
 			super(str);

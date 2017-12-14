@@ -13,6 +13,7 @@ import java.util.List;
 import com.triniforce.db.ddl.DBTables.DBOperation;
 import com.triniforce.db.ddl.Delta.DeltaSchema;
 import com.triniforce.db.ddl.TableDef.FieldDef;
+import com.triniforce.db.ddl.TableDef.IndexDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.test.TFTestCase;
 
@@ -20,50 +21,72 @@ public class DeltaTest extends TFTestCase {
 
 	public void testCalculateDelta() {
 		Delta delta = new Delta();
-		DeltaSchema src = new Delta.DeltaSchema();
-		DeltaSchema dst = new Delta.DeltaSchema();
-		
-		List<DBOperation> res = delta.calculateDelta(src.getTables(), dst.getTables());
-		assertTrue(res.isEmpty());
-		
-		TableDef table = new TableDef("t1");
-		FieldDef fld = FieldDef.createScalarField("fld1", ColumnType.INT, true);
-		table.addField(1, fld);
-		table.addField(2, FieldDef.createScalarField("fld2", ColumnType.INT, true));
-		dst.addTable(table);
-		
 		{
-			table = new TableDef("t2");
-			FieldDef fld21 = FieldDef.createScalarField("fld21", ColumnType.INT, true);
-			table.addField(1, fld21);
-			src.addTable(table);
+			DeltaSchema src = new Delta.DeltaSchema();
+			DeltaSchema dst = new Delta.DeltaSchema();
 			
-			table = new TableDef("t2");
-			table.addField(1, fld21);
-			FieldDef fld22 = FieldDef.createScalarField("fld22", ColumnType.INT, true);
-			table.addField(2, fld22);
-			table.addForeignKey(3, "fk", new String[]{"fld22"}, "t1", "pk", false);
+			List<DBOperation> res = delta.calculateDelta(src.getTables(), dst.getTables());
+			assertTrue(res.isEmpty());
+			
+			TableDef table = new TableDef("t1");
+			FieldDef fld = FieldDef.createScalarField("fld1", ColumnType.INT, true);
+			table.addField(1, fld);
+			table.addField(2, FieldDef.createScalarField("fld2", ColumnType.INT, true));
 			dst.addTable(table);
+			
+			{
+				table = new TableDef("t2");
+				FieldDef fld21 = FieldDef.createScalarField("fld21", ColumnType.INT, true);
+				table.addField(1, fld21);
+				src.addTable(table);
+				
+				table = new TableDef("t2");
+				table.addField(1, fld21);
+				FieldDef fld22 = FieldDef.createScalarField("fld22", ColumnType.INT, true);
+				table.addField(2, fld22);
+				table.addForeignKey(3, "fk", new String[]{"fld22"}, "t1", "pk", false);
+				dst.addTable(table);
+			}
+			{
+				table = new TableDef("t3");
+				FieldDef fld21 = FieldDef.createScalarField("fld31", ColumnType.INT, true);
+				table.addField(1, fld21);
+				src.addTable(table);
+			}
+			
+			res = delta.calculateDelta(src.getTables(), dst.getTables());
+			
+			assertEquals(4, res.size());
+			
+			List<TableOperation> ops1 = getTabOps(res, "t1");
+			
+			CreateTableOperation op = (CreateTableOperation) ops1.get(0);
+			AddColumnOperation op2 = (AddColumnOperation) op.getElements().get(0);
+			assertSame(fld, op2.getField());
+			
+			DBOperation lastOp = res.get(res.size()-1);
+			assertEquals("t2", lastOp.getDBOName());
 		}
-		{
-			table = new TableDef("t3");
-			FieldDef fld21 = FieldDef.createScalarField("fld31", ColumnType.INT, true);
-			table.addField(1, fld21);
-			src.addTable(table);
+		
+		{// Test original index names
+			//Src already have index on COL1 but dst add new Original index on same column
+			HashMap<String, TableDef> src = new HashMap<String, TableDef>();
+			HashMap<String, TableDef> dst = new HashMap<String, TableDef>();
+			TableDef t1 = new TableDef("t1");
+			t1.addField(1, FieldDef.createScalarField("col1", ColumnType.INT,true));
+			t1.addModification(2, new AddIndexOperation(IndexDef.createIndex("IDX1", Arrays.asList("col1"), false, true, false)));
+			src.put("t1", t1);
+			TableDef t1_2 = new TableDef("t1");
+			t1_2.addField(1, FieldDef.createScalarField("col1", ColumnType.INT,true));
+			t1_2.addModification(2, new AddIndexOperation(IndexDef.createIndex("IDX1", Arrays.asList("col1"), false, true, false)));
+			t1_2.addModification(3, new AddIndexOperation(IndexDef.createIndex("IDX2_ORIGINAL", Arrays.asList("col1"), false, true, false, null, null, true)));
+			dst.put("t1", t1_2);
+			
+			List<DBOperation> res = delta.calculateDelta(src, dst);
+			AddIndexOperation op1 = (AddIndexOperation) res.get(0).getOperation();
+			assertNotNull(op1);
+			assertEquals("IDX2_ORIGINAL", op1.getIndex().getName());
 		}
-		
-		res = delta.calculateDelta(src.getTables(), dst.getTables());
-		
-		assertEquals(4, res.size());
-		
-		List<TableOperation> ops1 = getTabOps(res, "t1");
-		
-		CreateTableOperation op = (CreateTableOperation) ops1.get(0);
-		AddColumnOperation op2 = (AddColumnOperation) op.getElements().get(0);
-		assertSame(fld, op2.getField());
-		
-		DBOperation lastOp = res.get(res.size()-1);
-		assertEquals("t2", lastOp.getDBOName());
 		
 	}
 
