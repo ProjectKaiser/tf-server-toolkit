@@ -9,7 +9,7 @@ targetCompatibility = 1.7
 version = new File('version').text
 ext.tf_vendor = 'Triniforce.com'
 
-// Project configuration is used for Maven deploy:
+// Project configuration is used for Maven  deploy:
 group = 'com.triniforce.tf-server-toolkit'
 
 // Get dynamic environment settings
