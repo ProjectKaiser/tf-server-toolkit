@@ -6,7 +6,7 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = new File('version').text
+version = file('version').text
 ext.tf_vendor = 'Triniforce.com'
 
 // Project configuration is used for Maven  deploy:
