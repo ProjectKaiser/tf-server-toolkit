@@ -24,7 +24,6 @@ import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
-import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiAlgs.SimpleName;
 import com.triniforce.utils.TFUtils;
@@ -224,8 +223,8 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
             public MapComponentDef(TypeDef keyDef, TypeDef valDef, CustomSerializer<?, ?> keyCs, CustomSerializer<?, ?>valCs) {
                 super(entryName(keyDef, valDef), MapEntry.class);
                 try {
-                	IGetSet keyGs = createGetSet("getKey", "setKey", keyCs);
-                	IGetSet valGs = createGetSet("getValue", "setValue", valCs);
+                	PropDef.IGetSet keyGs = createGetSet("getKey", "setKey", keyCs);
+                	PropDef.IGetSet valGs = createGetSet("getValue", "setValue", valCs);
                     getOwnProps().add(new PropDef("key", keyDef, keyDef.getType(), keyGs));
                     getOwnProps().add(new PropDef("value", valDef, valDef.getType(), valGs));
                     m_keyCs = keyCs;
@@ -235,8 +234,8 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
                 }
             }
             
-            private IGetSet createGetSet(String getter, String setter, CustomSerializer<?, ?> customSrz) {
-            	IGetSet res = new ClassDef.CDGetSet(Map.Entry.class.getName(), getter, MapEntry.class.getName(), setter);
+            private PropDef.IGetSet createGetSet(String getter, String setter, CustomSerializer<?, ?> customSrz) {
+            	PropDef.IGetSet res = new ClassDef.CDGetSet(Map.Entry.class.getName(), getter, MapEntry.class.getName(), setter);
             	if(null != customSrz)
             		res = customSrz.getGetSet(res);
             	return res;
