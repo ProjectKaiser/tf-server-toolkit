@@ -28,14 +28,16 @@ import com.triniforce.utils.ITime.ITimeHelper;
 public class TaskExecutors implements ITaskExecutors{
     
     public static int MAX_NORMAL_THREADS = 100;
+    public static int MAX_SHORT_THREADS = 200;
+    public static int MAX_LONG_THREADS = 100;
 
 	Map<ExecutorKey, ExecutorService> m_executors = new HashMap<ExecutorKey, ExecutorService>();
 	Integer m_executed = 0;
 	
     public TaskExecutors() {
-        addExecutor(ITaskExecutors.longTaskExecutorKey, new KeyTaskExecutor(80));
+        addExecutor(ITaskExecutors.longTaskExecutorKey, new KeyTaskExecutor(MAX_LONG_THREADS));
         addExecutor(ITaskExecutors.shortTaskExecutorKey,
-                new KeyTaskExecutor(10));
+                new KeyTaskExecutor(MAX_SHORT_THREADS));
         addExecutor(ITaskExecutors.normalTaskExecutorKey,
                 new ThreadPoolExecutor(2, MAX_NORMAL_THREADS, 10, TimeUnit.SECONDS
                         , new SynchronousQueue<Runnable>())//SynchronousQueue prevents flooding
