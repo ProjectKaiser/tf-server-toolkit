@@ -20,8 +20,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -1279,6 +1281,21 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 	        }
         }
     	
+    }
+    
+    public void testSerailizeToStream() throws TransformerConfigurationException, TransformerException, 
+    ParserConfigurationException, SAXException, IOException, JAXBException{
+        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        InterfaceDescription desc = gen.parse(null, TestSrv2.class);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        SOAPDocument soap = new SOAPDocument();
+        gen.serializeToStream(output, desc, soap);
+        byte[] bytes = output.toByteArray();
+        assertTrue(bytes.length > 0);
+        trace(new String(bytes));
+        
+        SOAPDocument res = gen.deserialize(desc, new ByteArrayInputStream(bytes));
+        assertNotNull(res);
     }
 
 }
