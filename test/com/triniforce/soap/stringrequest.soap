@@ -1,0 +1,9 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:soap="http://tempuri.org/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <soap:method11>
+         <soap:arg0>&lt;somestring&gt;</soap:arg0>
+      </soap:method11>
+   </soapenv:Body>
+</soapenv:Envelope>

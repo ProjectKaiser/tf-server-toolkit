@@ -97,6 +97,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         void method8(O1 i1);
         void method9(O3 i2);
         void method10(Map<String,ICustom1> i2);
+        void method11(String arg0);
     }
     
     static class Cls1{
@@ -1280,10 +1281,17 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 	        	assertEquals("Premature end of file.", e.getMessage());
 	        }
         }
+        
+        {//Test SOAP encode for spec symbols
+        	InterfaceDescription desc = gen.parse(null, TestSrv2.class);
+	        SOAPDocument res = gen.deserialize(desc, getClass().getResourceAsStream("stringrequest.soap"));
+	        assertEquals("<somestring>", res.m_args[0]);
+        	
+        }
     	
     }
     
-    public void testSerailizeToStream() throws TransformerConfigurationException, TransformerException, 
+    public void ntestSerailizeToStream() throws TransformerConfigurationException, TransformerException, 
     ParserConfigurationException, SAXException, IOException, JAXBException{
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
         InterfaceDescription desc = gen.parse(null, TestSrv2.class);
