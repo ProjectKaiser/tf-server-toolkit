@@ -1285,7 +1285,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         {//Test SOAP encode for spec symbols
         	InterfaceDescription desc = gen.parse(null, TestSrv2.class);
 	        SOAPDocument res = gen.deserialize(desc, getClass().getResourceAsStream("stringrequest.soap"));
-	        assertEquals("<somestring>", res.m_args[0]);
+	        assertEquals("<some\rstring>", res.m_args[0]);
         	
         }
     	

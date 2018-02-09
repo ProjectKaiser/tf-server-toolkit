@@ -3,7 +3,7 @@
    <soapenv:Header/>
    <soapenv:Body>
       <soap:method11>
-         <soap:arg0>&lt;somestring&gt;</soap:arg0>
+         <soap:arg0>&#x2;&lt;some&#xD;string&gt;</soap:arg0>
       </soap:method11>
    </soapenv:Body>
 </soapenv:Envelope>
