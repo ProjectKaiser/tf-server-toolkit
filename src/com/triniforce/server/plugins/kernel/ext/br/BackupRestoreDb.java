@@ -86,8 +86,8 @@ public class BackupRestoreDb extends PKEPBackupRestoreEntry{
         PluginVersions archivePV = (PluginVersions) stg.readObject(KEY_DATA);
         IBasicServer bs = ApiStack.getInterface(IBasicServer.class);
         PluginVersions currentPV = new PluginVersions(bs);
-        if( VersionComparator.compareVersions(currentPV.getPluginVersions(), archivePV.getPluginVersions()) != 0){
-            return "Archive contains different plugin versions";
+        if( VersionComparator.compareVersions(currentPV.getPluginVersions(), archivePV.getPluginVersions()) < 0){
+            return "Archive contains newer plugin versions";
         }
         return null;        
     }

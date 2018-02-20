@@ -10,6 +10,10 @@ public interface IPKEPBackupRestoreEntry {
     abstract void backup(IBackupStorage stg);
     void finitBackup();
     
+    /**
+     * @param stg
+     * @return not null if entry may not be restored
+     */
     String initRestore(IRestoreStorage stg);
     abstract void restore(IRestoreStorage stg);
     void finitRestore();
