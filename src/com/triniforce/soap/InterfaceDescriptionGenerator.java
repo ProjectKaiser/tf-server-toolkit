@@ -30,16 +30,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.json.simple.parser.ParseException;
@@ -1160,6 +1163,20 @@ public class InterfaceDescriptionGenerator {
 		m_customSerializers.add(iCustomSerializer);
 	}
 
-    
+	public void serializeToStream(OutputStream output, InterfaceDescription desc, SOAPDocument soap) 
+			throws TransformerConfigurationException, TransformerException, JAXBException{
+		Source src = createSource(desc, soap);
+		getTransformer().transform(src, new StreamResult(output));
+	}
+
+	private Source createSource(InterfaceDescription desc, SOAPDocument soap) throws JAXBException {
+//		JAXBContext jc = JAXBContext.newInstance(SOAPDocument.class);
+		
+//	    Marshaller m = jc.createMarshaller();
+		InputSource inpSrc = new InputSource();
+		SAXSource sax = new SAXSource(inpSrc);
+		
+		return sax;
+	}
 
 }

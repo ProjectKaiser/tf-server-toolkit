@@ -20,8 +20,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -95,6 +97,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         void method8(O1 i1);
         void method9(O3 i2);
         void method10(Map<String,ICustom1> i2);
+        void method11(String arg0);
     }
     
     static class Cls1{
@@ -1278,7 +1281,29 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 	        	assertEquals("Premature end of file.", e.getMessage());
 	        }
         }
+        
+        {//Test SOAP encode for spec symbols
+        	InterfaceDescription desc = gen.parse(null, TestSrv2.class);
+	        SOAPDocument res = gen.deserialize(desc, getClass().getResourceAsStream("stringrequest.soap"));
+	        assertEquals("<some\rstring>", res.m_args[0]);
+        	
+        }
     	
+    }
+    
+    public void ntestSerailizeToStream() throws TransformerConfigurationException, TransformerException, 
+    ParserConfigurationException, SAXException, IOException, JAXBException{
+        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        InterfaceDescription desc = gen.parse(null, TestSrv2.class);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        SOAPDocument soap = new SOAPDocument();
+        gen.serializeToStream(output, desc, soap);
+        byte[] bytes = output.toByteArray();
+        assertTrue(bytes.length > 0);
+        trace(new String(bytes));
+        
+        SOAPDocument res = gen.deserialize(desc, new ByteArrayInputStream(bytes));
+        assertNotNull(res);
     }
 
 }
