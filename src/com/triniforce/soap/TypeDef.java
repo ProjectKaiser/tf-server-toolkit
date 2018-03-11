@@ -130,7 +130,7 @@ public class TypeDef extends SimpleName{
 					}
 	            }
 	            else if(typeName.equals("decimal")){
-	            	res = new BigDecimal(value);
+	            	res = new BigDecimal(value == null ? value : value.replace(",", "."));
 	            }
 	            else if(typeName.equals("base64Binary")){
 	            	res = Base64.decode(value);

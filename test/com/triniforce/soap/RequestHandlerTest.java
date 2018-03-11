@@ -269,7 +269,7 @@ public class RequestHandlerTest extends TFTestCase {
             "       xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"+
             "  <soap:Body>"+
             "    <methodDecimal xmlns=\"http://tempuri.org/\">"+
-            "      <arg0>56734,235</arg0>"+
+            "      <arg0>567.34.235</arg0>"+
             "    </methodDecimal>"+
             "  </soap:Body>"+
             "</soap:Envelope>";
