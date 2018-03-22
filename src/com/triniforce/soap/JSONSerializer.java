@@ -22,10 +22,15 @@ import org.json.simple.parser.ParseException;
 
 import com.triniforce.soap.InterfaceDescription.MessageDef;
 import com.triniforce.soap.InterfaceDescription.Operation;
+import com.triniforce.soap.InterfaceDescriptionGenerator.JsonResult;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
 import com.triniforce.soap.JSONSerializer.KeyFinder.Element.Type;
 import com.triniforce.soap.SAXHandler.CurrentObject;
+import com.triniforce.soap.TypeDef.ClassDef;
+import com.triniforce.soap.TypeDef.EnumDef;
+import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
+import com.triniforce.soap.TypeDefLibCache.MapDefLib.MapComponentDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.utils.ApiAlgs;
 
@@ -167,19 +172,58 @@ public class JSONSerializer {
 		int i =0 ;
 		for(PropDef pd : props){
 			Object value;
-			if(pd.getRawType().equals(java.util.Date.class.getName())){
-				value = ((ScalarDef)pd.getType()).stringValue(soap.m_args[i]);
-			}
-			else{
-				value = soap.m_args[i];
-			}
+			value = toJsonObject(desc, pd.getType(), soap.m_args[i]);
 			mobj[i] = value;
 			i++;
 		}
-		JsonRpc obj = new JsonRpcMessage("2.0", soap.m_method, mobj, 1);
+		JsonRpc obj;
+		if(soap.m_bIn)
+			obj = new JsonRpcMessage("2.0", soap.m_method, mobj, 1);
+		else{
+			JsonResult jsonRes = new JsonResult();
+			if(soap.m_args.length > 0)
+				jsonRes.setResult(mobj[0]);
+			obj = jsonRes;
+		}
 		serializeObject(obj, out);
 	}
 	
+	private Object toJsonObject(InterfaceDescription desc, TypeDef type, Object object) {
+		Object value;
+		if(type instanceof EnumDef){
+			ScalarDef sd = (ScalarDef) type;
+			value = sd.stringValue(object);				
+		}
+		else if(type.getType().equals(java.util.Date.class.getName())){
+			value = ((ScalarDef)type).stringValue(object);
+		}
+		else if(type instanceof ClassDef){
+			ClassDef cd = (ClassDef) type;
+			LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+			
+			 Class objCls = object.getClass();
+             
+             if(!objCls.getName().equals(cd.getType())){
+                 TypeDef hideTypeDef = desc.getType(objCls);
+                 if(null != hideTypeDef){
+                	 if(!(hideTypeDef instanceof ClassDef))
+                		 throw new RuntimeException("wrong argument type : " + objCls.getName());
+                	 
+                     String typeName = hideTypeDef.getName();
+                     map.put("type", typeName);
+                     cd = (ClassDef) hideTypeDef;
+                 }
+             }
+			for(PropDef pd : cd.getProps()){
+				map.put(pd.getName(), toJsonObject(desc, pd.getType(), pd.get(object)));
+			}
+			value = map;
+		}
+		else
+			value = object;
+		return value;
+	}
+
 	public void serializeObject(Object obj, OutputStream out) throws IOException {
 		Object res = js.serialize(obj, new String[]{UniqueIdGenerator.UNIQUE_ID_PROPERTY, "class"});
 		String str = res.toString();
@@ -292,6 +336,12 @@ public class JSONSerializer {
 						if("value".equals(arg0) && m_handler.getTopObject().getType() instanceof ScalarDef){
 							m_bSetScalarValue = true;
 						}
+						else if (m_handler.getTopObject().getType() instanceof MapDef){
+							m_handler.startElement("value", false, null);
+							m_handler.startElement("key", false, null);
+							m_handler.characters(arg0.toCharArray(), 0, arg0.length());
+							m_handler.endElement();
+						}
 						else
 							m_handler.startElement(arg0, false, null);
 					}
@@ -332,12 +382,15 @@ public class JSONSerializer {
 					
 					top.setType(type);
 					m_bSetType = false;
-				}
+				}				
 				else{
 					if(m_bSetScalarValue){
 						m_bSetScalarValue = false;
 //						String vStr = m_value.toString();
 //						m_handler.characters(vStr.toCharArray(), 0, vStr.length());
+					}
+					else if (m_handler.getTopObject().getType() instanceof MapDef){
+						m_handler.endElement();//Map.value
 					}
 					else{
 						m_handler.endElement();
@@ -423,6 +476,12 @@ public class JSONSerializer {
 					}
 					boolean bNull = null == arg0;
 					m_handler.startElement(argName, bNull, null);
+					setPrimitive(arg0);
+					m_handler.endElement();
+				}
+				else if (m_handler.getTopObject().getType() instanceof MapComponentDef){
+					
+					m_handler.startElement("value", false, null);
 					setPrimitive(arg0);
 					m_handler.endElement();
 				}

@@ -16,12 +16,14 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
 import org.json.simple.parser.ParseException;
 
 import com.triniforce.db.test.TFTestCase;
+import com.triniforce.soap.InterfaceDescriptionGenerator.JsonResult;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
 import com.triniforce.soap.InterfaceOperationDescription.NamedArg;
 import com.triniforce.soap.JSONSerializerTest.Service001.Outter01;
@@ -92,7 +94,34 @@ public class JSONSerializerTest extends TFTestCase {
 		public void method_dt01(Date arg1){}
 		
 		public enum SimpleEnum{Value777, Value111};
-		public void method_enum(SimpleEnum se){}
+		public SimpleEnum method_enum(SimpleEnum se){
+			return se;}
+		
+		public void method_map(Map<String, Object> map){
+			
+		}
+		
+		static class C1{
+			private int param;
+
+			public int getParam() {
+				return param;
+			}
+
+			public void setParam(int param) {
+				this.param = param;
+			}
+			
+			public C1() {
+				
+			}
+			public C1(int v) {
+				param = v;
+			}
+			
+		}
+
+		public void method_list(List<C1> l){}
 	}
 	
 	static class Prop01{
@@ -139,6 +168,17 @@ public class JSONSerializerTest extends TFTestCase {
 		}finally{
 			TimeZone.setDefault(tz0);
 		}
+		
+		assertEquals( "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"i am result\"}", 
+				serializeResponse(srz, desc, "method_0011", "i am result"));
+		assertEquals( "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"Value777\"}", 
+				serializeResponse(srz, desc, "method_enum", SimpleEnum.Value777));
+		
+		Real1 vreal = new Real1();
+		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_003\",\"params\":[{\"type\":\"Real1\",\"prop_001\":null}],\"id\":1}",
+				serialize(srz, desc, "method_003", vreal));
+
+		
 	}
 
 	private String serialize(JSONSerializer srz, InterfaceDescription desc,
@@ -152,6 +192,17 @@ public class JSONSerializerTest extends TFTestCase {
 		soap.m_method = method;
 		soap.m_args = values;
 		soap.m_bIn = true;
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		srz.serialize(desc, soap, out);
+		return out.toString("utf-8");
+	}
+	
+	private String serializeResponse(JSONSerializer srz, InterfaceDescription desc, String method,
+			Object value) throws IOException {
+		SOAPDocument soap = new InterfaceDescriptionGenerator.SOAPDocument();
+		soap.m_method = method;
+		soap.m_args = new Object[]{value};
+		soap.m_bIn = false;
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		srz.serialize(desc, soap, out);
 		return out.toString("utf-8");
@@ -299,6 +350,18 @@ public class JSONSerializerTest extends TFTestCase {
 			res = srz.deserialize(desc, source(str));
 			trace("enum: " + res.m_args[0]);
 		}
+		{// Map
+			String str = "{\"jsonrpc\":\"2.0\",\"method\":\"method_map\",\"params\":[{\"k0\":99, \"k1\":\"fdgd\"}]}";
+			Map mapres = (Map) srz.deserialize(desc, source(str)).m_args[0];
+			assertEquals(99L,mapres.get("k0"));
+			assertEquals("fdgd",mapres.get("k1"));
+		}
+		{//List of objects
+			String str = "{\"jsonrpc\":\"2.0\",\"method\":\"method_list\",\"params\":[{\"param\":1},{\"param\":2}]}";
+			List l1 = (List) srz.deserialize(desc, source(str)).m_args[0];
+			
+			
+		}
 
 		{
 			ArrayList<InterfaceOperationDescription> ops = new ArrayList<InterfaceOperationDescription>();
@@ -309,12 +372,26 @@ public class JSONSerializerTest extends TFTestCase {
 			res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_858585\",\"params\":[\"GGG\"]}"));
 			assertEquals("GGG", res.m_args[0]);
 		}
+		
 
 	}
 
 	public static InputStream source(String string) throws UnsupportedEncodingException {
 		ByteArrayInputStream res = new ByteArrayInputStream(string.getBytes("utf-8"));
 		return res;
+	}
+	
+	enum ENM1{VAL1};
+	
+	public void testSerializeObject() throws IOException{
+//		InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+//		InterfaceDescription desc = gen.parse(null, Service001.class);
+		JSONSerializer srz = new JSONSerializer();
+		JsonResult jsonRes = new JsonResult();
+		jsonRes.setResult(ENM1.VAL1);
+
+		srz.serializeObject(jsonRes, System.out);
+		
 	}
 
 }

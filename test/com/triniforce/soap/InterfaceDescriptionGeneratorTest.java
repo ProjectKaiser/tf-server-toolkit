@@ -923,6 +923,9 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         	InterfaceDescription desc = gen.parse(null, TestSrv2.class);	        
 	        SOAPDocument res = gen.deserializeJson(desc, JSONSerializerTest.source(
 	        		"{\"jsonrpc\":\"2.0\",\"method\":\"method7\",\"params\":[{\"type\":\"Real1\", \"param0\":\"str777\", \"param1\":\"fhhdhd\"}],\"id\":1}"));
+	        
+	        Real1 r1 = (Real1) res.m_args[0];
+	        assertEquals("str777", r1.getParam0());
         	
         	
         }
@@ -932,7 +935,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
         InterfaceDescription desc = gen.parse(null, TestSrv2.class);
         {
-	        String strRes = gen.serializeJson(desc, 77);
+	        String strRes = gen.serializeJson(desc, "method3", 77);
 	        
 	        assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":77}", strRes);
 	        

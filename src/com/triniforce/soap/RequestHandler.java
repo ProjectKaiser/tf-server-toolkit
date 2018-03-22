@@ -146,7 +146,7 @@ public class RequestHandler {
 		try {
             SOAPDocument in = m_gen.deserializeJson(m_desc, input);
             Object res = m_invoker.invokeService(in.m_method, in.m_args);
-            str = m_gen.serializeJson(m_desc, res);
+            str = m_gen.serializeJson(m_desc, in.m_method, res);
         } catch (Throwable e) {
             try {
 				str = m_gen.serializeJsonException(e);
