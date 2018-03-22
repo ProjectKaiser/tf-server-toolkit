@@ -85,6 +85,7 @@ dependencies {
 	testCompile 'org.eclipse.jetty:jetty-plus:9.2.0.RC0'
 	testCompile 'org.eclipse.jetty:jetty-jndi:9.2.0.RC0'
 	testCompile 'javax.servlet.jsp:jsp-api:2.1'
+	testCompile( group: 'xerces', name: 'xercesImpl', version: '2.11.0')
 
 
 	providedCompile 'javax.servlet:javax.servlet-api:3.0.1'

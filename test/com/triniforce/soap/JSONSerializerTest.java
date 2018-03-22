@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -22,8 +23,10 @@ import org.json.simple.parser.ParseException;
 
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
+import com.triniforce.soap.InterfaceOperationDescription.NamedArg;
 import com.triniforce.soap.JSONSerializerTest.Service001.Outter01;
 import com.triniforce.soap.JSONSerializerTest.Service001.Real1;
+import com.triniforce.soap.JSONSerializerTest.Service001.SimpleEnum;
 import com.triniforce.utils.StringSerializer;
 
 public class JSONSerializerTest extends TFTestCase {
@@ -87,6 +90,9 @@ public class JSONSerializerTest extends TFTestCase {
 		public void method_008(TObj1 v){}
 		
 		public void method_dt01(Date arg1){}
+		
+		public enum SimpleEnum{Value777, Value111};
+		public void method_enum(SimpleEnum se){}
 	}
 	
 	static class Prop01{
@@ -279,11 +285,30 @@ public class JSONSerializerTest extends TFTestCase {
 			trace(res.m_args[0]);
 //			assertEquals(json,  res.m_args[0]);
 		}
-		
-		String str = "{\"jsonrpc\":\"2.0\",\"method\":\"log_log\",\"params\":[\"log_me\",null,\"INFO\"]}";
-		res = srz.deserialize(desc, source(str));
-		assertEquals(Arrays.asList("log_me", null, "INFO"), Arrays.asList(res.m_args));
+		{
+			String str = "{\"jsonrpc\":\"2.0\",\"method\":\"log_log\",\"params\":[\"log_me\",null,\"INFO\"]}";
+			res = srz.deserialize(desc, source(str));
+			assertEquals(Arrays.asList("log_me", null, "INFO"), Arrays.asList(res.m_args));
+		}
+		{//enum types
+			String str = "{\"jsonrpc\":\"2.0\",\"method\":\"method_enum\",\"params\":[\"Value111\"]}";
+			res = srz.deserialize(desc, source(str));
+			assertEquals(Arrays.asList(SimpleEnum.Value111), Arrays.asList(res.m_args));
+			
+			str = "{\"jsonrpc\":\"2.0\",\"method\":\"method_enum\",\"params\":[\"ValueUnknown\"]}";
+			res = srz.deserialize(desc, source(str));
+			trace("enum: " + res.m_args[0]);
+		}
 
+		{
+			ArrayList<InterfaceOperationDescription> ops = new ArrayList<InterfaceOperationDescription>();
+			ops.add(new InterfaceOperationDescription("method_858585", Arrays.asList(
+					new NamedArg("header", String.class)), new NamedArg("resulting", int.class)));
+			ArrayList<SoapInclude> incls = new ArrayList<SoapInclude>();
+			desc = gen.parse(null, ops, getClass().getPackage(), incls);
+			res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_858585\",\"params\":[\"GGG\"]}"));
+			assertEquals("GGG", res.m_args[0]);
+		}
 
 	}
 

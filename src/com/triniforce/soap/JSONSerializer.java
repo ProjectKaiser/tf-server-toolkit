@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -243,9 +244,13 @@ public class JSONSerializer {
 		}
 		
 		Stack<Element> m_stk = new Stack<Element>();
+		private List<String> m_argNames;
+		private InterfaceDescription m_desc;
 
-		public KeyFinder(SAXHandler handler) {
+		public KeyFinder(SAXHandler handler, InterfaceDescription desc) {
 			m_handler = handler;
+			m_argNames = null;
+			m_desc = desc;
 		}
 
 
@@ -277,6 +282,7 @@ public class JSONSerializer {
 				if(PARAMS.m_name.equals(arg0)){
 					m_handler.startElement(m_method, false, null);
 					m_state = State.Arguments;
+					m_argNames = getArgumentNames(m_desc, m_method);
 				}
 				else if (State.Arguments.equals(m_state)){
 					if("type".equals(arg0) && Element.Type.Object.equals(m_stk.peek().m_type)){
@@ -295,6 +301,19 @@ public class JSONSerializer {
 			startStackElement(new Element(Element.Type.Entry, m_entry));
 			return true;
 		}
+		private List<String> getArgumentNames(InterfaceDescription desc, String opName) {
+			Operation op = desc.getOperation(opName);
+			MessageDef mdef = (MessageDef) op.getProp(opName).getType();
+			List<PropDef> props = mdef.getProps();
+			ArrayList<String> res = new ArrayList<String>(props.size());
+			for (PropDef prop : props) {
+				res.add(prop.getName());
+			}
+			return res;
+		}
+
+
+
 		@Override
 		public boolean endObjectEntry() throws ParseException, IOException {
 			Element tag = endStackElement(Element.Type.Entry);
@@ -357,7 +376,9 @@ public class JSONSerializer {
 					if(Element.Type.Array.equals(top.m_type)){
 						String argName = top.m_name;
 						if(top.m_name.equals("arg")){
-							argName = "arg"+m_argIdx;
+							if(m_argIdx >= m_argNames.size())
+								throw new ESoap.EUnknownElement("arg" + m_argIdx);
+							argName = m_argNames.get(m_argIdx);
 							m_argIdx++;
 		
 						}
@@ -394,7 +415,9 @@ public class JSONSerializer {
 				if(Element.Type.Array.equals(top.m_type)){
 					String argName = top.m_name;
 					if(top.m_name.equals("arg")){
-						argName = "arg"+m_argIdx;
+						if(m_argIdx >= m_argNames.size())
+							throw new ESoap.EUnknownElement("arg" + m_argIdx);
+						argName = m_argNames.get(m_argIdx);
 						m_argIdx++;
 	
 					}
@@ -440,7 +463,7 @@ public class JSONSerializer {
 		SAXHandler handler = new SAXHandler(desc);
 
 		JSONParser parser = new JSONParser();
-		KeyFinder finder = new KeyFinder(handler);
+		KeyFinder finder = new KeyFinder(handler, desc);
 		InputStreamReader reader = new InputStreamReader(source, Charset.forName("UTF-8"));
 		parser.parse(reader, finder, true);
 		SOAPDocument res = new SOAPDocument();

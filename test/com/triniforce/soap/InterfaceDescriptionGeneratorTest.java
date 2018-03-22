@@ -85,7 +85,28 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
     }
     interface ICustom1{}
     
-    @SoapInclude(extraClasses={ExtraInc.class, Cls1.class, Cls2.class})
+    static class Real1 implements ICustom1{
+    	private String param0;
+		private String param1;
+
+		public String getParam1() {
+			return param1;
+		}
+
+		public void setParam1(String param1) {
+			this.param1 = param1;
+		}
+
+		public String getParam0() {
+			return param0;
+		}
+
+		public void setParam0(String param0) {
+			this.param0 = param0;
+		}
+    }
+    
+    @SoapInclude(extraClasses={ExtraInc.class, Cls1.class, Cls2.class, Real1.class})
     interface TestSrv2{
         void method1();
         void method2();
@@ -896,6 +917,14 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         	assertNotNull(arg0);
         	assertEquals(2, arg0.getV1().size());
         	assertEquals(15, arg0.getV1().get(0)[1]);
+        }
+        
+        {	//inherited object
+        	InterfaceDescription desc = gen.parse(null, TestSrv2.class);	        
+	        SOAPDocument res = gen.deserializeJson(desc, JSONSerializerTest.source(
+	        		"{\"jsonrpc\":\"2.0\",\"method\":\"method7\",\"params\":[{\"type\":\"Real1\", \"param0\":\"str777\", \"param1\":\"fhhdhd\"}],\"id\":1}"));
+        	
+        	
         }
     }
     
