@@ -40,6 +40,7 @@ public class PKArchiveMetaDataTest extends TFTestCase {
         md.putDataEntry("e1", "d1", 0);
         try {
             md.putDataEntry("e1", "d1", 0);
+            fail();
         } catch (EDataEntryAlreadyExists e) {
             trace(e);
         }
