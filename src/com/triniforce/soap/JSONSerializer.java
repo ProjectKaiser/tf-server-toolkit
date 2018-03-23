@@ -25,7 +25,6 @@ import com.triniforce.soap.InterfaceDescription.MessageDef;
 import com.triniforce.soap.InterfaceDescription.Operation;
 import com.triniforce.soap.InterfaceDescriptionGenerator.JsonResult;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
-import com.triniforce.soap.InterfaceDescriptionGenerator.ObjectConverter.TypedObject;
 import com.triniforce.soap.JSONSerializer.KeyFinder.Element.Type;
 import com.triniforce.soap.SAXHandler.CurrentObject;
 import com.triniforce.soap.TypeDef.ArrayDef;
@@ -323,7 +322,6 @@ public class JSONSerializer {
 
 		@Override
 		public boolean startObject() throws ParseException, IOException {
-			ApiAlgs.getLog(this).trace("startObject");
 
 			startStackElement(new Element(Element.Type.Object, ""));
 			m_bSetType=false;
@@ -331,7 +329,6 @@ public class JSONSerializer {
 		}
 		@Override
 		public boolean endObject() throws ParseException, IOException {
-			ApiAlgs.getLog(this).trace("endObject");
 
 			endStackElement(Element.Type.Object);
 			return true;
@@ -340,8 +337,6 @@ public class JSONSerializer {
 		@Override
 		public boolean startObjectEntry(String arg0) throws ParseException,
 				IOException {
-			ApiAlgs.getLog(this).trace("startObjectEntry."+arg0);
-
 			if(null != m_method){
 				if(PARAMS.m_name.equals(arg0)){
 					m_handler.startElement(m_method, false, null);
@@ -386,7 +381,6 @@ public class JSONSerializer {
 
 		@Override
 		public boolean endObjectEntry() throws ParseException, IOException {
-			ApiAlgs.getLog(this).trace("endObjectEntry");
 
 			Element tag = endStackElement(Element.Type.Entry);
 			ApiAlgs.assertTrue(Element.Type.Entry.equals(tag.m_type), tag.toString());
@@ -429,7 +423,6 @@ public class JSONSerializer {
 		
 		@Override
 		public boolean startArray() throws ParseException, IOException {
-			ApiAlgs.getLog(this).trace("startArray");
 			Element top = m_stk.peek();
 			String arrName = "value";
 			if(top.equals(PARAMS))
@@ -441,7 +434,6 @@ public class JSONSerializer {
 		
 		@Override
 		public boolean endArray() throws ParseException, IOException {
-			ApiAlgs.getLog(this).trace("endArray");
 			endStackElement(Element.Type.Array);
 			return true;
 		}

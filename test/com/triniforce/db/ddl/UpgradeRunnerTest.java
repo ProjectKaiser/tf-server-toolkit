@@ -748,7 +748,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
         
         assertNotNull(dbName);
         
-        long tst = System.currentTimeMillis();
+        long tst = (System.currentTimeMillis()/1000)*1000; // Store only seconds        
         
         PreparedStatement ps = getConnection().prepareStatement("insert into "+dbName+" " +
                 "(fINT, fSMALLINT, fFLOAT, fTIMESTAMP, fDECIMAL_10_2, fCHAR_5, fNCHAR_10," +

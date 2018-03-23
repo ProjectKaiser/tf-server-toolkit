@@ -428,6 +428,7 @@ public class JSONSerializerTest extends TFTestCase {
 
 		String str = "{\"jsonrpc\":\"2.0\",\"method\":\"method_list\",\"params\":[[{\"param\":1},{\"param\":2}]]}";
 		List l1 = (List) srz.deserialize(desc, source(str)).m_args[0];
+		assertNotNull(l1);
 
 		
 	}
