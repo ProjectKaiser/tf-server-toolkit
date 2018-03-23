@@ -26,6 +26,8 @@ import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.InterfaceDescriptionGenerator.JsonResult;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
 import com.triniforce.soap.InterfaceOperationDescription.NamedArg;
+import com.triniforce.soap.JSONSerializerTest.Service001.ObjWEnum;
+import com.triniforce.soap.JSONSerializerTest.Service001.ObjWEnum2;
 import com.triniforce.soap.JSONSerializerTest.Service001.Outter01;
 import com.triniforce.soap.JSONSerializerTest.Service001.Real1;
 import com.triniforce.soap.JSONSerializerTest.Service001.SimpleEnum;
@@ -96,6 +98,41 @@ public class JSONSerializerTest extends TFTestCase {
 		public enum SimpleEnum{Value777, Value111};
 		public SimpleEnum method_enum(SimpleEnum se){
 			return se;}
+		
+		public static class ObjWEnum2{
+			private List<ObjWEnum> m_inners;
+			private Map<Integer, ObjWEnum> m_inners2;
+
+			public List<ObjWEnum> getInners() {
+				return m_inners;
+			}
+
+			public void setInners(List<ObjWEnum> inners) {
+				m_inners = inners;
+			}
+
+			public Map<Integer, ObjWEnum> getInners2() {
+				return m_inners2;
+			}
+
+			public void setInners2(Map<Integer, ObjWEnum> inners2) {
+				m_inners2 = inners2;
+			}
+		}
+		
+		public static class ObjWEnum{
+			private SimpleEnum enumhere;
+
+			public SimpleEnum getEnumhere() {
+				return enumhere;
+			}
+
+			public void setEnumhere(SimpleEnum enumhere) {
+				this.enumhere = enumhere;
+			}
+		}
+		public ObjWEnum2 method_enum2(){
+			return null;}
 		
 		public void method_map(Map<String, Object> map){
 			
@@ -173,6 +210,18 @@ public class JSONSerializerTest extends TFTestCase {
 				serializeResponse(srz, desc, "method_0011", "i am result"));
 		assertEquals( "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"Value777\"}", 
 				serializeResponse(srz, desc, "method_enum", SimpleEnum.Value777));
+
+		ObjWEnum v = new ObjWEnum();
+		v.setEnumhere(SimpleEnum.Value777);
+		ObjWEnum2 v2 = new ObjWEnum2();
+		v2.m_inners = Arrays.asList(v);
+		v2.setInners2(new HashMap<Integer, ObjWEnum>());
+		v = new ObjWEnum();
+		v.setEnumhere(SimpleEnum.Value111);
+		v2.getInners2().put(5665, v);
+		assertEquals( "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"inners\":[{\"enumhere\":\"Value777\"}],"
+				+ "\"inners2\":[{\"key\":5665,\"value\":{\"enumhere\":\"Value111\"}}]}}", 
+				serializeResponse(srz, desc, "method_enum2", v2));
 		
 		Real1 vreal = new Real1();
 		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_003\",\"params\":[{\"type\":\"Real1\",\"prop_001\":null}],\"id\":1}",
@@ -351,16 +400,12 @@ public class JSONSerializerTest extends TFTestCase {
 			trace("enum: " + res.m_args[0]);
 		}
 		{// Map
-			String str = "{\"jsonrpc\":\"2.0\",\"method\":\"method_map\",\"params\":[{\"k0\":99, \"k1\":\"fdgd\"}]}";
+			String str = "{\"jsonrpc\":\"2.0\",\"method\":\"method_map\",\"params\":[[{\"key\":\"k0\",\"value\":99},{\"key\":\"k1\",\"value\":\"fdgd\"}]]}";
 			Map mapres = (Map) srz.deserialize(desc, source(str)).m_args[0];
 			assertEquals(99L,mapres.get("k0"));
 			assertEquals("fdgd",mapres.get("k1"));
 		}
 		{//List of objects
-			String str = "{\"jsonrpc\":\"2.0\",\"method\":\"method_list\",\"params\":[{\"param\":1},{\"param\":2}]}";
-			List l1 = (List) srz.deserialize(desc, source(str)).m_args[0];
-			
-			
 		}
 
 		{
@@ -374,6 +419,17 @@ public class JSONSerializerTest extends TFTestCase {
 		}
 		
 
+	}
+	
+	public void testDeserialize2() throws UnsupportedEncodingException, IOException, ParseException{
+		JSONSerializer srz = new JSONSerializer();
+		InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+		InterfaceDescription desc = gen.parse(null, Service001.class);
+
+		String str = "{\"jsonrpc\":\"2.0\",\"method\":\"method_list\",\"params\":[[{\"param\":1},{\"param\":2}]]}";
+		List l1 = (List) srz.deserialize(desc, source(str)).m_args[0];
+
+		
 	}
 
 	public static InputStream source(String string) throws UnsupportedEncodingException {

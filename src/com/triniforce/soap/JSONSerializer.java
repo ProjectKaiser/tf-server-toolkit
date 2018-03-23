@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,8 +25,10 @@ import com.triniforce.soap.InterfaceDescription.MessageDef;
 import com.triniforce.soap.InterfaceDescription.Operation;
 import com.triniforce.soap.InterfaceDescriptionGenerator.JsonResult;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
+import com.triniforce.soap.InterfaceDescriptionGenerator.ObjectConverter.TypedObject;
 import com.triniforce.soap.JSONSerializer.KeyFinder.Element.Type;
 import com.triniforce.soap.SAXHandler.CurrentObject;
+import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.EnumDef;
 import com.triniforce.soap.TypeDef.MapDef;
@@ -219,6 +222,17 @@ public class JSONSerializer {
 			}
 			value = map;
 		}
+		else if (type instanceof ArrayDef){
+            ArrayDef ad = (ArrayDef) type;
+            PropDef propDef = ad.getPropDef();
+            Collection col = (Collection) propDef.get(object);
+            ArrayList<Object> l = new ArrayList<Object>(col.size());
+            for (Object o1 : col) {
+                l.add(toJsonObject(desc, propDef.getType(), o1));
+            }
+            value = l;
+			
+		}
 		else
 			value = object;
 		return value;
@@ -309,12 +323,16 @@ public class JSONSerializer {
 
 		@Override
 		public boolean startObject() throws ParseException, IOException {
+			ApiAlgs.getLog(this).trace("startObject");
+
 			startStackElement(new Element(Element.Type.Object, ""));
 			m_bSetType=false;
 			return true;
 		}
 		@Override
 		public boolean endObject() throws ParseException, IOException {
+			ApiAlgs.getLog(this).trace("endObject");
+
 			endStackElement(Element.Type.Object);
 			return true;
 		}
@@ -322,6 +340,8 @@ public class JSONSerializer {
 		@Override
 		public boolean startObjectEntry(String arg0) throws ParseException,
 				IOException {
+			ApiAlgs.getLog(this).trace("startObjectEntry."+arg0);
+
 			if(null != m_method){
 				if(PARAMS.m_name.equals(arg0)){
 					m_handler.startElement(m_method, false, null);
@@ -337,11 +357,11 @@ public class JSONSerializer {
 							m_bSetScalarValue = true;
 						}
 						else if (m_handler.getTopObject().getType() instanceof MapDef){
-							m_handler.startElement("value", false, null);
-							m_handler.startElement("key", false, null);
-							m_handler.characters(arg0.toCharArray(), 0, arg0.length());
-							m_handler.endElement();
-						}
+								m_handler.startElement("value", false, null);
+								m_handler.startElement("key", false, null);
+								m_handler.characters(arg0.toCharArray(), 0, arg0.length());
+								m_handler.endElement();
+							}
 						else
 							m_handler.startElement(arg0, false, null);
 					}
@@ -366,6 +386,8 @@ public class JSONSerializer {
 
 		@Override
 		public boolean endObjectEntry() throws ParseException, IOException {
+			ApiAlgs.getLog(this).trace("endObjectEntry");
+
 			Element tag = endStackElement(Element.Type.Entry);
 			ApiAlgs.assertTrue(Element.Type.Entry.equals(tag.m_type), tag.toString());
 			if(tag.equals(METHOD))
@@ -407,6 +429,7 @@ public class JSONSerializer {
 		
 		@Override
 		public boolean startArray() throws ParseException, IOException {
+			ApiAlgs.getLog(this).trace("startArray");
 			Element top = m_stk.peek();
 			String arrName = "value";
 			if(top.equals(PARAMS))
@@ -418,6 +441,7 @@ public class JSONSerializer {
 		
 		@Override
 		public boolean endArray() throws ParseException, IOException {
+			ApiAlgs.getLog(this).trace("endArray");
 			endStackElement(Element.Type.Array);
 			return true;
 		}
