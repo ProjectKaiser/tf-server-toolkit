@@ -208,6 +208,9 @@ public class DBTestCase extends TFTestCase {
     private void cleanDatabase() throws Exception{
     	if(!getDbType().equals(DbType.FIREBIRD))
     		CleanDatabase.run(this, ApiAlgs.getLog(this));
+    	else{
+//    		CleanDatabase.run(this, ApiAlgs.getLog(this), false);
+    	}
    }
     
     public void clearConnection() throws Exception{
