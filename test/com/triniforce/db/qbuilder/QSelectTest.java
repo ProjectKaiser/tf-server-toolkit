@@ -48,7 +48,7 @@ public class QSelectTest extends TFTestCase {
             sel.joinLast(new QTable("articles", "art"));
             String s = sel.toString();
             assertEquals("select art.\"COL1\",art.\"COL2\" from articles art", s );
-        }        
+        }
         
     }
     
@@ -83,24 +83,35 @@ public class QSelectTest extends TFTestCase {
 	}
 	
 	public void testJoinTableWithParams(){
-		QSelect qsel = new QSelect();
-		qsel.joinLast(new QTable("tab1", "T"));
-		qsel.joinByPrefix(JoinType.INNER, "T", "left_col1", "right_col2", new QTable("tab2", "T2"), 
-				new Expr.Compare("T2", "CC3", "=", 554));
-		assertEquals(
-				"select from( tab1 T " +
-				"inner join tab2 T2 on T.\"LEFT_COL1\" = T2.\"RIGHT_COL2\" and T2.\"CC3\" = 554 )", 
-				qsel.toString());
+		{
+			QSelect qsel = new QSelect();
+			qsel.joinLast(new QTable("tab1", "T"));
+			qsel.joinByPrefix(JoinType.INNER, "T", "left_col1", "right_col2", new QTable("tab2", "T2"), 
+					new Expr.Compare("T2", "CC3", "=", 554));
+			assertEquals(
+					"select from( tab1 T " +
+					"inner join tab2 T2 on T.\"LEFT_COL1\" = T2.\"RIGHT_COL2\" and T2.\"CC3\" = 554 )", 
+					qsel.toString());
+			
+			qsel = new QSelect();
+			qsel.joinLast(new QTable("tab1", "T"));
+			qsel.joinByPrefix(JoinType.INNER, "T", 
+					new String[]{"left_col1","left_col2"}, 
+					new String[]{"right_col1", "right_col2"}, new QTable("tab2", "T2"));
+			assertEquals(
+					"select from( tab1 T " +
+					"inner join tab2 T2 on T.\"LEFT_COL1\" = T2.\"RIGHT_COL1\" and T.\"LEFT_COL2\" = T2.\"RIGHT_COL2\" )", 
+					qsel.toString());
+		}
 		
-		qsel = new QSelect();
-		qsel.joinLast(new QTable("tab1", "T"));
-		qsel.joinByPrefix(JoinType.INNER, "T", 
-				new String[]{"left_col1","left_col2"}, 
-				new String[]{"right_col1", "right_col2"}, new QTable("tab2", "T2"));
-		assertEquals(
-				"select from( tab1 T " +
-				"inner join tab2 T2 on T.\"LEFT_COL1\" = T2.\"RIGHT_COL1\" and T.\"LEFT_COL2\" = T2.\"RIGHT_COL2\" )", 
-				qsel.toString());
+		{
+			// join by Expr
+			QSelect qsel = new QSelect();
+			qsel.joinLast(new QTable("tab1", "T"));
+			qsel.joinByPrefix(JoinType.LEFT_OUTER, "T", new String[]{}, new String[]{}, new QTable("tab2", "T2"), 
+					new Expr.Compare("T", "col1", "<", "T2", "col2"));
+			assertEquals("select from( tab1 T left outer join tab2 T2 on  and T.\"COL1\" < T2.\"COL2\" )", qsel.toString());			
+		}
 	}
 	
 	public void testGroupBy(){
@@ -110,4 +121,5 @@ public class QSelectTest extends TFTestCase {
 		assertEquals("select from tab1 T group by T.\"COLUMN_00\"", qsel.toString());
 		
 	}
+	
 }
