@@ -121,6 +121,10 @@ public class CollectionViewRequest extends LongListRequest {
     public void addOrderByDesc(IName name){
     	getOrderBy().add(new DescField(name.getName()));
     }
+    
+    public void addOrderByDesc(String name){
+    	getOrderBy().add(new DescField(name));
+    }
 
     public void setOrderBy(List<Object> orderBy) {
         m_orderBy = orderBy;
