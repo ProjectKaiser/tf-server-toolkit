@@ -266,7 +266,8 @@ public class QSelect extends QStatementWithWhere{
                                 .append(" = ").append(t.qt.calcPrefixedCol(t.rightCols[i])); //$NON-NLS-1$
                     }
                     if(null != t.expr){
-                    	res.append(" and ");
+                    	if(t.leftCols.length != 0)
+                    		res.append(" and ");
                     	res.append(t.expr.toString());
                     }                    
                     res.append(" )"); //$NON-NLS-1$

@@ -110,7 +110,7 @@ public class QSelectTest extends TFTestCase {
 			qsel.joinLast(new QTable("tab1", "T"));
 			qsel.joinByPrefix(JoinType.LEFT_OUTER, "T", new String[]{}, new String[]{}, new QTable("tab2", "T2"), 
 					new Expr.Compare("T", "col1", "<", "T2", "col2"));
-			assertEquals("select from( tab1 T left outer join tab2 T2 on  and T.\"COL1\" < T2.\"COL2\" )", qsel.toString());			
+			assertEquals("select from( tab1 T left outer join tab2 T2 on T.\"COL1\" < T2.\"COL2\" )", qsel.toString());			
 		}
 	}
 	
