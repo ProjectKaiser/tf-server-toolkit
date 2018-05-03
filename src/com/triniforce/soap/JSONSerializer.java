@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,10 +23,16 @@ import org.json.simple.parser.ParseException;
 
 import com.triniforce.soap.InterfaceDescription.MessageDef;
 import com.triniforce.soap.InterfaceDescription.Operation;
+import com.triniforce.soap.InterfaceDescriptionGenerator.JsonResult;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
 import com.triniforce.soap.JSONSerializer.KeyFinder.Element.Type;
 import com.triniforce.soap.SAXHandler.CurrentObject;
+import com.triniforce.soap.TypeDef.ArrayDef;
+import com.triniforce.soap.TypeDef.ClassDef;
+import com.triniforce.soap.TypeDef.EnumDef;
+import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
+import com.triniforce.soap.TypeDefLibCache.MapDefLib.MapComponentDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.utils.ApiAlgs;
 
@@ -166,19 +174,69 @@ public class JSONSerializer {
 		int i =0 ;
 		for(PropDef pd : props){
 			Object value;
-			if(pd.getRawType().equals(java.util.Date.class.getName())){
-				value = ((ScalarDef)pd.getType()).stringValue(soap.m_args[i]);
-			}
-			else{
-				value = soap.m_args[i];
-			}
+			value = toJsonObject(desc, pd.getType(), soap.m_args[i]);
 			mobj[i] = value;
 			i++;
 		}
-		JsonRpc obj = new JsonRpcMessage("2.0", soap.m_method, mobj, 1);
+		JsonRpc obj;
+		if(soap.m_bIn)
+			obj = new JsonRpcMessage("2.0", soap.m_method, mobj, 1);
+		else{
+			JsonResult jsonRes = new JsonResult();
+			if(soap.m_args.length > 0)
+				jsonRes.setResult(mobj[0]);
+			obj = jsonRes;
+		}
 		serializeObject(obj, out);
 	}
 	
+	private Object toJsonObject(InterfaceDescription desc, TypeDef type, Object object) {
+		Object value;
+		if(type instanceof EnumDef){
+			ScalarDef sd = (ScalarDef) type;
+			value = sd.stringValue(object);				
+		}
+		else if(type.getType().equals(java.util.Date.class.getName())){
+			value = ((ScalarDef)type).stringValue(object);
+		}
+		else if(type instanceof ClassDef){
+			ClassDef cd = (ClassDef) type;
+			LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+			
+			 Class objCls = object.getClass();
+             
+             if(!objCls.getName().equals(cd.getType())){
+                 TypeDef hideTypeDef = desc.getType(objCls);
+                 if(null != hideTypeDef){
+                	 if(!(hideTypeDef instanceof ClassDef))
+                		 throw new RuntimeException("wrong argument type : " + objCls.getName());
+                	 
+                     String typeName = hideTypeDef.getName();
+                     map.put("type", typeName);
+                     cd = (ClassDef) hideTypeDef;
+                 }
+             }
+			for(PropDef pd : cd.getProps()){
+				map.put(pd.getName(), toJsonObject(desc, pd.getType(), pd.get(object)));
+			}
+			value = map;
+		}
+		else if (type instanceof ArrayDef){
+            ArrayDef ad = (ArrayDef) type;
+            PropDef propDef = ad.getPropDef();
+            Collection col = (Collection) propDef.get(object);
+            ArrayList<Object> l = new ArrayList<Object>(col.size());
+            for (Object o1 : col) {
+                l.add(toJsonObject(desc, propDef.getType(), o1));
+            }
+            value = l;
+			
+		}
+		else
+			value = object;
+		return value;
+	}
+
 	public void serializeObject(Object obj, OutputStream out) throws IOException {
 		Object res = js.serialize(obj, new String[]{UniqueIdGenerator.UNIQUE_ID_PROPERTY, "class"});
 		String str = res.toString();
@@ -243,9 +301,13 @@ public class JSONSerializer {
 		}
 		
 		Stack<Element> m_stk = new Stack<Element>();
+		private List<String> m_argNames;
+		private InterfaceDescription m_desc;
 
-		public KeyFinder(SAXHandler handler) {
+		public KeyFinder(SAXHandler handler, InterfaceDescription desc) {
 			m_handler = handler;
+			m_argNames = null;
+			m_desc = desc;
 		}
 
 
@@ -260,12 +322,14 @@ public class JSONSerializer {
 
 		@Override
 		public boolean startObject() throws ParseException, IOException {
+
 			startStackElement(new Element(Element.Type.Object, ""));
 			m_bSetType=false;
 			return true;
 		}
 		@Override
 		public boolean endObject() throws ParseException, IOException {
+
 			endStackElement(Element.Type.Object);
 			return true;
 		}
@@ -277,6 +341,7 @@ public class JSONSerializer {
 				if(PARAMS.m_name.equals(arg0)){
 					m_handler.startElement(m_method, false, null);
 					m_state = State.Arguments;
+					m_argNames = getArgumentNames(m_desc, m_method);
 				}
 				else if (State.Arguments.equals(m_state)){
 					if("type".equals(arg0) && Element.Type.Object.equals(m_stk.peek().m_type)){
@@ -286,6 +351,12 @@ public class JSONSerializer {
 						if("value".equals(arg0) && m_handler.getTopObject().getType() instanceof ScalarDef){
 							m_bSetScalarValue = true;
 						}
+						else if (m_handler.getTopObject().getType() instanceof MapDef){
+								m_handler.startElement("value", false, null);
+								m_handler.startElement("key", false, null);
+								m_handler.characters(arg0.toCharArray(), 0, arg0.length());
+								m_handler.endElement();
+							}
 						else
 							m_handler.startElement(arg0, false, null);
 					}
@@ -295,8 +366,22 @@ public class JSONSerializer {
 			startStackElement(new Element(Element.Type.Entry, m_entry));
 			return true;
 		}
+		private List<String> getArgumentNames(InterfaceDescription desc, String opName) {
+			Operation op = desc.getOperation(opName);
+			MessageDef mdef = (MessageDef) op.getProp(opName).getType();
+			List<PropDef> props = mdef.getProps();
+			ArrayList<String> res = new ArrayList<String>(props.size());
+			for (PropDef prop : props) {
+				res.add(prop.getName());
+			}
+			return res;
+		}
+
+
+
 		@Override
 		public boolean endObjectEntry() throws ParseException, IOException {
+
 			Element tag = endStackElement(Element.Type.Entry);
 			ApiAlgs.assertTrue(Element.Type.Entry.equals(tag.m_type), tag.toString());
 			if(tag.equals(METHOD))
@@ -313,12 +398,15 @@ public class JSONSerializer {
 					
 					top.setType(type);
 					m_bSetType = false;
-				}
+				}				
 				else{
 					if(m_bSetScalarValue){
 						m_bSetScalarValue = false;
 //						String vStr = m_value.toString();
 //						m_handler.characters(vStr.toCharArray(), 0, vStr.length());
+					}
+					else if (m_handler.getTopObject().getType() instanceof MapDef){
+						m_handler.endElement();//Map.value
 					}
 					else{
 						m_handler.endElement();
@@ -357,7 +445,9 @@ public class JSONSerializer {
 					if(Element.Type.Array.equals(top.m_type)){
 						String argName = top.m_name;
 						if(top.m_name.equals("arg")){
-							argName = "arg"+m_argIdx;
+							if(m_argIdx >= m_argNames.size())
+								throw new ESoap.EUnknownElement("arg" + m_argIdx);
+							argName = m_argNames.get(m_argIdx);
 							m_argIdx++;
 		
 						}
@@ -394,12 +484,20 @@ public class JSONSerializer {
 				if(Element.Type.Array.equals(top.m_type)){
 					String argName = top.m_name;
 					if(top.m_name.equals("arg")){
-						argName = "arg"+m_argIdx;
+						if(m_argIdx >= m_argNames.size())
+							throw new ESoap.EUnknownElement("arg" + m_argIdx);
+						argName = m_argNames.get(m_argIdx);
 						m_argIdx++;
 	
 					}
 					boolean bNull = null == arg0;
 					m_handler.startElement(argName, bNull, null);
+					setPrimitive(arg0);
+					m_handler.endElement();
+				}
+				else if (m_handler.getTopObject().getType() instanceof MapComponentDef){
+					
+					m_handler.startElement("value", false, null);
 					setPrimitive(arg0);
 					m_handler.endElement();
 				}
@@ -440,7 +538,7 @@ public class JSONSerializer {
 		SAXHandler handler = new SAXHandler(desc);
 
 		JSONParser parser = new JSONParser();
-		KeyFinder finder = new KeyFinder(handler);
+		KeyFinder finder = new KeyFinder(handler, desc);
 		InputStreamReader reader = new InputStreamReader(source, Charset.forName("UTF-8"));
 		parser.parse(reader, finder, true);
 		SOAPDocument res = new SOAPDocument();

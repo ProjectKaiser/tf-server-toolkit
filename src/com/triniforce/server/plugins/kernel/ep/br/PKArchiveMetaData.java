@@ -70,7 +70,7 @@ public class PKArchiveMetaData implements IPropSerializabe {
         PKArchiveDataEntryKey ek = new PKArchiveDataEntryKey(extensionKey,
                 dataKey);
         PKArchiveDataEntry ade = new PKArchiveDataEntry(ek, dataType);
-        if (m_dataEntries.containsKey(ek)) {
+        if (m_dataEntries.containsKey(ek.toStringKey())) {
             throw new EDataEntryAlreadyExists(extensionKey, dataKey);
         }
         m_dataEntries.put(ek.toStringKey(), ade);

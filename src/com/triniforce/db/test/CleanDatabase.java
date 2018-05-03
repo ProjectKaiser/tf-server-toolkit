@@ -57,6 +57,10 @@ public class CleanDatabase {
     }
     
     public static void run(DBTestCase test, Log log) throws Exception {
+    	run(test, log, true);
+    }
+    
+    public static void run(DBTestCase test, Log log, boolean bDropViews) throws Exception {
 
     		Connection conn = test.reopenConnection();
 	    	String schem = null;
@@ -82,19 +86,21 @@ public class CleanDatabase {
 		        DatabaseMetaData md = conn.getMetaData();
 		        boolean bFail= false;
 				//	        conn.commit();
-		        //Drop Views 
-				ResultSet rs = md.getTables(conn.getCatalog(), schem, "%",
-						new String[] { "VIEW" });
-				while (rs.next()) {
-					String dbName = rs.getString("TABLE_NAME");
-					log.trace(String.format("Delete view %s.", dbName));
-					try{
-					conn.createStatement().execute("DROP VIEW " + dbName);
-					} catch(Exception e){
-						
+		        if(bDropViews){
+			        //Drop Views 
+					ResultSet rs = md.getTables(conn.getCatalog(), schem, "%",
+							new String[] { "VIEW" });
+					while (rs.next()) {
+						String dbName = rs.getString("TABLE_NAME");
+						log.trace(String.format("Delete view %s.", dbName));
+						try{
+						conn.createStatement().execute("DROP VIEW " + dbName);
+						} catch(Exception e){
+							
+						}
 					}
-				}
-				conn.commit();
+					conn.commit();
+		        }
 		        
 	//	        ResultSet rs = md.getTables(conn.getCatalog(), schem, "%",
 	//	                new String[] { "TABLE", "VIEW" });

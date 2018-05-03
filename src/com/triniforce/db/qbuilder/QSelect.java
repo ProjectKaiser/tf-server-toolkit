@@ -141,12 +141,14 @@ public class QSelect extends QStatementWithWhere{
             IQTable qt, Expr expr ) throws Err.EPrefixAlreadyExists,
             Err.EPrefixNotFound {
 
-        if (leftCols.length <= 0) {
-            throw new IllegalArgumentException("leftCols is zero");//$NON-NLS-1$            
-        }
-        if (rightCols.length <= 0) {
-            throw new IllegalArgumentException("rightCols is zero");//$NON-NLS-1$            
-        }
+    	if(null == expr){
+	        if (leftCols.length <= 0) {
+	            throw new IllegalArgumentException("leftCols is zero");//$NON-NLS-1$            
+	        }
+	        if (rightCols.length <= 0) {
+	            throw new IllegalArgumentException("rightCols is zero");//$NON-NLS-1$            
+	        }
+    	}
         if (rightCols.length != rightCols.length) {
             throw new IllegalArgumentException("rightCols != leftCols");//$NON-NLS-1$            
         }

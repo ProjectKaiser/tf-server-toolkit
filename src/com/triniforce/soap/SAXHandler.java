@@ -111,6 +111,9 @@ public class SAXHandler {
                     return ad.getPropDef().getType();
                 }
             }
+//            else if (m_objDef instanceof MapDef){
+//            	
+//            }
             
             ApiAlgs.assertNotNull(m_objDef, propName);
             

@@ -1119,7 +1119,7 @@ public class InterfaceDescriptionGenerator {
 		
 	} 
 	
-	public String serializeJson(InterfaceDescription desc, Object response) throws IOException {
+	public String serializeJson(InterfaceDescription desc, String method, Object response) throws IOException {
 		JSONSerializer js = new JSONSerializer();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JsonResult jsonRes = new JsonResult();

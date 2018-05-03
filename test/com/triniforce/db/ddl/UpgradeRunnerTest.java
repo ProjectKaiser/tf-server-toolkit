@@ -485,6 +485,8 @@ public class UpgradeRunnerTest extends DDLTestCase {
             }
             else if(getDbType().equals(DbType.DERBY)){
             	assertEquals(MessageFormat.format("ALTER TABLE {0} ALTER COLUMN {1} SET DATA TYPE {2}", dbName, "col1", m_player.getTypeString(ColumnType.INT, 0, 0)), sql);
+            }else if(getDbType().equals(DbType.FIREBIRD)){
+            	assertEquals(MessageFormat.format("ALTER TABLE {0} ALTER COLUMN {1} TYPE {2}", dbName, "col1", m_player.getTypeString(ColumnType.INT, 0, 0)), sql);
             }else{
             	assertEquals(MessageFormat.format("ALTER TABLE {0} ALTER COLUMN {1} {2} NULL", dbName, "col1", m_player.getTypeString(ColumnType.INT, 0, 0)), sql);
             }
@@ -748,7 +750,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
         
         assertNotNull(dbName);
         
-        long tst = System.currentTimeMillis();
+        long tst = (System.currentTimeMillis()/1000)*1000; // Store only seconds        
         
         PreparedStatement ps = getConnection().prepareStatement("insert into "+dbName+" " +
                 "(fINT, fSMALLINT, fFLOAT, fTIMESTAMP, fDECIMAL_10_2, fCHAR_5, fNCHAR_10," +
@@ -1132,7 +1134,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
 	
 	public void testAlterColumn() throws EReferenceError, SQLException, InvalidPropertiesFormatException, FileNotFoundException, IOException{
 		if(getDbType().equals(DbType.FIREBIRD)){
-			return;
+//			return;
 		}
     	TableDef def1 = new TableDef("testAlterColumn");
     	def1.setDbName("testAlterColumn");
