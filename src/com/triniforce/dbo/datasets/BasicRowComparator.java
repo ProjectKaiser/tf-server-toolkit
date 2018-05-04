@@ -24,17 +24,17 @@ public abstract class BasicRowComparator<T> implements Comparator<T>{
         m_indexColumns = indexColumns;
     }        
     
-    Object reduce(Object o){
+    Object reduceNone(Object o){
     	if(o instanceof VNone){
-    		return "";
+    		return null;
     	}
     	return o;
     }
     
     @SuppressWarnings("unchecked") //$NON-NLS-1$
     int compareValues(Object obj0, Object obj1) {
-        obj0 = reduce(obj0);
-        obj1 = reduce(obj1);
+        obj0 = reduceNone(obj0);
+        obj1 = reduceNone(obj1);
     	if(null == obj0){
             if(null == obj1)
                 return 0;
