@@ -8,6 +8,8 @@ package com.triniforce.dbo.datasets;
 import java.util.Comparator;
 import java.util.List;
 
+import com.triniforce.server.soap.VNone;
+
 public abstract class BasicRowComparator<T> implements Comparator<T>{
     List<Integer> m_indexColumns;
 
@@ -22,9 +24,18 @@ public abstract class BasicRowComparator<T> implements Comparator<T>{
         m_indexColumns = indexColumns;
     }        
     
+    Object reduceNone(Object o){
+    	if(o instanceof VNone){
+    		return null;
+    	}
+    	return o;
+    }
+    
     @SuppressWarnings("unchecked") //$NON-NLS-1$
     int compareValues(Object obj0, Object obj1) {
-        if(null == obj0){
+        obj0 = reduceNone(obj0);
+        obj1 = reduceNone(obj1);
+    	if(null == obj0){
             if(null == obj1)
                 return 0;
             else 
