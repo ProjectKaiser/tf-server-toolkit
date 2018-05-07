@@ -305,6 +305,8 @@ public class Expr {
 
     public static class In extends Expr {
 
+
+
         private String m_str;
 
         public In(String prefix, String col, int nargs) {
@@ -342,13 +344,19 @@ public class Expr {
         }
 
 		public In(String prefix, String col, String setOfVals, boolean bIn) {
-			m_str = String.format("%s %s (%s)", QTable.joinPrefixedCol(prefix, col),  bIn ? "IN" : "NOT IN", setOfVals); //$NON-NLS-1$
             addPrefixToCheck(prefix, "");
+            m_str = String.format("%s %s (%s)", QTable.joinPrefixedCol(prefix, col),  bIn ? "IN" : "NOT IN", setOfVals); //$NON-NLS-1$
 		}
+
+		public In(String prefix, String col, QSelect qs) {
+			this(prefix, col, qs.toString(), true);			
+		}
+		
+		
 
 		@Override
         public String toString() {
-            return m_str;
+			return m_str;
         }
     }
 
@@ -442,5 +450,13 @@ public class Expr {
 		}
 
 	}
+    
+    public static class QSelectExpr extends Expr{
+
+		public QSelectExpr(QSelect qs) {
+			// TODO Auto-generated constructor stub
+		}
+    	
+    }
 
 }

@@ -14,6 +14,7 @@ import com.triniforce.db.qbuilder.Expr.Between;
 import com.triniforce.db.qbuilder.Expr.Func;
 import com.triniforce.db.qbuilder.Expr.In;
 import com.triniforce.db.qbuilder.Expr.Like;
+import com.triniforce.db.qbuilder.Expr.QSelectExpr;
 import com.triniforce.db.qbuilder.Expr.SinglePred;
 import com.triniforce.db.qbuilder.OrderByClause.DescColumn;
 import com.triniforce.db.test.TFTestCase;
@@ -145,5 +146,13 @@ public class ExprTest extends TFTestCase {
 		
 		assertEquals("fun1(TBB.\"COLNAME\")", sp.toString());
 		
+	}
+	
+	public void testInQSelectExpr(){
+		QSelect qs = new QSelect();
+		qs.joinLast(new QTable("tab999").addCol("SOME_COL001"));
+		qs.groupBy(new GroupByClause().addCol("", "SOME_COL001"));
+		In expr = new Expr.In("T88", "C8R", qs);
+		assertEquals("T88.\"C8R\" IN (select \"SOME_COL001\" from tab999 group by \"SOME_COL001\")", expr.toString());
 	}
 }

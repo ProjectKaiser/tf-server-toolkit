@@ -117,8 +117,9 @@ public class QSelectTest extends TFTestCase {
 	public void testGroupBy(){
 		QSelect qsel = new QSelect();
 		qsel.joinLast(new QTable("tab1", "T"));
+		qsel.addGetExpr(new Expr.SinglePred("MAX", new Expr.Column("T", "COL665")), "CAPTION_IT");
 		assertSame(qsel, qsel.groupBy(new GroupByClause().addCol("T", "column_00")));
-		assertEquals("select from tab1 T group by T.\"COLUMN_00\"", qsel.toString());
+		assertEquals("select MAX(T.\"COL665\") AS CAPTION_IT from tab1 T group by T.\"COLUMN_00\"", qsel.toString());
 		
 	}
 	
