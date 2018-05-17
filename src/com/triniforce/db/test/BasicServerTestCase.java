@@ -361,8 +361,17 @@ public static class DPPProcPlugin extends PKPlugin{
     }
 
     protected void addPlugin(IPlugin plugin) {
-        m_plugins.add(plugin);
-    	m_bRestartOnSetup = true;
+    	if(m_server != null){
+    		Set<Class> clss = new HashSet<Class>();
+    		for(IPlugin plg : m_server.getPlugins()){
+    			clss.add(plg.getClass());
+    		}
+    		if(!clss.contains(plugin.getClass()))
+    			m_bRestartOnSetup = true;
+    			
+    	}
+        m_plugins.add(plugin);        
+//    	m_bRestartOnSetup = true;
     }
 
     protected void checkResourcesConnections(){
