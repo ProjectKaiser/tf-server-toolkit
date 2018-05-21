@@ -52,8 +52,6 @@ public class PKEPAPIs  extends PKExtensionPoint{
         
         for(IPKExtension ex: exs){
             Object api = ex.getInstance();
-            ApiAlgs.getLog(this).trace("Init api: " + api.getClass().getName());
-            
             if((init && api instanceof IInitApi) || (!init && api instanceof IFinitApi)){
                 try{
                     if(null != bs){
