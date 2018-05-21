@@ -156,7 +156,7 @@ public class CVRHandler implements ICVRHandler {
 		resColumns.addAll(ffResColumns);
 		
 		
-		List<WhereExpr> where = (List<WhereExpr>) getWhereExprs(req);
+		List<WhereExpr> where = getWhereExprs(req);
 		if(isFilterNeeded(flags, where, req.getWhere().keySet(), ffResColumns)){
 			rs = filter(rs, where, req.getFunctions(), ffs);
 		}
@@ -194,7 +194,12 @@ public class CVRHandler implements ICVRHandler {
 	}
 
 	private boolean isFilterNeeded(RSFlags flags, List<WhereExpr> where, Set<String> whereKeys, List<String> ffResColumns) {
-		return (!(flags.m_bFilter || where.isEmpty())) || intersects(whereKeys, ffResColumns);
+		Set<String> allWhereCols = new HashSet<String>();
+		for (WhereExpr w : where) {
+			allWhereCols.addAll(w.calcColumnNames());
+		}
+		allWhereCols.addAll(whereKeys);
+		return (!(flags.m_bFilter || allWhereCols.isEmpty())) || intersects(allWhereCols, ffResColumns);
 		
 	}
 
