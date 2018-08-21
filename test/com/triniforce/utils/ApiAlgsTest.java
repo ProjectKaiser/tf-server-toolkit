@@ -11,12 +11,26 @@ import com.triniforce.utils.test.JustAClass;
 
 public class ApiAlgsTest extends TFTestCase {
 	
+	static class ETestSafeExcepion extends ESafeException {
+		public ETestSafeExcepion(String msg) {
+			super(msg);
+		}
+
+		private static final long serialVersionUID = 1L;
+	}
+	
     public void test_isSeriousException() {
         assertTrue(ApiAlgs.isSeriousException(new RuntimeException("")));
         assertFalse(ApiAlgs.isSeriousException(new RuntimeException("Unable to complete network request to host qweqwe")));
         assertFalse(ApiAlgs.isSeriousException(new RuntimeException("database C:/TESTS/TESTBUILDTESTUNTILL/DB/REGRESSION.GDB shutdown kjlkj")));
         assertFalse(ApiAlgs.isSeriousException(new RuntimeException("GDS Exception. 335544721. Unable to complete network request to host qq q q q")));
-        
+        assertFalse(ApiAlgs.isSeriousException(new ETestSafeExcepion("test")));
+        try {
+        	ApiAlgs.rethrowException(new ETestSafeExcepion("test"));
+        	fail();
+        } catch (RuntimeException e) {
+        	assertFalse(ApiAlgs.isSeriousException(e));
+        }
     }
     
 	public void testAssertTrue() {
