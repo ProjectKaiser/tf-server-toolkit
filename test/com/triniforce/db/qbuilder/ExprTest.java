@@ -14,7 +14,6 @@ import com.triniforce.db.qbuilder.Expr.Between;
 import com.triniforce.db.qbuilder.Expr.Func;
 import com.triniforce.db.qbuilder.Expr.In;
 import com.triniforce.db.qbuilder.Expr.Like;
-import com.triniforce.db.qbuilder.Expr.QSelectExpr;
 import com.triniforce.db.qbuilder.Expr.SinglePred;
 import com.triniforce.db.qbuilder.OrderByClause.DescColumn;
 import com.triniforce.db.test.TFTestCase;
