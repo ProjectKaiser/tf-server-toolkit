@@ -1239,12 +1239,14 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 		private Api m_baseApi;
 		private Runnable m_runnable;
 		boolean bShutDown = false;
+		private boolean m_bSrvRegistered;
 		
 		public RegistrationThread(BasicServer srv, Api baseApi, Runnable runnable) {
 			super(RegistrationThread.class.getSimpleName());
 			m_srv = srv;
 			m_baseApi = baseApi;
 			m_runnable = runnable;
+			m_bSrvRegistered=false;
 		}
 		
 		@Override
@@ -1261,8 +1263,11 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 							pool.returnConnection(con);
 						}
 						try{
-							m_srv.setBaseApi(m_baseApi);
-							m_srv.doRegistration();
+							if(!m_bSrvRegistered){
+								m_srv.setBaseApi(m_baseApi);
+								m_srv.doRegistration();
+								m_bSrvRegistered = true;
+							}
 							ApiStack.pushInterface(IBasicServer.class, m_srv);
 							try{
 								m_runnable.run();
@@ -1292,6 +1297,11 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 			} catch (InterruptedException e) {
 				ApiAlgs.rethrowException(e);
 			}
+		}
+
+		protected void setSrvRegistered(boolean b) {
+			m_bSrvRegistered = b;
+			
 		}
 	}
 	
