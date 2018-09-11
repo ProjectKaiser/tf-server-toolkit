@@ -48,6 +48,8 @@ dependencies {
 //	compile 'commons-dbcp:commons-dbcp:1.2.2' // (latest: 1.4)
 	compile 'commons-dbcp:commons-dbcp:1.4' // (latest: 1.4)
 	compile 'commons-logging:commons-logging:1.1.1'
+	compile 'org.apache.commons:commons-lang3:3.8'
+	
 
 	compile(group: 'log4j', name: 'log4j', version: '1.2.16')
 	compile(group: 'org.beanshell', name: 'bsh', version: '2.0b4')

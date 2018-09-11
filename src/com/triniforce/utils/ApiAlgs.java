@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -36,6 +37,11 @@ public class ApiAlgs {
                 return false;
             }
         }
+        
+        if (e instanceof ESafeException || ExceptionUtils.getRootCause(e) instanceof ESafeException) {
+        	return false;
+        }
+        
         return true;
     }
     
