@@ -116,6 +116,13 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 		SrvApiAlgs2.getIServerTran().instantiateBL(TQSyncQueues.BL.class).clear();
 		runnables.clear();
 	}
+	
+	@Override
+	protected void tearDown() throws Exception {
+		SrvApiAlgs2.getIServerTran().instantiateBL(TQSyncQueues.BL.class).clear();
+		SrvApiAlgs2.getIServerTran().commit();
+		super.tearDown();
+	}
 
 	public void testSetMaxNumberOfSyncTasks() {
 		sm.setMaxNumberOfSyncTasks(20);
