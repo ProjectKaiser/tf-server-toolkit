@@ -21,11 +21,15 @@ import org.jmock.Mockery;
 
 import com.triniforce.db.ddl.ActualStateBL;
 import com.triniforce.db.ddl.TableDef;
+import com.triniforce.db.ddl.TableDef.EDBObjectException;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.ddl.UpgradeRunner.DbType;
+import com.triniforce.extensions.PKPlugin;
 import com.triniforce.server.plugins.kernel.BasicServer.EInvalidServerState;
 import com.triniforce.server.plugins.kernel.BasicServer.ServerException;
+import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
 import com.triniforce.server.srvapi.DataPreparationProcedure;
+import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.IDatabaseInfo;
 import com.triniforce.server.srvapi.IPlugin;
@@ -212,6 +216,16 @@ public class ServerImplTest extends ServerTest {
     		bCall= true;
     	}
     }
+    
+    static class TestPTask extends BasicPeriodicalTask{
+
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			
+		}
+    	
+    }
 
     /**
      * Test method for {@link com.triniforce.server.plugins.kernel.Server#doRegistration()}.
@@ -263,6 +277,38 @@ public class ServerImplTest extends ServerTest {
 //        	srv.doDbModification();
 //        	assertFalse(TestDPP1.bCall);
 //        }
+        
+        {
+
+        	PKPlugin pl = new PKPlugin() {
+				
+				@Override
+				public void doRegistration() {
+				}
+				
+				@Override
+				public void doExtensionPointsRegistration() {
+				}
+				
+				@Override
+				public void doRegistration(ISORegistration reg) throws EDBObjectException {
+		            IBasicServer srv = ApiStack.getInterface(IBasicServer.class);
+		            srv.addPeriodicalTask(new TestPTask());
+				}
+			};
+            BasicServer server2 = new BasicServer(m_coreApi, Arrays.asList(new IPlugin[]{pl}));
+            
+            server2.doRegistration();
+            server2.setBaseApi(m_coreApi);
+            server2.doRegistration();
+            
+            int cnt = 0;
+            for(BasicPeriodicalTask t : server2.getPeriodicalTasks()){
+            	if(t.getClass().equals( TestPTask.class))
+            		cnt++;
+            }
+            assertEquals(1, cnt);
+        }
     }
     
     public void testIsDbModificationNeeded() throws Throwable{
