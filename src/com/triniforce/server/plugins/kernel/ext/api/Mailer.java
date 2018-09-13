@@ -55,6 +55,8 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
     
     static final int ERROR_SEND_TIMEOUT = 1 * 60 * 1000; // 1 minute after error
     
+    static final List<Object> SESSION_FACTORY_KEY = Arrays.asList((Object)"SESSION_FACTORY");
+    
     static final Properties INI_SESSION_PROPS = new Properties();
     static{
         String strTimeout = Integer.valueOf(innerTimeout).toString();
@@ -269,7 +271,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
         	
         	List<Object> oldSessionKey = m_sessionKey; 
         	Session session = getActiveSession(mailerSettings);
-        	final boolean bSessionRecreated = !TFUtils.equals(oldSessionKey, m_sessionKey);
+        	final boolean bSessionRecreated = !TFUtils.equals(oldSessionKey, m_sessionKey) || oldSessionKey.equals(SESSION_FACTORY_KEY);
             
         	MimeMessage msg;
         	final InternetAddress fromAddr;
@@ -315,6 +317,8 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
                 return true;
             } catch(RethrownException e){
                 ApiAlgs.getLog(this).error("Error sending mail, mail is skipped", e.getCause());
+    			m_session = null;
+    			m_sessionKey = null;
                 return false;
             }
         }finally{
@@ -349,22 +353,32 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 	}
 
 	private Session reopenSession(final IMailerSettings mailerSettings) {
-		Properties props = createSessionProperties(mailerSettings);
-		final String smtpUsr = mailerSettings.getSmtpUser();
-        javax.mail.Authenticator authenticator = null;
-	    if (!Utils.isEmptyString(smtpUsr)) {
-            authenticator = new javax.mail.Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(smtpUsr, 
-                    		"".equals(mailerSettings.getSmtpPassword()) ? null : mailerSettings.getSmtpPassword());
-                }
-            };
-        }
-		m_session = Session.getInstance(props, authenticator);
+		Session session = mailerSettings.createSmtpSession();
+		if(null != session){
+			m_session = session;
+			m_sessionKey = SESSION_FACTORY_KEY;
+		}
+		else{
+			Properties props = createSessionProperties(mailerSettings);
+			final String smtpUsr = mailerSettings.getSmtpUser();
+	        javax.mail.Authenticator authenticator = null;
+		    if (!Utils.isEmptyString(smtpUsr)) {
+	            authenticator = new javax.mail.Authenticator() {
+	                protected PasswordAuthentication getPasswordAuthentication() {
+	                    return new PasswordAuthentication(smtpUsr, 
+	                    		"".equals(mailerSettings.getSmtpPassword()) ? null : mailerSettings.getSmtpPassword());
+	                }
+	            };
+	        }
+			m_session = Session.getInstance(props, authenticator);
+		}
 		return m_session;
 	}
 	
 	private Session getActiveSession(IMailerSettings mailerSettings) {
+		if(SESSION_FACTORY_KEY.equals(m_sessionKey))
+			return m_session;
+		
 		Session result;
         Properties props = createSessionProperties(mailerSettings); 
         
@@ -421,21 +435,29 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 	public boolean isMailerConfigured() {
 		final IMailerSettings mailerSettings  = ApiStack.queryInterface(IMailerSettings.class);
 		
+		
 		if (mailerSettings == null) {
 			ApiAlgs.getLog(this).warn("Mailer settings is null"); //$NON-NLS-1$
 			return false;
 		}
-		
+
 		mailerSettings.loadSettings();
 		
-        String smtpHost = mailerSettings.getSmtpHost();
-        if (Utils.isEmptyString(smtpHost)) {
-            ApiAlgs.getLog(this).warn("SMTP server is not configured"); //$NON-NLS-1$
-			return false;
-        }
+		if(null == m_session){
+			m_session = mailerSettings.createSmtpSession();
+			if(null == m_session){
+		        String smtpHost = mailerSettings.getSmtpHost();
+		        if (Utils.isEmptyString(smtpHost)) {
+		            ApiAlgs.getLog(this).warn("SMTP server is not configured"); //$NON-NLS-1$
+					return false;
+		        }
+			} 
+			else{
+				m_sessionKey = SESSION_FACTORY_KEY;
+			}
+		}
 		return true;
 	}
-	
 	
 	
 

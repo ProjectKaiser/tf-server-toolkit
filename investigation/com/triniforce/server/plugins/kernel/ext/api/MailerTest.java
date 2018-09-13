@@ -1,5 +1,9 @@
 package com.triniforce.server.plugins.kernel.ext.api;
 
+import java.util.Properties;
+
+import javax.mail.Session;
+
 import com.triniforce.server.plugins.kernel.ext.api.IMailer.EMailerConfigurationError;
 import com.triniforce.server.plugins.kernel.ext.api.IMailerSettings;
 import com.triniforce.server.plugins.kernel.ext.api.Mailer;
@@ -65,8 +69,15 @@ public class MailerTest extends ServicesTestCase {
 		public String getDefaultSender() {
 			return null;
 		}
+
+
+		@Override
+		public Session createSmtpSession() {
+			return null;
+		}
 		
 	}
+
 	
 	public void testSend() throws EMailerConfigurationError {
 	

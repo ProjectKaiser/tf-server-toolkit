@@ -5,6 +5,8 @@
  */
 package com.triniforce.server.plugins.kernel.ext.api;
 
+import javax.mail.Session;
+
 import com.triniforce.db.test.BasicServerRunningTestCase;
 import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.utils.Api;
@@ -73,6 +75,12 @@ public class MailerTest2 extends BasicServerRunningTestCase {
 
 		public String getDefaultSender() {
 			return m_sender;
+		}
+
+		@Override
+		public Session createSmtpSession() {
+			// TODO Auto-generated method stub
+			return null;
 		}
 
     }

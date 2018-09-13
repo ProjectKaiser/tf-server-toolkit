@@ -6,11 +6,14 @@
 package com.triniforce.server.plugins.kernel.ext.api;
 
 import java.util.Arrays;
+import java.util.Properties;
 
 import javax.mail.Address;
+import javax.mail.Authenticator;
 import javax.mail.BodyPart;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -21,6 +24,7 @@ import com.icegreen.greenmail.util.ServerSetupTest;
 import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.extensions.PKPlugin;
 import com.triniforce.server.plugins.kernel.ep.api.PKEPAPIs;
+import com.triniforce.server.plugins.kernel.ext.api.IMailer.EMailerConfigurationError;
 import com.triniforce.server.plugins.kernel.ext.api.Mailer.MailData;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.IDbQueue;
@@ -70,8 +74,15 @@ public class MailerSrvTest extends BasicServerTestCase {
 		public String getDefaultSender() {
 			return DEF_SENDER;
 		}
+
+		@Override
+		public Session createSmtpSession() {
+			cnt1 ++;
+			return SESSION;
+		}
 		
 	}
+	static int cnt1 =0;
 	
 	static RuntimeException SENDING_ERROR = null;
 	
@@ -105,6 +116,10 @@ public class MailerSrvTest extends BasicServerTestCase {
 			return m_session;
 		}
 		
+		public void invalidateSession(){
+			m_session = null;
+		}
+		
 	}
 	
 	static class MailerSrvPlugin extends PKPlugin{
@@ -134,6 +149,9 @@ public class MailerSrvTest extends BasicServerTestCase {
 			getServer().leaveMode();
 		}
 		SENDING_ERROR = null;
+		SMTP_HOST = "localhost";
+		cnt1 = 0;
+		SESSION=null;
 
 	}
 	
@@ -395,7 +413,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 		}
 	}
 	
-	public void testSendMail() throws InterruptedException, MessagingException {
+	public void testSendMail() throws InterruptedException, MessagingException, EMailerConfigurationError {
 		
 		sendMail("a@mail.com", "x@mail.com","one recipient","zzz");
 		waitForMailer();
@@ -430,5 +448,56 @@ public class MailerSrvTest extends BasicServerTestCase {
 		waitForMailer();
 		
 		assertEquals(greenMail.getReceivedMessages().length,7);
+		
 	}
+	
+	static private Session SESSION = null;
+	
+	public void testSendMailBySession() throws InterruptedException{
+		waitForMailer();
+		
+		int sz = greenMail.getReceivedMessages().length;
+		
+		//session factory
+		Properties props = new Properties();
+        props.put("mail.smtp.host", "localhost");
+        props.put("mail.smtp.port", ServerSetupTest.SMTP.getPort());
+		SESSION = Session.getInstance(props);
+		
+		getServer().enterMode(Mode.Running);
+		try{
+			TestMailer m = (TestMailer) ApiStack.getInterface(IMailer.class);
+			m.invalidateSession();
+			
+			sendMail("a@mail.com", "b@mail.com","1 recipients","zzz");
+			waitForMailer();
+			
+			assertEquals(sz + 1, greenMail.getReceivedMessages().length);
+			assertEquals(1, cnt1);
+			
+			m.invalidateSession();
+			props.put("mail.smtp.host", "unknown");
+			SESSION = Session.getInstance(props);
+			incExpectedLogErrorCount(1);
+			sendMail("a@mail.com", "b@mail.com","1 recipients","zzz");
+			waitForMailer();
+			assertEquals(2, cnt1);
+			assertEquals(sz + 1, greenMail.getReceivedMessages().length);
+			
+			m.m_nextExecTime=0l;
+			props.put("mail.smtp.host", "localhost");
+			SESSION = Session.getInstance(props);
+			sendMail("a@mail.com", "b@mail.com","1 recipients","zzz");
+			waitForMailer();
+			assertEquals(sz + 3, greenMail.getReceivedMessages().length);
+			assertEquals(3, cnt1);
+			
+			
+		}finally{
+			getServer().leaveMode();
+		}
+		
+	}
+
 }
+
