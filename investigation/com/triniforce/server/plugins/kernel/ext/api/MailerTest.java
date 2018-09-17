@@ -1,12 +1,8 @@
 package com.triniforce.server.plugins.kernel.ext.api;
 
-import java.util.Properties;
-
 import javax.mail.Session;
 
 import com.triniforce.server.plugins.kernel.ext.api.IMailer.EMailerConfigurationError;
-import com.triniforce.server.plugins.kernel.ext.api.IMailerSettings;
-import com.triniforce.server.plugins.kernel.ext.api.Mailer;
 import com.triniforce.server.plugins.kernel.ext.api.Mailer.MailData;
 import com.triniforce.server.plugins.kernel.services.ServicesTestCase;
 import com.triniforce.server.srvapi.IDbQueue;
