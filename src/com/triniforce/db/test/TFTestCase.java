@@ -138,6 +138,11 @@ public class TFTestCase extends TestCase {
         return getTestProperties().getProperty(key);
     }
     
+    public static String getTestPropertyDef(String key, String def) {
+        String res = getTestProperties().getProperty(key);
+        return res == null? def: res;
+    }
+    
     public static String getMustHaveTestProperty(String key) {
         String res = getTestProperties().getProperty(key);
         TFUtils.assertNotNull(res, "tes.properties must have property:" + key);
