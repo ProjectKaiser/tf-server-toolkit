@@ -46,6 +46,9 @@ public class ApiAlgs {
     }
     
     public static void logError(Object obj, String msg, Throwable e){
+    	if (e instanceof ESafeException) {
+    		return;
+    	}
         if(isSeriousException(e)){
             ApiAlgs.getLog(obj).error(msg, e);
         }else{
