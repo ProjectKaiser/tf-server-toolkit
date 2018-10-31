@@ -82,13 +82,15 @@ public class RequestHandler {
     static final int LOG_BUF_SIZE = 8000;
     
     public void exec(InputStream input, OutputStream output){
+    	ApiAlgs.getLog(this).trace("execsoap");
         String soapNS = null;
     	
     	boolean bLogErorRequest;
         Log log = ApiAlgs.getLog(this);
         bLogErorRequest = log.isTraceEnabled() && input.markSupported();
         if(bLogErorRequest)
-        	input.mark(LOG_BUF_SIZE);
+        	input.mark(LOG_BUF_SIZE);        
+        
         SOAPDocument in;
         try{
             try{
@@ -108,7 +110,20 @@ public class RequestHandler {
                 	
                 }
                 return;
-        	} 
+        	}
+            
+            if(bLogErorRequest){
+            	try {
+					input.reset();
+					byte[] buf = new byte[LOG_BUF_SIZE];
+					input.read(buf);
+					log.trace(new String(buf, "utf-8"));
+				} catch (IOException e1) {
+					ApiAlgs.getLog(this).error("Log request failed", e1);
+				}
+            	
+            }
+            
             try {
 	            soapNS = in.m_soap;
 	            Object res = m_invoker.invokeService(in.m_method, in.m_args);
@@ -141,6 +156,8 @@ public class RequestHandler {
 	}
 
 	public int execJson(InputStream input, OutputStream output) {
+		ApiAlgs.getLog(this).trace("execjson");
+        
         String str = null;
         int code = HttpServletResponse.SC_OK;
 		try {

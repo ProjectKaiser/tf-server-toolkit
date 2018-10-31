@@ -104,7 +104,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 			MailData mailData = (MailData)obj;
 			boolean bMailSent;
 			
-			if(mailData.getFrom() == null || mailData.getTo() == null){
+			if(mailData.getTo() == null){
 				ApiAlgs.getLog(this).error("Mail address is null, mail is skipped");
 			}
 			else{
