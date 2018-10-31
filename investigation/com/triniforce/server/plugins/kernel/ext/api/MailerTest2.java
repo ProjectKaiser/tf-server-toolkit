@@ -5,6 +5,12 @@
  */
 package com.triniforce.server.plugins.kernel.ext.api;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+
 import javax.mail.Session;
 
 import com.triniforce.db.test.BasicServerRunningTestCase;
@@ -124,6 +130,23 @@ public class MailerTest2 extends BasicServerRunningTestCase {
         } finally {
             ApiStack.popApi();
         }
+    }
+    
+    public void testMD() throws IOException, ClassNotFoundException{
+    	ByteArrayOutputStream bout = new ByteArrayOutputStream();
+    	InputStream in = getClass().getResourceAsStream("md.dat");
+    	int b1,b2;
+		while( (b1 = in.read()) != -1){
+			b2 = in.read();
+			String s = new String(new byte[]{(byte) b1,(byte) b2});
+    		int i = Integer.parseInt(s, 16);
+    		bout.write(i);
+    	} 
+		ObjectInputStream oin = new ObjectInputStream(new ByteArrayInputStream(bout.toByteArray()));
+		Object obj = oin.readObject();
+		assertNotNull(obj);
+		
+		
     }
 
 }

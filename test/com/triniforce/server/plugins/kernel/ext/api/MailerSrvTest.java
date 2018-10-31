@@ -444,8 +444,14 @@ public class MailerSrvTest extends BasicServerTestCase {
 		//
 		sendMail("a@mail.com", "b@mail.com, c@mail.com,d@mail.com,e@mail.com","4 recipients","zzz");
 		waitForMailer();
-		
+		getMailer().m_nextExecTime=0l;
 		assertEquals(greenMail.getReceivedMessages().length,7);
+		
+		sendMail("A@adm.coom", null, "sub", "body");
+		waitForMailer();
+		incExpectedLogErrorCount(1);// addres is null
+		getMailer().m_nextExecTime=0l;
+		waitForMailer(); // No error mail is skipped
 		
 	}
 	

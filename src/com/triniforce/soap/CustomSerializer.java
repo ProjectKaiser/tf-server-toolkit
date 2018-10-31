@@ -69,11 +69,11 @@ public abstract class CustomSerializer<From, To>{
 		
 	}
 	
-	Class<To> getTargetType(){
+	public Class<To> getTargetType(){
 		return m_toCls;
 	}
 
-	private Class<From> getSourceType() {
+	public Class<From> getSourceType() {
 		return m_fromCls;
 	}
 

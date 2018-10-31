@@ -104,26 +104,31 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 			MailData mailData = (MailData)obj;
 			boolean bMailSent;
 			
-			try{
-				if(null == mailData.getAttachment())
-					bMailSent = this.send(mailData.getFrom(), mailData.getTo(), mailData.getSubject(), mailData.getBody());
-				else
-					bMailSent = this.send(mailData.getFrom(), mailData.getTo(), mailData.getSubject(), 
-							mailData.getBodyType(), mailData.getBody(),
-							mailData.getAttachFileName(), mailData.getAttachType(), mailData.getAttachment());
-			}catch(IMailer.EMailerConfigurationError e){
-				ApiAlgs.getLog(this).warn("Mailer is not configured");
-				bMailSent = false;					
+			if(mailData.getFrom() == null || mailData.getTo() == null){
+				ApiAlgs.getLog(this).error("Mail address is null, mail is skipped");
 			}
-			catch (Exception e) {
-				ApiAlgs.getLog(this).warn("Mail is not sent", e);
-				bMailSent = false;					
-			}
-			
-			if(!bMailSent){
-				mailerQueue.put(mailData);
-				m_nextExecTime = ApiStack.getInterface(ITime.class).currentTimeMillis() + ERROR_SEND_TIMEOUT;
-				break;
+			else{
+				try{
+					if(null == mailData.getAttachment())
+						bMailSent = this.send(mailData.getFrom(), mailData.getTo(), mailData.getSubject(), mailData.getBody());
+					else
+						bMailSent = this.send(mailData.getFrom(), mailData.getTo(), mailData.getSubject(), 
+								mailData.getBodyType(), mailData.getBody(),
+								mailData.getAttachFileName(), mailData.getAttachType(), mailData.getAttachment());
+				}catch(IMailer.EMailerConfigurationError e){
+					ApiAlgs.getLog(this).warn("Mailer is not configured");
+					bMailSent = false;					
+				}
+				catch (Exception e) {
+					ApiAlgs.getLog(this).warn("Mail is not sent", e);
+					bMailSent = false;					
+				}
+				
+				if(!bMailSent){
+					mailerQueue.put(mailData);
+					m_nextExecTime = ApiStack.getInterface(ITime.class).currentTimeMillis() + ERROR_SEND_TIMEOUT;
+					break;
+				}
 			}
 		}
 	}
