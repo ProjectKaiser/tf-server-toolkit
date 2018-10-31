@@ -6,16 +6,20 @@
 package com.triniforce.qsync.impl;
 
 import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
 
 import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.qsync.impl.QSyncPlugin.TestSyncer;
 import com.triniforce.qsync.intf.IQSyncManager;
+import com.triniforce.qsync.intf.QSyncQueueInfo;
 import com.triniforce.qsync.intf.QSyncTaskStatus;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.INamedDbId;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ITaskExecutors;
+import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.utils.ApiStack;
 
 public class QSyncStatisSyncerTest extends BasicServerTestCase {
@@ -27,7 +31,6 @@ public class QSyncStatisSyncerTest extends BasicServerTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		
 		addPlugin(p = new QSyncPlugin());
 
 		super.setUp();
@@ -37,6 +40,17 @@ public class QSyncStatisSyncerTest extends BasicServerTestCase {
 			INamedDbId dbId = ApiStack.getInterface(INamedDbId.class);
 			qId = dbId.getId(TestSyncer.class.getName());
 			IDbQueueFactory.Helper.cleanQueue(qId);
+			
+			IQSyncManager man = ApiStack.getInterface(IQSyncManager.class);
+			List<QSyncQueueInfo> info = man.getTopQueuesInfo(100, EnumSet.allOf(QSyncTaskStatus.class));
+			for(QSyncQueueInfo inf : info){
+				try{
+					ApiStack.getInterface(INamedDbId.class).getName(inf.result.qid);
+				}catch(INamedDbId.ENotFound e){
+					trace("uknown queue : " + inf.result.qid);
+					man.unRegisterQueue(inf.result.qid, inf.result.syncerId);					
+				}
+			}
 			ApiStack.getInterface(ISrvSmartTran.class).commit();
 		}finally{
 			getServer().leaveMode();
