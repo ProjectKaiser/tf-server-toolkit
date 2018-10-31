@@ -95,5 +95,14 @@ public class ApiAlgsTest extends TFTestCase {
 
         }
     }
+    
+    public void testSkipSafeExceptionsLog() {
+    	// expect not logged
+    	ApiAlgs.logError(this, "", new ETestSafeExcepion("test"));
+    	
+    	//expect logged
+    	incExpectedLogErrorCount(1);
+    	ApiAlgs.logError(this, "", null);
+    }
 
 }
