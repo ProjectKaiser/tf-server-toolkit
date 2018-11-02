@@ -353,6 +353,8 @@ public class QSyncManagerTest extends BasicServerRunningTestCase {
 	}
 
 	public void testOnQueueChanged() {
+		IDbQueueFactory.Helper.getQueue(555).clean();
+		
 		getBasicSrvApiEmu().setTimeSeq(1000, new long[]{10L});
 		sm.registerQueue(555L, 101L);
 		assertNotNull(sm.getQueueInfo(555L));
