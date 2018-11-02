@@ -182,7 +182,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 			assertEquals("test1@tur.com", from[0].toString());
 			
 			assertFalse(GreenMailUtil.hasNonTextAttachments(msg1));
-			assertEquals("text/null; charset=UTF-8", msg1.getContentType());
+			assertEquals("text/plain; charset=UTF-8", msg1.getContentType());
 		}
 		
 

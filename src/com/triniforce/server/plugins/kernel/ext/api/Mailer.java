@@ -110,7 +110,8 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 			else{
 				try{
 					if(null == mailData.getAttachment())
-						bMailSent = this.send(mailData.getFrom(), mailData.getTo(), mailData.getSubject(), mailData.getBody());
+						bMailSent = this.send(mailData.getFrom(), mailData.getTo(), mailData.getSubject(), 
+								mailData.getBodyType(), mailData.getBody(), null, null, null);
 					else
 						bMailSent = this.send(mailData.getFrom(), mailData.getTo(), mailData.getSubject(), 
 								mailData.getBodyType(), mailData.getBody(),
