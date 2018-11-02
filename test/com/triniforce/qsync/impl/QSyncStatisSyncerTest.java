@@ -19,7 +19,6 @@ import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.INamedDbId;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ITaskExecutors;
-import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.utils.ApiStack;
 
 public class QSyncStatisSyncerTest extends BasicServerTestCase {

@@ -40,6 +40,9 @@ public class MailerSrvTest extends BasicServerTestCase {
 	private static String SMTP_USER = "alex@kukuruku.com";
 	
 	static String DEF_SENDER = null;
+	static{
+//		ServerSetupTest.setPortOffset(11000);
+	}
 	
 	int SMTP_PORT = ServerSetupTest.SMTP.getPort();
 	String SMTP_HOST = "localhost";
@@ -179,13 +182,13 @@ public class MailerSrvTest extends BasicServerTestCase {
 			assertEquals("test1@tur.com", from[0].toString());
 			
 			assertFalse(GreenMailUtil.hasNonTextAttachments(msg1));
-			assertEquals("text/plain; charset=UTF-8", msg1.getContentType());
+			assertEquals("text/null; charset=UTF-8", msg1.getContentType());
 		}
 		
 
 //		greenMail.getManagers().getImapHostManager().getInbox(user)
 		{
-			sendMailAttach("html", "TEST_ATTACH".getBytes());
+			sendMailAttach("text/html; charset=UTF-8", "TEST_ATTACH".getBytes());
 			waitForMailer();
 			
 			MimeMessage msg1 = greenMail.getReceivedMessages()[1];

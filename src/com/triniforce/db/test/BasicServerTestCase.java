@@ -475,4 +475,13 @@ public static class DPPProcPlugin extends PKPlugin{
     	m_bFinitServer = true;
     }
     
+    protected IPlugin getInstalledPlugin(Class<? extends IPlugin> cls) throws InstantiationException, IllegalAccessException{
+    	IPlugin i0 = cls.newInstance();
+    	for (IPlugin iPlugin : SERVER_INSTALLED_PLUGINS) {
+        	if( 0 == PLUGIN_COMPARATOR.compare(iPlugin, i0)){
+        		return iPlugin;
+        	}
+		}
+		return null;
+    }
 }

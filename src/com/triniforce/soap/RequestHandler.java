@@ -19,7 +19,6 @@ import java.nio.charset.Charset;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.TransformerException;
 
-import org.apache.commons.logging.Log;
 import org.w3c.dom.Document;
 
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
@@ -84,12 +83,6 @@ public class RequestHandler {
     public void exec(InputStream input, OutputStream output){
     	ApiAlgs.getLog(this).trace("execsoap");
         String soapNS = null;
-    	
-    	boolean bLogErorRequest;
-        Log log = ApiAlgs.getLog(this);
-        bLogErorRequest = log.isTraceEnabled() && input.markSupported();
-        if(bLogErorRequest)
-        	input.mark(LOG_BUF_SIZE);        
         
         SOAPDocument in;
         try{
@@ -98,31 +91,8 @@ public class RequestHandler {
         	} catch (Exception e){
             	ApiAlgs.getLog(this).error("service exception", e);
                 m_gen.writeDocument(output, m_gen.serializeException(soapNS, e, m_desc, ""));
-                if(bLogErorRequest){
-                	try {
-    					input.reset();
-    					byte[] buf = new byte[LOG_BUF_SIZE];
-    					input.read(buf);
-    					log.trace(new String(buf, "utf-8"));
-    				} catch (IOException e1) {
-    					ApiAlgs.getLog(this).error("Log request failed", e1);
-    				}
-                	
-                }
                 return;
-        	}
-            
-            if(bLogErorRequest){
-            	try {
-					input.reset();
-					byte[] buf = new byte[LOG_BUF_SIZE];
-					input.read(buf);
-					log.trace(new String(buf, "utf-8"));
-				} catch (IOException e1) {
-					ApiAlgs.getLog(this).error("Log request failed", e1);
-				}
-            	
-            }
+        	}            
             
             try {
 	            soapNS = in.m_soap;

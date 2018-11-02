@@ -341,14 +341,25 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
         msg.setSubject(subject, emailCharset);
         
         if(null == attachment){
-        	msg.setText(body, emailCharset);
+            if(null != bodyType && (bodyType.contains("text/html"))){
+            	msg.setContent(body, bodyType);
+            }
+            else{
+                msg.setText(body, emailCharset, bodyType);            	
+            }
         }
         else{
         	MimeMultipart multiPart = new MimeMultipart();
 
             MimeBodyPart textPart = new MimeBodyPart();
             multiPart.addBodyPart(textPart);
-            textPart.setText(body, emailCharset, bodyType);
+            if(null != bodyType && (bodyType.contains("text/html"))){
+                textPart.setContent(body, bodyType);            	
+            }
+            else{
+                textPart.setText(body, emailCharset, bodyType);            	
+            }
+            
 
         	multiPart.addBodyPart(attachment);
             
