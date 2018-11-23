@@ -16,12 +16,20 @@ public class DSMetadata {
 	public static long CAN_SORT = 0x2;
 	public static long CAN_FILTER = 0x4;
 	
+	// Must be filled in only when returned from queryTargetById() 
+	private String m_target;
+	
 	private List<String> m_columns;
 	private long m_flags;
 	
-	public DSMetadata(long flags, List<String> cols) {
+	public DSMetadata(long flags, List<String> cols, String target) {
 		m_flags = flags;
 		m_columns = cols;
+		m_target = target;
+	}
+	
+	public DSMetadata(long flags, List<String> cols) {
+		this(flags, cols, null);
 	}
 	
 	public boolean check(CollectionViewRequest req){
@@ -45,5 +53,9 @@ public class DSMetadata {
 	}
 	
 	public void setLLRAttrs(LongListResponse res){}
+
+	public String getTarget() {
+		return m_target;
+	}
 	
 }
