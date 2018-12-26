@@ -17,8 +17,8 @@ import com.triniforce.server.srvapi.IDbQueue;
 import com.triniforce.server.srvapi.ISrvPrepSqlGetter;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
-import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory.ITranExtender;
+import com.triniforce.server.srvapi.SrvApiAlgs2;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 
@@ -76,6 +76,27 @@ public class SrvSmartTran extends SmartTran implements ISrvSmartTran {
 
     	
     	super.close(bCommit);
+
+    	{
+	    	List<ITranExtender> extenders = trf.getOuterExtenders(); 
+	    	ListIterator<ITranExtender> iExtenders = extenders.listIterator(extenders.size());
+	    	while(iExtenders.hasPrevious()){
+	    		try{
+	    			ITranExtender trnExtender = iExtenders.previous();
+	    			trnExtender.pop(bCommit);
+				} catch(RuntimeException t){
+					ApiAlgs.getLog(this).error("", t);
+				}
+			}
+    	}
+
+        for (IDbQueue queue : m_updatedQueues) {
+            synchronized (queue) {
+                queue.notify();
+            }
+        }
+        
+
     	if(bCommit){
         	IQSyncManager sm = ApiStack.getInterface(IQSyncManager.class);
             for (IDbQueue queue : m_updatedQueues) {
@@ -89,31 +110,10 @@ public class SrvSmartTran extends SmartTran implements ISrvSmartTran {
             }
     	}
         
-    	
-    	{
-	    	List<ITranExtender> extenders = trf.getOuterExtenders(); 
-	    	ListIterator<ITranExtender> iExtenders = extenders.listIterator(extenders.size());
-	    	while(iExtenders.hasPrevious()){
-	    		try{
-	    			ITranExtender trnExtender = iExtenders.previous();
-	    			trnExtender.pop(bCommit);
-				} catch(RuntimeException t){
-					ApiAlgs.getLog(this).error("", t);
-				}
-			}
-    	}
-    	
-        for (IDbQueue queue : m_updatedQueues) {
-            synchronized (queue) {
-                queue.notify();
-                
-            }
-        }
-        
-        
         if( null != eFirstProblem){
             throw eFirstProblem;
         }
+        
         
     }
 

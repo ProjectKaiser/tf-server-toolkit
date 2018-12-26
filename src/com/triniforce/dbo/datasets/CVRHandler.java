@@ -370,7 +370,7 @@ public class CVRHandler implements ICVRHandler {
 			if(null != md)
 				break;
 		}
-		if(null == req.getTarget()){
+		if(null != md && null == req.getTarget()){
 			req.setTarget(md.getTarget());
 		}
 		return md;
