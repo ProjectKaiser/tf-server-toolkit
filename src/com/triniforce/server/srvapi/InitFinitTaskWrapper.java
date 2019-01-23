@@ -8,10 +8,25 @@ package com.triniforce.server.srvapi;
 
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ICommitable;
+import com.triniforce.utils.alerter.AlerterState;
+import com.triniforce.utils.alerter.StateAlerter;
 
 public class InitFinitTaskWrapper implements Runnable  {
 
     private final InitFinitTask m_command;
+    private StateAlerter taskState = new StateAlerter(AlerterState.OK) {
+    	
+		@Override
+		protected void becomeOK() {
+			ApiAlgs.getLog(getRelatedObject()).trace("periodical task failure mode leave: " + getRelatedObject().getClass().getSimpleName());
+		}
+		
+		@Override
+		protected void becomeBAD(String reason) {
+			ApiAlgs.logError(getRelatedObject(), reason, getAttachedThrowable());
+			ApiAlgs.getLog(getRelatedObject()).trace("periodical task failure mode enter: " + getRelatedObject().getClass().getSimpleName());
+		}
+	};
 
     public InitFinitTaskWrapper(InitFinitTask command) {
         m_command = command;
@@ -19,11 +34,12 @@ public class InitFinitTaskWrapper implements Runnable  {
     
     void logInitializationErrror(Throwable e){
         String msg = "Initialization error:" + m_command.toString();
-        ApiAlgs.logError(this, msg, e);
+        taskState.enterBADMode(this, msg, e);
     }
 
     public void run() {
         try {
+        	Boolean executed = false;
             try {
                 try {
                     m_command.init();
@@ -36,16 +52,18 @@ public class InitFinitTaskWrapper implements Runnable  {
                     if (m_command instanceof ICommitable) {
                         ((ICommitable) m_command).commit();
                     }
+                    executed = true;
                 } catch (Throwable e) {
-                    ApiAlgs.logError(this,
-                            "Run error:" + m_command.toString(), e);//$NON-NLS-1$
+                	taskState.enterBADMode(this, "Run error:" + m_command.toString(), e); //$NON-NLS-1$
                 }
             } finally {
                 try {
                     m_command.finit();
+                    if (executed) {
+                    	taskState.setOK();
+                    }
                 } catch (Throwable e) {
-                    ApiAlgs.logError(this,
-                            "Finit error:" + m_command.toString(), e);//$NON-NLS-1$
+                	taskState.enterBADMode(this, "Finit error:" + m_command.toString(), e); //$NON-NLS-1$
                 }
             }
         } catch (Throwable t) {
@@ -56,7 +74,6 @@ public class InitFinitTaskWrapper implements Runnable  {
 
             }
         }
-        
     }
 
     @Override
@@ -91,4 +108,8 @@ public class InitFinitTaskWrapper implements Runnable  {
     public String getTaskName(){
     	return "TaskWrapper." + m_command.getClass().getName();
     }
+
+	public StateAlerter getTaskState() {
+		return taskState;
+	}
 }
