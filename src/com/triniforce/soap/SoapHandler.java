@@ -6,6 +6,7 @@
 package com.triniforce.soap;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 import javax.xml.namespace.QName;
@@ -37,10 +38,10 @@ class SoapHandler extends DefaultHandler{
     
     SAXHandler m_saxHandler;
     
-    public SoapHandler(String tns, InterfaceDescription desc) {
+    public SoapHandler(String tns, InterfaceDescription desc, Map<String, Boolean> configuration) {
         m_tns = tns;
         m_uriMap = new HashMap<String, String>();
-        m_saxHandler = new SAXHandler(desc);
+        m_saxHandler = new SAXHandler(desc, configuration);
     }
     
     @Override

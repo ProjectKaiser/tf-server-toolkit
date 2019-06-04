@@ -260,6 +260,9 @@ public static class DPPProcPlugin extends PKPlugin{
         }
         m_bemu.setTimeSeq(BasicServerApiEmu.START_TIME, BasicServerApiEmu.TIME_OFFSETS);
         
+        if(null != m_bStartRunningMode && m_bStartRunningMode)
+        	getServer().enterMode(Mode.Running);
+        
     }
 
     private void finitServer() {
@@ -290,7 +293,10 @@ public static class DPPProcPlugin extends PKPlugin{
 			
 			for(IPlugin plugin : getPlugins()){
 				res = Collections.binarySearch(SERVER_INSTALLED_PLUGINS, plugin, PLUGIN_COMPARATOR) < 0;
-				if (res) break;
+				if (res){
+					trace("plugin \"" +plugin.getClass().getName()+ "\" not installed. restart server");
+					break;
+				}
 			}
 			
 			if(res){
@@ -398,9 +404,14 @@ public static class DPPProcPlugin extends PKPlugin{
     }
     
     int m_startNumActive = 0;
+
+	private Boolean m_bStartRunningMode = false;
     
     @Override
 	protected void tearDown() throws Exception {
+        if(null != m_bStartRunningMode && m_bStartRunningMode)
+        	getServer().leaveMode();
+
     	if(m_bFinitServer){
     		finitServer();
     	}
@@ -467,7 +478,7 @@ public static class DPPProcPlugin extends PKPlugin{
     	}
     }
     
-    protected void restartServerOnSetup(){
+    public void restartServerOnSetup(){
     	m_bRestartOnSetup = true;
     }
     
@@ -484,4 +495,8 @@ public static class DPPProcPlugin extends PKPlugin{
 		}
 		return null;
     }
+    
+    protected void setTestRunningMode(){
+    	m_bStartRunningMode  = true;
+    } 
 }

@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import com.triniforce.soap.ESoap.EInterfaceElementException;
@@ -20,19 +21,26 @@ import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
+import com.triniforce.soap.TypeDef.UnknownDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.IName;
 
 public class SAXHandler {
-    static class CurrentObject{
+	
+	static final String CFG_UNK_PROPS = "com.triniforce.soap.SAXHandler.UnknwonPropertties";
+
+	Map<String, Boolean> m_configuration;
+	
+	final Object DEFAULT_OBJECT = new Object();
+    static final UnknownDef UNKNOWN_DEF = new UnknownDef();
+	
+    class CurrentObject{
         TypeDef  m_objDef;
         int      m_propIdx;
         Object[] m_props;
         private boolean m_bNull;
 		private String m_name;
-        
-        static final Object DEFAULT_OBJECT = new Object();
         
         public CurrentObject(String name, TypeDef objDef) throws ESoap.ENonNullableObject {
             this(name, objDef, false);
@@ -90,6 +98,7 @@ public class SAXHandler {
             }
             return res;
         }
+        
 
         TypeDef setCurrentProp(String propName) throws ESoap.EUnknownElement, ESoap.EElementReentry{
             if(m_objDef instanceof ClassDef){
@@ -102,8 +111,12 @@ public class SAXHandler {
                     }
                     return cd.getProps().get(m_propIdx).getType();
                 }
-                else
-                	throw new ESoap.EUnknownElement(cd.getType() + "." + propName);
+                else{
+                	if(Boolean.TRUE.equals(m_configuration.get(CFG_UNK_PROPS)))
+                		return UNKNOWN_DEF;
+                	else
+                		throw new ESoap.EUnknownElement(cd.getType() + "." + propName);
+                }
             }
             else if (m_objDef instanceof ArrayDef){
                 ArrayDef ad = (ArrayDef) m_objDef;
@@ -111,6 +124,9 @@ public class SAXHandler {
                     return ad.getPropDef().getType();
                 }
             }
+            else if( m_objDef instanceof UnknownDef)
+            	return UNKNOWN_DEF;
+            	
 //            else if (m_objDef instanceof MapDef){
 //            	
 //            }
@@ -203,8 +219,9 @@ public class SAXHandler {
     boolean m_bIn;
     Object[] m_args;
     
-    public SAXHandler(InterfaceDescription desc) {
+    public SAXHandler(InterfaceDescription desc, Map<String, Boolean> config) {
         m_desc = desc;
+        m_configuration = config;
     }
     
     public TypeDef startElement(String tag, boolean bNull, TypeDef reqTypeDef) throws EInterfaceElementException {
@@ -284,6 +301,8 @@ public class SAXHandler {
         else{
         	if(!m_stringValue.isEmpty())
         		obj.setStringValue(getNodeCharacters());
+        	if(obj.getType() instanceof UnknownDef)
+        		return ;
             CurrentObject parent = m_objStk.peek();
             parent.setPropValue(obj.toObject());
         }
@@ -306,6 +325,14 @@ public class SAXHandler {
 
 	public CurrentObject getTopObject() {
 		return m_objStk.peek();
+	}
+
+	public CurrentObject createObject(String qn, TypeDef object) {
+		return new CurrentObject(qn, object);
+	}
+	
+	public CurrentObject createObject(String name, TypeDef objDef, boolean bNull) {
+		return new CurrentObject(name, objDef, bNull);
 	}
 
 }

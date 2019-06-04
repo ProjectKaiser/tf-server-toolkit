@@ -405,6 +405,10 @@ public class TypeDef extends SimpleName{
 		}
 		    	
     }
+    
+    static class UnknownDef extends TypeDef{
+		private static final long serialVersionUID = 5280677981465813206L;
+    }
 
     private String m_typeName;
     

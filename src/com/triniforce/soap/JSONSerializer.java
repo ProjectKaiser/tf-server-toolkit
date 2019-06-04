@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import org.json.simple.parser.ContentHandler;
@@ -150,6 +151,7 @@ public class JSONSerializer {
 	}
 
 	private JsonSerializer js;
+	private Map<String, Boolean> m_configuration;
 	
 	public JSONSerializer() {
 		
@@ -535,7 +537,7 @@ public class JSONSerializer {
 	}
 
 	public SOAPDocument deserialize(InterfaceDescription desc, InputStream source) throws IOException, ParseException{
-		SAXHandler handler = new SAXHandler(desc);
+		SAXHandler handler = new SAXHandler(desc, m_configuration);
 
 		JSONParser parser = new JSONParser();
 		KeyFinder finder = new KeyFinder(handler, desc);

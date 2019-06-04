@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -87,6 +88,7 @@ public class InterfaceDescriptionGenerator {
     private DocumentBuilderFactory m_documentBuilderFactory;
     private TransformerFactory m_transformerFactory;
     List<CustomSerializer<?,?>> m_customSerializers = new ArrayList<CustomSerializer<?,?>>();
+	private Map<String, Boolean> m_configuration = new HashMap<String, Boolean>();
 
     public InterfaceDescriptionGenerator() {
         this("http://tempuri.org/", "ServerName");
@@ -655,7 +657,7 @@ public class InterfaceDescriptionGenerator {
     }
     
     private SOAPDocument deserialize(InterfaceDescription desc, InputStream source, IParser parser) throws SAXException, IOException, ParserConfigurationException{
-        SoapHandler h = new SoapHandler(m_targetNamespace, desc);
+        SoapHandler h = new SoapHandler(m_targetNamespace, desc, m_configuration );
         parser.parse(source, h);
         if(null != h.m_fault)
         	throw new ESoap.EFaultCode(h.m_fault.m_string);
@@ -1177,6 +1179,10 @@ public class InterfaceDescriptionGenerator {
 		SAXSource sax = new SAXSource(inpSrc);
 		
 		return sax;
+	}
+
+	public Map<String, Boolean> getConfiguration() {
+		return m_configuration;
 	}
 
 }

@@ -1,0 +1,12 @@
+<soapenv:Envelope 
+xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:soap="http://tempuri.org/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <soap:method8>
+         <soap:arg0 >
+            <soap:newProp00202><soap:inner0034/>VVV</soap:newProp00202></soap:arg0>
+      </soap:method8>
+   </soapenv:Body>
+</soapenv:Envelope>

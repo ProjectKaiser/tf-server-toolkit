@@ -118,7 +118,8 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         void method8(O1 i1);
         void method9(O3 i2);
         void method10(Map<String,ICustom1> i2);
-        void method11(String arg0);
+        void method11(String arg0);        
+        void method12(Object in1);
     }
     
     static class Cls1{
@@ -986,6 +987,14 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         }catch(NoSuchElementException e){
         	assertEquals("unknownMethod_0023", e.getMessage());
         }
+        
+        {
+        	//encapsulation
+        	soapDoc.m_method = "method12";
+        	soapDoc.m_args = new Object[]{new Real1()};
+        	Document res = gen.serialize(desc, soapDoc);
+        	print(res);
+        }
 
     }
     
@@ -1319,8 +1328,13 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 	        SOAPDocument res = gen.deserialize(desc, getClass().getResourceAsStream("stringrequest.soap"));
 	        assertEquals("<some\rstring>", res.m_args[0]);
         	
+        }    	
+        {
+        	gen.getConfiguration().put(SAXHandler.CFG_UNK_PROPS, true);
+        	InterfaceDescription desc = gen.parse(null, TestSrv2.class);
+	        SOAPDocument res = gen.deserialize(desc, getClass().getResourceAsStream("extendedinterface.soap"));
+        	assertEquals("O1", res.m_args[0].getClass().getSimpleName());
         }
-    	
     }
     
     public void ntestSerailizeToStream() throws TransformerConfigurationException, TransformerException, 

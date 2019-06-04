@@ -46,7 +46,7 @@ public class KeyFinderTest extends TFTestCase {
 	public void testStartArray() throws ParseException, IOException {
 		InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
 		InterfaceDescription desc = gen.parse(null, IService.class); 
-		SAXHandler sh = new SAXHandler(desc);
+		SAXHandler sh = new SAXHandler(desc, null);
 		KeyFinder kf = new JSONSerializer.KeyFinder(sh, desc);
 		kf.startObject();
 		kf.startObjectEntry("method");

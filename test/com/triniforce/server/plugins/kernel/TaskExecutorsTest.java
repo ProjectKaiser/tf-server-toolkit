@@ -232,5 +232,50 @@ public class TaskExecutorsTest extends TFTestCase {
         
         
     }
+    
+    static int executed = 0;
+    
+    static Object SYNCH = new Object();
+    
+    static class T1 extends InitFinitTask{
+		@Override
+		public void run() {
+			executed ++;
+			
+			synchronized (SYNCH) {
+				try {
+					SYNCH.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			return obj.getClass().equals(T1.class);
+			
+		}
+		
+		@Override
+		public int hashCode() {
+			return 1;
+		}
+    }
+    
+    public void testSubmitEqualTasks(){
+        TaskExecutors te = new TaskExecutors();
+        synchronized (SYNCH) {
+	        te.execute(TaskExecutors.longTaskExecutorKey, new T1());
+	        te.execute(TaskExecutors.longTaskExecutorKey, new T1());
+	        SYNCH.notify();
+		}
+        te.shutdownNow();
+        te.awatTermination(1000L);
+        
+        assertEquals(1, executed);
+    	
+    }
 
 }
