@@ -28,7 +28,7 @@ import com.triniforce.utils.IName;
 
 public class SAXHandler {
 	
-	static final String CFG_UNK_PROPS = "com.triniforce.soap.SAXHandler.UnknwonPropertties";
+	public static final String CFG_UNK_PROPS = "com.triniforce.soap.SAXHandler.UnknwonPropertties";
 
 	Map<String, Boolean> m_configuration;
 	
