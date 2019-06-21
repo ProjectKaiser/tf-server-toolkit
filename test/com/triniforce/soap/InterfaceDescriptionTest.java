@@ -5,16 +5,29 @@
  */ 
 package com.triniforce.soap;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Document;
+
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.ESoap.EParameterizedException;
 import com.triniforce.soap.InterfaceDescription.MessageDef;
 import com.triniforce.soap.InterfaceDescription.Operation;
+import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
 import com.triniforce.soap.InterfaceDescriptionTest.IWithError.EError2;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
@@ -22,6 +35,7 @@ import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.WsdlDescription.WsdlType;
 import com.triniforce.soap.WsdlDescription.WsdlType.Restriction;
 import com.triniforce.soap.WsdlDescription.WsdlTypeElement;
+import com.triniforce.utils.ApiAlgs;
 
 public class InterfaceDescriptionTest extends TFTestCase {
     
@@ -207,6 +221,72 @@ public class InterfaceDescriptionTest extends TFTestCase {
         assertEquals(Arrays.asList("thwogisd", "762346"), propDef.get(obj));
      
         assertEquals(Object[].class.getName(), mDef.getType());
+    }
+    
+    static class Cs1{
+    	private String m_prop1;
+		private String m_prop2;
+
+		public String getProp2() {
+			return m_prop2;
+		}
+
+		public void setProp2(String prop2) {
+			m_prop2 = prop2;
+		}
+
+		public String getProp1() {
+			return m_prop1;
+		}
+
+		public void setProp1(String prop1) {
+			m_prop1 = prop1;
+		}
+    }
+    
+    interface ITest1{
+    	Cs1 method_003();
+    	Cs1 method_004();
+    }
+    
+    public void testGetType() throws XPathExpressionException, ClassNotFoundException, IOException{
+        XPathFactory xpf = XPathFactory.newInstance();  
+        XPath xp = xpf.newXPath();
+        InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        InterfaceDescription desc = gen.parse(null, ITest1.class);
+        
+        desc.ignoreProperty("method_003", false, "method_003Result", "prop1");
+
+        
+        Cs1 value1 = new Cs1();
+        value1.m_prop1 = "str0012";
+        value1.m_prop2 = "str0014";
+        SOAPDocument soap = new InterfaceDescriptionGenerator.SOAPDocument();
+        soap.m_bIn = false;
+        soap.m_args = new Object[]{value1};
+        soap.m_method = "method_003";
+        
+        Document res = gen.serialize(desc, soap);       
+        print(res);
+        assertNotNull( xp.evaluate("//prop2", res, XPathConstants.NODE));
+        assertNull(    xp.evaluate("//prop1", res, XPathConstants.NODE));
+        
+        soap.m_method = "method_004";
+        Document res2 = gen.serialize(desc, soap);       
+        print(res2);
+        assertNotNull( xp.evaluate("//prop2", res2, XPathConstants.NODE));
+        assertNotNull( xp.evaluate("//prop1", res2, XPathConstants.NODE));
+    }
+    
+    private void print(Document doc) {
+        TransformerFactory tf = TransformerFactory.newInstance();
+        try {
+            Transformer t = tf.newTransformer();
+            t.setOutputProperty("indent", "yes");
+            t.transform(new DOMSource(doc), new StreamResult(System.out));
+        } catch (Exception e) {
+            ApiAlgs.rethrowException(e);
+        }
     }
 
 

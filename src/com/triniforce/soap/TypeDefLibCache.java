@@ -367,7 +367,7 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
     
     public static class PropDef extends SimpleName implements Serializable{
         private static final long serialVersionUID = -2146710337654704756L;
-        private transient TypeDef m_type;
+        private TypeDef m_type;
         private String m_rawTypeName;
         private IGetSet m_getSet;
         
@@ -443,6 +443,10 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         public Object get(Object obj) {
             return m_getSet.get(obj);
         }
+
+		public void setType(ClassDef type) {
+			m_type = type;
+		}
     }
     
     Map<TypeDef, ArrayDef> m_arrays;

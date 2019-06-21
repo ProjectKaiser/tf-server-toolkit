@@ -251,7 +251,7 @@ public class InterfaceDescriptionGenerator {
         }
         
         <T> Node_S append (Collection<T> col, IConverter<T> conv){
-            for (T v: col) {
+            for (T v: col) {            	
                 conv.run(this, v);
             }
             return this;    
@@ -750,7 +750,7 @@ public class InterfaceDescriptionGenerator {
         
         @Override
 		@SuppressWarnings("unchecked")
-        public void run(Node_S parent, TypedObject val) {
+        public void run(Node_S parent, TypedObject val) {        
             Node_S e = parent.append(val.getPropName());
             if(bSetNS){
                 e.attr("xmlns", m_targetNS);

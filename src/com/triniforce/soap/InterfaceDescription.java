@@ -5,6 +5,11 @@
  */ 
 package com.triniforce.soap;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -12,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.function.Predicate;
 
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
@@ -175,4 +181,28 @@ public class InterfaceDescription implements Serializable{
     public Operation getOperation(String opName) {
         return InterfaceDescriptionGenerator.findByName(getOperations(), opName);
     }
+
+	public void ignoreProperty(String opName, boolean bIn, String argName, final String propName) throws IOException, ClassNotFoundException {
+        Operation opDef = getOperation(opName);
+        MessageDef methDef = bIn ? opDef.getRequestType() : opDef.getResponseType();
+        PropDef propDef = methDef.getProp(argName);
+        ClassDef csDef = (ClassDef) propDef.getType();
+        csDef = clone(csDef);
+        csDef.getOwnProps().removeIf(new Predicate<PropDef>() {
+			@Override
+			public boolean test(PropDef t) {
+				return t.getName().equals(propName);
+			}
+		});
+        propDef.setType(csDef);
+        
+	}
+
+	private ClassDef clone(ClassDef csDef) throws IOException, ClassNotFoundException {
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		ObjectOutputStream oout = new ObjectOutputStream(bout);
+		oout.writeObject(csDef);
+		oout.close();
+		return (ClassDef) new ObjectInputStream(new ByteArrayInputStream(bout.toByteArray())).readObject();
+	}
 }
