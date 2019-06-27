@@ -83,6 +83,7 @@ public abstract class BasicResSet implements IResSet {
             ii++;
         }
         res.append('\n');
+        int cnt = 0;
         while(next()){
             for(int i = 1; i <= cols.size(); i++){
                 if(i > 1) res.append('\t');
@@ -93,7 +94,11 @@ public abstract class BasicResSet implements IResSet {
                 }
             }
             res.append('\n');
+            cnt ++;
         }
+        
+        res.append("Record count:" + cnt);
+        
         try{
             first();
         }catch(Exception e){

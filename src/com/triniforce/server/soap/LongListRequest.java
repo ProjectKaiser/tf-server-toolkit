@@ -67,6 +67,9 @@ public class LongListRequest extends SessionRequest{
             }
             return def;
         }
+        if( null != cls && cls == Integer.class && res.getClass() == Long.class){
+        	return (T)res;
+        }
         if(null != cls && !cls.isAssignableFrom(res.getClass())){
             throw new IllegalArgumentException("Incompatible type for argument '" + argName +"'. Expected " + cls.getName() + " but " + res.getClass());
         }

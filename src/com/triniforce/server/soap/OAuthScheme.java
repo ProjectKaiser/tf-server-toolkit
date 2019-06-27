@@ -5,6 +5,9 @@
  */ 
 package com.triniforce.server.soap;
 
+import com.triniforce.soap.PropertiesSequence;
+
+@PropertiesSequence( sequence = {"oAuthId"})
 public class OAuthScheme extends AuthScheme{
     private String m_oAuthId;
 
