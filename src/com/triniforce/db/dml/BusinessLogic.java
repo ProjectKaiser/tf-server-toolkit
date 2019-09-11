@@ -70,5 +70,5 @@ public abstract class BusinessLogic {
     protected void delete(Map<IName, Object> lookUpValues){
         getSt().delete(getTable(), lookUpValues);
     }
-    
+
 }

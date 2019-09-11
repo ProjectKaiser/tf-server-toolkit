@@ -1337,12 +1337,16 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         }
     }
     
-    public void ntestSerailizeToStream() throws TransformerConfigurationException, TransformerException, 
+    public void testSerailizeToStream() throws TransformerConfigurationException, TransformerException, 
     ParserConfigurationException, SAXException, IOException, JAXBException{
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
         InterfaceDescription desc = gen.parse(null, TestSrv2.class);
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         SOAPDocument soap = new SOAPDocument();
+        soap.m_method = "method12";
+        soap.m_bIn = true;
+        soap.m_args = new Object[]{"TEXT_CONTENT"};
+       // soap.
         gen.serializeToStream(output, desc, soap);
         byte[] bytes = output.toByteArray();
         assertTrue(bytes.length > 0);

@@ -15,8 +15,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.AbstractList;
@@ -27,11 +29,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -232,7 +237,48 @@ public class InterfaceDescriptionGenerator {
     static String xmlns = "http://www.w3.org/2000/xmlns/";
     
     interface IConverter<T>{
-        void run(Node_S parent, T val);
+        void run(INodeS parent, T val);
+    }
+    
+    interface INodeS{
+
+		void append(String propName, boolean bAttrs);
+		void attr(String attr, Object v);
+		void endattr();		
+		void end(String propName);
+    	
+    }
+    
+    static class SaxNodeS implements INodeS{
+
+		public SaxNodeS(Writer writer) {
+			// TODO Auto-generated constructor stub
+		}
+
+		@Override
+		public void append(String propName, boolean bAttrs) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void attr(String attr, Object v) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void endattr() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void end(String propName) {
+			// TODO Auto-generated method stub
+			
+		}
+
     }
     
     static class Node_S{
@@ -250,17 +296,17 @@ public class InterfaceDescriptionGenerator {
             return res;
         }
         
-        <T> Node_S append (Collection<T> col, IConverter<T> conv){
-            for (T v: col) {            	
-                conv.run(this, v);
-            }
-            return this;    
-        }
-        <T> Node_S append (T val, IConverter<T> conv){
-            conv.run(this, val);
-            return this;    
-        }
-        
+//        <T> Node_S append (Collection<T> col, IConverter<T> conv){
+//            for (T v: col) {            	
+//                conv.run(this, v);
+//            }
+//            return this;    
+//        }
+//        <T> Node_S append (T val, IConverter<T> conv){
+//            conv.run(this, val);
+//            return this;    
+//        }
+//        
         Node_S attr(String name, String v){
             m_element.setAttribute(name, v);
             return this;
@@ -286,8 +332,8 @@ public class InterfaceDescriptionGenerator {
             m_tns = tns;
         }
         @Override
-		public void run(Node_S parent, WsdlType val) {
-            Node_S t = parent.append(val.isComplex() ? "s:complexType" : "s:simpleType");
+		public void run(INodeS handler, WsdlType val) {
+        	handler.append(val.isComplex() ? "s:complexType" : "s:simpleType");
             if(m_bShowName)
                 t.attr("name", val.getTypeDef().getName());
             
@@ -300,17 +346,19 @@ public class InterfaceDescriptionGenerator {
             }
             Collection<WsdlTypeElement> elements = val.getElements();
             if(!elements.isEmpty()){
-	            t.append("s:sequence")
-	                .append(elements, new IConverter<WsdlTypeElement>(){
+	            t.append("s:sequence");
+	            IConverter<WsdlTypeElement> cnv = new IConverter<WsdlTypeElement>(){
 	                    @Override
-						public void run(Node_S parent, WsdlTypeElement val) {
+						public void run(INodeS parent, WsdlTypeElement val) {
+	                    	Map<String,String> attrs =  new LinkedHashMap<>(); 
 	                        int maxOccur = val.getMaxOccur();
 	                        String sMaxOccur = maxOccur == -1 ? "unbounded" : Integer.toString(maxOccur);
-	                        Node_S e = parent.append("s:element")
-	                            .attr("minOccurs", Integer.toString(val.getMinOccur()))
-	                            .attr("maxOccurs", sMaxOccur)
-	                            .attr("name", val.getName());
+	                        parent.append("s:element", true);
+	                        parent.attr("minOccurs", Integer.toString(val.getMinOccur()));
+	                        parent.attr("maxOccurs", sMaxOccur);
+	                        parent.attr("name", val.getName());
 	                        if(!val.isResidentType()){
+	                        	parent.endattr();
 	                            e.append(val.getType(), new TypeConverter(false, m_tns));
 	                        }
 	                        else{
@@ -320,8 +368,11 @@ public class InterfaceDescriptionGenerator {
 	                        if(val.getMinOccur()>0 && val.isNillable())
 	                        	e.attr("nillable", "true");
 	                    }
-	                })
-	                .end()
+	                };
+				for(WsdlTypeElement te : elements){
+					cnv.run(parent, te);
+				} 
+	            t.end("s:sequence")    .end()
 	            .end();
             }
             Restriction restrBase = val.getResriction();
@@ -750,14 +801,15 @@ public class InterfaceDescriptionGenerator {
         
         @Override
 		@SuppressWarnings("unchecked")
-        public void run(Node_S parent, TypedObject val) {        
-            Node_S e = parent.append(val.getPropName());
+        public void run(INodeS parent, TypedObject val) {        
+            parent.append(val.getPropName(), true);
             if(bSetNS){
-                e.attr("xmlns", m_targetNS);
+                parent.attr("xmlns", m_targetNS);
                 bSetNS = false;
             }
             if(null == val.getObject()){
-                e.attr("xsi:nil", "true");
+            	parent.attr("xsi:nil", "true");
+            	parent.endattr();
             }
             else{
                 TypeDef typeDef = val.getTypeDef();
@@ -772,22 +824,25 @@ public class InterfaceDescriptionGenerator {
                                 typeName = "xsd:"+hideTypeDef.getName();
                             else
                                 typeName = hideTypeDef.getName();
-                            e.attr("xsi:type", typeName);
+                            parent.attr("xsi:type", typeName);
                             typeDef = hideTypeDef;
                         }
                     }
                 }
+                parent.endattr();
                 
                 if(typeDef instanceof ClassDef){
                     ClassDef cd = (ClassDef) typeDef;
-                    e.append(new TypedProps(cd.getProps(), val), this);
+                    for(TypedObject to : new TypedProps(cd.getProps(), val)){
+                    	this.run(parent, val);
+                    }
                 }
                 else if(typeDef instanceof ArrayDef){
                     ArrayDef ad = (ArrayDef) typeDef;
                     PropDef propDef = ad.getPropDef();
                     Collection col = (Collection) propDef.get(val.getObject());
                     for (Object object : col) {
-                        e.append(new TypedObject(propDef, object), this);
+                    	this.run(parent, new TypedObject(propDef, object));
                     }
                 }
                 else if(typeDef instanceof ScalarDef){
@@ -892,8 +947,9 @@ public class InterfaceDescriptionGenerator {
                 if(null == op)
                 	throw new NoSuchElementException(method);
                 PropDef prop = op.getThrowByType(ep.getClass());
-                if(null != prop)
-                	detail.append(new TypedObject(prop, ep), new ObjectConverter(desc, m_targetNamespace));
+                if(null != prop){
+                	new ObjectConverter(desc, m_targetNamespace).run(detail, new TypedObject(prop, ep));
+                }
             }
             
             doc = body.getDocument();
@@ -1164,21 +1220,63 @@ public class InterfaceDescriptionGenerator {
 	public <T> void addCustomSerializer(CustomSerializer iCustomSerializer) {
 		m_customSerializers.add(iCustomSerializer);
 	}
+	
 
 	public void serializeToStream(OutputStream output, InterfaceDescription desc, SOAPDocument soap) 
-			throws TransformerConfigurationException, TransformerException, JAXBException{
-		Source src = createSource(desc, soap);
-		getTransformer().transform(src, new StreamResult(output));
+			throws TransformerConfigurationException, TransformerException, JAXBException, IOException{
+		OutputStreamWriter writer = new OutputStreamWriter(output);
+		Operation op = desc.getOperation(soap.m_method);
+		String prop1 = soap.m_bIn ? soap.m_method : soap.m_method + "Response";
+		
+		TFUtils.copyStream(getClass().getResourceAsStream("soapheader.dat"), output);
+		
+		ObjectConverter conv = new ObjectConverter(desc, m_targetNamespace);
+		SaxNodeS sax = new SaxNodeS(writer);
+		conv.run(sax, new TypedObject(op.getProp(prop1), soap.m_args));
+		
+//		writer.append(String.format("<%s xmlns=\"%s\">", prop1, m_targetNamespace));
+//		serializeToStream(writer, desc, op.getProp(prop1).getType(), soap.m_args);
+//		writer.append(String.format("</%s>", prop1));
+		writer.close();
+		TFUtils.copyStream(getClass().getResourceAsStream("soapfooter.dat"), output);
+	}
+	
+	
+
+	private void serializeToStream(Writer output, InterfaceDescription desc, TypeDef typ, Object[] args) throws IOException {
+		if (typ instanceof ClassDef)
+			for (PropDef pd : ((ClassDef)typ).getProps()) {
+				output.append(String.format("<%s>", pd.getName()));
+				output.append(String.format("</%s>", pd.getName()));
+				
+			}
+		
 	}
 
 	private Source createSource(InterfaceDescription desc, SOAPDocument soap) throws JAXBException {
 //		JAXBContext jc = JAXBContext.newInstance(SOAPDocument.class);
-		
+//		
 //	    Marshaller m = jc.createMarshaller();
-		InputSource inpSrc = new InputSource();
-		SAXSource sax = new SAXSource(inpSrc);
+//	    
+//		InputSource inpSrc = new InputSource();
+//		SAXSource sax = new SAXSource(inpSrc);
+//		
+//		return sax;
 		
-		return sax;
+		return new Source(){
+
+			@Override
+			public String getSystemId() {
+				ApiAlgs.getLog(this).trace("getSystemId");
+				return "sid0";
+			}
+
+			@Override
+			public void setSystemId(String arg0) {
+				ApiAlgs.getLog(this).trace("setSystemId");
+			}
+			
+		};
 	}
 
 	public Map<String, Boolean> getConfiguration() {
