@@ -234,54 +234,17 @@ public class InterfaceDescriptionGenerator {
         void run(Node_S parent, T val);
     }
     
-    static class Node_S{
-        private Node_S m_parent;
-        private Element m_element;
-        public Node_S(Element element, Node_S parent) {
-            m_element = element;
-            m_parent = parent;
-        }
-        
-        public Node_S append(String name){
-            Element e = getDocument().createElement(name);
-            m_element.appendChild(e);
-            Node_S res = new Node_S(e, this);
-            return res;
-        }
-        
-        public <T> Node_S append (Collection<T> col, IConverter<T> conv){
-            for (T v: col) {            	
-                conv.run(this, v);
-            }
-            return this;    
-        }
-        
-        public <T> Node_S append (T val, IConverter<T> conv){
-            conv.run(this, val);
-            return this;    
-        }
-        
-        public Node_S attr(String name, String v){
-            m_element.setAttribute(name, v);
-            return this;
-        }
-        public Node_S end(){
-            return m_parent;
-        }
-
-        public Node_S text(String string) {
-            m_element.setTextContent(string);
-            return this;
-        }
-        Document getDocument(){
-            return m_element.getOwnerDocument();
-        }
-
-		public void flush() {
-			// TODO Auto-generated method stub
-			
-		}
+    interface Node_S{
+        public Node_S append(String name);
+        public <T> Node_S append (Collection<T> col, IConverter<T> conv);
+        public <T> Node_S append (T val, IConverter<T> conv);
+        public Node_S attr(String name, String v);
+        public Node_S end();
+		public Node_S textContent(ScalarDef typeDef, Object object);
+		public Node_S text(String string);
     }
+    
+    
     
     static class TypeConverter implements IConverter<WsdlType>{
         private boolean m_bShowName;
@@ -363,7 +326,7 @@ public class InterfaceDescriptionGenerator {
             doc.appendChild(eDefs);
             final TypeConverter typeConverter = new TypeConverter(true, m_targetNamespace);
             TFUtils.assertEquals(null,
-            new Node_S(eDefs, null)
+            new DomNode_S(eDefs, null)
                 .attr("xmlns:soap", soap)
                 .attr("xmlns:soapenc", "http://schemas.xmlsoap.org/soap/encoding/")
                 .attr("xmlns:mime", "http://schemas.xmlsoap.org/wsdl/mime/")
@@ -800,8 +763,7 @@ public class InterfaceDescriptionGenerator {
                     }
                 }
                 else if(typeDef instanceof ScalarDef){
-                	String str = ((ScalarDef) typeDef).stringValue(val.getObject());
-                    e.text(str);
+                    e.textContent((ScalarDef) typeDef, val.getObject());
                 }
             }
             e.end();
@@ -816,7 +778,7 @@ public class InterfaceDescriptionGenerator {
         
         Element eDefs = doc.createElement("soap:Envelope");
         doc.appendChild(eDefs);
-        Node_S node = new Node_S(eDefs, null);
+        Node_S node = new DomNode_S(eDefs, null);
         serialize(desc, soap, node);
         return doc;
     }
@@ -848,14 +810,14 @@ public class InterfaceDescriptionGenerator {
         
     }
     
-    private Node_S createSoapDocument(String soapNS) throws ParserConfigurationException {
+    private DomNode_S createSoapDocument(String soapNS) throws ParserConfigurationException {
         DocumentBuilder db = getDocumentBuilder();
         Document doc = db.newDocument();
         
         Element eDefs = doc.createElement("soap:Envelope");
         doc.appendChild(eDefs);
-        Node_S node = new Node_S(eDefs, null);
-		return createSoapDocument(node, soapNS);
+        Node_S node = new DomNode_S(eDefs, null);
+		return (DomNode_S) createSoapDocument(node, soapNS);
 	}
 
 
@@ -864,7 +826,7 @@ public class InterfaceDescriptionGenerator {
         try {
         	if(null == soapNS)
         		soapNS = soapenv;
-            Node_S body = createSoapDocument(soapNS);
+            DomNode_S body = createSoapDocument(soapNS);
             Node_S fault = body.append("soap:Fault");
             Node_S detail, eCode= null;
             if(soapenv12.equals(soapNS)){

@@ -10,6 +10,7 @@ import java.io.StringWriter;
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.InterfaceDescriptionGenerator.IConverter;
 import com.triniforce.soap.InterfaceDescriptionGenerator.Node_S;
+import com.triniforce.soap.TypeDef.ScalarDef;
 
 
 public class SaxNodeSTest extends TFTestCase {
@@ -78,16 +79,19 @@ public class SaxNodeSTest extends TFTestCase {
 			s.text("content here!!!").end();
 			assertEquals("<some>content here!!!</some>", w.getBuffer().toString());
 		}
+	}
+	
+	public void testTextContent(){
 		{
 			StringWriter w = new StringWriter();
 			SaxNodeS s = new SaxNodeS(null, "some", w);
-			s.text("<xml>\"bread\" & \"butter\"</xml>").end();
+			
+			TypeDef sd = new TypeDefLibCache(null, null).get(String.class);
+			s.textContent((ScalarDef) sd, "<xml>\"bread\" & \"butter\"</xml>").end();
+			
 			assertEquals("<some>&lt;xml&gt;&quot;bread&quot; &amp; &quot;butter&quot;&lt;/xml&gt;</some>", w.getBuffer().toString());
 			
 		}
-		
-		
-		
 	}
 
 }

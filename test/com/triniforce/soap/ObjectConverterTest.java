@@ -85,7 +85,7 @@ public class ObjectConverterTest extends TFTestCase {
 	        e.setAttribute("xmlns:xsi", InterfaceDescriptionGenerator.xsi);
 	        doc.appendChild(e);
 	        
-	        Node_S parent = new InterfaceDescriptionGenerator.Node_S(e, null);
+	        Node_S parent = new DomNode_S(e, null);
 	        TypedObject val = new InterfaceDescriptionGenerator.ObjectConverter.TypedObject(
 	                new PropDef("name", desc.getType(Cls1.class), null, null), new Cls2("property_from_Cls1", "property_from_Cls2"));
 	        
@@ -114,7 +114,7 @@ public class ObjectConverterTest extends TFTestCase {
 	        e.setAttribute("xmlns:xsi", InterfaceDescriptionGenerator.xsi);
 	        doc.appendChild(e);
 	        
-	        Node_S parent = new InterfaceDescriptionGenerator.Node_S(e, null);
+	        Node_S parent = new DomNode_S(e, null);
 
 	        InterfaceDescription desc = new InterfaceDescription();
         	ObjectConverter oc = new ObjectConverter(desc, "TNS");

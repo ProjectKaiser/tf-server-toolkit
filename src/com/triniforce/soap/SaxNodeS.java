@@ -15,11 +15,12 @@ import org.apache.commons.text.StringEscapeUtils;
 
 import com.triniforce.soap.InterfaceDescriptionGenerator.IConverter;
 import com.triniforce.soap.InterfaceDescriptionGenerator.Node_S;
+import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.utils.ApiAlgs;
 
 import javafx.util.Pair;
 
-public class SaxNodeS extends Node_S{
+public class SaxNodeS implements Node_S{
 
 	private Writer m_writer;
 	private String m_name;
@@ -28,7 +29,6 @@ public class SaxNodeS extends Node_S{
 	private List<Pair<String,String>> m_attrs = new ArrayList<>();
 
 	public SaxNodeS(SaxNodeS parent, String name, Writer w) {
-		super(null, null);
 		m_writer = w;
 		m_name = name;
 		m_parent = parent;
@@ -82,11 +82,18 @@ public class SaxNodeS extends Node_S{
 	public SaxNodeS text(String string) {
 		terminateStart(false);
 		try {
-			m_writer.append(StringEscapeUtils.escapeXml10(string));
+			m_writer.append(string);
 		} catch (IOException e) {
 			ApiAlgs.rethrowException(e);
 		}
 		return this;
+	}
+	
+	public Node_S textContent(ScalarDef typeDef, Object object) {
+		String value = typeDef.stringValue(object);
+		if(typeDef.getType().equals(String.class.getName()))
+			value = StringEscapeUtils.escapeXml10(value);
+		return text(value);
 	}
 
 }
