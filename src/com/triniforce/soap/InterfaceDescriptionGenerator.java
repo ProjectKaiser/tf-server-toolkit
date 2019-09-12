@@ -18,7 +18,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.AbstractList;
@@ -29,26 +28,21 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.json.simple.parser.ParseException;
@@ -237,48 +231,7 @@ public class InterfaceDescriptionGenerator {
     static String xmlns = "http://www.w3.org/2000/xmlns/";
     
     interface IConverter<T>{
-        void run(INodeS parent, T val);
-    }
-    
-    interface INodeS{
-
-		void append(String propName, boolean bAttrs);
-		void attr(String attr, Object v);
-		void endattr();		
-		void end(String propName);
-    	
-    }
-    
-    static class SaxNodeS implements INodeS{
-
-		public SaxNodeS(Writer writer) {
-			// TODO Auto-generated constructor stub
-		}
-
-		@Override
-		public void append(String propName, boolean bAttrs) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void attr(String attr, Object v) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void endattr() {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void end(String propName) {
-			// TODO Auto-generated method stub
-			
-		}
-
+        void run(Node_S parent, T val);
     }
     
     static class Node_S{
@@ -289,29 +242,30 @@ public class InterfaceDescriptionGenerator {
             m_parent = parent;
         }
         
-        Node_S append(String name){
+        public Node_S append(String name){
             Element e = getDocument().createElement(name);
             m_element.appendChild(e);
             Node_S res = new Node_S(e, this);
             return res;
         }
         
-//        <T> Node_S append (Collection<T> col, IConverter<T> conv){
-//            for (T v: col) {            	
-//                conv.run(this, v);
-//            }
-//            return this;    
-//        }
-//        <T> Node_S append (T val, IConverter<T> conv){
-//            conv.run(this, val);
-//            return this;    
-//        }
-//        
-        Node_S attr(String name, String v){
+        public <T> Node_S append (Collection<T> col, IConverter<T> conv){
+            for (T v: col) {            	
+                conv.run(this, v);
+            }
+            return this;    
+        }
+        
+        public <T> Node_S append (T val, IConverter<T> conv){
+            conv.run(this, val);
+            return this;    
+        }
+        
+        public Node_S attr(String name, String v){
             m_element.setAttribute(name, v);
             return this;
         }
-        Node_S end(){
+        public Node_S end(){
             return m_parent;
         }
 
@@ -322,6 +276,11 @@ public class InterfaceDescriptionGenerator {
         Document getDocument(){
             return m_element.getOwnerDocument();
         }
+
+		public void flush() {
+			// TODO Auto-generated method stub
+			
+		}
     }
     
     static class TypeConverter implements IConverter<WsdlType>{
@@ -332,8 +291,8 @@ public class InterfaceDescriptionGenerator {
             m_tns = tns;
         }
         @Override
-		public void run(INodeS handler, WsdlType val) {
-        	handler.append(val.isComplex() ? "s:complexType" : "s:simpleType");
+		public void run(Node_S parent, WsdlType val) {
+            Node_S t = parent.append(val.isComplex() ? "s:complexType" : "s:simpleType");
             if(m_bShowName)
                 t.attr("name", val.getTypeDef().getName());
             
@@ -346,19 +305,17 @@ public class InterfaceDescriptionGenerator {
             }
             Collection<WsdlTypeElement> elements = val.getElements();
             if(!elements.isEmpty()){
-	            t.append("s:sequence");
-	            IConverter<WsdlTypeElement> cnv = new IConverter<WsdlTypeElement>(){
+	            t.append("s:sequence")
+	                .append(elements, new IConverter<WsdlTypeElement>(){
 	                    @Override
-						public void run(INodeS parent, WsdlTypeElement val) {
-	                    	Map<String,String> attrs =  new LinkedHashMap<>(); 
+						public void run(Node_S parent, WsdlTypeElement val) {
 	                        int maxOccur = val.getMaxOccur();
 	                        String sMaxOccur = maxOccur == -1 ? "unbounded" : Integer.toString(maxOccur);
-	                        parent.append("s:element", true);
-	                        parent.attr("minOccurs", Integer.toString(val.getMinOccur()));
-	                        parent.attr("maxOccurs", sMaxOccur);
-	                        parent.attr("name", val.getName());
+	                        Node_S e = parent.append("s:element")
+	                            .attr("minOccurs", Integer.toString(val.getMinOccur()))
+	                            .attr("maxOccurs", sMaxOccur)
+	                            .attr("name", val.getName());
 	                        if(!val.isResidentType()){
-	                        	parent.endattr();
 	                            e.append(val.getType(), new TypeConverter(false, m_tns));
 	                        }
 	                        else{
@@ -368,11 +325,8 @@ public class InterfaceDescriptionGenerator {
 	                        if(val.getMinOccur()>0 && val.isNillable())
 	                        	e.attr("nillable", "true");
 	                    }
-	                };
-				for(WsdlTypeElement te : elements){
-					cnv.run(parent, te);
-				} 
-	            t.end("s:sequence")    .end()
+	                })
+	                .end()
 	            .end();
             }
             Restriction restrBase = val.getResriction();
@@ -720,8 +674,12 @@ public class InterfaceDescriptionGenerator {
         return m_SAXParserFactory.newSAXParser();
     }
     
-    private DocumentBuilder getDocumentBuilder() throws ParserConfigurationException {
-        return m_documentBuilderFactory.newDocumentBuilder();
+    private DocumentBuilder getDocumentBuilder() {
+        try {
+			return m_documentBuilderFactory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			throw new ApiAlgs.RethrownException(e);
+		}
     }
     
     private Transformer getTransformer() throws TransformerConfigurationException{
@@ -801,15 +759,14 @@ public class InterfaceDescriptionGenerator {
         
         @Override
 		@SuppressWarnings("unchecked")
-        public void run(INodeS parent, TypedObject val) {        
-            parent.append(val.getPropName(), true);
+        public void run(Node_S parent, TypedObject val) {        
+            Node_S e = parent.append(val.getPropName());
             if(bSetNS){
-                parent.attr("xmlns", m_targetNS);
+                e.attr("xmlns", m_targetNS);
                 bSetNS = false;
             }
             if(null == val.getObject()){
-            	parent.attr("xsi:nil", "true");
-            	parent.endattr();
+                e.attr("xsi:nil", "true");
             }
             else{
                 TypeDef typeDef = val.getTypeDef();
@@ -824,25 +781,22 @@ public class InterfaceDescriptionGenerator {
                                 typeName = "xsd:"+hideTypeDef.getName();
                             else
                                 typeName = hideTypeDef.getName();
-                            parent.attr("xsi:type", typeName);
+                            e.attr("xsi:type", typeName);
                             typeDef = hideTypeDef;
                         }
                     }
                 }
-                parent.endattr();
                 
                 if(typeDef instanceof ClassDef){
                     ClassDef cd = (ClassDef) typeDef;
-                    for(TypedObject to : new TypedProps(cd.getProps(), val)){
-                    	this.run(parent, val);
-                    }
+                    e.append(new TypedProps(cd.getProps(), val), this);
                 }
                 else if(typeDef instanceof ArrayDef){
                     ArrayDef ad = (ArrayDef) typeDef;
                     PropDef propDef = ad.getPropDef();
                     Collection col = (Collection) propDef.get(val.getObject());
                     for (Object object : col) {
-                    	this.run(parent, new TypedObject(propDef, object));
+                        e.append(new TypedObject(propDef, object), this);
                     }
                 }
                 else if(typeDef instanceof ScalarDef){
@@ -852,39 +806,58 @@ public class InterfaceDescriptionGenerator {
             }
             e.end();
         }
-    } 
+
+    }
     
 
-    public Document serialize(InterfaceDescription desc, final SOAPDocument soap) {
-        Document doc = null;
+    public Document serialize(InterfaceDescription desc, final SOAPDocument soap)  {
+        DocumentBuilder db = getDocumentBuilder();
+        Document doc = db.newDocument();
+        
+        Element eDefs = doc.createElement("soap:Envelope");
+        doc.appendChild(eDefs);
+        Node_S node = new Node_S(eDefs, null);
+        serialize(desc, soap, node);
+        return doc;
+    }
+    
+    private void serialize(InterfaceDescription desc, SOAPDocument soap, Node_S node){
         try {
             Operation op = findByName(desc.getOperations(), soap.m_method);
             if(null == op)
             	throw new NoSuchElementException(soap.m_method);
             PropDef prop = soap.m_bIn ? op.getProps().get(0) : op.getProps().get(1);
             
-            Node_S body = createSoapDocument(soap.m_soap);
+            Node_S body = createSoapDocument(node, soap.m_soap);
             body.append(new TypedObject(prop, soap.m_args), new ObjectConverter(desc, m_targetNamespace));
-            doc = body.getDocument();
+            body.end();
         } catch (Exception e) {
             ApiAlgs.rethrowException(e);
         }
-        return doc;
+    	
     }
+    
+    enum SrzType {DOM, SAX};
 
-    private Node_S createSoapDocument(String soapNS) throws ParserConfigurationException {
-        DocumentBuilder db = getDocumentBuilder();
-        Document doc = db.newDocument();
-        
-        Element eDefs = doc.createElement("soap:Envelope");
-        doc.appendChild(eDefs);
-        return new Node_S(eDefs, null)
+    private Node_S createSoapDocument(Node_S doc, String soapNS) throws ParserConfigurationException {
+        return doc
             .attr("xmlns:soap", soapNS)
             .attr("xmlns:xsd", "http://www.w3.org/2001/XMLSchema")
             .attr("xmlns:xsi", xsi)
             .append("soap:Body");
         
     }
+    
+    private Node_S createSoapDocument(String soapNS) throws ParserConfigurationException {
+        DocumentBuilder db = getDocumentBuilder();
+        Document doc = db.newDocument();
+        
+        Element eDefs = doc.createElement("soap:Envelope");
+        doc.appendChild(eDefs);
+        Node_S node = new Node_S(eDefs, null);
+		return createSoapDocument(node, soapNS);
+	}
+
 
     public Document serializeException(String soapNS, Throwable throwable, InterfaceDescription desc, String method) {
         Document doc = null;
@@ -947,9 +920,8 @@ public class InterfaceDescriptionGenerator {
                 if(null == op)
                 	throw new NoSuchElementException(method);
                 PropDef prop = op.getThrowByType(ep.getClass());
-                if(null != prop){
-                	new ObjectConverter(desc, m_targetNamespace).run(detail, new TypedObject(prop, ep));
-                }
+                if(null != prop)
+                	detail.append(new TypedObject(prop, ep), new ObjectConverter(desc, m_targetNamespace));
             }
             
             doc = body.getDocument();
@@ -959,7 +931,7 @@ public class InterfaceDescriptionGenerator {
         return doc;
     }
     
-    private Throwable extractExceptionCause(Throwable throwable) {
+	private Throwable extractExceptionCause(Throwable throwable) {
     	Throwable ep=throwable;
     	while((ep instanceof InvocationTargetException || ep instanceof RethrownException) && null != ep.getCause()){
     		ep = ep.getCause();
@@ -1220,63 +1192,20 @@ public class InterfaceDescriptionGenerator {
 	public <T> void addCustomSerializer(CustomSerializer iCustomSerializer) {
 		m_customSerializers.add(iCustomSerializer);
 	}
-	
 
 	public void serializeToStream(OutputStream output, InterfaceDescription desc, SOAPDocument soap) 
-			throws TransformerConfigurationException, TransformerException, JAXBException, IOException{
-		OutputStreamWriter writer = new OutputStreamWriter(output);
-		Operation op = desc.getOperation(soap.m_method);
-		String prop1 = soap.m_bIn ? soap.m_method : soap.m_method + "Response";
+			throws TransformerConfigurationException, TransformerException, JAXBException{
+		OutputStreamWriter w = new OutputStreamWriter(output);
 		
-		TFUtils.copyStream(getClass().getResourceAsStream("soapheader.dat"), output);
+		SaxNodeS body = new SaxNodeS(null, "soap:Envelope", w);
+		serialize(desc, soap, body);
+		body.end();
+		try {
+			w.close();
+		} catch (IOException e) {
+			ApiAlgs.rethrowException(e);
+		}
 		
-		ObjectConverter conv = new ObjectConverter(desc, m_targetNamespace);
-		SaxNodeS sax = new SaxNodeS(writer);
-		conv.run(sax, new TypedObject(op.getProp(prop1), soap.m_args));
-		
-//		writer.append(String.format("<%s xmlns=\"%s\">", prop1, m_targetNamespace));
-//		serializeToStream(writer, desc, op.getProp(prop1).getType(), soap.m_args);
-//		writer.append(String.format("</%s>", prop1));
-		writer.close();
-		TFUtils.copyStream(getClass().getResourceAsStream("soapfooter.dat"), output);
-	}
-	
-	
-
-	private void serializeToStream(Writer output, InterfaceDescription desc, TypeDef typ, Object[] args) throws IOException {
-		if (typ instanceof ClassDef)
-			for (PropDef pd : ((ClassDef)typ).getProps()) {
-				output.append(String.format("<%s>", pd.getName()));
-				output.append(String.format("</%s>", pd.getName()));
-				
-			}
-		
-	}
-
-	private Source createSource(InterfaceDescription desc, SOAPDocument soap) throws JAXBException {
-//		JAXBContext jc = JAXBContext.newInstance(SOAPDocument.class);
-//		
-//	    Marshaller m = jc.createMarshaller();
-//	    
-//		InputSource inpSrc = new InputSource();
-//		SAXSource sax = new SAXSource(inpSrc);
-//		
-//		return sax;
-		
-		return new Source(){
-
-			@Override
-			public String getSystemId() {
-				ApiAlgs.getLog(this).trace("getSystemId");
-				return "sid0";
-			}
-
-			@Override
-			public void setSystemId(String arg0) {
-				ApiAlgs.getLog(this).trace("setSystemId");
-			}
-			
-		};
 	}
 
 	public Map<String, Boolean> getConfiguration() {

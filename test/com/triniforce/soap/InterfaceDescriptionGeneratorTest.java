@@ -1346,6 +1346,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         soap.m_method = "method12";
         soap.m_bIn = true;
         soap.m_args = new Object[]{"TEXT_CONTENT"};
+        soap.m_soap = InterfaceDescriptionGenerator.soapenv;
        // soap.
         gen.serializeToStream(output, desc, soap);
         byte[] bytes = output.toByteArray();
@@ -1354,6 +1355,8 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         
         SOAPDocument res = gen.deserialize(desc, new ByteArrayInputStream(bytes));
         assertNotNull(res);
+        
+        assertEquals(Arrays.asList("TEXT_CONTENT"), Arrays.asList(res.m_args));
     }
 
 }

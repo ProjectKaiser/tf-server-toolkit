@@ -2,8 +2,8 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 version = file('version').text
@@ -69,6 +69,7 @@ dependencies {
 	compile 'org.apache.poi:poi:3.10.1'
 
 	compile 'org.apache.httpcomponents:httpclient:4.3.6'
+	compile 'org.apache.commons:commons-text:1.8'
 
 	testCompile(group: 'org.jmock', name: 'jmock', version: '2.5.1')
 	testCompile 'net.sourceforge.jtds:jtds:1.2.4'
