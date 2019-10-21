@@ -520,12 +520,7 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         ArrayList<TypeDef> res = new ArrayList<TypeDef>(m_arrays.values());
         res.addAll(m_classes.values());
         for (TypeDef typeDef : m_extLib.getDefs()) {
-        	if(typeDef instanceof ScalarDef){
-        		if(typeDef instanceof EnumDef)
-        			res.add(typeDef);
-        	}
-        	else
-        		res.add(typeDef);
+       		res.add(typeDef);
 		}
         for(ArrayDef ad : m_arrays.values()){
         	if(ad instanceof MapDef){
@@ -560,8 +555,8 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
     	return m_uniqueNameGen.generate(template);
     }
 
-	public void addExternalDef(Class<?> class1, TypeDef cdef) {
-		m_extLib.addDef(class1, cdef);
+	public void addExternalDef(Class<?> class1, TypeDef cdef, Boolean isXsd) {
+		m_extLib.addDef(class1, cdef, isXsd);
 		
 	}
 

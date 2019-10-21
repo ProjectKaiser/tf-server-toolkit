@@ -400,7 +400,7 @@ public class TypeDefLibCacheTest extends TFTestCase {
     
     public void testAddExtDef(){
     	C1Def c1 = new C1Def();
-    	m_lib.addExternalDef(C01.class, c1);    	
+    	m_lib.addExternalDef(C01.class, c1, false);    	
     	assertSame(c1, m_lib.get(C01.class));
     }
 }

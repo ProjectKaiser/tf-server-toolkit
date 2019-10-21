@@ -602,7 +602,7 @@ public class ClassParserTest extends TFTestCase {
 					e.printStackTrace();
 				}
         	}
-        });
+        }, false);
         cp.parse(O01.class, lib, "typeName-1");
         
     	

@@ -89,7 +89,20 @@ public class InterfaceDescriptionGenerator {
     private TransformerFactory m_transformerFactory;
     List<CustomSerializer<?,?>> m_customSerializers = new ArrayList<CustomSerializer<?,?>>();
 	private Map<String, Boolean> m_configuration = new HashMap<String, Boolean>();
-	private List<Pair<Class<?>,TypeDef>> m_externalDefs;
+	
+	static class ExtDefDescr {
+		Class<?> m_cls;
+		TypeDef m_td;
+		Boolean m_isXsd;
+		
+		public ExtDefDescr(Class<?> cls, TypeDef td, Boolean isXsd) {
+			m_cls = cls;
+			m_td = td;
+			m_isXsd = isXsd;
+		}
+	}
+	
+	private List<ExtDefDescr> m_externalDefs;
 
     public InterfaceDescriptionGenerator() {
         this("http://tempuri.org/", "ServerName");
@@ -104,7 +117,7 @@ public class InterfaceDescriptionGenerator {
         m_documentBuilderFactory = DocumentBuilderFactory.newInstance();
         m_documentBuilderFactory.setNamespaceAware(true);
         m_transformerFactory = TransformerFactory.newInstance();
-        m_externalDefs = new ArrayList<Pair<Class<?>,TypeDef>>();
+        m_externalDefs = new ArrayList<ExtDefDescr>();
     }
     
     
@@ -949,8 +962,8 @@ public class InterfaceDescriptionGenerator {
                 lib.add(extraCls);
             }
         }
-        for (Pair<Class<?>, TypeDef> pair: m_externalDefs) {
-        	lib.addExternalDef(pair.getKey(), pair.getValue());
+        for (ExtDefDescr ed: m_externalDefs) {
+        	lib.addExternalDef(ed.m_cls, ed.m_td, ed.m_isXsd);
 		}
         
         for (InterfaceOperationDescription opDesc : operationDescs) {
@@ -1180,8 +1193,8 @@ public class InterfaceDescriptionGenerator {
 		return m_configuration;
 	}
 
-	public void addExternalDef(Class<?> class1, TypeDef td) {
-		m_externalDefs.add(new Pair(class1, td));
+	public void addExternalDef(Class<?> class1, TypeDef td, boolean isXsd) {
+		m_externalDefs.add(new ExtDefDescr(class1, td, isXsd));
 		
 	}
 

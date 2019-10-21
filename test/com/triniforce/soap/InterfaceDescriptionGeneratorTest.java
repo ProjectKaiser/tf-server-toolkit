@@ -1370,7 +1370,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
     public void testAddExtraClass(){
     	InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
     	ScalarDef td1 = new ScalarDef(int.class);
-        gen.addExternalDef(IC1.class, td1);
+        gen.addExternalDef(IC1.class, td1, true);
     
         InterfaceDescription desc = gen.parse(null, ITestExtra1.class);
         TypeDef res = desc.getOperation("method").getRequestType().getProp("arg0").getType();
