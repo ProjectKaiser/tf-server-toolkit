@@ -8,10 +8,14 @@ package com.triniforce.soap;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,17 +32,20 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.apache.commons.io.output.WriterOutputStream;
+
 import com.triniforce.soap.TypeDefLibCache.MapDefLib.MapComponentDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiAlgs.SimpleName;
 import com.triniforce.utils.Base64;
+import com.triniforce.utils.Base64.OutputStream;
 import com.triniforce.utils.TFUtils;
 
 public class TypeDef extends SimpleName{
     private static final long serialVersionUID = 6626564048671748844L;
 
-    static class ScalarDef extends TypeDef{
+    public static class ScalarDef extends TypeDef{
         private static final long serialVersionUID = 1L;
         
         static HashMap<String, String>   BOXES;
@@ -142,27 +149,39 @@ public class TypeDef extends SimpleName{
         }
         
         public String stringValue(Object v){
-        	String res;
-        	if(getName().equals("dateTime")){
-        		try {
-    				GregorianCalendar gregCal = new GregorianCalendar();
-	        		gregCal.setTimeZone(TimeZone.getTimeZone("GMT"));
-	        		gregCal.setTime((Date) v);
-					DatatypeFactory tf = DatatypeFactory.newInstance();
-					res = tf.newXMLGregorianCalendar(gregCal).toXMLFormat();
-				} catch (DatatypeConfigurationException e) {
-					ApiAlgs.rethrowException(e);
-					res = null;
-				}
+        	StringWriter sw = new StringWriter();
+        	serialize(v, sw);
+        	return sw.toString();
+        }
+        
+        public void serialize(Object v, Writer w){
+        	try{
+	        	if(getName().equals("dateTime")){
+	        		try {
+	    				GregorianCalendar gregCal = new GregorianCalendar();
+		        		gregCal.setTimeZone(TimeZone.getTimeZone("GMT"));
+		        		gregCal.setTime((Date) v);
+						DatatypeFactory tf = DatatypeFactory.newInstance();
+						w.append(tf.newXMLGregorianCalendar(gregCal).toXMLFormat());
+					} catch (DatatypeConfigurationException e) {
+						ApiAlgs.rethrowException(e);
+					}
+	        	}
+	        	else if(getName().equals("base64Binary")){
+	        		WriterOutputStream wout = new org.apache.commons.io.output.WriterOutputStream(w, Charset.forName("utf-8"));
+	        		OutputStream b64 = new Base64.OutputStream(wout);
+	        		b64.write((byte[]) v);
+	        		b64.close();
+	        		wout.close();
+	        	}
+	        	else
+	        		w.append(v.toString());
+        	} catch (IOException e){
+        		throw new ApiAlgs.RethrownException(e);
         	}
-        	else if(getName().equals("base64Binary")){
-        		res = Base64.encodeBytes((byte[]) v);
-        	}
-        	else
-        		res = v.toString();
-        	return res;
         	
         }
+        
     }
     
     static class ArrayDef extends TypeDef implements Serializable{

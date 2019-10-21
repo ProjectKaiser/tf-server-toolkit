@@ -70,6 +70,7 @@ dependencies {
 
 	compile 'org.apache.httpcomponents:httpclient:4.3.6'
 	compile 'org.apache.commons:commons-text:1.8'
+	compile 'commons-io:commons-io:2.6'
 
 	testCompile(group: 'org.jmock', name: 'jmock', version: '2.5.1')
 	testCompile 'net.sourceforge.jtds:jtds:1.2.4'

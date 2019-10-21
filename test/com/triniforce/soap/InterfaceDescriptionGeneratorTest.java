@@ -1358,5 +1358,26 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         
         assertEquals(Arrays.asList("TEXT_CONTENT"), Arrays.asList(res.m_args));
     }
+    
+    interface IC1{
+    	
+    }
+    
+    interface ITestExtra1{
+    	void method(IC1 v);
+    }
+    
+    public void testAddExtraClass(){
+    	InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+    	ScalarDef td1 = new ScalarDef(int.class);
+        gen.addExternalDef(IC1.class, td1);
+    
+        InterfaceDescription desc = gen.parse(null, ITestExtra1.class);
+        TypeDef res = desc.getOperation("method").getRequestType().getProp("arg0").getType();
+        assertSame(res, td1);
+        
+        WsdlDescription wsdl = desc.getWsdlDescription();
+        assertTrue(wsdl.getWsdlTypes().isEmpty());
+    }
 
 }

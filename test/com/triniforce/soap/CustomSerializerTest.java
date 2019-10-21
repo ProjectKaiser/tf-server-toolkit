@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
 
+@Deprecated
 public class CustomSerializerTest extends TFTestCase {
 	
 	interface IType1{}

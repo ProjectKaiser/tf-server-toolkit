@@ -185,6 +185,8 @@ public class WsdlDescription {
         String getNamespace(String tns){
         	if(TypeDefLibCache.SCALAR_LIB.getDefs().contains(m_td))
         		return InterfaceDescriptionGenerator.schema;
+        	if((m_td instanceof ScalarDef) && (!(m_td instanceof EnumDef)))
+        		return InterfaceDescriptionGenerator.schema;
         	return tns;
         }
     }

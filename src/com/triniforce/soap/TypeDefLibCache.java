@@ -22,6 +22,7 @@ import java.util.Map;
 import com.triniforce.soap.IDefLibrary.ITypeNameGenerator;
 import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
+import com.triniforce.soap.TypeDef.EnumDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.utils.ApiAlgs;
@@ -518,7 +519,14 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
     public List<TypeDef> getDefs() {
         ArrayList<TypeDef> res = new ArrayList<TypeDef>(m_arrays.values());
         res.addAll(m_classes.values());
-        res.addAll(m_extLib.getDefs());
+        for (TypeDef typeDef : m_extLib.getDefs()) {
+        	if(typeDef instanceof ScalarDef){
+        		if(typeDef instanceof EnumDef)
+        			res.add(typeDef);
+        	}
+        	else
+        		res.add(typeDef);
+		}
         for(ArrayDef ad : m_arrays.values()){
         	if(ad instanceof MapDef){
         		MapDef md = (MapDef) ad;
@@ -551,5 +559,10 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
     	}
     	return m_uniqueNameGen.generate(template);
     }
+
+	public void addExternalDef(Class<?> class1, TypeDef cdef) {
+		m_extLib.addDef(class1, cdef);
+		
+	}
 
 }

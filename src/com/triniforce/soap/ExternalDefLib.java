@@ -54,4 +54,7 @@ public class ExternalDefLib implements IDefLibrary {
 		return m_map.values();
 	}
 
+	public void addDef(Type typ, TypeDef td){
+		m_map.put(typ, td);
+	}
 }

@@ -75,6 +75,7 @@ import com.triniforce.utils.EUtils;
 import com.triniforce.utils.IName;
 import com.triniforce.utils.TFUtils;
 
+import javafx.util.Pair;
 import net.sf.sojo.interchange.json.JsonParserException;
 import net.sf.sojo.interchange.json.JsonSerializer;
 
@@ -88,6 +89,7 @@ public class InterfaceDescriptionGenerator {
     private TransformerFactory m_transformerFactory;
     List<CustomSerializer<?,?>> m_customSerializers = new ArrayList<CustomSerializer<?,?>>();
 	private Map<String, Boolean> m_configuration = new HashMap<String, Boolean>();
+	private List<Pair<Class<?>,TypeDef>> m_externalDefs;
 
     public InterfaceDescriptionGenerator() {
         this("http://tempuri.org/", "ServerName");
@@ -102,6 +104,7 @@ public class InterfaceDescriptionGenerator {
         m_documentBuilderFactory = DocumentBuilderFactory.newInstance();
         m_documentBuilderFactory.setNamespaceAware(true);
         m_transformerFactory = TransformerFactory.newInstance();
+        m_externalDefs = new ArrayList<Pair<Class<?>,TypeDef>>();
     }
     
     
@@ -946,6 +949,9 @@ public class InterfaceDescriptionGenerator {
                 lib.add(extraCls);
             }
         }
+        for (Pair<Class<?>, TypeDef> pair: m_externalDefs) {
+        	lib.addExternalDef(pair.getKey(), pair.getValue());
+		}
         
         for (InterfaceOperationDescription opDesc : operationDescs) {
             res.getOperations().add(parseOperation(opDesc, lib));
@@ -1172,6 +1178,11 @@ public class InterfaceDescriptionGenerator {
 
 	public Map<String, Boolean> getConfiguration() {
 		return m_configuration;
+	}
+
+	public void addExternalDef(Class<?> class1, TypeDef td) {
+		m_externalDefs.add(new Pair(class1, td));
+		
 	}
 
 }

@@ -6,6 +6,7 @@
 package com.triniforce.soap;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -90,10 +91,19 @@ public class SaxNodeS implements Node_S{
 	}
 	
 	public Node_S textContent(ScalarDef typeDef, Object object) {
-		String value = typeDef.stringValue(object);
-		if(typeDef.getType().equals(String.class.getName()))
-			value = StringEscapeUtils.escapeXml10(value);
-		return text(value);
+		terminateStart(false);
+		try {
+			if(typeDef.getType().equals(String.class.getName())){
+				StringWriter sw = new StringWriter();
+				typeDef.serialize(object, sw);
+				StringEscapeUtils.ESCAPE_XML10.translate(sw.toString(), m_writer);
+			}
+			else
+				typeDef.serialize(object, m_writer);
+		} catch (IOException e) {
+			throw new ApiAlgs.RethrownException(e);
+		}
+		return this;
 	}
 
 }

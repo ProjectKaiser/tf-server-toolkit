@@ -184,6 +184,7 @@ public class TypeDefLibCacheTest extends TFTestCase {
     
     interface ICustom1{}
     interface ICustom2{}
+    @Deprecated
     static class CSrz1 extends CustomSerializer<ICustom1, String>{
 
 		public CSrz1() {
@@ -203,6 +204,7 @@ public class TypeDefLibCacheTest extends TFTestCase {
     	
     } 
     
+    @Deprecated
     static class CSrz2 extends CustomSerializer<ICustom2, String>{
 
 		public CSrz2() {
@@ -383,5 +385,22 @@ public class TypeDefLibCacheTest extends TFTestCase {
     	String res1 = m_lib.get(com.triniforce.soap.testpkg_01.DuplicatedName.class, "DuplicatedName", false);
     	String res2 = m_lib.get(com.triniforce.soap.testpkg_02.DuplicatedName.class, "DuplicatedName", false);
     	assertFalse(res1.equals(res2));
+    }
+    
+    static class C01{
+    	
+    }
+    
+    static class C1Def extends ScalarDef{
+		private static final long serialVersionUID = 8869700740101859913L;
+		public C1Def() {
+			super(String.class);
+		}    	
+    }
+    
+    public void testAddExtDef(){
+    	C1Def c1 = new C1Def();
+    	m_lib.addExternalDef(C01.class, c1);    	
+    	assertSame(c1, m_lib.get(C01.class));
     }
 }

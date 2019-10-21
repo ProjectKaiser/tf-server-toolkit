@@ -5,6 +5,8 @@
  */ 
 package com.triniforce.soap;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -586,4 +588,25 @@ public class ClassParserTest extends TFTestCase {
         assertEquals("customized", def.getProp("value").get(obj));
     	
     }
+    
+    public void testExternalDef(){
+        ClassParser cp = new ClassParser(ClassParserTest.class.getPackage(), Collections.emptyList());
+        TypeDefLibCache lib = new TypeDefLibCache(cp, Collections.EMPTY_LIST);
+        lib.addExternalDef(Custom01.class, new ScalarDef(String.class){
+			private static final long serialVersionUID = 4393197656579650503L;
+			@Override
+        	public void serialize(Object v, Writer w) {
+        		try {
+					w.append("custom01");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+        	}
+        });
+        cp.parse(O01.class, lib, "typeName-1");
+        
+    	
+    }
+    
+    
 }
