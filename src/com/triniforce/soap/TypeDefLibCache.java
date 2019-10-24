@@ -22,7 +22,6 @@ import java.util.Map;
 import com.triniforce.soap.IDefLibrary.ITypeNameGenerator;
 import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
-import com.triniforce.soap.TypeDef.EnumDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.utils.ApiAlgs;

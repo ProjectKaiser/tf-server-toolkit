@@ -19,15 +19,13 @@ import com.triniforce.soap.InterfaceDescriptionGenerator.Node_S;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.utils.ApiAlgs;
 
-import javafx.util.Pair;
-
 public class SaxNodeS implements Node_S{
 
 	private Writer m_writer;
 	private String m_name;
 	private SaxNodeS m_parent;
 	private boolean m_bStartTerminated = false;
-	private List<Pair<String,String>> m_attrs = new ArrayList<>();
+	private List<String[]> m_attrs = new ArrayList<>();
 
 	public SaxNodeS(SaxNodeS parent, String name, Writer w) {
 		m_writer = w;
@@ -49,7 +47,7 @@ public class SaxNodeS implements Node_S{
 			}
 			else{
 				String s = m_attrs.stream().map(e -> String.format("%s=\"%s\" ", 
-						e.getKey(), StringEscapeUtils.escapeXml10(e.getValue()))).reduce("", String::concat);
+						e[0], StringEscapeUtils.escapeXml10(e[1]))).reduce("", String::concat);
 				m_writer.append(String.format("<%s%s%s>", m_name, m_attrs.isEmpty() ? "" : " "+s, bEnd ? "/" : ""));
 				m_bStartTerminated = true;
 			}
@@ -71,7 +69,7 @@ public class SaxNodeS implements Node_S{
 	}
 
 	public SaxNodeS attr(String name, String v) {
-		m_attrs.add(new Pair<String,String>(name, v));
+		m_attrs.add(new String[]{name, v});
 		return this;
 	}
 

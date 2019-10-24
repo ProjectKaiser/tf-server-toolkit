@@ -75,7 +75,6 @@ import com.triniforce.utils.EUtils;
 import com.triniforce.utils.IName;
 import com.triniforce.utils.TFUtils;
 
-import javafx.util.Pair;
 import net.sf.sojo.interchange.json.JsonParserException;
 import net.sf.sojo.interchange.json.JsonSerializer;
 
