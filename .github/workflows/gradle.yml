@@ -14,4 +14,9 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Gradle
+      env:
+	-name: UNTILL_MAVEN_USERNAME
+	value: alex
+	-name: UNTILL_MAVEN_PASSWORD
+	value: alex
       run: ./gradlew compileJava
