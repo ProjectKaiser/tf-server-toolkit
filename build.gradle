@@ -15,6 +15,9 @@ group = 'com.triniforce.tf-server-toolkit'
 // Get dynamic environment settings
 apply from: 'config.gradle'
 
+ext.testFolderDir = new File(buildDir, 'test')
+
+
 defaultTasks 'clean', 'ide'
 
 repositories {
@@ -35,6 +38,14 @@ processResources {
 		include '**/*.wiki'
 		include '**/*.bsh'
 		include '**/*.htm'
+	}
+	from('test') {
+		include '**/*.jar'
+		include '**/*.bs'
+		include '**/*.txt'
+		include '**/*.properties'
+		include '**/*.soap'
+	
 	}
 }
 
@@ -101,7 +112,7 @@ sourceSets.test.runtimeClasspath += configurations.providedCompile
 
 sourceSets {
 	main.java.srcDirs = ['src']
-	test.java.srcDirs = ['test', 'investigation']
+	test.java.srcDirs = ['test']
 }
 
 tasks.eclipse.dependsOn(cleanEclipse)
@@ -175,6 +186,42 @@ jar {
 		)
 	}
 }
+
+task prepareTestFolder {
+	outputs.dir testFolderDir
+	doLast {
+		delete testFolderDir
+		mkdir testFolderDir
+		new File(testFolderDir, 'log4j.properties').write(
+			'log4j.rootLogger=trace, file\n' +
+			'log4j.appender.file=org.apache.log4j.RollingFileAppender\n' +
+			'log4j.appender.file.File=' + new File(testFolderDir, 'messages.log').absolutePath.replace('\\', '/') + '\n' +
+			'log4j.appender.file.MaxFileSize=8MB\n' +
+			'log4j.appender.file.MaxBackupIndex=10\n' +
+			'log4j.appender.file.layout=org.apache.log4j.PatternLayout\n' +
+			'log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %5p %t %c{6}:%L - %m %l %n\n' +
+			'log4j.logger.com.triniforce.db.dml.StmtContainer=OFF\n'
+		)
+		new File(testFolderDir, 'test.properties').write(
+			'url=jdbc:h2:mem:db\n' +
+			'class=org.h2.Driver\n'+
+			'testSeqFile=seq.txt'
+		)
+	}
+}
+
+test {
+	dependsOn prepareTestFolder
+	doFirst {
+		environment.put('TF_SERVER_TOOLKIT_TEST_FOLDER', testFolderDir)
+	}
+
+	minHeapSize = "128m"
+	maxHeapSize = "256m"
+}
+
+
+task outputDirs << { sourceSets.test.java.srcDirs.each{f -> println(f)}}
 
 //war {
 //	from 'war'

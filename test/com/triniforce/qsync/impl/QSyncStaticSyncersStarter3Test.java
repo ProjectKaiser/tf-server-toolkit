@@ -17,15 +17,15 @@ public class QSyncStaticSyncersStarter3Test extends BasicServerTestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
-		addPlugin(new QSyncPlugin());
+//		addPlugin(new QSyncPlugin());
 
 		super.setUp();
 		
 		
 	}
 	
-	@Override
-	public void test() throws Exception {
+//	@Override
+	public void ntest() throws Exception {
 		getServer().enterMode(Mode.Running);
 		try{
 			INamedDbId dbId = ApiStack.getInterface(INamedDbId.class);

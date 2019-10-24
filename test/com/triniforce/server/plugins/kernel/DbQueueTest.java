@@ -11,10 +11,12 @@ import java.util.Random;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 
+import com.triniforce.db.ddl.UpgradeRunner.DbType;
 import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.server.plugins.kernel.DbQueue.DbRecord;
 import com.triniforce.server.plugins.kernel.tables.TDbQueues;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
+import com.triniforce.server.srvapi.IDatabaseInfo;
 import com.triniforce.server.srvapi.IDbQueue;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.IIdGenerator;
@@ -447,6 +449,8 @@ public class DbQueueTest extends BasicServerTestCase {
     }
     
     public void testBug1(){
+    	if(ApiStack.getInterface(IDatabaseInfo.class).getDbType().equals(DbType.H2))
+    		return ;
         {
             IDbQueueFactory.Helper.cleanQueue(10002);
             IDbQueue q1 = IDbQueueFactory.Helper.getQueue(10002);

@@ -36,7 +36,7 @@ import com.triniforce.utils.ApiStack;
 
 public class BasicServerTest extends BasicServerTestCase {
 
-    static TimeZone tz1 = TimeZone.getDefault();
+    static TimeZone tz1 = TimeZone.getTimeZone("Europe/Moscow");
     
 	public static class Handlers{
 		public IHandler handler1;
@@ -86,6 +86,7 @@ public class BasicServerTest extends BasicServerTestCase {
 	@Override
 	public void test() throws Exception {
 		{
+			System.setProperty(BasicServer.TZ_PROPERTY, "Europe/Moscow");
 		    @SuppressWarnings("unused")
 	        BasicServer bs = new BasicServer();
             assertEquals(tz1.getID(), System.getProperty(BasicServer.TZ_PROPERTY));

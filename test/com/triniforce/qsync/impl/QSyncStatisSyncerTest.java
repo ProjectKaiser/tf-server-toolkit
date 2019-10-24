@@ -63,8 +63,8 @@ public class QSyncStatisSyncerTest extends BasicServerTestCase {
 		}
 	}
 
-	@Override
-	public void test() throws Exception {
+//	@Override
+	public void ntest() throws Exception {
 		synchronized (QSyncPlugin.syncObj) {
 			putQueue(qId, "str_01");
 			long tst = System.currentTimeMillis();

@@ -193,8 +193,8 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 			tab = tabs2.getTables().get("DeltaSchemaLoaderTest3");
 			assertNotNull(tab);
 			IndexDef idx0 = tab.getIndices().getElement(0);
-			assertEquals("DeltaSchemaLoaderTest3_ORIGINAL_DB_NAME", idx0.getName());
-			ElementVerStored<IndexDef> res = tab.getIndices().findElement("DeltaSchemaLoaderTest3_ORIGINAL_DB_NAME");
+			assertEquals("DeltaSchemaLoaderTest3_ORIGINAL_DB_NAME".toUpperCase(), idx0.getName().toUpperCase());
+			ElementVerStored<IndexDef> res = tab.getIndices().findElement(idx0.getName());
 			assertNotNull(res);
 			assertTrue(idx0.isOriginalDbName());
 		}
