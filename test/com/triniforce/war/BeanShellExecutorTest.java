@@ -39,14 +39,15 @@ public class BeanShellExecutorTest extends BasicServerRunningTestCase {
 		BeanShellExecutor executor = new BeanShellExecutor();
 		
 		String res = executor.execBeanShell("PW0RD", "System.out.println(\"Hello !\")");
-		assertEquals("Hello !\r\n", res);
+		assertTrue(res, res.contains("Hello !"));
 		
 		try{
 			executor.execBeanShell("PW0RD1", "System.out.print(\"Hello !\")");
 			fail();
 		}catch(EAuthException e){}
 		
-		assertEquals("HI test\r\n", executor.execBeanShell("PW0RD", "println(\"HI test\")"));
+		res = executor.execBeanShell("PW0RD", "println(\"HI test\")");
+		assertTrue(res, res.contains("HI test"));
 		
 		assertTrue(executor.execBeanShell("PW0RD", "println(diag.getEnvironment())").contains("Servlet Context"));
 		

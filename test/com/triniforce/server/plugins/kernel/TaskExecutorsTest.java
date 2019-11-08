@@ -242,14 +242,15 @@ public class TaskExecutorsTest extends TFTestCase {
 		public void run() {
 			executed ++;
 			
-			synchronized (SYNCH) {
-				try {
-					SYNCH.wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				synchronized (SYNCH) {
+					SYNCH.notify();
+					try {
+						SYNCH.wait();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
-			}
 		}
 		
 		@Override
@@ -264,13 +265,15 @@ public class TaskExecutorsTest extends TFTestCase {
 		}
     }
     
-    public void testSubmitEqualTasks(){
+    public void testSubmitEqualTasks() throws InterruptedException{
         TaskExecutors te = new TaskExecutors();
         synchronized (SYNCH) {
 	        te.execute(TaskExecutors.longTaskExecutorKey, new T1());
 	        te.execute(TaskExecutors.longTaskExecutorKey, new T1());
+	        SYNCH.wait();
 	        SYNCH.notify();
 		}
+        
         te.shutdownNow();
         te.awatTermination(1000L);
         
