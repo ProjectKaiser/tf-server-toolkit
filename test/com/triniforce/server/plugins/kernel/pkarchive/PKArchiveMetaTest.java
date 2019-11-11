@@ -155,8 +155,11 @@ public class PKArchiveMetaTest extends TFTestCase {
 
     }
 
-    public void testExtEntryFolder() throws Exception {
-        tstExtEntryFolder(StringSerializer.PREFIX_BASE64);
+    public void testExtEntryFolder1() throws Exception {
         tstExtEntryFolder(StringSerializer.PREFIX_JSON);
+    }
+
+    public void testExtEntryFolder2() throws Exception {
+        tstExtEntryFolder(StringSerializer.PREFIX_BASE64);        
     }
 }
