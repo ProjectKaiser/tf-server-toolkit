@@ -23,6 +23,7 @@ import com.triniforce.server.srvapi.ITaskExecutors.LongTaskExecutorKey;
 import com.triniforce.server.srvapi.ITaskExecutors.PeriodicalTaskExecutorKey;
 import com.triniforce.server.srvapi.ITaskExecutors.ShortTaskExecutorKey;
 import com.triniforce.server.srvapi.InitFinitTask;
+import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ICheckInterrupted;
 
 public class TaskExecutorsTest extends TFTestCase {
@@ -234,23 +235,27 @@ public class TaskExecutorsTest extends TFTestCase {
     }
     
     static int executed = 0;
+    static Exception ERROR = null;
     
     static Object SYNCH = new Object();
     
     static class T1 extends InitFinitTask{
 		@Override
 		public void run() {
+			ApiAlgs.getLog(this).trace("started...");
 			executed ++;
 			
 				synchronized (SYNCH) {
+					ApiAlgs.getLog(this).trace("synching");
 					SYNCH.notify();
 					try {
 						SYNCH.wait();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						ApiAlgs.getLog(this).error("", e);
+						ERROR = e;
 					}
 				}
+			ApiAlgs.getLog(this).trace("ended...");
 		}
 		
 		@Override
@@ -267,16 +272,28 @@ public class TaskExecutorsTest extends TFTestCase {
     
     public void testSubmitEqualTasks() throws InterruptedException{
         TaskExecutors te = new TaskExecutors();
+        int cnt = te.getTasksCount();
         synchronized (SYNCH) {
+        	trace("start task 1");
 	        te.execute(TaskExecutors.longTaskExecutorKey, new T1());
+	        trace("start task 2");
 	        te.execute(TaskExecutors.longTaskExecutorKey, new T1());
+	        trace("waiting for SYNCH");
 	        SYNCH.wait();
+	        
+	        while(cnt + 2 < te.getTasksCount()) {
+	        	Thread.sleep(100); // Both task should be started
+	        }
+	        
+	        trace("waiting for NOTIFIING");
 	        SYNCH.notify();
 		}
         
+        trace("shutdown process");
         te.shutdownNow();
         te.awatTermination(1000L);
         
+        assertNull(""+ERROR, ERROR);
         assertEquals("" + executed, 1, executed);
     	
     }

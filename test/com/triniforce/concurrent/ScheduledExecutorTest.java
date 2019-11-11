@@ -37,11 +37,13 @@ public class ScheduledExecutorTest extends TFTestCase {
         
         se.submit(r1).get();
         se.submit(r2).get();
+        se.shutdown();
+        se.awaitTermination(100L, TimeUnit.MILLISECONDS);
         
     }
     
     
-    public void testReport() throws InterruptedException{
+    public void ntestReport() throws InterruptedException{
     	
         ScheduledExecutor se = new ScheduledExecutor(2,3);
         for(int i=0; i<5; i++){
@@ -55,7 +57,9 @@ public class ScheduledExecutorTest extends TFTestCase {
 				}
 			}, 0, 500, TimeUnit.MILLISECONDS);
         }
+        se.shutdown();
         se.awaitTermination(2000L, TimeUnit.MILLISECONDS);
+        trace("sh");
     }
     
     public void test2() throws InterruptedException{
@@ -83,6 +87,9 @@ public class ScheduledExecutorTest extends TFTestCase {
 			public void run() {
 			}
         }, 0, 0), 100);
+        se.shutdown();
+        se.awaitTermination(100L, TimeUnit.MILLISECONDS);
+        trace("sh");
     }
 
 }
