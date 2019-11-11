@@ -501,6 +501,7 @@ public class DbQueueTest extends BasicServerTestCase {
     	IDbQueueFactory.Helper.cleanQueue(10004);
     	IIdGenerator idGen = ApiStack.getInterface(IIdGenerator.class);
     	long stdId = idGen.getKey();
+    	assertTrue(""+stdId, stdId >= 10000);
     	DbQueue q1 = (DbQueue) IDbQueueFactory.Helper.getQueue(10004);
     	q1.put("data_001");
     	q1.put("data_002");
@@ -511,7 +512,7 @@ public class DbQueueTest extends BasicServerTestCase {
     	
     	assertEquals(req1.recId+1, req2.recId);
     	assertEquals(stdId+1, idGen.getKey());
-    	assertTrue(""+req1.recId, req1.recId > 10000);
+    	assertTrue(""+req1.recId, req1.recId >= 10000);
 //    	assertTrue(""+req1.recId, stdId < req1.recId);
     	
     	
