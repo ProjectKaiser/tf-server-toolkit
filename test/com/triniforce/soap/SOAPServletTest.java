@@ -21,6 +21,9 @@ import javax.xml.transform.TransformerException;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.triniforce.db.test.TFTestCase;
 
@@ -158,7 +161,7 @@ public class SOAPServletTest extends TFTestCase {
 		
 	}
 	
-	public void testJSONRequestEx() throws ServletException, IOException, TransformerException{
+	public void testJSONRequestEx() throws ServletException, IOException, TransformerException, ParseException{
 		
 		Mockery ctx = new Mockery();
 		final ServletConfig cfg = ctx.mock(ServletConfig.class);
@@ -189,7 +192,15 @@ public class SOAPServletTest extends TFTestCase {
 		srv.doServiceCall(req, res);
 		System.out.write(BYTE_OUT.toByteArray());
 		
-		assertEquals("{\"jsonrpc\":\"2.0\",\"id\":1,\"error\":{\"message\":\"java.io.IOException: null\",\"code\":500,\"stackTrace\":\"\"}}", new String (BYTE_OUT.toByteArray()));
+		JSONParser p = new JSONParser();
+		JSONObject json1 = (JSONObject) p.parse(new String (BYTE_OUT.toByteArray()));
+		trace(json1);
+		assertEquals("2.0", json1.get("jsonrpc"));
+		assertEquals(1L, json1.get("id"));
+		JSONObject err = (JSONObject) json1.get("error");
+		assertEquals("java.io.IOException: null", err.get("message"));
+		assertEquals(500L, err.get("code"));
+		assertEquals("", err.get("stackTrace"));
 		
 	}
 	

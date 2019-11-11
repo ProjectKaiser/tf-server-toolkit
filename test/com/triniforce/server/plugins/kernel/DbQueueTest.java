@@ -498,6 +498,7 @@ public class DbQueueTest extends BasicServerTestCase {
     }
     
     public void testPut(){
+    	IDbQueueFactory.Helper.cleanQueue(10004);
     	IIdGenerator idGen = ApiStack.getInterface(IIdGenerator.class);
     	long stdId = idGen.getKey();
     	DbQueue q1 = (DbQueue) IDbQueueFactory.Helper.getQueue(10004);
