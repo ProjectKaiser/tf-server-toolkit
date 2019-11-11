@@ -40,7 +40,7 @@ public class IdGeneratorTest extends BasicServerTestCase {
 		for(int i=0; i<2*IdGenerator.KEY_CACHE_SIZE; i++){
 			long k = gen.getKey();
 			trace(k);
-			assertEquals(v+i+1, k);
+			assertEquals("" + k, v+i+1, k);
 		}
 	}
 	

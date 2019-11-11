@@ -277,7 +277,7 @@ public class TaskExecutorsTest extends TFTestCase {
         te.shutdownNow();
         te.awatTermination(1000L);
         
-        assertEquals(1, executed);
+        assertEquals("" + executed, 1, executed);
     	
     }
 
