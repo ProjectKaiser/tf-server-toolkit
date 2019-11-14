@@ -1,5 +1,5 @@
 apply plugin: 'java'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'eclipse'
 
 sourceCompatibility = 1.8
@@ -10,7 +10,8 @@ version = file('version').text
 ext.tf_vendor = 'Triniforce.com'
 
 // Project configuration is used for Maven  deploy:
-group = 'com.triniforce.tf-server-toolkit'
+//groupId = 
+//artifactId = 'tf-server-toolkit'
 
 // Get dynamic environment settings
 apply from: 'config.gradle'
@@ -128,12 +129,12 @@ eclipse {
 	}
 }
 
-eclipseJdt << {
-	file('.settings/org.eclipse.core.resources.prefs').write(
-	  'eclipse.preferences.version=1\n' +
-	  'encoding/<project>=UTF-8\n'
-	)
-}
+//eclipseJdt << {
+//	file('.settings/org.eclipse.core.resources.prefs').write(
+//	  'eclipse.preferences.version=1\n' +
+//	  'encoding/<project>=UTF-8\n'
+//	)
+//}
 
 task ide(dependsOn: tasks.eclipse) {
 	group = 'IDE'
@@ -149,16 +150,53 @@ artifacts {
 	archives sourcesJar
 }
 
-uploadArchives {
-	repositories.mavenDeployer {
-		uniqueVersion = false
-		repository(url: MavenPublishUrl) {
-			authentication(userName: MavenPublishUsername, password: MavenPublishPassword)
-		}
-		snapshotRepository(url: MavenPublishSnapshotUrl) {
-			authentication(userName: MavenPublishUsername, password: MavenPublishPassword)
-		}
-	}
+//uploadArchives {
+//	repositories.mavenDeployer {
+//		uniqueVersion = false
+//		repository(url: MavenPublishUrl) {
+//			authentication(userName: MavenPublishUsername, password: MavenPublishPassword)
+//		}
+//		snapshotRepository(url: MavenPublishSnapshotUrl) {
+//			authentication(userName: MavenPublishUsername, password: MavenPublishPassword)
+//		}
+//	}
+//}
+
+publishing {
+//	publications {
+//            maven(MavenPublication) {
+//                groupId = 'com.triniforce'
+//                artifactId = 'tf-server-toolkit'
+//                version = version
+
+//                from components.java
+//            }
+//        }
+
+    repositories {
+        maven {
+//            def releasesRepoUrl = "$buildDir/repos/releases"
+//            def snapshotsRepoUrl = "$buildDir/repos/snapshots"
+            name = "GitHubPackages"
+            def releasesRepoUrl = MavenPublishUrl
+            def snapshotsRepoUrl = MavenPublishSnapshotUrl
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username = 'AlexeyWhite'
+                password = 'feafa2a2ec850c4284b47ae34805e43f9d05e0dd'
+            }
+        }
+    }
+
+        publications {
+            gpr(MavenPublication) {
+                groupId = 'com.triniforce'
+                artifactId = 'tf-server-toolkit'
+                version = version
+
+                from(components.java)
+            }
+        }
 }
 
 task jar_lib(type: Copy, dependsOn:[jar]){
@@ -222,7 +260,7 @@ test {
 }
 
 
-task outputDirs << { sourceSets.test.java.srcDirs.each{f -> println(f)}}
+//task outputDirs << { sourceSets.test.java.srcDirs.each{f -> println(f)}}
 
 //war {
 //	from 'war'
