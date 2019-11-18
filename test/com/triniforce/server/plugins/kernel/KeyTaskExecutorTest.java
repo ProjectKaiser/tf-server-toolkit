@@ -22,25 +22,30 @@ public class KeyTaskExecutorTest extends TFTestCase {
     public void testSharedTaskList() throws Exception{
         KeyTaskExecutor te1 = new KeyTaskExecutor(2, 2);
         KeyTaskExecutor te2 = new KeyTaskExecutor(2, 2);
+        try{
         
-        final SynchronousQueue<String> q1 = new SynchronousQueue<String>();
-        
-        Runnable r = new Runnable() {
-            public void run() {
-                try {
-                    trace(q1.take());
-                    q1.put("");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        
-        te1.execute(r);
-        q1.put("te1 started");
-        te2.execute(r);
-        while(te2.getRejectedCount()==0){
-            Thread.sleep(1000);
+	        final SynchronousQueue<String> q1 = new SynchronousQueue<String>();
+	        
+	        Runnable r = new Runnable() {
+	            public void run() {
+	                try {
+	                    trace(q1.take());
+	                    q1.put("");
+	                } catch (InterruptedException e) {
+	                    e.printStackTrace();
+	                }
+	            }
+	        };
+	        
+	        te1.execute(r);
+	        q1.put("te1 started");
+	        te2.execute(r);
+	        while(te2.getRejectedCount()==0){
+	            Thread.sleep(1000);
+	        }
+        }finally{
+        	te1.shutdown();
+        	te2.shutdown();
         }
         
     }
@@ -52,52 +57,57 @@ public class KeyTaskExecutorTest extends TFTestCase {
 
         KeyTaskExecutor te1 = new KeyTaskExecutor(coreSize, nThreads);
         KeyTaskExecutor te2 = new KeyTaskExecutor(coreSize, nThreads);
-
-        final LinkedBlockingQueue qr1 = new LinkedBlockingQueue();
-        final LinkedBlockingQueue qr2 = new LinkedBlockingQueue();
-        
-        final SynchronousQueue<String> qw1 = new SynchronousQueue<String>();        
-        final SynchronousQueue<String> qw2 = new SynchronousQueue<String>();        
-        // final List<SynchronousQueue> qs = new ArrayList<SynchronousQueue>();
-        for (int i = 0; i < nThreads; i++) {
-            qr1.put(Integer.toString(i));
-            qr2.put(Integer.toString(i));
-        }
-
-        for (int i = 0; i < nThreads; i++) {
-            Runnable r1 = new Runnable() {
-                public void run() {
-                    try {
-                        trace(qr1.take());
-                        qw1.put("");
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
-            te1.execute(r1);
-            Runnable r2 = new Runnable() {
-                public void run() {
-                    try {
-                        trace(qw1.take());
-                        qw2.put("");
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
-            te2.execute(r2);            
-        }
-
-        while (qr1.size() > 0) {
-            ICheckInterrupted.Helper.sleep(1000);
-        }
-        while (qw1.size() > 0) {
-            ICheckInterrupted.Helper.sleep(1000);
-        }        
-        for (int i = 0; i < nThreads; i++) {
-            qr2.take();
-            qw2.take();
+        try{
+	
+	        final LinkedBlockingQueue qr1 = new LinkedBlockingQueue();
+	        final LinkedBlockingQueue qr2 = new LinkedBlockingQueue();
+	        
+	        final SynchronousQueue<String> qw1 = new SynchronousQueue<String>();        
+	        final SynchronousQueue<String> qw2 = new SynchronousQueue<String>();        
+	        // final List<SynchronousQueue> qs = new ArrayList<SynchronousQueue>();
+	        for (int i = 0; i < nThreads; i++) {
+	            qr1.put(Integer.toString(i));
+	            qr2.put(Integer.toString(i));
+	        }
+	
+	        for (int i = 0; i < nThreads; i++) {
+	            Runnable r1 = new Runnable() {
+	                public void run() {
+	                    try {
+	                        trace(qr1.take());
+	                        qw1.put("");
+	                    } catch (InterruptedException e) {
+	                        e.printStackTrace();
+	                    }
+	                }
+	            };
+	            te1.execute(r1);
+	            Runnable r2 = new Runnable() {
+	                public void run() {
+	                    try {
+	                        trace(qw1.take());
+	                        qw2.put("");
+	                    } catch (InterruptedException e) {
+	                        e.printStackTrace();
+	                    }
+	                }
+	            };
+	            te2.execute(r2);            
+	        }
+	
+	        while (qr1.size() > 0) {
+	            ICheckInterrupted.Helper.sleep(1000);
+	        }
+	        while (qw1.size() > 0) {
+	            ICheckInterrupted.Helper.sleep(1000);
+	        }        
+	        for (int i = 0; i < nThreads; i++) {
+	            qr2.take();
+	            qw2.take();
+	        }
+        }finally{
+	        te1.shutdown();
+	        te2.shutdown();
         }
 
     }
@@ -105,8 +115,18 @@ public class KeyTaskExecutorTest extends TFTestCase {
     @Override
     public void test() throws Exception {
         {
-            assertEquals(2, new KeyTaskExecutor(2, 4).getCorePoolSize());
-            assertEquals(154, new KeyTaskExecutor(154, 240).getCorePoolSize());
+        	KeyTaskExecutor te = new KeyTaskExecutor(2, 4);
+        	try{
+        		assertEquals(2, te.getCorePoolSize());
+        	}finally{
+        		te.shutdown();
+        	}
+        	te = new KeyTaskExecutor(154, 240);
+        	try{
+        		assertEquals(154, te.getCorePoolSize());
+        	}finally{
+        		te.shutdown();
+        	}
         }
         try {
             new KeyTaskExecutor(0);

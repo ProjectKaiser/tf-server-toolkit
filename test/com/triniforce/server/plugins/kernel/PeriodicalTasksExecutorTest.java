@@ -24,15 +24,18 @@ public class PeriodicalTasksExecutorTest extends BasicServerRunningTestCase {
 		{
 			PeriodicalTasksExecutor te = new PeriodicalTasksExecutor();
 			te.init();
+			try{
 			
-			BasicPeriodicalTask command = new TestCommand();
-			te.scheduleWithFixedDelay(command, 100, 100, TimeUnit.MILLISECONDS);
-			
-			ScheduledFuture<?> feat;
-			assertNotNull(feat = te.getTaskFeature(TestCommand.class));
-			assertFalse(feat.isDone());
-			assertFalse(feat.isCancelled());
-			
+				BasicPeriodicalTask command = new TestCommand();
+				te.scheduleWithFixedDelay(command, 100, 100, TimeUnit.MILLISECONDS);
+				
+				ScheduledFuture<?> feat;
+				assertNotNull(feat = te.getTaskFeature(TestCommand.class));
+				assertFalse(feat.isDone());
+				assertFalse(feat.isCancelled());
+			}finally{
+				te.finit();
+			}
 		}
 		{
 					

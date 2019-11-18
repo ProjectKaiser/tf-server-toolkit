@@ -100,7 +100,7 @@ public class TNamedDbIdTest extends BasicServerTestCase {
 	
 	public void testQueryId() {
 	    
-		TNamedDbId dbId = (TNamedDbId) ApiStack.getInterface(INamedDbId.class);
+		TNamedDbId dbId = new TNamedDbId();
 
 		//unicode pattern
 		{

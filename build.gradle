@@ -23,15 +23,15 @@ defaultTasks 'clean', 'ide'
 
 repositories {
 	
-	mavenCentral()
-//	maven {
-//		url MavenResolveUrl
-///		credentials(PasswordCredentials) {
-//			username = MavenUsername
-//			password = MavenPassword
-//		}
-//
-//	}
+//	mavenCentral()
+	maven {
+		url MavenResolveUrl
+		credentials(PasswordCredentials) {
+			username = MavenUsername
+			password = MavenPassword
+		}
+
+	}
 }
 
 processResources {
@@ -47,6 +47,7 @@ processResources {
 		include '**/*.txt'
 		include '**/*.properties'
 		include '**/*.soap'
+		include '**/*.wiki'
 	
 	}
 }

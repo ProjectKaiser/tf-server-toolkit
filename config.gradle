@@ -1,5 +1,5 @@
-//adjustProperty('MavenBaseUrl', 'https://dev.untill.com/artifactory')
-adjustProperty('MavenBaseUrl', 'https://maven.pkg.github.com/projectkaiser/tf-server-toolkit/')
+adjustProperty('MavenBaseUrl', 'https://dev.untill.com/artifactory')
+//adjustProperty('MavenBaseUrl', 'https://maven.pkg.github.com/projectkaiser/tf-server-toolkit/')
 //adjustProperty('MavenBaseUrl', 'file://d:/tmp/myRepo/')
 
 adjustProperty('MavenUsername', 'AlexeyWhite', true)

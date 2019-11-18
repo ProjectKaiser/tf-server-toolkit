@@ -74,23 +74,27 @@ public class ThreadExecutorsInvTest extends TFTestCase {
 
         ExecutorService es = new ThreadPoolExecutor(2, 2, 10, TimeUnit.SECONDS,
                 new SynchronousQueue<Runnable>());
-        Runnable r1 = new CountDownRunnable(start1_2, finish);
-        Runnable r2 = new CountDownRunnable(start1_2, finish);
-        Runnable r3 = new CountDownRunnable(start3, finish);
-
-        es.submit(r1);
-        es.submit(r2);
-        start1_2.await();
-        trace("1 & 2 started");
-
-        try {
-            es.submit(r3);
-            fail();
-        } catch (RejectedExecutionException e) {
+        try{
+	        Runnable r1 = new CountDownRunnable(start1_2, finish);
+	        Runnable r2 = new CountDownRunnable(start1_2, finish);
+	        Runnable r3 = new CountDownRunnable(start3, finish);
+	
+	        es.submit(r1);
+	        es.submit(r2);
+	        start1_2.await();
+	        trace("1 & 2 started");
+	
+	        try {
+	            es.submit(r3);
+	            fail();
+	        } catch (RejectedExecutionException e) {
+	        }
+	
+	        finish.countDown();
+	        trace("Completed");
+        }finally{
+        	es.shutdown();
         }
-
-        finish.countDown();
-        trace("Completed");
     }
 
 }
