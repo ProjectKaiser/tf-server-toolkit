@@ -4,10 +4,9 @@ adjustProperty('MavenPassword', null, true)
 adjustProperty('MavenResolveUrl', combineUrl(MavenBaseUrl, 'repo'))
 adjustProperty('MavenResolveRealm', 'Artifactory Realm')
 adjustProperty('MavenResolveHost', new URL(MavenResolveUrl).host)
-adjustProperty('MavenPublishUrl', combineUrl(MavenBaseUrl, 'triniforce-release-local'))
-adjustProperty('MavenPublishSnapshotUrl', combineUrl(MavenBaseUrl, 'triniforce-snapshot-local'))
-adjustProperty('MavenPublishUsername', MavenUsername)
-adjustProperty('MavenPublishPassword', MavenPassword)
+adjustProperty('GithubRegistryUsername', null, true)
+adjustProperty('GithubRegistryToken', null, true)
+
 
 /////////////////////
 // Private methods //

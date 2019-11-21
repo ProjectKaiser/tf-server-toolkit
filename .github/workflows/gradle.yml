@@ -10,6 +10,8 @@ jobs:
       UNTILL_MAVEN_BASE_URL: https://mvnrepository.com/
       UNTILL_MAVEN_USERNAME: Alex
       UNTILL_MAVEN_PASSWORD: Alex
+      UNTILL_GITHUB_REGISTRY_USERNAME: 
+      UNTILL_GITHUB_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - uses: actions/checkout@v1
     - name: Set up JDK 1.8
@@ -17,4 +19,4 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew publish

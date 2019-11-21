@@ -1,5 +1,5 @@
 apply plugin: 'java'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'eclipse'
 
 sourceCompatibility = 1.8
@@ -10,7 +10,11 @@ version = file('version').text
 ext.tf_vendor = 'Triniforce.com'
 
 // Project configuration is used for Maven  deploy:
-group = 'com.triniforce.tf-server-toolkit'
+ext.vgroupId = 'com.triniforce'
+ext.GITHUB_OWNER = "projectkaiser";
+ext.GITHUB_REPOSITORY = "tf-server-toolkit";
+ext.vartifactId = 'tf-server-toolkit'
+
 
 // Get dynamic environment settings
 apply from: 'config.gradle'
@@ -21,15 +25,12 @@ ext.testFolderDir = new File(buildDir, 'test')
 defaultTasks 'clean', 'ide'
 
 repositories {
-	
-//	mavenCentral()
 	maven {
 		url MavenResolveUrl
 		credentials(PasswordCredentials) {
 			username = MavenUsername
 			password = MavenPassword
 		}
-
 	}
 }
 
@@ -46,6 +47,7 @@ processResources {
 		include '**/*.txt'
 		include '**/*.properties'
 		include '**/*.soap'
+		include '**/*.wiki'
 	
 	}
 }
@@ -102,6 +104,7 @@ dependencies {
 	testCompile 'org.eclipse.jetty:jetty-jndi:9.2.0.RC0'
 	testCompile 'javax.servlet.jsp:jsp-api:2.1'
 	testCompile( group: 'xerces', name: 'xercesImpl', version: '2.11.0')
+	testCompile 'com.graphql-java:graphql-java:11.0'
 
 
 	providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
@@ -114,7 +117,10 @@ sourceSets.test.runtimeClasspath += configurations.providedCompile
 sourceSets {
 	main.java.srcDirs = ['src']
 	test.java.srcDirs = ['test']
+	in.java.srcDirs = ['investigation']
+
 }
+
 
 tasks.eclipse.dependsOn(cleanEclipse)
 eclipse {
@@ -128,12 +134,12 @@ eclipse {
 	}
 }
 
-eclipseJdt << {
-	file('.settings/org.eclipse.core.resources.prefs').write(
-	  'eclipse.preferences.version=1\n' +
-	  'encoding/<project>=UTF-8\n'
-	)
-}
+//eclipseJdt << {
+//	file('.settings/org.eclipse.core.resources.prefs').write(
+//	  'eclipse.preferences.version=1\n' +
+//	  'encoding/<project>=UTF-8\n'
+//	)
+//}
 
 task ide(dependsOn: tasks.eclipse) {
 	group = 'IDE'
@@ -149,14 +155,28 @@ artifacts {
 	archives sourcesJar
 }
 
-uploadArchives {
-	repositories.mavenDeployer {
-		uniqueVersion = false
-		repository(url: MavenPublishUrl) {
-			authentication(userName: MavenPublishUsername, password: MavenPublishPassword)
+tasks.withType(PublishToMavenRepository) { it.dependsOn test }
+
+publishing{
+
+	repositories {
+		maven {
+			name = "GitHubPackages"
+			url = 'https://maven.pkg.github.com/'+GITHUB_OWNER+'/'+GITHUB_REPOSITORY
+			credentials {
+				username = GithubRegistryUsername
+				password = GithubRegistryToken
+			}
 		}
-		snapshotRepository(url: MavenPublishSnapshotUrl) {
-			authentication(userName: MavenPublishUsername, password: MavenPublishPassword)
+	}
+
+	publications {
+		gpr(MavenPublication) {
+			groupId = vgroupId
+			artifactId = vartifactId
+			version = getNextVersion(requestLastRegistryVersion())
+
+			from(components.java)
 		}
 	}
 }
@@ -222,8 +242,66 @@ test {
 }
 
 
-task outputDirs << { sourceSets.test.java.srcDirs.each{f -> println(f)}}
+//task outputDirs << { sourceSets.test.java.srcDirs.each{f -> println(f)}}
 
 //war {
 //	from 'war'
 //}
+
+import groovy.json.JsonOutput;
+import groovy.json.JsonSlurper;
+
+String requestLastRegistryVersion(){
+	def gqlQuery = """
+query{repository(owner:"${GITHUB_OWNER}", name:"${GITHUB_REPOSITORY}"){
+  id
+  registryPackages(last: 1) {
+    edges {
+      node {
+        id
+        latestVersion {
+          id
+          version
+        }
+      }
+    }
+  }
+}}
+""";
+	def baseUrl = new URL('https://api.github.com/graphql')
+	def connection = baseUrl.openConnection()
+	connection.with {
+		doOutput = true
+		doInput = true
+		requestMethod = 'POST'
+		def basicAuth = 'token ' + GithubRegistryToken
+		setRequestProperty("Authorization", basicAuth);
+		outputStream.withWriter { writer ->
+			writer << JsonOutput.toJson(["query": gqlQuery])
+		}
+		def strResp = content.text;
+		def gqlResponse =  new JsonSlurper().parseText(strResp);
+		def latestVersion = gqlResponse.data.repository.registryPackages.edges[0].node.latestVersion.version;
+		return latestVersion;
+	}
+
+}
+
+String getNextVersion(String registryVersion){
+	def matcher = registryVersion =~ /^(\d+\.\d+)\.(\d{1,4})$/;
+
+	assert matcher.find();
+	def major = matcher[0][1];
+	def minor = matcher[0][2];
+	def nextVersion;
+	if(version.startsWith(major, 0))
+		nextVersion = major + '.'+((minor as int) + 1);
+	else
+		nextVersion = version + ".0";
+	return nextVersion;
+}
+
+task showNextPackageVersion(){
+	println "next version : " + getNextVersion(requestLastRegistryVersion());
+
+}
