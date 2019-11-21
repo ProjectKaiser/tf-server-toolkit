@@ -12,6 +12,9 @@ adjustProperty('MavenPublishUrl', combineUrl(MavenBaseUrl, 'triniforce-release-l
 adjustProperty('MavenPublishSnapshotUrl', MavenBaseUrl)
 adjustProperty('MavenPublishUsername', MavenUsername)
 adjustProperty('MavenPublishPassword', MavenPassword)
+adjustProperty('GithubRegistryUsername', null, true)
+adjustProperty('GithubRegistryToken', null, true)
+
 
 /////////////////////
 // Private methods //
