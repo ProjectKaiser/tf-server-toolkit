@@ -55,9 +55,8 @@ public class PKEPServicesTest extends ServicesTestCase {
 			assertTrue(bComplete);
 			
 		}finally{
-			server.stopServices();
+			server.stopServicesAndWait();
 		}
-		Thread.sleep(2000L);
 		assertEquals(IService.State.STOPPED, getService().getState());
 	}
 
