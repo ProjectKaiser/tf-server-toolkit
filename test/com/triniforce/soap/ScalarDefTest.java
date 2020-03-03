@@ -18,5 +18,10 @@ public class ScalarDefTest extends TFTestCase {
 		sd.serialize("123456bhf", w);
 		assertEquals("123456bhf", w.toString());
 	}
+	
+	public void testValueOf(){
+		ScalarDef sd = new TypeDef.ScalarDef(Object.class);
+		assertEquals("\u0002010F11C239", sd.valueOf("\u0002010F11C239"));
+	}
 
 }

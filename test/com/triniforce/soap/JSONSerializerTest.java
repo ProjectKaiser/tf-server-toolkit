@@ -333,6 +333,15 @@ public class JSONSerializerTest extends TFTestCase {
 		Integer  i = (Integer) arg0[1];
 		assertNotNull(i);
 		
+		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_004\",\"params\":[[{\"type\":\"Real1\",\"prop_001\":\"setter\"}, {\"type\":\"DateTime\", \"value\":\"1970-01-01T08:00:00\"}]],\"id\":1}"));
+		arg0 = (Object[]) res.m_args[0];
+		obj = (Real1) arg0[0];
+		assertNotNull(obj);
+		assertEquals("setter",obj.getProp_001());
+		Date dt = (Date) arg0[1];
+		assertNotNull(dt);
+
+		
 		res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_005\",\"params\":[[" +
 				"{\"key\":\"key_001\", \"value\":\"vvvv\"}, {\"key\":\"key_002\", \"value\":\"vvv2\"}]],\"id\":1}"));
 		Map<String,String> map = (Map<String, String>) res.m_args[0];
@@ -416,6 +425,12 @@ public class JSONSerializerTest extends TFTestCase {
 			desc = gen.parse(null, ops, getClass().getPackage(), incls);
 			res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_858585\",\"params\":[\"GGG\"]}"));
 			assertEquals("GGG", res.m_args[0]);
+			{//unicode
+				res = srz.deserialize(desc, source("{\"jsonrpc\":\"2.0\",\"method\":\"method_858585\",\"params\":[\"\\u0442\\u0435\\u0441\\u0442\"]}"));
+				assertEquals("тест", res.m_args[0]);
+			}
+			
+			
 		}
 		
 

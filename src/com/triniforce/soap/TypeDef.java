@@ -108,7 +108,7 @@ public class TypeDef extends SimpleName{
         public Object valueOf(String value) {
             Object res;
             String typeName = getName();
-            if(typeName.equals("string"))
+            if(typeName.equals("string") || typeName.equals("object"))
             	res = value;
             else{
 	            value = value.trim();
