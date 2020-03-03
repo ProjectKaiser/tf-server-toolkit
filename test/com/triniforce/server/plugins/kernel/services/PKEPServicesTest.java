@@ -18,9 +18,9 @@ public class PKEPServicesTest extends ServicesTestCase {
 		public void doCycle() throws Throwable {
 			super.doCycle();
 			synchronized (SYNCH_OBJ1) {
+				bComplete = true;
 				SYNCH_OBJ1.notify();
 			}
-			bComplete = true;
 		}
 	}
 
