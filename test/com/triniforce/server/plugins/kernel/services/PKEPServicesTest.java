@@ -12,12 +12,16 @@ import com.triniforce.utils.ApiStack;
 
 public class PKEPServicesTest extends ServicesTestCase {
 	
+	public static Object SYNCH_OBJ1 = new Object();
 	static boolean bComplete = false;
 	
 	public static class TestService extends Service{
 		@Override
 		public void doCycle() throws Throwable {
 			super.doCycle();
+			synchronized (SYNCH_OBJ1) {
+				SYNCH_OBJ1.notify();
+			}
 			bComplete = true;
 		}
 	}
@@ -39,15 +43,26 @@ public class PKEPServicesTest extends ServicesTestCase {
 	
 	@Override
 	protected void tearDown() throws Exception {
+        IThrdWatcherRegistrator twr = ApiStack.getInterface(IThrdWatcherRegistrator.class);
+        twr.unregisterThread(Thread.currentThread());
+
+        IBasicServer rep = ApiStack.getInterface(IBasicServer.class);
+		ep = (PKEPServices) rep.getExtensionPoint(PKEPServices.class);
+		ep.removeExtension(TestService.class.getName());
+        
 		getServer().leaveMode();
 		super.tearDown();
 	}
 
 	public void testStartAll() throws InterruptedException{
 		IBasicServer server = ApiStack.getInterface(IBasicServer.class);
-		server.startServices();
 
-		Thread.sleep(2000L);
+		long t0 = System.currentTimeMillis();
+		synchronized(SYNCH_OBJ1){
+			server.startServices();
+			SYNCH_OBJ1.wait(5000L);
+		}
+		trace("Exec time: " + (System.currentTimeMillis() - t0) + "ms");
 		assertTrue(bComplete);
 		
 		server.stopServices();
