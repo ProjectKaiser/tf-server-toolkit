@@ -13,7 +13,7 @@ import com.triniforce.utils.ApiStack;
 public class PKEPServicesTest extends ServicesTestCase {
 	
 	public static Object SYNCH_OBJ1 = new Object();
-	static boolean bComplete = false;
+	static volatile boolean  bComplete = false;
 	
 	public static class TestService extends Service{
 		@Override
