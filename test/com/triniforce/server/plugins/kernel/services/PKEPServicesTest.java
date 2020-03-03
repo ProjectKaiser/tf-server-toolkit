@@ -62,10 +62,13 @@ public class PKEPServicesTest extends ServicesTestCase {
 			server.startServices();
 			SYNCH_OBJ1.wait(5000L);
 		}
-		trace("Exec time: " + (System.currentTimeMillis() - t0) + "ms");
-		assertTrue(bComplete);
-		
-		server.stopServices();
+		try{
+			trace("Exec time: " + (System.currentTimeMillis() - t0) + "ms");
+			assertTrue(bComplete);
+			
+		}finally{
+			server.stopServices();
+		}
 		Thread.sleep(2000L);
 		assertEquals(IService.State.STOPPED, getService().getState());
 	}
