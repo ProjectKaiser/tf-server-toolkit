@@ -155,7 +155,7 @@ artifacts {
 	archives sourcesJar
 }
 
-tasks.withType(PublishToMavenRepository) { it.dependsOn test }
+//tasks.withType(PublishToMavenRepository) { it.dependsOn test }
 
 publishing{
 
@@ -255,7 +255,7 @@ String requestLastRegistryVersion(){
 	def gqlQuery = """
 query{repository(owner:"${GITHUB_OWNER}", name:"${GITHUB_REPOSITORY}"){
   id
-  registryPackages(last: 1) {
+  registryPackages(last: 100) {
     edges {
       node {
         id
@@ -281,7 +281,15 @@ query{repository(owner:"${GITHUB_OWNER}", name:"${GITHUB_REPOSITORY}"){
 		}
 		def strResp = content.text;
 		def gqlResponse =  new JsonSlurper().parseText(strResp);
-		def latestVersion = gqlResponse.data.repository.registryPackages.edges[0].node.latestVersion.version;
+		def edges = gqlResponse.data.repository.registryPackages.edges;
+		def latestVersion = edges[0].node.latestVersion.version;
+		for(int i=1; i < edges.size(); i++){
+			println "checking: " + edges[i].node.latestVersion.version;		
+			if(edges[i].node.latestVersion.version.startsWith(version)){
+				latestVersion = edges[i].node.latestVersion.version;
+				break;
+			}
+		}        
 		return latestVersion;
 	}
 
