@@ -155,7 +155,7 @@ artifacts {
 	archives sourcesJar
 }
 
-//tasks.withType(PublishToMavenRepository) { it.dependsOn test }
+tasks.withType(PublishToMavenRepository) { it.dependsOn test }
 
 publishing{
 
