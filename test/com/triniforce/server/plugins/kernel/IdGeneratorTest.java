@@ -5,9 +5,13 @@
  */
 package com.triniforce.server.plugins.kernel;
 
+import com.triniforce.db.ddl.TableDef.EDBObjectException;
 import com.triniforce.db.test.BasicServerTestCase;
+import com.triniforce.extensions.PKPlugin;
 import com.triniforce.server.plugins.kernel.tables.NextId;
 import com.triniforce.server.srvapi.IIdGenerator;
+import com.triniforce.server.srvapi.ISOQuery;
+import com.triniforce.server.srvapi.ISORegistration;
 import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
@@ -17,9 +21,30 @@ import com.triniforce.utils.IProfilerStack.PSI;
 public class IdGeneratorTest extends BasicServerTestCase {
 
 	private static final int RSV_SIZE = 0x2000;
+	
+	static class IdGeneratorTestTab extends NextId{
+		public IdGeneratorTestTab() {
+			super(IdGeneratorTestTab.class.getName());
+		}
+	}
 
 	@Override
 	protected void setUp() throws Exception {
+		addPlugin(new PKPlugin() {
+			
+			@Override
+			public void doRegistration() {
+			}
+			
+			@Override
+			public void doRegistration(ISORegistration reg) throws EDBObjectException {
+				reg.registerTableDef(new IdGeneratorTestTab());
+			}
+			
+			@Override
+			public void doExtensionPointsRegistration() {
+			}
+		});
 		super.setUp();
 		getServer().enterMode(Mode.Running);
 	}
@@ -32,7 +57,8 @@ public class IdGeneratorTest extends BasicServerTestCase {
 	
     @Override
 	public void test() throws Exception {
-		IIdGenerator gen = ApiStack.getApi().getIntfImplementor(IIdGenerator.class);
+		IIdGenerator gen = new IdGenerator(IdGenerator.KEY_CACHE_SIZE, 
+				ApiStack.getInterface(ISOQuery.class).getEntity(IdGeneratorTestTab.class.getName()));
 
 		long v = gen.getKey();
 		assertTrue(""+v, v >=  IdGenerator.MIN_GENERATED_KEY);
