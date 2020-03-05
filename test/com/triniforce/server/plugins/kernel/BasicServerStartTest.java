@@ -17,10 +17,12 @@ import org.firebirdsql.management.FBManager;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 
+import com.triniforce.db.ddl.TableDef.EDBObjectException;
 import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.db.test.TFTestCase;
 import com.triniforce.db.test.BasicServerTestCase.Pool;
 import com.triniforce.server.plugins.kernel.BasicServer.ERegistratorRunning;
+import com.triniforce.server.plugins.kernel.BasicServer.ServerException;
 import com.triniforce.server.srvapi.IBasicServer;
 import com.triniforce.server.srvapi.IPooledConnection;
 import com.triniforce.utils.Api;
@@ -118,7 +120,7 @@ public class BasicServerStartTest extends TFTestCase {
 //	@Override
 	public void test() throws Exception {
 		BasicDataSource ds = getDataSource();
-		startServer(ds);
+		startServerWithRegistrator(ds);
 	}
 	
 	public void testStartServerInDifferentLocales() throws Exception{
@@ -149,7 +151,44 @@ public class BasicServerStartTest extends TFTestCase {
 	}
 
 
-	private IBasicServer startServer(BasicDataSource ds) {
+	private IBasicServer startServer(BasicDataSource ds) throws ServerException, EDBObjectException, SQLException {
+		ds.setMaxWait(100L);		
+		Pool pool = new BasicServerTestCase.Pool(ds);
+		Api baseApi = new Api();
+		final BasicServer srv = new BasicServer();
+		srv.doPluginsRegistration();
+		baseApi.setIntfImplementor(IPooledConnection.class, pool);
+		
+		Runnable runner = new Runnable(){
+			public void run() {
+				IBasicServer isrv = ApiStack.getInterface(IBasicServer.class);
+			
+				if(isrv.isDbModificationNeeded()){
+					try {
+						isrv.doDbModification();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				isrv.initAndStart();
+				trace("server started successfully");				
+			}
+		};
+		
+		srv.setBaseApi(baseApi);
+		srv.doRegistration();
+
+		ApiStack.pushInterface(IBasicServer.class, srv);
+		try{
+			runner.run();
+		}finally{
+			ApiStack.popInterface(1);
+		}
+		return srv;
+	}
+
+
+	private IBasicServer startServerWithRegistrator(BasicDataSource ds) {
 		ds.setMaxWait(100L);		
 		Pool pool = new BasicServerTestCase.Pool(ds);
 		Api baseApi = new Api();
