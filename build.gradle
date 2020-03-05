@@ -48,6 +48,7 @@ processResources {
 		include '**/*.properties'
 		include '**/*.soap'
 		include '**/*.wiki'
+		include '**/*.FDB'
 	
 	}
 }
