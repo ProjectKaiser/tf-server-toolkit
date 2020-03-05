@@ -174,7 +174,7 @@ public class BasicServerStartTest extends TFTestCase {
 
 		srv.startRegistrator(baseApi, runner);
 		trace("registration thread started");
-		srv.waitRegistrator(0L);
+		srv.waitRegistrator(10000L);
 
 		return srv;
 	}
