@@ -12,9 +12,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 
-import com.triniforce.db.ddl.DBTables.DBOperation;
-import com.triniforce.db.ddl.TableDef.FieldDef;
-import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.ddl.UpgradeRunner.DbType;
 
 
