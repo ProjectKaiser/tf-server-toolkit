@@ -6,6 +6,7 @@
 
 package com.triniforce.eval;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +26,7 @@ public class OlBExprContainsWord extends OlBExprColumnVsValue{
         if(null == testValue){
             return null;
         }
-        testValue = testValue.toString().toLowerCase();
+        testValue = testValue.toString().toLowerCase(Locale.ENGLISH);
         return Pattern.compile( "(^|[\\s@.,;\\-]+)" + Pattern.quote(testValue.toString()), Pattern.CASE_INSENSITIVE);
     }
     
@@ -35,7 +36,7 @@ public class OlBExprContainsWord extends OlBExprColumnVsValue{
 
     @Override
     boolean compareNotNullValues(Object columnValue, Object testValue) {
-        String sv = columnValue.toString().toLowerCase();
+        String sv = columnValue.toString().toLowerCase(Locale.ENGLISH);
         Matcher m = ((Pattern)testValue).matcher(sv);
         return m.find();
     }

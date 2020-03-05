@@ -9,6 +9,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -75,7 +76,7 @@ public class PropValueMap {
 
     public PropValueMap(NamedVar[] values, Map<String, ValueDef> defs, boolean bCaseSensitive) {
         for (NamedVar value : values) {
-            String name = bCaseSensitive ? value.getName() : value.getName().toLowerCase();
+            String name = bCaseSensitive ? value.getName() : value.getName().toLowerCase(Locale.ENGLISH);
             putValue(defs, name, value.getValue());
             
         }

@@ -9,6 +9,7 @@ package com.triniforce.db.test;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Locale;
 
 import com.triniforce.db.ddl.TableDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
@@ -67,7 +68,7 @@ public class MiscDbTest extends DBTestCase {
         {//select {fn Upper("max")}       
         	trace(sel.toString());
             PreparedStatement stmt = getConnection().prepareStatement(sel.toString());
-            stmt.setString(1, "max".toUpperCase());
+            stmt.setString(1, "max".toUpperCase(Locale.ENGLISH));
             ResultSet rs = stmt.executeQuery();
             assertTrue(rs.next());
             assertEquals("MAx", rs.getString(1));
@@ -76,7 +77,7 @@ public class MiscDbTest extends DBTestCase {
         }
         {//select {fn Upper("vIC")}
             PreparedStatement stmt = getConnection().prepareStatement(sel.toString());
-            stmt.setString(1, "vic".toUpperCase());
+            stmt.setString(1, "vic".toUpperCase(Locale.ENGLISH));
             ResultSet rs = stmt.executeQuery();
             assertTrue(rs.next());
             assertEquals("vIC", rs.getString(1));

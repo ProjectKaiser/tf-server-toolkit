@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Locale;
 import java.util.Map;
 
 import com.triniforce.db.ddl.DBTables.DBOperation;
@@ -709,7 +710,7 @@ public class UpgradeRunner {
         boolean condition = iter.hasNext();
         String res = ""; //$NON-NLS-1$
         while (condition) {
-            res += m_quateString + iter.next().toUpperCase() + m_quateString;
+            res += m_quateString + iter.next().toUpperCase(Locale.ENGLISH) + m_quateString;
             condition = iter.hasNext();
             if (condition)
                 res += ", "; //$NON-NLS-1$
@@ -745,7 +746,7 @@ public class UpgradeRunner {
 //    		throw new RuntimeException("must be lowercase: " + f.getName());
     	
         String res;
-        res = m_quateString + f.m_name.toUpperCase() + m_quateString + " " + getTypeString(f.m_type, f.m_size, f.m_scale); //$NON-NLS-1$
+        res = m_quateString + f.m_name.toUpperCase(Locale.ENGLISH) + m_quateString + " " + getTypeString(f.m_type, f.m_size, f.m_scale); //$NON-NLS-1$
         if(f.isAutoincrement()){
         	if(DbType.MSSQL.equals(m_dbType)){
         		res += " IDENTITY(1,1)";

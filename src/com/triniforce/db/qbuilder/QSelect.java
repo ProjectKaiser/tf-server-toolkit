@@ -8,6 +8,7 @@ package com.triniforce.db.qbuilder;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -230,7 +231,7 @@ public class QSelect extends QStatementWithWhere{
                     	if(name.equals("*"))
                     		resName = name;
                     	else
-                    		resName = quoteString + name.toUpperCase() + quoteString;
+                    		resName = quoteString + name.toUpperCase(Locale.ENGLISH) + quoteString;
                         res = res.append(resName);
                     }
                 }                

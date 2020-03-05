@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import com.triniforce.db.dml.ResSet;
 import com.triniforce.soap.PropertiesSequence;
@@ -243,7 +244,7 @@ public class LongListResponse extends BasicResponse{
             md = resSet.getResultSet().getMetaData();
             String colNames[] = new String[md.getColumnCount() + (null == extraColumns?0:extraColumns.size())];
             for (int i = 0; i < colNames.length; i++) {
-                colNames[i] = md.getColumnName(i + 1).toLowerCase(); 
+                colNames[i] = md.getColumnName(i + 1).toLowerCase(Locale.ENGLISH); 
                 
             }
             LongListResponse res = new LongListResponse(colNames);

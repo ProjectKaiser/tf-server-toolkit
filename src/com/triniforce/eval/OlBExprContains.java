@@ -6,6 +6,7 @@
 
 package com.triniforce.eval;
 
+import java.util.Locale;
 
 public class OlBExprContains extends OlBExprColumnVsValue {
     
@@ -21,7 +22,7 @@ public class OlBExprContains extends OlBExprColumnVsValue {
         if(null == testValue){
             return null;
         }
-        return testValue.toString().toLowerCase();
+        return testValue.toString().toLowerCase(Locale.ENGLISH);
         
     }
 
@@ -32,7 +33,7 @@ public class OlBExprContains extends OlBExprColumnVsValue {
 
     @Override
     boolean compareNotNullValues(Object columnValue, Object testValue) {
-        String sv = columnValue.toString().toLowerCase();
+        String sv = columnValue.toString().toLowerCase(Locale.ENGLISH);
         return sv.indexOf((String)testValue) >=0;
     }
     

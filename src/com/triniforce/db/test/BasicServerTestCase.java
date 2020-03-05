@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -350,7 +351,7 @@ public static class DPPProcPlugin extends PKPlugin{
     boolean tabExists(Connection conn, String tabName)
             throws SQLException {
         if (UpgradeRunner.getDbType(conn).equals(UpgradeRunner.DbType.DERBY))
-            tabName = tabName.toUpperCase();
+            tabName = tabName.toUpperCase(Locale.ENGLISH);
 
         ResultSet rs = conn.getMetaData().getTables(null, null, tabName, null);
         boolean res;

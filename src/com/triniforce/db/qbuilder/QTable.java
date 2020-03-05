@@ -5,6 +5,8 @@
  */
 package com.triniforce.db.qbuilder;
 
+import java.util.Locale;
+
 import com.triniforce.server.srvapi.IDatabaseInfo;
 import com.triniforce.utils.ApiStack;
 import com.triniforce.utils.IName;
@@ -55,9 +57,9 @@ public class QTable implements IQTable {
     	IDatabaseInfo dbInfo = ApiStack.getInterface(IDatabaseInfo.class);
     	String quoteString = dbInfo.getIdentifierQuoteString();
         if( prefix.length() > 0 ){
-            return prefix+'.' + quoteString + col.toUpperCase() + quoteString;    
+            return prefix+'.' + quoteString + col.toUpperCase(Locale.ENGLISH) + quoteString;    
         }
-        return quoteString + col.toUpperCase() + quoteString;        
+        return quoteString + col.toUpperCase(Locale.ENGLISH) + quoteString;        
     }
     public String calcPrefixedCol(String name) {
         return joinPrefixedCol(getPrefix(), name);

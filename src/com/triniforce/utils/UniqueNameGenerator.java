@@ -6,6 +6,7 @@
 package com.triniforce.utils;
 
 import java.util.HashSet;
+import java.util.Locale;
 
 public class UniqueNameGenerator{
 
@@ -24,12 +25,12 @@ public class UniqueNameGenerator{
 	        }while(contains(tmpValue));
 			template = tmpValue;
 		}
-		m_set.add(template.toLowerCase());
+		m_set.add(template.toLowerCase(Locale.ENGLISH));
 		return template;
 	}
 
 	public boolean contains(String value) {
-		return m_set.contains(value.toLowerCase());
+		return m_set.contains(value.toLowerCase(Locale.ENGLISH));
 	}
 	
 }

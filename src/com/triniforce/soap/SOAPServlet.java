@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -136,7 +137,7 @@ import com.triniforce.utils.ApiAlgs;
 			ByteArrayOutputStream outBuf = new ByteArrayOutputStream();
 			
 			int status = HttpServletResponse.SC_OK;
-			ProtocolType protocol = getProtocolType(request.getContentType().toLowerCase());
+			ProtocolType protocol = getProtocolType(request.getContentType().toLowerCase(Locale.ENGLISH));
 			
 			if(ProtocolType.JSON.equals(protocol)){
 	            response.setContentType("text/json; charset=utf-8");

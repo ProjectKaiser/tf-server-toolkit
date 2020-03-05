@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -385,7 +386,7 @@ public class VObject {
     public static ArrayList<String> getPropMethodNames(Class cls) {
         ArrayList<String> res = new ArrayList<String>();
         for (String name : getFieldNames(cls)) {
-            res.add(name.substring(2, 3).toUpperCase() + name.substring(3));
+            res.add(name.substring(2, 3).toUpperCase(Locale.ENGLISH) + name.substring(3));
         }
         return res;
     }

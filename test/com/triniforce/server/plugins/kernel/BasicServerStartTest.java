@@ -5,10 +5,15 @@
  */
 package com.triniforce.server.plugins.kernel;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Locale;
 
 import org.apache.commons.dbcp.BasicDataSource;
+import org.firebirdsql.gds.impl.GDSType;
+import org.firebirdsql.jdbc.FBDriver;
+import org.firebirdsql.management.FBManager;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 
@@ -111,16 +116,48 @@ public class BasicServerStartTest extends TFTestCase {
 
 
 //	@Override
-	public void ntest() throws Exception {
+	public void test() throws Exception {
 		BasicDataSource ds = getDataSource();
-		ds.setMaxWait(100L);
+		startServer(ds);
+	}
+	
+	public void testStartServerInDifferentLocales() throws Exception{
+		Locale[] locales2test = new Locale[]{
+				new Locale("tr", "TR")
+		};
+		
+		Locale loc = Locale.getDefault();
+		try{
+			
+			for (Locale locale : locales2test) {
+				Locale.setDefault(locale);
+				BasicDataSource pool = new BasicDataSource();
+				String cls = "org.firebirdsql.jdbc.FBDriver";
+		        pool.setDriverClassName(cls);
+		        pool.setUrl(createDb(cls));
+		        String dbUserName = "UNTILLUSER";
+		        String dbPassword = "1945";
+		        pool.setUsername(dbUserName);
+		        pool.setPassword(dbPassword);
+
+				IBasicServer srv = startServer(pool);				
+				srv.finit();
+			}
+		}finally{
+			Locale.setDefault(loc);
+		}
+	}
+
+
+	private IBasicServer startServer(BasicDataSource ds) {
+		ds.setMaxWait(100L);		
 		Pool pool = new BasicServerTestCase.Pool(ds);
 		Api baseApi = new Api();
 		final BasicServer srv = new BasicServer();
 		srv.doPluginsRegistration();
 		baseApi.setIntfImplementor(IPooledConnection.class, pool);
-
-		srv.startRegistrator(baseApi, new Runnable(){
+		
+		Runnable runner = new Runnable(){
 			public void run() {
 				IBasicServer isrv = ApiStack.getInterface(IBasicServer.class);
 				if(isrv.isDbModificationNeeded()){
@@ -131,10 +168,24 @@ public class BasicServerStartTest extends TFTestCase {
 					}
 				}
 				isrv.initAndStart();
-				trace("server started successfully");
+				trace("server started successfully");				
 			}
-		});
+		};
+
+		srv.startRegistrator(baseApi, runner);
 		trace("registration thread started");
 		srv.waitRegistrator(0L);
+
+		return srv;
+	}
+
+
+	private String createDb(String cls) throws Exception {
+		copyTestResources(new String[]{"EMPTY.FDB"}, getTempTestFolder());
+		String fn = new File(getTempTestFolder(),"EMPTY.FDB").getAbsolutePath();
+		Class.forName(getTestProperty("class"));
+		
+		
+		return "jdbc:firebirdsql:localhost/3050:"+fn;
 	}
 }

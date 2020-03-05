@@ -16,6 +16,7 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.triniforce.db.ddl.Delta.DBMetadata.IIndexLocNames;
@@ -88,7 +89,7 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 				new IIndexLocNames(){
 					public String getShortName(String dbTabName,
 							String dbFullName) {
-						if(dbFullName.startsWith(dbTabName.toUpperCase()+"_")){
+						if(dbFullName.startsWith(dbTabName.toUpperCase(Locale.ENGLISH)+"_")){
 							return dbFullName.substring(dbTabName.length()+1);
 						}
 						return dbFullName;
@@ -193,7 +194,7 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 			tab = tabs2.getTables().get("DeltaSchemaLoaderTest3");
 			assertNotNull(tab);
 			IndexDef idx0 = tab.getIndices().getElement(0);
-			assertEquals("DeltaSchemaLoaderTest3_ORIGINAL_DB_NAME".toUpperCase(), idx0.getName().toUpperCase());
+			assertEquals("DeltaSchemaLoaderTest3_ORIGINAL_DB_NAME".toUpperCase(Locale.ENGLISH), idx0.getName().toUpperCase(Locale.ENGLISH));
 			ElementVerStored<IndexDef> res = tab.getIndices().findElement(idx0.getName());
 			assertNotNull(res);
 			assertTrue(idx0.isOriginalDbName());
@@ -299,7 +300,7 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 	}
 
 private boolean existTable(String tabName) throws SQLException, Exception {
-	ResultSet rs = getConnection().getMetaData().getTables(null, null, tabName.toUpperCase(), null);
+	ResultSet rs = getConnection().getMetaData().getTables(null, null, tabName.toUpperCase(Locale.ENGLISH), null);
 	try{
 		return rs.next();
 	}finally{

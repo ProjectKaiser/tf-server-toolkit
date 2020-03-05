@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.triniforce.utils.IName;
@@ -45,7 +46,7 @@ public abstract class BasicResSet implements IResSet {
         if(m_idx == null){
             m_idx = new HashMap<String, Integer>();
             for (int i = 0; i < getColumns().size(); i++) {
-                m_idx.put(getColumns().get(i).toLowerCase(), i+1);//1 - based               
+                m_idx.put(getColumns().get(i).toLowerCase(Locale.ENGLISH), i+1);//1 - based               
             }
         }
         Object res = m_idx.get(colName);

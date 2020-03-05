@@ -8,6 +8,7 @@ package com.triniforce.server.plugins.kernel.upg_procedures;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.util.Locale;
 import java.util.Random;
 
 import com.triniforce.db.ddl.TableDef;
@@ -73,7 +74,7 @@ public class ConvertForeignKeysTest extends BasicServerTestCase {
         boolean found = false;
         while(rs.next()){
         	String tabDbName = rs.getString(3);
-        	if(soDbInfo.getDbTableNames().contains(tabDbName.toLowerCase())){
+        	if(soDbInfo.getDbTableNames().contains(tabDbName.toLowerCase(Locale.ENGLISH))){
 	            ResultSet rsKeys = md.getExportedKeys(rs.getString(1), rs.getString(2), rs.getString(3));
 	            while(rsKeys.next()){
 	            	trace(rsKeys.getString(3) + "." + rsKeys.getString(4) + "<="

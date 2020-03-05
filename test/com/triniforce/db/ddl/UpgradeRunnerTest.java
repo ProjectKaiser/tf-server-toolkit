@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.InvalidPropertiesFormatException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import com.triniforce.db.ddl.DBTables.DBOperation;
@@ -178,7 +179,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
 	        {
 	            AddPrimaryKeyOperation op = new AddPrimaryKeyOperation("pk1", Arrays.asList("col1", "col2"));
 	            String s = m_player.getPrimaryKeyConstraintString("DBT1", op,false);
-	            assertEquals(MessageFormat.format("CONSTRAINT {0} PRIMARY KEY (\"COL1\", \"COL2\")", getDbType().equals(DbType.MYSQL)? "" : m_player.getFullIndexName("DBT1", "pk1", IndexDef.TYPE.PRIMARY_KEY).toUpperCase()), s);
+	            assertEquals(MessageFormat.format("CONSTRAINT {0} PRIMARY KEY (\"COL1\", \"COL2\")", getDbType().equals(DbType.MYSQL)? "" : m_player.getFullIndexName("DBT1", "pk1", IndexDef.TYPE.PRIMARY_KEY).toUpperCase(Locale.ENGLISH)), s);
 	        }
 	        {
 	            AddForeignKeyOperation op = new AddForeignKeyOperation("fk1", Arrays.asList("col1"), TAB_WITH_PK, "pk1", AddForeignKeyOperation.DELETE_RULE.CASCADE, AddForeignKeyOperation.UPDATE_RULE.NOT_SPECIFIED);
@@ -268,7 +269,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
     class NameComparator implements Comparator<IElementDef>{
 
         public int compare(IElementDef arg0, IElementDef arg1) {
-            return arg0.getName().toUpperCase().compareTo(arg1.getName().toUpperCase());
+            return arg0.getName().toUpperCase(Locale.ENGLISH).compareTo(arg1.getName().toUpperCase(Locale.ENGLISH));
         }
     }
     
@@ -279,7 +280,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
 		List<IElementDef> fields = nodes.subList(0, fNum);
 //		List<INodeDef> indices = nodes.subList(fNum, nodes.size());
 		
-		ResultSet rs = getConnection().getMetaData().getColumns(null, null, m_as.getDBName(tabName).toUpperCase(), null);
+		ResultSet rs = getConnection().getMetaData().getColumns(null, null, m_as.getDBName(tabName).toUpperCase(Locale.ENGLISH), null);
 		fNum = 0;
 		while(rs.next()){
 			String fName = rs.getString("COLUMN_NAME");
@@ -366,7 +367,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
     		ApiAlgs.getLog(this).trace("numActive : " + getDataSource().getNumActive());
     		getDataSource().setMaxIdle(0);
     		m_player.run(cl);
-    		String dbRefTab = m_as.getDBName(TAB_WITH_PK).toUpperCase();
+    		String dbRefTab = m_as.getDBName(TAB_WITH_PK).toUpperCase(Locale.ENGLISH);
     		IndexDef fk = getForeignKey(dbName, dbName+"_fk1");
     		assertNotNull("FK not found", fk);
     		assertEquals(dbRefTab, fk.m_parentTable);
@@ -432,9 +433,9 @@ public class UpgradeRunnerTest extends DDLTestCase {
     		DeleteColumnOperation op = new DeleteColumnOperation(fName);
     		String sql = m_player.getOperationString(new DBOperation(tabName, op));    		
             if(getDbType().equals(DbType.FIREBIRD))
-                assertEquals(MessageFormat.format("ALTER TABLE {0} DROP \"{1}\"", dbName, fName.toUpperCase()), sql);
+                assertEquals(MessageFormat.format("ALTER TABLE {0} DROP \"{1}\"", dbName, fName.toUpperCase(Locale.ENGLISH)), sql);
             else
-                assertEquals(MessageFormat.format("ALTER TABLE {0} DROP COLUMN {1}", dbName, getQuoted(fName.toUpperCase())), sql);
+                assertEquals(MessageFormat.format("ALTER TABLE {0} DROP COLUMN {1}", dbName, getQuoted(fName.toUpperCase(Locale.ENGLISH))), sql);
     	}
     	{
             if(getDbType().equals(DbType.MYSQL)){
@@ -542,7 +543,20 @@ public class UpgradeRunnerTest extends DDLTestCase {
         			as.getIndexDbName(m_player.getFullIndexName(as.getDBName(tabName), "ORIGINAL_INDEX_NAME_91249149291343", IndexDef.TYPE.INDEX)));
         	assertEquals("CREATE   INDEX ORIGINAL_INDEX_NAME_91249149291343 ON t_testgetoperationstring (\"INT_FIELD\")", sql);
         }
-		m_as.removeTable(tabName);    	    	
+		
+		{// Locale independent operations
+			Locale loc = Locale.getDefault();
+			try{
+				Locale.setDefault(new Locale("tr", "TR"));
+				AddColumnOperation op = new AddColumnOperation(FieldDef.createScalarField("FIELD_iO", ColumnType.INT, true));
+	        	String sql = m_player.getOperationString(new DBOperation(tabName, op));
+	        	assertEquals("ALTER TABLE t_testgetoperationstring ADD \"FIELD_IO\" " + m_player.getTypeString(ColumnType.INT, 0, 0) + " NOT NULL", sql);
+				
+			}finally{
+				Locale.setDefault(loc);
+			}
+		}
+		m_as.removeTable(tabName);
     }
     
     private Object getQuoted(String v) {
@@ -1004,7 +1018,7 @@ public class UpgradeRunnerTest extends DDLTestCase {
     	Connection con = getConnection();
     	DatabaseMetaData md = con.getMetaData();
     	
-    	ResultSet rs = md.getColumns(null, null, m_as.getDBName(tab).toUpperCase(), col.toUpperCase());
+    	ResultSet rs = md.getColumns(null, null, m_as.getDBName(tab).toUpperCase(Locale.ENGLISH), col.toUpperCase(Locale.ENGLISH));
     	assertTrue(tab+"."+col, rs.next());
     	ApiAlgs.getLog(this).trace(rs.getString("COLUMN_NAME"));
     	return rs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;

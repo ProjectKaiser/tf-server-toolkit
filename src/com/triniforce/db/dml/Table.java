@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import com.triniforce.db.ddl.TableDef.FieldDef;
 import com.triniforce.db.dml.Table.Row.State;
@@ -333,7 +334,7 @@ public class Table {
     }
 
     private int getFieldIndex(String fName) {        
-        Integer idx = m_fieldPos.get(fName.toUpperCase());
+        Integer idx = m_fieldPos.get(fName.toUpperCase(Locale.ENGLISH));
         if(idx == null)
             throw new UnknownFieldException(fName);
         return idx;
@@ -344,7 +345,7 @@ public class Table {
      * @param f field definition for the new column
      */
     public void addColumn(FieldDef f) {        
-        m_fieldPos.put(f.getName().toUpperCase(), m_fields.size());
+        m_fieldPos.put(f.getName().toUpperCase(Locale.ENGLISH), m_fields.size());
         m_fields.add(f);        
         for (int iRow = 0; iRow < m_rows.size(); iRow++) {
             RowInternal oldRow = m_rows.get(iRow);

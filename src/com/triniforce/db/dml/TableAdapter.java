@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import com.triniforce.db.ddl.TableDef;
 import com.triniforce.db.ddl.TableDef.FieldDef;
@@ -194,10 +195,10 @@ public class TableAdapter {
         for (i = 0; i < flds.size(); i++) {
             if (i == 0)
                 setV = MessageFormat.format(
-                        "{0}=?", flds.get(i).getName().toUpperCase()); //$NON-NLS-1$
+                        "{0}=?", flds.get(i).getName().toUpperCase(Locale.ENGLISH)); //$NON-NLS-1$
             else
                 setV += MessageFormat.format(
-                        ",{0}=?", flds.get(i).getName().toUpperCase()); //$NON-NLS-1$
+                        ",{0}=?", flds.get(i).getName().toUpperCase(Locale.ENGLISH)); //$NON-NLS-1$
         }
         return MessageFormat.format(UPDATE_CLAUSE, dbName, setV, where);
     }
@@ -209,10 +210,10 @@ public class TableAdapter {
         int cols[] = new int[flds.size()];
         for (int i = 0; i < flds.size(); i++) {
             if (i == 0) {
-                colNames = flds.get(i).getName().toUpperCase();
+                colNames = flds.get(i).getName().toUpperCase(Locale.ENGLISH);
                 colVals = "?"; //$NON-NLS-1$
             } else {
-                colNames += "," + flds.get(i).getName().toUpperCase(); //$NON-NLS-1$
+                colNames += "," + flds.get(i).getName().toUpperCase(Locale.ENGLISH); //$NON-NLS-1$
                 colVals += ",?"; //$NON-NLS-1$
             }
             cols[i] = i;

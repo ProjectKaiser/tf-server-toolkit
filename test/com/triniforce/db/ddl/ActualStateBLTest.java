@@ -10,7 +10,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 
+import com.triniforce.db.ddl.DBTables.DBOperation;
+import com.triniforce.db.ddl.TableDef.FieldDef;
+import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
 import com.triniforce.db.ddl.UpgradeRunner.DbType;
 
 
@@ -88,6 +92,15 @@ public class ActualStateBLTest extends DDLTestCase {
         	m_as.addTable("t_tab1", "pkg2.tab", 1);
         	assertEquals("t_tab2", m_as.generateTabName("pkg3.tab"));
         }
+		{// Locale independent operations
+			Locale loc = Locale.getDefault();
+			try{
+				Locale.setDefault(new Locale("tr", "TR"));
+				assertEquals("t_tabiiv", m_as.generateTabName("pkg1.tabIiV"));				
+			}finally{
+				Locale.setDefault(loc);
+			}
+		}
     }
 
     public void testTableExists() throws Exception {
@@ -151,6 +164,17 @@ public class ActualStateBLTest extends DDLTestCase {
         assertEquals(PKG_NAME+"testGetAppName", m_as.getAppName("testGetAppName"));
         assertEquals(PKG_NAME+"testGetAppName", m_as.getAppName("TESTGETAPPNAME"));
         
+        
+		{// Locale independent operations
+			Locale loc = Locale.getDefault();
+			try{
+				Locale.setDefault(new Locale("tr", "TR"));
+				m_as.addTable("tab_with_i", PKG_NAME+"somename", 21);
+				assertEquals(PKG_NAME+"somename", m_as.getAppName("tab_with_I"));
+			}finally{
+				Locale.setDefault(loc);
+			}
+		}
     }
     
     public void testLoadState() throws Exception{
@@ -196,7 +220,7 @@ public class ActualStateBLTest extends DDLTestCase {
     		assertEquals("APP1234567890_NAME1234567890_I2", m_as.getIndexDbName("app1234567890_name1234567890_idx3"));
     	}
     	else{
-    		assertEquals("app1234567890_name1234567890_idx1".toUpperCase(), m_as.generateIndexName("app1234567890_name1234567890_idx1"));    		
+    		assertEquals("app1234567890_name1234567890_idx1".toUpperCase(Locale.ENGLISH), m_as.generateIndexName("app1234567890_name1234567890_idx1"));    		
     	}
     	
     	assertEquals("app1_1231", m_as.getIndexDbName("app1_1231"));

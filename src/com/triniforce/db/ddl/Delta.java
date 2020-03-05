@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -75,10 +76,10 @@ public class Delta {
             String realDbTableName = aDbTableName;
             try {
                 if (m_md.storesUpperCaseIdentifiers()) {
-                    realDbTableName = realDbTableName.toUpperCase();
+                    realDbTableName = realDbTableName.toUpperCase(Locale.ENGLISH);
                 }
                 if (m_md.storesLowerCaseIdentifiers()) {
-                    realDbTableName = realDbTableName.toLowerCase();
+                    realDbTableName = realDbTableName.toLowerCase(Locale.ENGLISH);
                 }
             } catch (Exception e) {
                 ApiAlgs.rethrowException(e);
@@ -144,7 +145,7 @@ public class Delta {
 		
 			public IndexTemporary createObject(ResultSet rs) {
 				try {
-					if(!m_tabName.toUpperCase().equals(rs.getString(m_fTabName).toUpperCase()))
+					if(!m_tabName.toUpperCase(Locale.ENGLISH).equals(rs.getString(m_fTabName).toUpperCase(Locale.ENGLISH)))
 						return null;
 //					String dbTabName = rs.getString(m_fTabName);
 //					m_tabName = m_dbNames.getAppName(dbTabName);
@@ -206,7 +207,7 @@ public class Delta {
 		
 			rs.close();
 		
-			rs = m_md.getImportedKeys(CATALOG, SCHEME, realDbTableName.toUpperCase());
+			rs = m_md.getImportedKeys(CATALOG, SCHEME, realDbTableName.toUpperCase(Locale.ENGLISH));
 			walker = new ResultSetWalker<IndexTemporary>(
 					new IndexObjectFactory(IndexDef.TYPE.FOREIGN_KEY, "FK_NAME", realDbTableName, "FKTABLE_NAME", dbNames, indexLocNames),
 					rs, "FK_NAME");
@@ -217,7 +218,7 @@ public class Delta {
 			}
 			rs.close();
 		
-			rs = m_md.getIndexInfo(CATALOG, SCHEME, realDbTableName.toUpperCase(), false, false);
+			rs = m_md.getIndexInfo(CATALOG, SCHEME, realDbTableName.toUpperCase(Locale.ENGLISH), false, false);
 			walker = new ResultSetWalker<IndexTemporary>(
 					new IndexObjectFactory(IndexDef.TYPE.INDEX, "INDEX_NAME", realDbTableName, "TABLE_NAME", dbNames, indexLocNames),
 					rs, "INDEX_NAME");
@@ -389,7 +390,7 @@ public class Delta {
 		public static class OlapIndexLocNames implements IIndexLocNames{
 			
 			public String getShortName(String dbTabName, String dbFullName){
-				if(dbFullName.toUpperCase().startsWith(dbTabName.toUpperCase()+"_")){
+				if(dbFullName.toUpperCase(Locale.ENGLISH).startsWith(dbTabName.toUpperCase(Locale.ENGLISH)+"_")){
 					return dbFullName.substring(dbTabName.length()+1);
 				}
 				return dbFullName;
@@ -645,9 +646,9 @@ public class Delta {
 
 					public String get(IndexDef value) {
 						if(m_src.isSupportForeignKeys()){
-							String key = value.getType() + ": " +value.getColumns().toString().toLowerCase();
+							String key = value.getType() + ": " +value.getColumns().toString().toLowerCase(Locale.ENGLISH);
 							if(value.getType().equals(IndexDef.TYPE.FOREIGN_KEY))
-								key += String .format(": %s", value.getParentTable().toLowerCase());
+								key += String .format(": %s", value.getParentTable().toLowerCase(Locale.ENGLISH));
 							return key;
 						}
 						else{
@@ -659,7 +660,7 @@ public class Delta {
 									key = value.getType().toString();
 								else
 									key = "";
-								key += ": " + value.getColumns().toString().toLowerCase();
+								key += ": " + value.getColumns().toString().toLowerCase(Locale.ENGLISH);
 							}
 							return key;
 						}

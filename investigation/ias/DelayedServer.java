@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Locale;
 
 import junit.framework.TestCase;
 
@@ -123,7 +124,7 @@ public class DelayedServer extends TestCase {
 					String str = new String(buffer.toByteArray());
 					buffer.reset();
 					if (str.isEmpty()) break;
-					if (str.toLowerCase().startsWith("content-length:"))
+					if (str.toLowerCase(Locale.ENGLISH).startsWith("content-length:"))
 						contentLength = Integer.parseInt(str.substring("content-length:".length()).trim());
 				} else if ( c != CR) {
 					buffer.write(c);

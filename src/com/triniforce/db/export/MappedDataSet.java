@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 
 import org.dbunit.dataset.AbstractDataSet;
@@ -43,7 +44,7 @@ public class MappedDataSet extends AbstractDataSet {
 		ArrayList<ITable> tabs = new ArrayList<ITable>();
 		Map<String,String> archiveDbAppMap = getAppNames(m_archive);
 		for(String archiveDbName : m_archive.getTableNames()){
-			archiveDbName = archiveDbName.toLowerCase();
+			archiveDbName = archiveDbName.toLowerCase(Locale.ENGLISH);
 			String appName = archiveDbAppMap.get(archiveDbName);
 			if(null == appName){
 			    ApiAlgs.getLog(this).warn("Empty appName for " + archiveDbName);

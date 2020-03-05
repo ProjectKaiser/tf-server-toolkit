@@ -1322,7 +1322,8 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 	public void waitRegistrator(long millis){
 		try {
 			synchronized(m_registratorThread){
-				m_registratorThread.wait(millis);
+				if(m_registratorThread.isAlive())
+					m_registratorThread.wait(millis);
 			}
 		} catch (InterruptedException e) {
 			ApiAlgs.rethrowException(e);

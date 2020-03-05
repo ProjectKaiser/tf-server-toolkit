@@ -16,6 +16,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import com.triniforce.db.ddl.DBTables.DBOperation;
@@ -264,7 +265,7 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
      */
     public String generateTabName(String appTabName) throws SQLException {
         String tabLocName = DBTABLE_NAME_PREFIX
-                + getLocalTabName(appTabName).toLowerCase();
+                + getLocalTabName(appTabName).toLowerCase(Locale.ENGLISH);
         String tabName = tabLocName;
         int i=1;
         while(m_dbNames.contains(tabName)){
@@ -367,7 +368,7 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 		for(int i=0; i<m_asTable.getSize(); i++){
 			Row row = m_asTable.getRow(i);
 			String v = (String) row.getField(1);
-			if(dbName.toLowerCase().equals(v.toLowerCase())){
+			if(dbName.toLowerCase(Locale.ENGLISH).equals(v.toLowerCase(Locale.ENGLISH))){
 				res = (String) row.getField(0);
 				break;
 			}
@@ -392,7 +393,7 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 			int i=0;
 			while(true){
 				String num = i==0 ? "" : Integer.toString(i);
-				String dbName = appName.substring(0, m_maxIndexLength-num.length()).toUpperCase()+num;
+				String dbName = appName.substring(0, m_maxIndexLength-num.length()).toUpperCase(Locale.ENGLISH)+num;
 				if(!m_dbIndexNames.containsKey(dbName)){
 					res = dbName;
 					break;
@@ -401,7 +402,7 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 			}
 		}
 		else{
-			res = appName.toUpperCase();
+			res = appName.toUpperCase(Locale.ENGLISH);
 		}
 		return res;
 	}
@@ -415,13 +416,13 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 	}
 
 	public void deleteIndexName(String appName) {
-		String upperName = appName.toUpperCase();
+		String upperName = appName.toUpperCase(Locale.ENGLISH);
 		for(int i=0; i<m_asIndexTable.getSize(); i++){
 			Row row = m_asIndexTable.getRow(i);
 			String appVal = (String) row.getField(0);
 			if(		!EnumSet.of(State.DELETED, State.CANCELED).contains(row.getState()) 
 					&& 
-					upperName.equals(appVal.toUpperCase())){
+					upperName.equals(appVal.toUpperCase(Locale.ENGLISH))){
 				
 				ApiAlgs.getLog(this).info("DROP NAME: "+appVal);
 				String dbVal = (String) row.getField(1);
