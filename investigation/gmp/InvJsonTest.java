@@ -1,5 +1,6 @@
 package gmp;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +51,12 @@ public class InvJsonTest extends TFTestCase{
 		map = (Map) jp.parse(js);
 		myc = (MyClass) StringSerializer.JSON2Object(js);
 				
+	}
+	
+	public void testSrz(){
+		HashMap<String, String> map = new HashMap<String,String>();
+		map.put("id0", "\u0002010F11C239");
+		assertEquals("", StringSerializer.Object2JSON(map));
 	}
 
 }

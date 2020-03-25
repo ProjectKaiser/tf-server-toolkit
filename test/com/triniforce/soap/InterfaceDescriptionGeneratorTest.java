@@ -958,7 +958,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         }
     }
     
-    public void testSerialize(){
+    public void testSerialize() throws TransformerException, ParserConfigurationException, SAXException, IOException{
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
         InterfaceDescription desc = gen.parse(null, TestSrv2.class);
         SOAPDocument soapDoc = new InterfaceDescriptionGenerator.SOAPDocument();
@@ -994,6 +994,18 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         	soapDoc.m_args = new Object[]{new Real1()};
         	Document res = gen.serialize(desc, soapDoc);
         	print(res);
+        }
+        
+        {//serialize string
+        	soapDoc.m_method = "method3";
+        	soapDoc.m_args = new Object[]{"\u0002010F11C239"};
+        	Document res = gen.serialize(desc, soapDoc);
+        	print(res);
+        	ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        	gen.writeDocument(bout, res);
+        	ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
+        	SOAPDocument res2 = gen.deserialize(desc, bin);
+        	assertEquals("\u0002010F11C239", res2.m_args[0]);
         }
 
     }
