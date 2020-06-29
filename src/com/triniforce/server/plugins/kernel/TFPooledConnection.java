@@ -73,5 +73,25 @@ public class TFPooledConnection implements IPooledConnection{
 			ApiAlgs.rethrowException(e);
 		}
 	}
+	
+	@Override
+	public String getInfo() {
+		
+		String s = "";
+		int i = 0;
+		for (StackTraceElement[] trace : m_conStack.values()) {
+            i =i + 1;
+            s = s + "---- " + i + " ----" + "\n";
+            for (StackTraceElement tr : trace) {
+                s = s + tr.toString() + "\n";
+            }
+        }
+		s = "MaxActive = " + m_ds.getMaxActive() + "\n" + 
+            "NumActive = " + m_ds.getNumActive() + "\n" +
+            "MaxWait = "   + m_ds.getMaxWait()   + "\n" +	
+            "Total in conStack: " + i +  "\n" + s + "----" + "\n"; 
+		
+		return s;
+	}	
     
 }

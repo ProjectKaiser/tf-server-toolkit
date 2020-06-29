@@ -161,6 +161,12 @@ public static class DPPProcPlugin extends PKPlugin{
 				ApiAlgs.rethrowException(e);
 			}
 		}
+
+		@Override
+		public String getInfo() {
+			// TODO Auto-generated method stub
+			return null;
+		}
     }
     
     protected int m_liUsers = 10000;

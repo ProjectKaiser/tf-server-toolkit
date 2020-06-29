@@ -69,6 +69,12 @@ public class ServerTest extends DBTestCase {
 			} catch (SQLException e) {
 				ApiAlgs.rethrowException(e);
 			}
+		}
+
+		@Override
+		public String getInfo() {
+			// TODO Auto-generated method stub
+			return null;
 		}        
     }
 

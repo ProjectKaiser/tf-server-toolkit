@@ -22,4 +22,5 @@ public interface IPooledConnection extends IModeAny{
     int getNumIdle();
     void setMaxIdle(int maxIdle);
     void close() throws SQLException;
+    String getInfo();
 }    

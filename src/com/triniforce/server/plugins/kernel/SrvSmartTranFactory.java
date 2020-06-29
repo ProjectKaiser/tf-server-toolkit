@@ -58,7 +58,7 @@ public class SrvSmartTranFactory implements ISrvSmartTranFactory {
             ApiStack.pushApi(api);
             api.setIntfImplementor(ISrvSmartTran.class, new SrvSmartTran(con, sqlGetter)); 
         } catch (SQLException e) {
-            ApiAlgs.rethrowException(e);
+        	ApiAlgs.rethrowException(pool.getInfo(), e);
         }
     }
 
