@@ -238,13 +238,13 @@ public static class DPPProcPlugin extends PKPlugin{
         if(isNeededServerRestart())
         	finitServer();
         
+        m_startNumActive = getPool().m_ds.getNumActive();        
         
         if(null == m_server){
 	        try{
 	        	m_bemu = new BasicServerApiEmu();
 //	            m_bemu.setTimeSeq(BasicServerApiEmu.START_TIME, BasicServerApiEmu.TIME_OFFSETS);
 	                
-		        m_startNumActive = getPool().m_ds.getNumActive();        
 		
 		        m_coreApi = new Api();
 		        setCoreApiInteraces_internal(m_coreApi);
