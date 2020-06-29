@@ -157,7 +157,7 @@ public class DbQueueTest extends BasicServerTestCase {
         }
     }    
    
-    public void testTransaction(){
+    public void ntestTransaction(){
         IDbQueue fq = getFileQueue();
         clearQueue(fq);
         Mockery context = new Mockery();
