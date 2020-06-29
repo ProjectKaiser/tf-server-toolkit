@@ -256,7 +256,7 @@ String requestLastRegistryVersion(){
 	def gqlQuery = """
 query{repository(owner:"${GITHUB_OWNER}", name:"${GITHUB_REPOSITORY}"){
   id
-  registryPackages(last: 100) {
+  packages(last: 100) {
     edges {
       node {
         id
@@ -282,7 +282,7 @@ query{repository(owner:"${GITHUB_OWNER}", name:"${GITHUB_REPOSITORY}"){
 		}
 		def strResp = content.text;
 		def gqlResponse =  new JsonSlurper().parseText(strResp);
-		def edges = gqlResponse.data.repository.registryPackages.edges;
+		def edges = gqlResponse.data.repository.packages.edges;
 		def latestVersion = edges[0].node.latestVersion.version;
 		for(int i=1; i < edges.size(); i++){
 			println "checking: " + edges[i].node.latestVersion.version;		
