@@ -225,8 +225,8 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
                 try {
                 	PropDef.IGetSet keyGs = createGetSet("getKey", "setKey", keyCs);
                 	PropDef.IGetSet valGs = createGetSet("getValue", "setValue", valCs);
-                    getOwnProps().add(new PropDef("key", keyDef, keyDef.getType(), keyGs));
-                    getOwnProps().add(new PropDef("value", valDef, valDef.getType(), valGs));
+                    getOwnProps().add(new PropDef("key", keyDef, keyDef.getType(), keyGs, false));
+                    getOwnProps().add(new PropDef("value", valDef, valDef.getType(), valGs, false));
                     m_keyCs = keyCs;
                     m_valCs = valCs;
                 } catch (Exception e) {
@@ -370,6 +370,7 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         private TypeDef m_type;
         private String m_rawTypeName;
         private IGetSet m_getSet;
+		private boolean m_bIgnoreNull = false;
         
         interface IGetSet{
             Object get(Object obj);
@@ -380,11 +381,12 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
             super(null);
         }
         
-        public PropDef(String name, TypeDef type, String rawType, IGetSet getSet) {
+        public PropDef(String name, TypeDef type, String rawType, IGetSet getSet, boolean bIgnoreNull) {
             super(name);
             m_type = type;
             m_rawTypeName  = rawType;
             m_getSet = getSet;
+            m_bIgnoreNull = bIgnoreNull;
         }
         public TypeDef getType() {
             return m_type;
@@ -446,6 +448,10 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
 
 		public void setType(ClassDef type) {
 			m_type = type;
+		}
+
+		public boolean isIgnoreNull() {
+			return m_bIgnoreNull;
 		}
     }
     

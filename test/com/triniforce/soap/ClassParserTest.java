@@ -212,6 +212,28 @@ public class ClassParserTest extends TFTestCase {
 		}
     }
     
+    static class CWithIgnoredProp{
+    	private String m_v1;
+		private String m_v2;
+
+		public String getV1() {
+			return m_v1;
+		}
+
+		@IgnoreNullField
+		public void setV1(String v1) {
+			m_v1 = v1;
+		}
+
+		public String getV2() {
+			return m_v2;
+		}
+
+		public void setV2(String v2) {
+			m_v2 = v2;
+		}
+    }
+    
     @Override
     public void test() throws Exception {
 
@@ -293,6 +315,14 @@ public class ClassParserTest extends TFTestCase {
         assertEquals("c", props.get(3).getName());
         assertEquals("c1", props.get(4).getName());
         assertEquals("d", props.get(5).getName());
+        
+        {
+        	//test IgnoreNullField
+        	ClassParser cp5 = new ClassParser(ClassParserTest.class.getPackage(), Collections.EMPTY_LIST);
+        	ClassDef cd = cp5.parse(CWithIgnoredProp.class, m_lib, null);
+        	assertTrue(cd.getProp("v1").isIgnoreNull());
+        	assertFalse(cd.getProp("v2").isIgnoreNull());        	
+        }
         
         
     }

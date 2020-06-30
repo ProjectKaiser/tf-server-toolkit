@@ -42,8 +42,8 @@ public class InterfaceDescription implements Serializable{
         public Operation(String name, MessageDef reqType, MessageDef resType, List<ClassDef> vthrows) {
             super(name, null);
             List<PropDef> props = getOwnProps();
-            props.add(new PropDef(name, reqType, null, null));
-            props.add(new PropDef(name+"Response", resType, null, null));
+            props.add(new PropDef(name, reqType, null, null, false));
+            props.add(new PropDef(name+"Response", resType, null, null, false));
             m_throws = vthrows;
         }
 
@@ -64,7 +64,7 @@ public class InterfaceDescription implements Serializable{
 				try {
 					cls = Class.forName(cd.getType());
 					if(cls.isAssignableFrom(class1)){
-						return new PropDef(cd.getName(),cd, null, null);
+						return new PropDef(cd.getName(),cd, null, null, false);
 					}
 				} catch (ClassNotFoundException e) {
 					ApiAlgs.rethrowException(e);
@@ -112,14 +112,14 @@ public class InterfaceDescription implements Serializable{
         
         void addParameter(String name, Class rawType, TypeDef typeDef){
             List<PropDef> props = getOwnProps(); 
-            props.add(new PropDef(name, typeDef, rawType.getName(), new MsgPropGetSet(name, props.size())));            
+            props.add(new PropDef(name, typeDef, rawType.getName(), new MsgPropGetSet(name, props.size()), false));            
         }
 
 		public void addParameter(String name, Class rawType, TypeDef typeDef, CustomSerializer<?, ?> customSrz) {
             List<PropDef> props = getOwnProps(); 
             IGetSet getset = new MsgPropGetSet(name, props.size());
             getset = customSrz.getGetSet(getset);
-            props.add(new PropDef(name, typeDef, rawType.getName(), getset));            
+            props.add(new PropDef(name, typeDef, rawType.getName(), getset, false));            
 		}
         
     }

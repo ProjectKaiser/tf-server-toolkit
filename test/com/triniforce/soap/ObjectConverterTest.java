@@ -87,7 +87,7 @@ public class ObjectConverterTest extends TFTestCase {
 	        
 	        Node_S parent = new DomNode_S(e, null);
 	        TypedObject val = new InterfaceDescriptionGenerator.ObjectConverter.TypedObject(
-	                new PropDef("name", desc.getType(Cls1.class), null, null), new Cls2("property_from_Cls1", "property_from_Cls2"));
+	                new PropDef("name", desc.getType(Cls1.class), null, null, false), new Cls2("property_from_Cls1", "property_from_Cls2"));
 	        
 	        oc.run(parent, val);
 	        
@@ -122,7 +122,7 @@ public class ObjectConverterTest extends TFTestCase {
         	GregorianCalendar gc = new GregorianCalendar(2001, 0, 12, 21, 21, 12);
         	gc.setTimeZone(TimeZone.getTimeZone("GMT"));
         	Date dt = gc.getTime();
-        	PropDef propDef = new PropDef("myTime", desc.getType(Date.class), Date.class.getName(), null);
+        	PropDef propDef = new PropDef("myTime", desc.getType(Date.class), Date.class.getName(), null, false);
         	TypedObject val = new TypedObject(propDef, dt);
         	oc.run(parent, val);
         	
@@ -138,6 +138,10 @@ public class ObjectConverterTest extends TFTestCase {
 	
 	        Element prop = (Element) xp.evaluate("./myTime", e, XPathConstants.NODE);
 	        assertEquals("2001-01-12T21:21:12.000Z", prop.getTextContent());
+        }
+        
+        {
+        	
         }
     }
 }

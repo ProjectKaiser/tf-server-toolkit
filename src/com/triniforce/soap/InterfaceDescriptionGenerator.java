@@ -709,6 +709,10 @@ public class InterfaceDescriptionGenerator {
             Object  getObject() {
                 return m_obj;
             }
+            
+            boolean bAppend(){
+            	return null != m_obj || !m_propDef.isIgnoreNull();
+            }
         }
         
         static class TypedProps extends AbstractList<TypedObject>{
@@ -737,7 +741,9 @@ public class InterfaceDescriptionGenerator {
         
         @Override
 		@SuppressWarnings("unchecked")
-        public void run(Node_S parent, TypedObject val) {        
+        public void run(Node_S parent, TypedObject val) {
+        	if(!val.bAppend())
+        		return;
             Node_S e = parent.append(val.getPropName());
             if(bSetNS){
                 e.attr("xmlns", m_targetNS);

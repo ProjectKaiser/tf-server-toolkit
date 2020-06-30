@@ -101,6 +101,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 			return param0;
 		}
 
+		@IgnoreNullField
 		public void setParam0(String param0) {
 			this.param0 = param0;
 		}
@@ -501,16 +502,16 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         oldDesc.getOperations().add(new Operation("method1", null, null));
         oldDesc.getOperations().add(new Operation("method3", null, null));
         ClassDef cDef = new ClassDef("Cls2", null);
-        cDef.getOwnProps().add(new PropDef("vObj", null, null, null));
-        cDef.getOwnProps().add(new PropDef("vObjUnk", null, null, null));
-        cDef.getOwnProps().add(new PropDef("map1", null, null, null));
+        cDef.getOwnProps().add(new PropDef("vObj", null, null, null, false));
+        cDef.getOwnProps().add(new PropDef("vObjUnk", null, null, null, false));
+        cDef.getOwnProps().add(new PropDef("map1", null, null, null, false));
         oldDesc.getTypes().add(cDef);
         oldDesc.getTypes().add(new ClassDef("ClsUnk", null));
         cDef = new ClassDef("Cls1", null);
-        cDef.getOwnProps().add(new PropDef("v1", null, null, null));
-        cDef.getOwnProps().add(new PropDef("v2", null, null, null));
-        cDef.getOwnProps().add(new PropDef("v3", null, null, null));
-        cDef.getOwnProps().add(new PropDef("vMap", null, null, null));
+        cDef.getOwnProps().add(new PropDef("v1", null, null, null, false));
+        cDef.getOwnProps().add(new PropDef("v2", null, null, null, false));
+        cDef.getOwnProps().add(new PropDef("v3", null, null, null, false));
+        cDef.getOwnProps().add(new PropDef("vMap", null, null, null, false));
         oldDesc.getTypes().add(cDef);
         
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
@@ -958,7 +959,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         }
     }
     
-    public void testSerialize(){
+    public void testSerialize() throws XPathExpressionException{
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
         InterfaceDescription desc = gen.parse(null, TestSrv2.class);
         SOAPDocument soapDoc = new InterfaceDescriptionGenerator.SOAPDocument();
@@ -994,6 +995,13 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         	soapDoc.m_args = new Object[]{new Real1()};
         	Document res = gen.serialize(desc, soapDoc);
         	print(res);
+        	
+	        XPathFactory xpf = XPathFactory.newInstance();  
+	        XPath xp = xpf.newXPath();
+	        
+	        assertNull(xp.evaluate("/Envelope/Body/method12/arg0/param0", res, XPathConstants.NODE));
+	        assertNotNull(xp.evaluate("/Envelope/Body/method12/arg0/param1", res, XPathConstants.NODE));
+        	
         }
 
     }
@@ -1334,6 +1342,15 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         	InterfaceDescription desc = gen.parse(null, TestSrv2.class);
 	        SOAPDocument res = gen.deserialize(desc, getClass().getResourceAsStream("extendedinterface.soap"));
         	assertEquals("O1", res.m_args[0].getClass().getSimpleName());
+        }
+        {
+        	gen.getConfiguration().put(SAXHandler.CFG_UNK_PROPS, false);
+        	InterfaceDescription desc = gen.parse(null, TestSrv2.class);
+	        SOAPDocument res = gen.deserialize(desc, getClass().getResourceAsStream("nullfield.soap"));
+        	assertEquals("Real1", res.m_args[0].getClass().getSimpleName());
+        	Real1 v =(Real1) res.m_args[0];
+        	assertNull(v.param1);
+        	
         }
     }
     

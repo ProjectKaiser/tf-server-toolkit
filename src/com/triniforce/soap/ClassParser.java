@@ -104,7 +104,8 @@ public class ClassParser {
                 	}
                     Class propCls = TypeDefLibCache.toClass(propType);
                     TypeDef td = lib.add(propType);
-                    PropDef propDef = new PropDef(lowerName, td, propCls.getName(), getset);
+                    PropDef propDef = new PropDef(lowerName, td, propCls.getName(), getset, 
+                    		setter.isAnnotationPresent(IgnoreNullField.class));
                     res.getOwnProps().add(propDef);
                 }
 //            } catch (SecurityException e) {

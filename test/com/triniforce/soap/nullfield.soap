@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soap:Body>
+<method12 xmlns="http://tempuri.org/">
+<arg0 xsi:type="Real1">
+<param0 xsi:nil="true"/>
+</arg0>
+</method12>
+</soap:Body>
+</soap:Envelope>

@@ -224,7 +224,7 @@ public class TypeDef extends SimpleName{
         
         protected ArrayDef(String name, Class type, TypeDef compDef,  PropDef.IGetSet getSet) {
             super(name, type);
-            m_propDef = new PropDef(PROP_NAME, compDef, type.getName(), getSet);
+            m_propDef = new PropDef(PROP_NAME, compDef, type.getName(), getSet, false);
         }
         
         public TypeDef getComponentType() {
