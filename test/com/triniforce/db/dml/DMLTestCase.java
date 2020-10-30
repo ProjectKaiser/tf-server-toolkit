@@ -13,8 +13,9 @@ import java.sql.Statement;
 import java.util.Arrays;
 
 import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetFactory;
+import javax.sql.rowset.RowSetProvider;
 
-import com.sun.rowset.CachedRowSetImpl;
 import com.triniforce.db.ddl.AddColumnOperation;
 import com.triniforce.db.ddl.AddPrimaryKeyOperation;
 import com.triniforce.db.ddl.DDLTestCase;
@@ -86,7 +87,8 @@ public class DMLTestCase extends DDLTestCase {
     CachedRowSet getCurrentRS() throws Exception{
         Statement stmnt = getConnection().createStatement();        
         ResultSet rs = stmnt.executeQuery("SELECT * FROM "+getDbName()+" ORDER BY ID");
-        CachedRowSet crs = new CachedRowSetImpl();
+        RowSetFactory aFactory = RowSetProvider.newFactory();
+        CachedRowSet crs = aFactory.createCachedRowSet();
         crs.populate(rs);
         rs.close();
         stmnt.close();        
