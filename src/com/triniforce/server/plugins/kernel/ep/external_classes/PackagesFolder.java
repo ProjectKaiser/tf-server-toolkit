@@ -13,12 +13,24 @@ import com.triniforce.extensions.PluginsLoader;
 import com.triniforce.utils.ApiAlgs;
 
 public abstract class PackagesFolder extends ClassesFolder{
-    
-    void processFolder(File f, Collection<Class> res){
-        
-        PluginsLoader pl =  new PluginsLoader(f);
-        res.addAll(pl.loadClasses());
-        
+	
+	private ClassLoader m_parentClassLoader = null;
+	   
+    public ClassLoader getParentClassLoader() {
+		return m_parentClassLoader;
+	}
+
+	public void setParentClassLoader(ClassLoader parentClassLoader) {
+		this.m_parentClassLoader = parentClassLoader;
+	}
+
+	void processFolder(File f, Collection<Class> res){        
+        PluginsLoader pl;
+        if (m_parentClassLoader == null)
+        	pl = new PluginsLoader(f);
+        else
+        	pl = new PluginsLoader(f, m_parentClassLoader);
+        res.addAll(pl.loadClasses());        
     }
     
     @Override

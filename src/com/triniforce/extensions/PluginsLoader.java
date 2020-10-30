@@ -20,7 +20,7 @@ import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.TFUtils;
 
 public class PluginsLoader {
-    
+	   
     public static String trimVersion(String name){
         Pattern pattern = Pattern.compile("-\\d.*");
         Matcher matcher = pattern.matcher(name);
@@ -32,9 +32,34 @@ public class PluginsLoader {
     }
     
     private final File m_folder;
+    
+    private ClassLoader m_parentClassLoader;
+    
+    public static final URLClassLoader filteredUrlClassLoader(Class cls, String[] prefixes) {
+		URLClassLoader cl = (URLClassLoader) cls.getClassLoader();
+		URL[] urls = cl.getURLs();
+		List<URL> list = new ArrayList<>();
+		for (URL url : urls) {
+			String extn = url.toExternalForm();
+			for (String p : prefixes) {
+				if (extn.indexOf(p) != -1) {
+					list.add(url);
+					break;
+				}
+			}
+		}
+		return new URLClassLoader(list.toArray(new URL[list.size()]), null);
+    	
+    }
 
     public PluginsLoader(File folder) {
         m_folder = folder;
+        m_parentClassLoader = this.getClass().getClassLoader();
+    }
+
+    public PluginsLoader(File folder, ClassLoader parentClassLoader) {
+        m_folder = folder;
+        m_parentClassLoader = parentClassLoader;
     }
     
     public List<File> getJarFiles(){
@@ -95,7 +120,7 @@ public class PluginsLoader {
         }
         
 		@SuppressWarnings("resource")
-		URLClassLoader ucl = new URLClassLoader(urls.toArray(new URL[urls.size()]), this.getClass().getClassLoader());
+		URLClassLoader ucl = new URLClassLoader(urls.toArray(new URL[urls.size()]), m_parentClassLoader);
         for(String mainClass: mainClasses){
             try {
                 Class cls = ucl.loadClass(mainClass);
