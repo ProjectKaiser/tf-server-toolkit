@@ -122,12 +122,19 @@ sourceSets {
 
 }
 
+import org.gradle.plugins.ide.eclipse.model.AccessRule
 
 tasks.eclipse.dependsOn(cleanEclipse)
 eclipse {
 	classpath {
 		downloadJavadoc = true
 		plusConfigurations += [configurations.providedCompile]
+		file {
+	        whenMerged {
+                	def jre = entries.find { it.path.contains 'org.eclipse.jdt.launching.JRE_CONTAINER' }
+                	jre.accessRules.add(new AccessRule('accessible', 'com/sun/net/**'))                	
+            		}
+        	}
 	}
 	jdt.file.withProperties{
 		it['org.eclipse.jdt.core.compiler.problem.rawTypeReference']='ignore'
