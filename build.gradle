@@ -9,10 +9,10 @@ targetCompatibility = 1.8
 version = file('version').text
 ext.tf_vendor = 'Triniforce.com'
 
-// Project configuration is used for Maven  deploy:
+// Project configuration is used for Maven deploy:
 ext.vgroupId = 'com.triniforce'
-ext.GITHUB_OWNER = "projectkaiser";
-ext.GITHUB_REPOSITORY = "tf-server-toolkit";
+ext.GITHUB_OWNER = 'ProjectKaiser'
+ext.GITHUB_REPOSITORY = 'tf-server-toolkit'
 ext.vartifactId = 'tf-server-toolkit'
 
 
@@ -25,13 +25,8 @@ ext.testFolderDir = new File(buildDir, 'test')
 defaultTasks 'clean', 'ide'
 
 repositories {
-	maven {
-		url MavenResolveUrl
-		credentials(PasswordCredentials) {
-			username = MavenUsername
-			password = MavenPassword
-		}
-	}
+	mavenCentral()
+	maven { url 'https://dev.untill.com/artifactory/repo' } // only for sojo 1.0.0
 }
 
 processResources {
@@ -49,7 +44,7 @@ processResources {
 		include '**/*.soap'
 		include '**/*.wiki'
 		include '**/*.FDB'
-	
+
 	}
 }
 
@@ -64,7 +59,6 @@ dependencies {
 	compile 'commons-dbcp:commons-dbcp:1.4' // (latest: 1.4)
 	compile 'commons-logging:commons-logging:1.1.1'
 	compile 'org.apache.commons:commons-lang3:3.8'
-	
 
 	compile(group: 'log4j', name: 'log4j', version: '1.2.16')
 	compile(group: 'org.beanshell', name: 'bsh', version: '2.0b4')
@@ -90,15 +84,15 @@ dependencies {
 	testCompile(group: 'org.jmock', name: 'jmock', version: '2.5.1')
 	testCompile 'net.sourceforge.jtds:jtds:1.2.4'
 	testCompile 'com.microsoft.sqlserver:mssql-jdbc:6.1.0.jre7'
-    	testCompile 'org.firebirdsql.jdbc:jaybird-jdk16:2.2.4'
+	testCompile 'org.firebirdsql.jdbc:jaybird-jdk16:2.2.4'
 	testCompile(group: 'junit', name: 'junit', version: '3.8.2', force: true)
 	testCompile(group: 'mysql', name: 'mysql-connector-java', version: '5.1.16')
 	testCompile 'com.google.guava:guava:19.0-rc2'
-	testCompile 'net.engio:mbassador:1.2.4'		
+	testCompile 'net.engio:mbassador:1.2.4'
 	testCompile 'com.icegreen:greenmail:1.3'
 	testCompile 'org.slf4j:slf4j-nop:1.7.14'
-		
-	testCompile "org.mockito:mockito-core:1.+"
+
+	testCompile 'org.mockito:mockito-core:1.+'
 	// Jetty
 	testCompile 'org.eclipse.jetty:jetty-webapp:9.2.0.RC0'
 	testCompile 'org.eclipse.jetty:jetty-plus:9.2.0.RC0'
@@ -130,11 +124,11 @@ eclipse {
 		downloadJavadoc = true
 		plusConfigurations += [configurations.providedCompile]
 		file {
-	        whenMerged {
-                	def jre = entries.find { it.path.contains 'org.eclipse.jdt.launching.JRE_CONTAINER' }
-                	jre.accessRules.add(new AccessRule('accessible', 'com/sun/net/**'))                	
-            		}
-        	}
+			whenMerged {
+					def jre = entries.find { it.path.contains 'org.eclipse.jdt.launching.JRE_CONTAINER' }
+					jre.accessRules.add(new AccessRule('accessible', 'com/sun/net/**'))
+			}
+		}
 	}
 	jdt.file.withProperties{
 		it['org.eclipse.jdt.core.compiler.problem.rawTypeReference']='ignore'
@@ -144,8 +138,8 @@ eclipse {
 
 //eclipseJdt << {
 //	file('.settings/org.eclipse.core.resources.prefs').write(
-//	  'eclipse.preferences.version=1\n' +
-//	  'encoding/<project>=UTF-8\n'
+//		'eclipse.preferences.version=1\n' +
+//		'encoding/<project>=UTF-8\n'
 //	)
 //}
 
@@ -169,11 +163,11 @@ publishing{
 
 	repositories {
 		maven {
-			name = "GitHubPackages"
+			name = 'GitHubPackages'
 			url = 'https://maven.pkg.github.com/'+GITHUB_OWNER+'/'+GITHUB_REPOSITORY
 			credentials {
-				username = GithubRegistryUsername
-				password = GithubRegistryToken
+				username = untillGithubRegistryUsername ?: ''
+				password = untillGithubRegistryToken
 			}
 		}
 	}
@@ -182,11 +176,14 @@ publishing{
 		gpr(MavenPublication) {
 			groupId = vgroupId
 			artifactId = vartifactId
-			version = getNextVersion(requestLastRegistryVersion())
 
 			from(components.java)
 		}
 	}
+}
+
+generatePomFileForGprPublication.doFirst {
+	publishing.publications.gpr.version = getNextVersion(requestLastRegistryVersion())
 }
 
 task jar_lib(type: Copy, dependsOn:[jar]){
@@ -196,7 +193,7 @@ task jar_lib(type: Copy, dependsOn:[jar]){
 }
 
 jar_lib.doFirst{
-	def envName ="TF_LIB_HOME"
+	def envName = 'TF_LIB_HOME'
 	def env = System.env[envName]
 	if (null == env || env.length() == 0){
 		throw new StopExecutionException("Variable $envName must point to TF_LIB HOME")
@@ -206,12 +203,12 @@ jar_lib.doFirst{
 jar {
 	manifest {
 		attributes(
-			"Specification-Title": project.name,
-			"Specification-Version": version,
-			"Specification-Vendor": tf_vendor,
-			"Implementation-Title": project.name,
-			"Implementation-Version": "$version (${new Date().format('yyyy-MM-dd')})",
-			"Implementation-Vendor": tf_vendor
+			'Specification-Title': project.name,
+			'Specification-Version': version,
+			'Specification-Vendor': tf_vendor,
+			'Implementation-Title': project.name,
+			'Implementation-Version': "$version (${new Date().format('yyyy-MM-dd')})",
+			'Implementation-Vendor': tf_vendor
 		)
 	}
 }
@@ -245,8 +242,8 @@ test {
 		environment.put('TF_SERVER_TOOLKIT_TEST_FOLDER', testFolderDir)
 	}
 
-	minHeapSize = "128m"
-	maxHeapSize = "256m"
+	minHeapSize = '128m'
+	maxHeapSize = '256m'
 }
 
 
@@ -282,42 +279,50 @@ query{repository(owner:"${GITHUB_OWNER}", name:"${GITHUB_REPOSITORY}"){
 		doOutput = true
 		doInput = true
 		requestMethod = 'POST'
-		def basicAuth = 'token ' + GithubRegistryToken
-		setRequestProperty("Authorization", basicAuth);
+		def basicAuth = 'token ' + untillGithubRegistryToken
+		setRequestProperty('Authorization', basicAuth)
 		outputStream.withWriter { writer ->
-			writer << JsonOutput.toJson(["query": gqlQuery])
+			writer << JsonOutput.toJson(['query': gqlQuery])
 		}
-		def strResp = content.text;
-		def gqlResponse =  new JsonSlurper().parseText(strResp);
-		def edges = gqlResponse.data.repository.packages.edges;
-		def latestVersion = edges[0].node.latestVersion.version;
-		for(int i=1; i < edges.size(); i++){
-			println "checking: " + edges[i].node.latestVersion.version;		
-			if(edges[i].node.latestVersion.version.startsWith(version)){
-				latestVersion = edges[i].node.latestVersion.version;
-				break;
+		def strResp = content.text
+		def gqlResponse = new JsonSlurper().parseText(strResp)
+		if (gqlResponse.errors != null) {
+			System.err.println gqlResponse.errors
+			throw new GradleException(gqlResponse.errors[0]?.message)
+		}
+		def edges = gqlResponse?.data?.repository?.packages?.edges
+		def latestVersion = null
+		if (edges != null) {
+			latestVersion = edges[0]?.node?.latestVersion?.version
+			for (int i = 1; i < edges.size(); i++) {
+				println 'checking: ' + edges[i].node.latestVersion
+				if (edges[i].node?.latestVersion?.version != null &&
+						edges[i].node.latestVersion.version.startsWith(version)) {
+					latestVersion = edges[i].node.latestVersion.version
+					break
+				}
 			}
-		}        
+		}
 		return latestVersion;
 	}
 
 }
 
 String getNextVersion(String registryVersion){
-	def matcher = registryVersion =~ /^(\d+\.\d+)\.(\d{1,4})$/;
+	def matcher = registryVersion =~ /^(\d+\.\d+)\.(\d{1,4})$/
 
-	assert matcher.find();
-	def major = matcher[0][1];
-	def minor = matcher[0][2];
-	def nextVersion;
-	if(version.startsWith(major, 0))
-		nextVersion = major + '.'+((minor as int) + 1);
-	else
-		nextVersion = version + ".0";
-	return nextVersion;
+	def nextVersion = version + '.0'
+	if (matcher.find()) {
+		def major = matcher[0][1]
+		def minor = matcher[0][2]
+		if (version.startsWith(major, 0))
+			nextVersion = major + '.' + ((minor as int) + 1)
+	}
+	return nextVersion
 }
 
-task showNextPackageVersion(){
-	println "next version : " + getNextVersion(requestLastRegistryVersion());
-
+task showNextPackageVersion {
+	doLast {
+		println 'next version: ' + getNextVersion(requestLastRegistryVersion())
+	}
 }
