@@ -135,7 +135,7 @@ public class RequestHandlerTest extends TFTestCase {
         private InterfaceDescriptionGenerator m_gen;
         private InterfaceDescription m_desc;
         private TestService m_svc;
-        private int m_count;
+        private volatile int m_count;
 
         public TestThread(InterfaceDescriptionGenerator gen, InterfaceDescription desc, TestService service) {
             m_gen = gen;
@@ -187,8 +187,14 @@ public class RequestHandlerTest extends TFTestCase {
         for (Thread thread : threads) {
             thread.start();
         }
-        
-        Thread.sleep(1000);
+        boolean allExecuted10 = false;
+        do{
+        	allExecuted10 = true;
+	        for (TestThread testThread : threads) {
+				allExecuted10 &= testThread.m_count >= 10;
+			}
+        	
+        }while(!allExecuted10 );
         
         bShutDown = true;
         
