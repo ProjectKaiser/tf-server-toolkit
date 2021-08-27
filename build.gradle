@@ -236,6 +236,7 @@ task prepareTestFolder {
 	}
 }
 
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat;
 test {
 	dependsOn prepareTestFolder
 	doFirst {
@@ -244,6 +245,14 @@ test {
 
 	minHeapSize = '128m'
 	maxHeapSize = '256m'
+
+	testLogging {
+        	events "passed", "skipped", "failed"
+		exceptionFormat TestExceptionFormat.FULL
+	        showExceptions true
+        	showCauses true
+	        showStackTraces true	
+	}
 }
 
 
