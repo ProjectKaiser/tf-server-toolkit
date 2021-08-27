@@ -247,7 +247,7 @@ test {
 	maxHeapSize = '256m'
 
 	testLogging {
-        	events "passed", "skipped", "failed"
+        	events "failed"
 		exceptionFormat TestExceptionFormat.FULL
 	        showExceptions true
         	showCauses true

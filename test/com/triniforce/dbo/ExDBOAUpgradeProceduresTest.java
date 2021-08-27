@@ -11,15 +11,16 @@ import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.extensions.IPKExtensionPoint;
 import com.triniforce.extensions.IPKRootExtensionPoint;
 import com.triniforce.server.srvapi.IBasicServer;
+import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
 import com.triniforce.server.srvapi.UpgradeProcedure;
-import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.utils.ApiStack;
 
 public class ExDBOAUpgradeProceduresTest extends BasicServerTestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
+		restartServerOnSetup();
 		super.setUp();
 		getServer().enterMode(Mode.Upgrade);
 		ISrvSmartTranFactory trnFact = ApiStack.getApi()
@@ -45,7 +46,7 @@ public class ExDBOAUpgradeProceduresTest extends BasicServerTestCase {
 		
 		@Override
 		public void run() throws Exception {
-			bCall = true;
+			bCall = true;			
 		}
 	}
 	
