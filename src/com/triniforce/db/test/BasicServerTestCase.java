@@ -18,7 +18,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
@@ -117,7 +117,7 @@ public static class DPPProcPlugin extends PKPlugin{
 
         public Pool(BasicDataSource ds ){
             m_ds = ds;
-            m_ds.setMaxActive(50);
+            m_ds.setMaxTotal(50);
         }
 
         @Override

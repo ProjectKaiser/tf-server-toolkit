@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 
 import com.triniforce.server.srvapi.IPooledConnection;
 import com.triniforce.utils.ApiAlgs;
@@ -23,12 +23,12 @@ public class TFPooledConnection implements IPooledConnection{
 
     public TFPooledConnection(BasicDataSource ds, int maxActive){
         m_ds = ds;
-        m_ds.setMaxActive(maxActive);
+        m_ds.setMaxTotal(maxActive);
     }
 
     public Connection getPooledConnection() throws SQLException {
     	synchronized (this){
-	        if( m_ds.getNumActive()  >= m_ds.getMaxActive() - 2 ){
+	        if( m_ds.getNumActive()  >= m_ds.getMaxTotal() - 2 ){
 	            for (StackTraceElement[] trace : m_conStack.values()) {
 	                String s = "Pooled Connection Exhausted: ";
 	                for (StackTraceElement tr : trace) {
@@ -86,9 +86,9 @@ public class TFPooledConnection implements IPooledConnection{
                 s = s + tr.toString() + "\n";
             }
         }
-		s = "MaxActive = " + m_ds.getMaxActive() + "\n" + 
+		s = "MaxActive = " + m_ds.getMaxTotal() + "\n" + 
             "NumActive = " + m_ds.getNumActive() + "\n" +
-            "MaxWait = "   + m_ds.getMaxWait()   + "\n" +	
+            "MaxWaitMillis = "   + m_ds.getMaxWaitMillis()   + "\n" +	
             "Total in conStack: " + i +  "\n" + s + "----" + "\n"; 
 		
 		return s;

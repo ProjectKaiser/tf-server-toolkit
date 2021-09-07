@@ -15,7 +15,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.UUID;
 
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;

@@ -10,7 +10,7 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.Locale;
 
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
 import com.triniforce.db.test.BasicServerTestCase;
@@ -53,7 +53,7 @@ public class BasicServerTrStartTest extends TFTestCase {
 
 
 	private IBasicServer startServer(BasicDataSource ds) throws ServerException, EDBObjectException, SQLException {
-		ds.setMaxWait(100L);		
+		ds.setMaxWaitMillis(100L);		
 		Pool pool = new BasicServerTestCase.Pool(ds);
 		Api baseApi = new Api();
 		final BasicServer srv = new BasicServer();

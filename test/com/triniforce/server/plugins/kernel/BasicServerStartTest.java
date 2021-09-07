@@ -8,7 +8,7 @@ package com.triniforce.server.plugins.kernel;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 
@@ -117,7 +117,7 @@ public class BasicServerStartTest extends TFTestCase {
 	}
 
 	private IBasicServer startServerWithRegistrator(BasicDataSource ds) {
-		ds.setMaxWait(100L);		
+		ds.setMaxWaitMillis(100L);		
 		Pool pool = new BasicServerTestCase.Pool(ds);
 		Api baseApi = new Api();
 		final BasicServer srv = new BasicServer();

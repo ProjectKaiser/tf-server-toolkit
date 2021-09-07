@@ -30,9 +30,9 @@ public class CleanDatabase {
             test.trace("Database clean.");
 
 //            test.getConnection().commit();
-            DBTestCase.getDataSource().setMaxActive(0);
+            DBTestCase.getDataSource().setMaxTotal(0);
             DBTestCase.getDataSource().setMaxIdle(1);
-            DBTestCase.getDataSource().setMaxActive(1);
+            DBTestCase.getDataSource().setMaxTotal(1);
             run(test,  ApiAlgs.getLog(test));
 
             test.trace("Ok. Done.");
