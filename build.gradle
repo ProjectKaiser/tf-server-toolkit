@@ -84,7 +84,8 @@ dependencies {
 	testCompile(group: 'org.jmock', name: 'jmock', version: '2.5.1')
 	testCompile 'net.sourceforge.jtds:jtds:1.2.4'
 	testCompile 'com.microsoft.sqlserver:mssql-jdbc:6.1.0.jre7'
-	testCompile 'org.firebirdsql.jdbc:jaybird-jdk16:2.2.4'
+	testCompile 'org.firebirdsql.jdbc:jaybird-jdk18:2.2.15'
+//	testCompile 'org.firebirdsql.jdbc:jaybird-jdk16:2.2.4'
 	testCompile(group: 'junit', name: 'junit', version: '3.8.2', force: true)
 	testCompile(group: 'mysql', name: 'mysql-connector-java', version: '5.1.16')
 	testCompile 'com.google.guava:guava:19.0-rc2'
