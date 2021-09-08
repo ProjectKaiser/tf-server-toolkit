@@ -134,7 +134,7 @@ public class BasicServerStartTest extends TFTestCase {
 						e.printStackTrace();
 					}
 				}
-				isrv.initAndStart();
+				//isrv.initAndStart();
 				trace("server started successfully");				
 			}
 		};

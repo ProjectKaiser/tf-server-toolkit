@@ -473,7 +473,7 @@ public class ServerImplTest extends ServerTest {
      * @throws Throwable 
      */
     public void testGetTableDbName() throws Throwable {
-        String entityName = "com.triniforce.server.plugins.kernel.ServerTest.testGetTableDbName";
+        String entityName = "com.triniforce.server.plugins.kernel.ServerImplTest.testGetTableDbName";
         TableDef def = new TableDef(entityName);
         def.addStringField(1, "str_field", ColumnType.CHAR, 5, true, "12345");
         BasicServer server = new BasicServer(m_coreApi, Arrays.asList(new IPlugin[]{                

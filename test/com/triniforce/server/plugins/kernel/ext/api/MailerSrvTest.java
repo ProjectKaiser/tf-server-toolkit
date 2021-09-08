@@ -140,6 +140,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
+		restartServerOnSetup();
 		greenMail.start();
 		addPlugin(new MailerSrvPlugin());
 		super.setUp();

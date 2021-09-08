@@ -70,7 +70,7 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 		
 		tabDef = new TableDef("DeltaSchemaLoaderTest3");
 		tabDef.addStringField(1, "field1", ColumnType.NVARCHAR, 100, false, null);
-		tabDef.addModification(2, new AddIndexOperation(IndexDef.createIndex("DeltaSchemaLoaderTest3_ORIGINAL_DB_NAME", 
+		tabDef.addModification(2, new AddIndexOperation(IndexDef.createIndex("DeltaSchemaLoaderTest3_ORG", 
 				Arrays.asList("field1"), false, true, false, null, null, true)));
 		ts.add(tabDef);
 
@@ -194,7 +194,7 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 			tab = tabs2.getTables().get("DeltaSchemaLoaderTest3");
 			assertNotNull(tab);
 			IndexDef idx0 = tab.getIndices().getElement(0);
-			assertEquals("DeltaSchemaLoaderTest3_ORIGINAL_DB_NAME".toUpperCase(Locale.ENGLISH), idx0.getName().toUpperCase(Locale.ENGLISH));
+			assertEquals("DeltaSchemaLoaderTest3_ORG".toUpperCase(Locale.ENGLISH), idx0.getName().toUpperCase(Locale.ENGLISH));
 			ElementVerStored<IndexDef> res = tab.getIndices().findElement(idx0.getName());
 			assertNotNull(res);
 			assertTrue(idx0.isOriginalDbName());
