@@ -257,6 +257,8 @@ public class InterfaceDescriptionGenerator {
         public Node_S end();
 		public Node_S textContent(ScalarDef typeDef, Object object);
 		public Node_S text(String string);
+		public List<Node_S> getChildNodes();
+		public String getName();
     }
     
     

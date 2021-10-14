@@ -26,16 +26,19 @@ public class SaxNodeS implements Node_S{
 	private SaxNodeS m_parent;
 	private boolean m_bStartTerminated = false;
 	private List<String[]> m_attrs = new ArrayList<>();
+	private ArrayList<Node_S> m_childNodes;
 
 	public SaxNodeS(SaxNodeS parent, String name, Writer w) {
 		m_writer = w;
 		m_name = name;
 		m_parent = parent;
+		m_childNodes = new ArrayList<Node_S>();
     }
 
 	public SaxNodeS append(String name) {
 		terminateStart(false);
 		SaxNodeS res = new SaxNodeS(this, name, m_writer);
+		m_childNodes.add(res);
 		return res;
 	}
 
@@ -102,6 +105,16 @@ public class SaxNodeS implements Node_S{
 			throw new ApiAlgs.RethrownException(e);
 		}
 		return this;
+	}
+
+	@Override
+	public List<Node_S> getChildNodes() {
+		return m_childNodes;
+	}
+
+	@Override
+	public String getName() {
+		return m_name;
 	}
 
 }

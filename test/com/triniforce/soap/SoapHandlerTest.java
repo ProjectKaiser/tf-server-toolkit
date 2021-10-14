@@ -264,7 +264,7 @@ public class SoapHandlerTest extends TFTestCase {
             obj.setCurrentProp("anything");
             fail();
         } catch(ESoap.EUnknownElement e){
-            assertEquals(new QName("anything").toString(), e.getMessage());
+            assertEquals(new QName("int.anything").toString(), e.getMessage());
         }
         
 //        assertNull(obj.toObject());
@@ -280,10 +280,11 @@ public class SoapHandlerTest extends TFTestCase {
         } catch(NullPointerException e){}
         
         try{
+        	
             obj.setPropValue("anything");
             fail();
         } catch(RuntimeException e){
-            assertEquals("ScalarDef", e.getMessage());
+            
         }
         
         //check all scalars
@@ -431,6 +432,7 @@ public class SoapHandlerTest extends TFTestCase {
         	
         	CurrentObject obj2 = sh.createObject("unk003", res1); // unknownProp in unknownItf
         	assertNotNull(obj2.setCurrentProp("p12"));
+        	obj2.setPropValue("bbp01");
         	
         	
         	

@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -232,7 +233,26 @@ public class TypeDef extends SimpleName{
         }
         public PropDef getPropDef() {
             return m_propDef;
-        } 
+        }
+        
+        @Override
+        public PropDef getProp(String propName) {
+        	if(getPropDef().getName().equals(propName)){
+                return getPropDef();
+            }
+        	else 
+        		return null;
+        }
+        
+        @Override
+        public Object[] instanciateDefaultProperies() {
+        	return new Object[]{new ArrayList<Object>()};
+        }
+        
+        @Override
+        public void setPropValue(Object[] props, String currentPropName, Object value) {
+            getPropDef().set(props[0], value);
+        }
     }
     
     public static class ClassDef extends TypeDef  implements Serializable{
@@ -353,6 +373,7 @@ public class TypeDef extends SimpleName{
          * @param string
          * @return
          */
+        @Override
         public PropDef getProp(String propName) {
             return InterfaceDescriptionGenerator.findByName(getProps(), propName);
         }
@@ -364,6 +385,60 @@ public class TypeDef extends SimpleName{
         public ClassDef getParentDef(){
             return m_parentDef;
         }
+        
+        static final Object DEFAULT_OBJECT = new Object();
+        
+        @Override
+        public Object instanciate(String name, Object[] props) {
+        	try {
+                Class<?> cls = Class.forName(getType());
+                Object instance;
+                if(cls.isArray())
+                    instance = Array.newInstance(Object.class, props.length);
+                else
+                    instance = cls.newInstance();
+                Object res = instance;
+                List<PropDef> propDefs = getProps();
+                for (int i=0; i<propDefs.size(); i++) {
+                    PropDef propDef = propDefs.get(i);
+                    Object val = props[i];
+                    if(!DEFAULT_OBJECT.equals(val))
+                    	propDef.set(instance, val);
+                }
+                return res;
+            }catch(InstantiationException e){
+            	ApiAlgs.rethrowException(getType().toString(), e);
+            	return null;
+            }catch (Exception e) {
+                ApiAlgs.rethrowException(e);
+                return null;
+            }
+        }
+
+        public Object[] instanciateDefaultProperies() {
+            Object[] res = new Object[getProps().size()];
+            Arrays.fill(res, DEFAULT_OBJECT);        	
+            return res;
+        };
+        
+        @Override
+        public void setPropValue(Object[] props, String currentPropName, Object value) {
+        	int i = 0;
+        	List<PropDef> propDefs = getProps();
+        	for(PropDef pd : propDefs){
+        		if(pd.getName().equals(currentPropName)){
+        			if(!DEFAULT_OBJECT.equals(props[i]))
+        				throw new ESoap.EElementReentry(currentPropName);
+        			props[i] = value;
+        			break;
+        		}
+        		i++;
+        	}
+        	if(i == propDefs.size())
+        		throw new RuntimeException(currentPropName);
+
+        }
+
     }
     
     static class MapDef extends ArrayDef{
@@ -394,6 +469,11 @@ public class TypeDef extends SimpleName{
         public TypeDef getValueDef(){
             MapComponentDef compDef = (MapComponentDef) getComponentType();
             return compDef.getValueDef();
+        }
+        
+        @Override
+        public Object[] instanciateDefaultProperies() {
+        	return new Object[]{new HashMap<Object, Object>()};
         }
     }
     
@@ -427,6 +507,11 @@ public class TypeDef extends SimpleName{
     
     static class UnknownDef extends TypeDef{
 		private static final long serialVersionUID = 5280677981465813206L;
+		
+		
+		@Override
+		public void setPropValue(Object[] props, String currentPropName, Object value) {
+		}
     }
 
     private String m_typeName;
@@ -440,6 +525,10 @@ public class TypeDef extends SimpleName{
         m_typeName = null != type ? type.getName() : null;
     }
     
+    public PropDef getProp(String propName) {
+    	return null;
+    }
+    
     public String getType(){
         return m_typeName;
     }
@@ -447,4 +536,22 @@ public class TypeDef extends SimpleName{
     boolean isNullable(){
         return true;
     }
+
+	public Object instanciate(String name, Object[] props) {
+		return  null != props ? props[0] : null;
+
+	}
+
+	public Object[] instanciateDefaultProperies() {
+		Object[] res;
+		if(String.class.getName().equals(getType()))
+    		res = new Object[]{""};
+    	else
+    		res = null;
+    	return res;
+	}
+
+	public void setPropValue(Object[] props, String currentPropName, Object value) {
+		throw new RuntimeException("unsuported for " + getName() + " propery: " + currentPropName);		
+	}
 }

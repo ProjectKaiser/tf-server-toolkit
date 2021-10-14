@@ -5,10 +5,7 @@
  */
 package com.triniforce.soap;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -17,14 +14,10 @@ import java.util.Stack;
 import com.triniforce.soap.ESoap.EInterfaceElementException;
 import com.triniforce.soap.InterfaceDescription.MessageDef;
 import com.triniforce.soap.InterfaceDescription.Operation;
-import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
-import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDef.UnknownDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
-import com.triniforce.utils.ApiAlgs;
-import com.triniforce.utils.IName;
 
 public class SAXHandler {
 	
@@ -32,15 +25,14 @@ public class SAXHandler {
 
 	Map<String, Boolean> m_configuration;
 	
-	final Object DEFAULT_OBJECT = new Object();
     static final UnknownDef UNKNOWN_DEF = new UnknownDef();
 	
     class CurrentObject{
         TypeDef  m_objDef;
-        int      m_propIdx;
         Object[] m_props;
         private boolean m_bNull;
 		private String m_name;
+		private String m_currentPropName;
         
         public CurrentObject(String name, TypeDef objDef) throws ESoap.ENonNullableObject {
             this(name, objDef, false);
@@ -66,32 +58,7 @@ public class SAXHandler {
         Object toObject(){
             Object res = null;
             if(!m_bNull){
-                if(m_objDef instanceof ClassDef){
-                    ClassDef cd = (ClassDef) m_objDef;
-                    try {
-                        Class<?> cls = Class.forName(cd.getType());
-                        Object instance;
-                        if(cls.isArray())
-                            instance = Array.newInstance(Object.class, m_props.length);
-                        else
-                            instance = cls.newInstance();
-                        res = instance;
-                        for (int i=0; i<cd.getProps().size(); i++) {
-                            PropDef propDef = cd.getProps().get(i);
-                            Object val = m_props[i];
-                            if(!DEFAULT_OBJECT.equals(val))
-                            	propDef.set(instance, val);
-                        }
-                    }catch(InstantiationException e){
-                    	ApiAlgs.rethrowException(cd.getType().toString(), e);
-                    }catch (Exception e) {
-                        ApiAlgs.rethrowException(e);
-                    }
-                }
-                else{
-                    if(null != m_props)
-                        res = m_props[0];
-                }
+            	res = m_objDef.instanciate(m_name, m_props);
             }
             if(res == null && !m_objDef.isNullable()){
             	throw new ESoap.ENonNullableObject(m_name, m_objDef.getType());
@@ -101,52 +68,20 @@ public class SAXHandler {
         
 
         TypeDef setCurrentProp(String propName) throws ESoap.EUnknownElement, ESoap.EElementReentry{
-            if(m_objDef instanceof ClassDef){
-                ClassDef cd = (ClassDef) m_objDef;
-                m_propIdx = getPos(cd.getProps(), propName);
-                if(m_propIdx !=-1){
-                    Object v = m_props[m_propIdx];
-                    if(!DEFAULT_OBJECT.equals(v)){
-                        throw new ESoap.EElementReentry(propName);
-                    }
-                    return cd.getProps().get(m_propIdx).getType();
-                }
-                else{
-                	if(Boolean.TRUE.equals(m_configuration.get(CFG_UNK_PROPS)))
-                		return UNKNOWN_DEF;
-                	else
-                		throw new ESoap.EUnknownElement(cd.getType() + "." + propName);
-                }
-            }
-            else if (m_objDef instanceof ArrayDef){
-                ArrayDef ad = (ArrayDef) m_objDef;
-                if(ad.getPropDef().getName().equals(propName)){
-                    return ad.getPropDef().getType();
-                }
-            }
-            else if( m_objDef instanceof UnknownDef)
-            	return UNKNOWN_DEF;
-            	
-//            else if (m_objDef instanceof MapDef){
-//            	
-//            }
-            
-            ApiAlgs.assertNotNull(m_objDef, propName);
-            
-            throw new ESoap.EUnknownElement(propName);
+        	PropDef prop = m_objDef.getProp(propName);
+        	if(null == prop){
+            	if(Boolean.TRUE.equals(m_configuration.get(CFG_UNK_PROPS)))
+            		return UNKNOWN_DEF;
+            	else
+            		throw new ESoap.EUnknownElement(m_objDef.getType() + "." + propName);        		
+        	}
+        	m_currentPropName = propName;
+        	return prop.getType();
         }
         
         @SuppressWarnings("unchecked")
         void setPropValue(Object value){
-            if(m_objDef instanceof ClassDef){
-                m_props[m_propIdx] = value;
-            }
-            else if (m_objDef instanceof ArrayDef){
-                ArrayDef ad = (ArrayDef) m_objDef;
-                ad.getPropDef().set(m_props[0], value);
-            }
-            else
-                throw new RuntimeException("ScalarDef");
+        	m_objDef.setPropValue(m_props, m_currentPropName, value);
         }
         
         Object[] getProps(){
@@ -166,35 +101,10 @@ public class SAXHandler {
                 }
             }
         }
-        
-        private <T extends IName> int getPos(List<T> col, String tag) {
-            for (int i=0; i<col.size(); i++) {
-                if(col.get(i).getName().equals(tag))
-                    return i;
-            }
-            return -1;
-        }
     
         public void setType(TypeDef td){
         	m_objDef = td;
-
-            if(m_objDef instanceof ClassDef){
-                m_props = new Object[((ClassDef)m_objDef).getProps().size()];
-                Arrays.fill(m_props, DEFAULT_OBJECT);
-            }
-            else if (m_objDef instanceof MapDef){
-                m_props = new Object[]{new HashMap<Object, Object>()};
-            }
-            else if (m_objDef instanceof ArrayDef){
-                m_props = new Object[]{new ArrayList<Object>()};
-            }
-            else if (m_objDef instanceof ScalarDef){
-            	ScalarDef sd = (ScalarDef) m_objDef;
-            	if(sd.getType().equals(String.class.getName()))
-            		m_props = new Object[]{""};
-            	else
-            		m_props = null;
-            }
+        	m_props = td.instanciateDefaultProperies();
         }
 
 		public TypeDef getType() {

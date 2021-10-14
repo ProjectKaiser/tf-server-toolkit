@@ -107,7 +107,28 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 		}
     }
     
-    @SoapInclude(extraClasses={ExtraInc.class, Cls1.class, Cls2.class, Real1.class})
+    public static class Req0WithAny{
+    	private int m_prop0;
+    	private AnyType m_prop1;
+		public int getProp0() {
+			return m_prop0;
+		}
+		public void setProp0(int prop0) {
+			m_prop0 = prop0;
+		}
+		public AnyType getProp1() {
+			return m_prop1;
+		}
+		public void setProp1(AnyType prop1) {
+			m_prop1 = prop1;
+		}
+    }
+    
+    public static class AnyType{
+    	
+    }
+    
+    @SoapInclude(extraClasses={ExtraInc.class, Cls1.class, Cls2.class, Real1.class})    
     interface TestSrv2{
         void method1();
         void method2();
@@ -121,6 +142,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         void method10(Map<String,ICustom1> i2);
         void method11(String arg0);        
         void method12(Object in1);
+        void method13(Req0WithAny anytype);
     }
     
     static class Cls1{
@@ -253,13 +275,40 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         public static class Error_00544 extends Error_00543{
 			private static final long serialVersionUID = 1L;}
         void run7() throws Error_00543; 
+        
+        void run8(AnyType at);
     }
     
     interface TestSrv4{
     	void method1(com.triniforce.soap.testpkg_01.DuplicatedName arg0, com.triniforce.soap.testpkg_02.DuplicatedName arg1);
     }
     
-    static Order DEFAULT_ORDER = null; 
+    static Order DEFAULT_ORDER = null;
+    
+    static class AnyDef extends TypeDef{
+		private static final long serialVersionUID = 4055073552572707062L;
+		
+		public AnyDef() {
+			super("any", AnyType.class);
+		}
+		@Override
+		public PropDef getProp(String propName) {
+			return new PropDef(propName, new AnyDef(), null, null, true);
+		}
+		@Override
+		public Object instanciate(String name, Object[] props) {
+			return new AnyType();
+		}
+		@Override
+		public Object[] instanciateDefaultProperies() {
+			return new Object[]{new ArrayList<Object>()};
+		}
+		
+		@Override
+		public void setPropValue(Object[] props, String currentPropName, Object value) {
+			
+		}
+    }
 
     @SuppressWarnings("unchecked")
     public void testParse() throws Exception {
@@ -332,6 +381,15 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         	assertNotNull(o2);
         	
         }
+        {
+        	AnyDef anyDef = new AnyDef();
+        	gen.addExternalDef(AnyType.class, anyDef, true);
+        	InterfaceDescription desc = gen.parse(null, TestSrv2.class);
+        	Operation op1 = desc.getOperation("method13");
+        	ClassDef c1 = (ClassDef) op1.getRequestType().getProp("arg0").getType();
+        	TypeDef res = c1.getProp("prop1").getType();
+        	assertSame(res, anyDef);
+        }
     }
     
     
@@ -347,6 +405,7 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
     @SuppressWarnings("unchecked")
     public void testGenerateWSDL() throws XPathExpressionException{
         InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        gen.addExternalDef(AnyType.class, new AnyDef(), true);
         InterfaceDescription desc = gen.parse(null, TestSrv3.class);
         Document doc = gen.generateWSDL(desc.getWsdlDescription(), "http:\\localhost:8080\test");
         
@@ -1350,6 +1409,14 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
         	assertEquals("Real1", res.m_args[0].getClass().getSimpleName());
         	Real1 v =(Real1) res.m_args[0];
         	assertNull(v.param1);
+        	
+        }
+        {
+        	gen.addExternalDef(AnyType.class, new AnyDef(), true);
+        	InterfaceDescription desc = gen.parse(null, TestSrv2.class);
+	        SOAPDocument res = gen.deserialize(desc, getClass().getResourceAsStream("anytype.soap"));
+	        Req0WithAny node =  (Req0WithAny) res.m_args[0];
+	        assertNotNull(node.m_prop1);
         	
         }
     }

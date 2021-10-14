@@ -1,0 +1,17 @@
+<soapenv:Envelope 
+xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:soap="http://tempuri.org/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <soap:method13>
+         <soap:arg0 >
+         	<soap:prop0>994</soap:prop0>
+         	<soap:prop1>
+	            <soap:newProp00202/>
+	            <soap:newProp00203/>
+         	</soap:prop1>
+         </soap:arg0>
+      </soap:method13>
+   </soapenv:Body>
+</soapenv:Envelope>

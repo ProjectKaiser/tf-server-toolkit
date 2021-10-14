@@ -6,6 +6,7 @@
 package com.triniforce.soap;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -60,5 +61,17 @@ public class DomNode_S implements Node_S{
 	public Node_S text(String string) {
         m_element.setTextContent(string);
         return this;
+	}
+
+	@Override
+	public List<Node_S> getChildNodes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
