@@ -285,7 +285,12 @@ public class TaskExecutorsTest extends TFTestCase {
 	        while(cnt + 2 < te.getTasksCount()) {
 	        	Thread.sleep(100); // Both task should be started
 	        }
-	        while(cntCompleted + 1 != te.getCompletedTasksCount()); // Second task should be completed before first ended
+	        int iterMax = 100;
+	        while(cntCompleted + 1 != te.getCompletedTasksCount() && iterMax > 0){
+	        	// Second task should be completed before first ended
+	        	Thread.sleep(10L);
+	        	iterMax --;
+	        } 
 	        
 	        trace("waiting for NOTIFIING");
 	        SYNCH.notify();
