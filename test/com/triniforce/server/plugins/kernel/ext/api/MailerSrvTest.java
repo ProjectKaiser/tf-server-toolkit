@@ -142,6 +142,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 	protected void setUp() throws Exception {
 		restartServerOnSetup();
 		greenMail.start();
+		greenMail.setUser(SMTP_USER, "PWD_TRR");
 		addPlugin(new MailerSrvPlugin());
 		super.setUp();
 		getServer().enterMode(Mode.Running);
@@ -271,6 +272,7 @@ public class MailerSrvTest extends BasicServerTestCase {
 		assertSame(session, mailer.getActiveSession());
 		
 		SMTP_USER = "testSessionUser@test.com";		
+		greenMail.setUser(SMTP_USER, "PWD_TRR");
 		sendMail();
 		Session s2;
 		assertNotSame(session, s2 = mailer.getActiveSession());
