@@ -272,6 +272,7 @@ public class TaskExecutorsTest extends TFTestCase {
     
     public void testSubmitEqualTasks() throws InterruptedException{
         TaskExecutors te = new TaskExecutors();
+        int cntCompleted = te.getCompletedTasksCount();
         int cnt = te.getTasksCount();
         synchronized (SYNCH) {
         	trace("start task 1");
@@ -284,6 +285,7 @@ public class TaskExecutorsTest extends TFTestCase {
 	        while(cnt + 2 < te.getTasksCount()) {
 	        	Thread.sleep(100); // Both task should be started
 	        }
+	        while(cntCompleted + 1 != te.getCompletedTasksCount()); // Second task should be completed before first ended
 	        
 	        trace("waiting for NOTIFIING");
 	        SYNCH.notify();
