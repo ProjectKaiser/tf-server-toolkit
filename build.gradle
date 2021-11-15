@@ -76,7 +76,7 @@ dependencies {
 	compile(group: 'joda-time', name: 'joda-time', version: '2.1')
 	compile 'com.googlecode.json-simple:json-simple:1.1.1'
 
-	implementation group: 'javax.mail', name: 'javax.mail-api', version: '1.6.2'
+	implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
 	compile 'org.apache.poi:poi:3.10.1'
 
 	compile 'org.apache.httpcomponents:httpclient:4.3.6'
