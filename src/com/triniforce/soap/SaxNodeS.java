@@ -90,17 +90,7 @@ public class SaxNodeS implements Node_S{
 	
 	public Node_S textContent(ScalarDef typeDef, Object object) {
 		terminateStart(false);
-		try {
-			if(typeDef.getType().equals(String.class.getName())){
-				StringWriter sw = new StringWriter();
-				typeDef.serialize(object, sw);
-				StringEscapeUtils.ESCAPE_XML10.translate(sw.toString(), m_writer);
-			}
-			else
-				typeDef.serialize(object, m_writer);
-		} catch (IOException e) {
-			throw new ApiAlgs.RethrownException(e);
-		}
+		typeDef.serialize(object, m_writer);
 		return this;
 	}
 

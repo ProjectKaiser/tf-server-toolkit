@@ -33,6 +33,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.io.output.WriterOutputStream;
+import org.apache.commons.text.StringEscapeUtils;
 
 import com.triniforce.soap.TypeDefLibCache.MapDefLib.MapComponentDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
@@ -174,8 +175,10 @@ public class TypeDef extends SimpleName{
 	        		b64.close();
 	        		wout.close();
 	        	}
-	        	else
-	        		w.append(v.toString());
+	        	else{
+	        		String str = v.toString();
+	        		StringEscapeUtils.ESCAPE_XML10.translate(str, w);
+	        	}
         	} catch (IOException e){
         		throw new ApiAlgs.RethrownException(e);
         	}

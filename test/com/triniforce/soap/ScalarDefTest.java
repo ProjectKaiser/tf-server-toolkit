@@ -13,10 +13,20 @@ import com.triniforce.soap.TypeDef.ScalarDef;
 public class ScalarDefTest extends TFTestCase {
 
 	public void testSerialize() {
-		ScalarDef sd = new TypeDef.ScalarDef(String.class);
-		StringWriter w = new StringWriter();
-		sd.serialize("123456bhf", w);
-		assertEquals("123456bhf", w.toString());
+		{
+			ScalarDef sd = new TypeDef.ScalarDef(String.class);
+			StringWriter w = new StringWriter();
+			sd.serialize("123456bhf", w);
+			assertEquals("123456bhf", w.toString());
+		}
+		{
+			ScalarDef sd = new TypeDef.ScalarDef(String.class);
+			StringWriter w = new StringWriter();
+			sd.serialize("7776\u0014\u00151245", w);
+			assertEquals("77761245", w.toString());
+		}
+		
+		
 	}
 	
 	public void testValueOf(){
