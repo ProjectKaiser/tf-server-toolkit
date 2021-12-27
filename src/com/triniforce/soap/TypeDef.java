@@ -33,7 +33,14 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.io.output.WriterOutputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.text.translate.AggregateTranslator;
+import org.apache.commons.text.translate.CharSequenceTranslator;
+import org.apache.commons.text.translate.EntityArrays;
+import org.apache.commons.text.translate.LookupTranslator;
+import org.apache.commons.text.translate.NumericEntityEscaper;
+import org.apache.commons.text.translate.UnicodeUnpairedSurrogateRemover;
 
 import com.triniforce.soap.TypeDefLibCache.MapDefLib.MapComponentDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
@@ -47,6 +54,67 @@ public class TypeDef extends SimpleName{
     private static final long serialVersionUID = 6626564048671748844L;
     
     public enum ContType {XML, JSON};
+
+    
+    public static final Map<CharSequence, CharSequence> BASIC_ESCAPE_WITHOUT_DOUBLE_QUOTES;
+    static {
+        final Map<CharSequence, CharSequence> initialMap = new HashMap<>();
+        initialMap.put("&", "&amp;");   // & - ampersand
+        initialMap.put("<", "&lt;");    // < - less-than
+        initialMap.put(">", "&gt;");    // > - greater-than
+        BASIC_ESCAPE_WITHOUT_DOUBLE_QUOTES = Collections.unmodifiableMap(initialMap);
+    }
+
+    /**
+     * Translator object for escaping XML 1.0.
+     *
+     * While {@link #escapeXml10(String)} is the expected method of use, this
+     * object allows the XML escaping functionality to be used
+     * as the foundation for a custom translator.
+     */
+    public static final CharSequenceTranslator ESCAPE_XML10_WITHOUT_DOUBLE_QUOTES;
+    static {
+        final Map<CharSequence, CharSequence> escapeXml10Map = new HashMap<>();
+        escapeXml10Map.put("\u0000", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0001", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0002", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0003", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0004", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0005", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0006", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0007", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0008", StringUtils.EMPTY);
+        escapeXml10Map.put("\u000b", StringUtils.EMPTY);
+        escapeXml10Map.put("\u000c", StringUtils.EMPTY);
+        escapeXml10Map.put("\u000e", StringUtils.EMPTY);
+        escapeXml10Map.put("\u000f", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0010", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0011", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0012", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0013", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0014", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0015", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0016", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0017", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0018", StringUtils.EMPTY);
+        escapeXml10Map.put("\u0019", StringUtils.EMPTY);
+        escapeXml10Map.put("\u001a", StringUtils.EMPTY);
+        escapeXml10Map.put("\u001b", StringUtils.EMPTY);
+        escapeXml10Map.put("\u001c", StringUtils.EMPTY);
+        escapeXml10Map.put("\u001d", StringUtils.EMPTY);
+        escapeXml10Map.put("\u001e", StringUtils.EMPTY);
+        escapeXml10Map.put("\u001f", StringUtils.EMPTY);
+        escapeXml10Map.put("\ufffe", StringUtils.EMPTY);
+        escapeXml10Map.put("\uffff", StringUtils.EMPTY);
+        ESCAPE_XML10_WITHOUT_DOUBLE_QUOTES = new AggregateTranslator(
+                new LookupTranslator(BASIC_ESCAPE_WITHOUT_DOUBLE_QUOTES),
+                new LookupTranslator(EntityArrays.APOS_ESCAPE),
+                new LookupTranslator(Collections.unmodifiableMap(escapeXml10Map)),
+                NumericEntityEscaper.between(0x7f, 0x84),
+                NumericEntityEscaper.between(0x86, 0x9f),
+                new UnicodeUnpairedSurrogateRemover()
+        );
+    }
 
     public static class ScalarDef extends TypeDef{
         private static final long serialVersionUID = 1L;
@@ -178,19 +246,19 @@ public class TypeDef extends SimpleName{
 	        		wout.close();
 	        	}
 	        	else if(getName().equals("string") || getName().equals("object")){
+	        		CharSequenceTranslator escaper;
 					if(ct.equals(ContType.JSON)){
-	        			StringEscapeUtils.ESCAPE_JSON.translate(v.toString(), w);
+	        			escaper = StringEscapeUtils.ESCAPE_JSON;
 					}
 					else{
-		        		if(desc.isAvoidDoubleQuotesEscaping()){
-		        			String sEsc = StringEscapeUtils.ESCAPE_XML10.translate(v.toString());
-		        			w.append(sEsc.replaceAll("&quot;", "\""));
+						if(desc.isAvoidDoubleQuotesEscaping()){
+		        			escaper = ESCAPE_XML10_WITHOUT_DOUBLE_QUOTES;
 		        		}
 		        		else{
-			        		String str = v.toString();			        		
-			        		StringEscapeUtils.ESCAPE_XML10.translate(str, w);
+			        		escaper = StringEscapeUtils.ESCAPE_XML10;
 		        		}
 					}					
+	        		escaper.translate(v.toString(), w);
 	        	}
 	        	else{
 	        		w.append(v.toString());
