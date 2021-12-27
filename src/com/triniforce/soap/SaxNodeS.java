@@ -6,7 +6,6 @@
 package com.triniforce.soap;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -88,9 +87,9 @@ public class SaxNodeS implements Node_S{
 		return this;
 	}
 	
-	public Node_S textContent(ScalarDef typeDef, Object object) {
+	public Node_S textContent(ScalarDef typeDef, Object object, InterfaceDescription desc) {
 		terminateStart(false);
-		typeDef.serialize(object, m_writer);
+		typeDef.serialize(object, m_writer, desc, TypeDef.ContType.XML);
 		return this;
 	}
 

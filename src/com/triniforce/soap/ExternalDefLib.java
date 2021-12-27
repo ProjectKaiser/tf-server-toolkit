@@ -28,7 +28,7 @@ public class ExternalDefLib implements IDefLibrary {
 		}
 		
 		@Override
-		public String stringValue(Object v) {
+		public String stringValue(Object v, InterfaceDescription desc, ContType ct) {
 			return Integer.toString(((Character)v).charValue());
 		}
 		

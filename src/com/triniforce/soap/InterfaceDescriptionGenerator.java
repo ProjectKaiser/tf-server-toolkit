@@ -255,7 +255,7 @@ public class InterfaceDescriptionGenerator {
         public <T> Node_S append (T val, IConverter<T> conv);
         public Node_S attr(String name, String v);
         public Node_S end();
-		public Node_S textContent(ScalarDef typeDef, Object object);
+		public Node_S textContent(ScalarDef typeDef, Object object, InterfaceDescription desc);
 		public Node_S text(String string);
     }
     
@@ -784,7 +784,7 @@ public class InterfaceDescriptionGenerator {
                     }
                 }
                 else if(typeDef instanceof ScalarDef){
-                    e.textContent((ScalarDef) typeDef, val.getObject());
+                    e.textContent((ScalarDef) typeDef, val.getObject(), m_lib);
                 }
             }
             e.end();

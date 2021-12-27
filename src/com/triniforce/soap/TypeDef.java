@@ -45,6 +45,8 @@ import com.triniforce.utils.TFUtils;
 
 public class TypeDef extends SimpleName{
     private static final long serialVersionUID = 6626564048671748844L;
+    
+    public enum ContType {XML, JSON};
 
     public static class ScalarDef extends TypeDef{
         private static final long serialVersionUID = 1L;
@@ -149,13 +151,13 @@ public class TypeDef extends SimpleName{
             return res;
         }
         
-        public String stringValue(Object v){
+        public String stringValue(Object v, InterfaceDescription desc, ContType contType){
         	StringWriter sw = new StringWriter();
-        	serialize(v, sw);
+        	serialize(v, sw, desc, contType);
         	return sw.toString();
         }
         
-        public void serialize(Object v, Writer w){
+        public void serialize(Object v, Writer w, InterfaceDescription desc, ContType ct){
         	try{
 	        	if(getName().equals("dateTime")){
 	        		try {
@@ -175,9 +177,23 @@ public class TypeDef extends SimpleName{
 	        		b64.close();
 	        		wout.close();
 	        	}
+	        	else if(getName().equals("string") || getName().equals("object")){
+					if(ct.equals(ContType.JSON)){
+	        			StringEscapeUtils.ESCAPE_JSON.translate(v.toString(), w);
+					}
+					else{
+		        		if(desc.isAvoidDoubleQuotesEscaping()){
+		        			String sEsc = StringEscapeUtils.ESCAPE_XML10.translate(v.toString());
+		        			w.append(sEsc.replaceAll("&quot;", "\""));
+		        		}
+		        		else{
+			        		String str = v.toString();			        		
+			        		StringEscapeUtils.ESCAPE_XML10.translate(str, w);
+		        		}
+					}					
+	        	}
 	        	else{
-	        		String str = v.toString();
-	        		StringEscapeUtils.ESCAPE_XML10.translate(str, w);
+	        		w.append(v.toString());
 	        	}
         	} catch (IOException e){
         		throw new ApiAlgs.RethrownException(e);

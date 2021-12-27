@@ -126,6 +126,7 @@ public class InterfaceDescription implements Serializable{
     
     private ArrayList<Operation> m_operations;
     private ArrayList<TypeDef>   m_types;
+    private boolean avoidDoubleQuotesEscaping;
     
     
     public InterfaceDescription() {
@@ -204,5 +205,13 @@ public class InterfaceDescription implements Serializable{
 		oout.writeObject(csDef);
 		oout.close();
 		return (ClassDef) new ObjectInputStream(new ByteArrayInputStream(bout.toByteArray())).readObject();
+	}
+
+	public boolean isAvoidDoubleQuotesEscaping() {
+		return avoidDoubleQuotesEscaping;
+	}
+
+	public void setAvoidDoubleQuotesEscaping(boolean avoidDoubleQuotesEscaping) {
+		this.avoidDoubleQuotesEscaping = avoidDoubleQuotesEscaping;
 	}
 }

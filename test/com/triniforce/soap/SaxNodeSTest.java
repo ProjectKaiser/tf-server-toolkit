@@ -83,13 +83,25 @@ public class SaxNodeSTest extends TFTestCase {
 	
 	public void testTextContent(){
 		{
-			StringWriter w = new StringWriter();
-			SaxNodeS s = new SaxNodeS(null, "some", w);
+			InterfaceDescription desc = new InterfaceDescription();
 			
 			TypeDef sd = new TypeDefLibCache(null, null).get(String.class);
-			s.textContent((ScalarDef) sd, "<xml>\"bread\" & \"butter\"</xml>").end();
+			{
+				StringWriter w = new StringWriter();
+				SaxNodeS s = new SaxNodeS(null, "some", w);
+				s.textContent((ScalarDef) sd, "<xml>\"bread\" & \"butter\"</xml>", desc).end();
+				
+				assertEquals("<some>&lt;xml&gt;&quot;bread&quot; &amp; &quot;butter&quot;&lt;/xml&gt;</some>", w.getBuffer().toString());
+			}
 			
-			assertEquals("<some>&lt;xml&gt;&quot;bread&quot; &amp; &quot;butter&quot;&lt;/xml&gt;</some>", w.getBuffer().toString());
+			desc.setAvoidDoubleQuotesEscaping(true);
+			{
+				StringWriter w = new StringWriter();
+				SaxNodeS s = new SaxNodeS(null, "some", w);
+				s.textContent((ScalarDef) sd, "<xml>\"bread\" & \"butter\"</xml>", desc).end();
+				
+				assertEquals("<some>&lt;xml&gt;\"bread\" &amp; \"butter\"&lt;/xml&gt;</some>", w.getBuffer().toString());
+			}
 			
 		}
 	}

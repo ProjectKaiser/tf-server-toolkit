@@ -625,7 +625,7 @@ public class ClassParserTest extends TFTestCase {
         lib.addExternalDef(Custom01.class, new ScalarDef(String.class){
 			private static final long serialVersionUID = 4393197656579650503L;
 			@Override
-        	public void serialize(Object v, Writer w) {
+        	public void serialize(Object v, Writer w, InterfaceDescription desc, ContType ct) {
         		try {
 					w.append("custom01");
 				} catch (IOException e) {

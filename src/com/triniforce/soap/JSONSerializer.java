@@ -196,10 +196,10 @@ public class JSONSerializer {
 		Object value;
 		if(type instanceof EnumDef){
 			ScalarDef sd = (ScalarDef) type;
-			value = sd.stringValue(object);				
+			value = sd.stringValue(object, desc, TypeDef.ContType.JSON);				
 		}
 		else if(type.getType().equals(java.util.Date.class.getName())){
-			value = ((ScalarDef)type).stringValue(object);
+			value = ((ScalarDef)type).stringValue(object, desc, TypeDef.ContType.JSON);
 		}
 		else if(type instanceof ClassDef){
 			ClassDef cd = (ClassDef) type;
