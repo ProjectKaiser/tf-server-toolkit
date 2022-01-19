@@ -1003,6 +1003,18 @@ public class InterfaceDescriptionGeneratorTest extends TFTestCase {
 	        assertNotNull(xp.evaluate("/Envelope/Body/method12/arg0/param1", res, XPathConstants.NODE));
         	
         }
+        
+        {
+        	soapDoc.m_method = "method3";
+        	soapDoc.m_args = new Object[]{"some&body"};
+        	Document res = gen.serialize(desc, soapDoc);
+        	print(res);
+	        XPathFactory xpf = XPathFactory.newInstance();  
+	        XPath xp = xpf.newXPath();
+	        Element element = (Element) xp.evaluate("/Envelope/Body/method3/arg0", res, XPathConstants.NODE);
+	        assertNotNull(element);
+	        assertEquals("some&body", element.getTextContent());
+        }
 
     }
     

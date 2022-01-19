@@ -89,7 +89,7 @@ public class SaxNodeS implements Node_S{
 	
 	public Node_S textContent(ScalarDef typeDef, Object object, InterfaceDescription desc) {
 		terminateStart(false);
-		typeDef.serialize(object, m_writer, desc, TypeDef.ContType.XML);
+		typeDef.serialize(object, m_writer, desc, true, TypeDef.ContType.XML);
 		return this;
 	}
 

@@ -219,13 +219,13 @@ public class TypeDef extends SimpleName{
             return res;
         }
         
-        public String stringValue(Object v, InterfaceDescription desc, ContType contType){
+        public String stringValue(Object v, InterfaceDescription desc, boolean bEscape, ContType contType){
         	StringWriter sw = new StringWriter();
-        	serialize(v, sw, desc, contType);
+        	serialize(v, sw, desc, bEscape, contType);
         	return sw.toString();
         }
         
-        public void serialize(Object v, Writer w, InterfaceDescription desc, ContType ct){
+        public void serialize(Object v, Writer w, InterfaceDescription desc, boolean bEscape, ContType ct){
         	try{
 	        	if(getName().equals("dateTime")){
 	        		try {
@@ -245,7 +245,7 @@ public class TypeDef extends SimpleName{
 	        		b64.close();
 	        		wout.close();
 	        	}
-	        	else if(getName().equals("string") || getName().equals("object")){
+	        	else if(bEscape && (getName().equals("string") || getName().equals("object"))){
 	        		CharSequenceTranslator escaper;
 					if(ct.equals(ContType.JSON)){
 	        			escaper = StringEscapeUtils.ESCAPE_JSON;

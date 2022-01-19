@@ -226,6 +226,10 @@ public class JSONSerializerTest extends TFTestCase {
 		Real1 vreal = new Real1();
 		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_003\",\"params\":[{\"type\":\"Real1\",\"prop_001\":null}],\"id\":1}",
 				serialize(srz, desc, "method_003", vreal));
+		
+		
+		assertEquals( "{\"jsonrpc\":\"2.0\",\"method\":\"method_007\",\"params\":[\"{\\\"some\\\":[\\\"internal\\\", 11, \\\"json\\\"]}\"],\"id\":1}",
+				serialize(srz, desc, "method_007", "{\"some\":[\"internal\", 11, \"json\"]}"));
 
 		
 	}

@@ -17,18 +17,18 @@ public class ScalarDefTest extends TFTestCase {
 		{
 			ScalarDef sd = new TypeDef.ScalarDef(String.class);
 			StringWriter w = new StringWriter();
-			sd.serialize("123456bhf", w, desc, TypeDef.ContType.JSON);
+			sd.serialize("123456bhf", w, desc, true, TypeDef.ContType.JSON);
 			assertEquals("123456bhf", w.toString());
 			
 			StringWriter w2 = new StringWriter();
-			sd.serialize("{\"key\":\"va<>lue\"}", w2, desc, TypeDef.ContType.JSON);
+			sd.serialize("{\"key\":\"va<>lue\"}", w2, desc, true, TypeDef.ContType.JSON);
 			assertEquals("{\\\"key\\\":\\\"va<>lue\\\"}", w2.toString());
 
 		}
 		{
 			ScalarDef sd = new TypeDef.ScalarDef(String.class);
 			StringWriter w = new StringWriter();
-			sd.serialize("7776\u0014\u00151245", w, desc, TypeDef.ContType.XML);
+			sd.serialize("7776\u0014\u00151245", w, desc, true, TypeDef.ContType.XML);
 			assertEquals("77761245", w.toString());
 		}
 		

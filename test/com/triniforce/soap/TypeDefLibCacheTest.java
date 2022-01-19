@@ -27,6 +27,7 @@ import com.triniforce.soap.ESoap.EParameterizedException;
 import com.triniforce.soap.IDefLibrary.ITypeNameGenerator;
 import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
+import com.triniforce.soap.TypeDef.ContType;
 import com.triniforce.soap.TypeDef.EnumDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
@@ -84,20 +85,24 @@ public class TypeDefLibCacheTest extends TFTestCase {
 	        BigDecimal vdec = (BigDecimal) dec.valueOf("57874.324");
 	        assertEquals(BigDecimal.valueOf(57874.324), vdec);
 	        
-	        assertEquals("443.004543", dec.stringValue(BigDecimal.valueOf(443.004543), desc, TypeDef.ContType.XML));
-	        assertEquals("443.12", dec.stringValue(BigDecimal.valueOf(443.12), desc, TypeDef.ContType.XML));
+	        assertEquals("443.004543", dec.stringValue(BigDecimal.valueOf(443.004543), desc, true,  TypeDef.ContType.XML));
+	        assertEquals("443.12", dec.stringValue(BigDecimal.valueOf(443.12), desc, true, TypeDef.ContType.XML));
 	        
 	        sd = scLib.get(byte[].class);
 	        assertNotNull(sd);
 	        assertEquals("base64Binary", sd.getName());
 	        byte[] bytes =  (byte[]) sd.valueOf("AQID");
 	        assertEquals(Arrays.asList((byte)1,(byte)2,(byte)3), Arrays.asList(bytes[0], bytes[1], bytes[2]));
-	        assertEquals("MyString_005624634", new String(Base64.decode(sd.stringValue("MyString_005624634".getBytes(), desc, TypeDef.ContType.XML))));
+	        assertEquals("MyString_005624634", new String(Base64.decode(sd.stringValue("MyString_005624634".getBytes(), desc, true, TypeDef.ContType.XML))));
 	        
 	        assertFalse(scLib.get(boolean.class).isNullable());
 	        assertTrue(scLib.get(Boolean.class).isNullable());
 	        assertTrue(scLib.get(String.class).isNullable());
 	        
+	        
+	        ScalarDef strDef = scLib.get(String.class);
+	        String str = strDef.stringValue("<Black>&White", desc, false, ContType.XML);
+	        assertEquals("<Black>&White", str);
     	}
 
     }
@@ -122,7 +127,7 @@ public class TypeDefLibCacheTest extends TFTestCase {
     		assertEquals(Set1.Val_2, res.valueOf("Val_2"));
     		assertEquals(null, res.valueOf("Val_3"));
     		
-    		assertEquals("Val_2", res.stringValue(Set1.Val_2, new InterfaceDescription(), TypeDef.ContType.JSON));
+    		assertEquals("Val_2", res.stringValue(Set1.Val_2, new InterfaceDescription(), true, TypeDef.ContType.JSON));
     	}
     }
     

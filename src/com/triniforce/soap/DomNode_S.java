@@ -54,7 +54,7 @@ public class DomNode_S implements Node_S{
     }
     
 	public Node_S textContent(ScalarDef typeDef, Object object, InterfaceDescription desc) {
-		return text(typeDef.stringValue(object, desc, TypeDef.ContType.XML));
+		return text(typeDef.stringValue(object, desc, false, TypeDef.ContType.XML));
 	}
 
 	public Node_S text(String string) {
