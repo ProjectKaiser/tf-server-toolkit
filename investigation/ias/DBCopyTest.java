@@ -152,4 +152,42 @@ public class DBCopyTest extends TFTestCase {
 		return res;
 	}
 	
+	public void testFbTypes() throws ClassNotFoundException, SQLException {
+		DeltaSchemaLoader loader;
+		DeltaSchema dst;
+		{
+			Class.forName("org.firebirdsql.jdbc.FBDriver");
+			String dstUrl = "jdbc:firebirdsql:localhost/3050:D:\\workspace\\UBL\\build\\test\\regression.fdb";
+			Connection dstCon;
+	        String dbUserName = getTestProperty("userName");
+	        if(null != dbUserName){
+		        String dbPassword = getTestProperty("password");
+				dstCon = DriverManager.getConnection(dstUrl, dbUserName, dbPassword);
+	        }
+	        else{
+	        	dstCon = DriverManager.getConnection(dstUrl);
+	        }
+			try{
+				loader = new Delta.DeltaSchemaLoader(getTabList(dstCon), new IIndexLocNames(){
+					public String getShortName(String dbTabName,
+							String dbFullName) {
+						return dbFullName;
+					}
+
+					@Override
+					public boolean bUseOriginalIndexNames() {
+						// TODO Auto-generated method stub
+						return false;
+					}
+					
+				});
+//				loader = new Delta.DeltaSchemaLoader(Arrays.asList("purchase_order"));
+				dst = loader.loadSchema(dstCon, getDstDbInfo());
+			} finally{
+				dstCon.close();
+			}
+		}
+			
+	}
+	
 }

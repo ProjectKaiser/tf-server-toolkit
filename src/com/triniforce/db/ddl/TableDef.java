@@ -165,19 +165,18 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
     public static class FieldDef implements IElementDef, com.triniforce.utils.IName, Cloneable, Serializable{
         private static final long serialVersionUID = -5431378065902561984L;
         
-        // Ans: Ищется первое соответствие, и берется значение из противоположного массива
-        // Так для всех типов TIMESTAMP, TIME, DATE соответествует один тип DATETIME
-        // и наоборот для типов библиотеки CHAR и NCHAR соответствует один тип SQL.CHAR 
 		private static final int[] SQL_TYPES= {Types.INTEGER,Types.SMALLINT,
             Types.REAL,Types.TIMESTAMP,Types.BLOB,Types.DECIMAL,
             Types.CHAR,Types.CHAR, Types.VARCHAR, Types.VARCHAR, Types.BIGINT, 
             Types.DOUBLE, Types.LONGVARBINARY, Types.FLOAT, Types.TIME, 
-            Types.DATE, Types.LONGVARCHAR, Types.NVARCHAR, Types.NCHAR};
+            Types.DATE, Types.LONGVARCHAR, Types.NVARCHAR, Types.NCHAR,
+            Types.BINARY, Types.VARBINARY};
         private static final ColumnType[] DDL_TYPES = {ColumnType.INT,ColumnType.SMALLINT,
             ColumnType.FLOAT,ColumnType.DATETIME,ColumnType.BLOB,ColumnType.DECIMAL,
             ColumnType.CHAR,ColumnType.NCHAR, ColumnType.VARCHAR, ColumnType.NVARCHAR, ColumnType.LONG, 
             ColumnType.DOUBLE, ColumnType.BLOB, ColumnType.FLOAT, ColumnType.DATETIME, 
-            ColumnType.DATETIME, ColumnType.BLOB, ColumnType.NVARCHAR, ColumnType.NCHAR};
+            ColumnType.DATETIME, ColumnType.BLOB, ColumnType.NVARCHAR, ColumnType.NCHAR,
+            ColumnType.CHAR, ColumnType.VARCHAR};
         
         
         private static final String NV_NAME = "name"; //$NON-NLS-1$
