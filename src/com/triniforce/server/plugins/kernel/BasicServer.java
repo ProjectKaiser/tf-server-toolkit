@@ -1063,7 +1063,7 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 		
 		while (isInit ? i.hasNext() : i.hasPrevious()) {
 			IPlugin plugin = isInit ? i.next() : i.previous();
-			enterMode(Mode.Running);
+			enterMode(isInit ? Mode.Running : Mode.Finalization);
 			try {
 				try {
 					if (isInit) {
@@ -1071,7 +1071,8 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 					} else {
 						plugin.finit();
 					}
-					ISrvSmartTranFactory.Helper.commit();
+					if(isInit)
+						ISrvSmartTranFactory.Helper.commit();
 				} catch (Throwable t) {
 					String action = isInit ? "init" : "finit";
 					ApiAlgs

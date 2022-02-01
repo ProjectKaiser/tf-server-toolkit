@@ -33,7 +33,7 @@ public interface IBasicServer extends IPKRootExtensionPoint {
      * 
      */
     public enum Mode {
-        None, Registration, Upgrade, Running
+        None, Registration, Upgrade, Running, Finalization
     }
     
     public void doPluginsRegistration();

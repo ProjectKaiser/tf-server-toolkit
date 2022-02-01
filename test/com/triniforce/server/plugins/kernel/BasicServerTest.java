@@ -9,6 +9,7 @@ package com.triniforce.server.plugins.kernel;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
@@ -291,4 +292,15 @@ public class BasicServerTest extends BasicServerTestCase {
         assertEquals("TEST_EXT_TAB", bs.getTableDbName(TestExtTab.class.getName()));
 	}
 	
+	public void testFinitAfterShutdown() throws SQLException{
+		getPool().m_ds.close();
+		getServer().stopAndFinit();
+		
+		m_pool = null;//reopen
+		DATA_SOURCE = null;
+		getPool();
+		
+	}
+
+
 }
