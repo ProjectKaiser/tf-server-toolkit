@@ -55,8 +55,8 @@ public class PKEPAPIs  extends PKExtensionPoint{
             if((init && api instanceof IInitApi) || (!init && api instanceof IFinitApi)){
                 try{
                     if(null != bs){
-                        //tests
-                        bs.enterMode(Mode.Running);
+                        //tests                    
+                        bs.enterMode(init ? Mode.Running : Mode.Finalization);
                     }
                     try{
                         if(init){
@@ -64,7 +64,7 @@ public class PKEPAPIs  extends PKExtensionPoint{
                         }else{
                             ((IFinitApi)api).finitApi();
                         }
-                        if(null != bs){
+                        if(null != bs && init){
                             ISrvSmartTranFactory.Helper.commit();
                         }
                     }

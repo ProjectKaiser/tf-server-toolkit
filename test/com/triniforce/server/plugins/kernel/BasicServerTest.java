@@ -21,6 +21,9 @@ import com.triniforce.db.test.BasicServerTestCase;
 import com.triniforce.dbo.DBOTableDef;
 import com.triniforce.dbo.PKEPDBObjects;
 import com.triniforce.extensions.IPKExtensionPoint;
+import com.triniforce.server.plugins.kernel.ep.api.IFinitApi;
+import com.triniforce.server.plugins.kernel.ep.api.IPKEPAPI;
+import com.triniforce.server.plugins.kernel.ep.api.PKEPAPIs;
 import com.triniforce.server.plugins.kernel.ep.br.PKEPBackupRestore;
 import com.triniforce.server.plugins.kernel.ep.sp.PKEPServerProcedures;
 import com.triniforce.server.plugins.kernel.ep.sp.ServerProcedure;
@@ -36,6 +39,23 @@ import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 
 public class BasicServerTest extends BasicServerTestCase {
+	
+	
+	static boolean bFINITED = false;
+	public static class TestPKEPAPI implements IPKEPAPI, IFinitApi{
+
+		@Override
+		public Class getImplementedInterface() {
+			return TestPKEPAPI.class;
+		}
+
+		@Override
+		public void finitApi() {
+			bFINITED = true;
+			
+		}
+		
+	}
 
     static TimeZone tz1 = TimeZone.getTimeZone("Europe/Moscow");
     
@@ -76,6 +96,8 @@ public class BasicServerTest extends BasicServerTestCase {
 		@Override
 		public void doExtensionPointsRegistration() {
 			putExtension(PKEPDBObjects.class, TestExtTab.class);
+			
+			putExtension(PKEPAPIs.class, TestPKEPAPI.class);
 		}
 
 		@Override
@@ -295,6 +317,7 @@ public class BasicServerTest extends BasicServerTestCase {
 	public void testFinitAfterShutdown() throws SQLException{
 		getPool().m_ds.close();
 		getServer().stopAndFinit();
+		assertTrue(bFINITED);
 		
 		m_pool = null;//reopen
 		DATA_SOURCE = null;
