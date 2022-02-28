@@ -166,13 +166,13 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
         private static final long serialVersionUID = -5431378065902561984L;
         
 		private static final int[] SQL_TYPES= {Types.INTEGER,Types.SMALLINT,
-            Types.REAL,Types.TIMESTAMP,Types.BLOB,Types.DECIMAL,
+            Types.REAL,Types.TIMESTAMP,Types.BLOB,Types.NUMERIC,Types.DECIMAL,
             Types.CHAR,Types.CHAR, Types.VARCHAR, Types.VARCHAR, Types.BIGINT, 
             Types.DOUBLE, Types.LONGVARBINARY, Types.FLOAT, Types.TIME, 
             Types.DATE, Types.LONGVARCHAR, Types.NVARCHAR, Types.NCHAR,
             Types.BINARY, Types.VARBINARY};
         private static final ColumnType[] DDL_TYPES = {ColumnType.INT,ColumnType.SMALLINT,
-            ColumnType.FLOAT,ColumnType.DATETIME,ColumnType.BLOB,ColumnType.DECIMAL,
+            ColumnType.FLOAT,ColumnType.DATETIME,ColumnType.BLOB,ColumnType.DECIMAL,ColumnType.DECIMAL,
             ColumnType.CHAR,ColumnType.NCHAR, ColumnType.VARCHAR, ColumnType.NVARCHAR, ColumnType.LONG, 
             ColumnType.DOUBLE, ColumnType.BLOB, ColumnType.FLOAT, ColumnType.DATETIME, 
             ColumnType.DATETIME, ColumnType.BLOB, ColumnType.NVARCHAR, ColumnType.NCHAR,
