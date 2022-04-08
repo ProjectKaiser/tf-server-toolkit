@@ -237,8 +237,22 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
      *             something wrong in SQL
      */
     public String getDBName(String appName){
-        Row r  = m_state.get(appName);
-        return null == r ? null : (String)r.getField(1);
+    	Row r  = m_state.get(appName);
+    	if (r == null) return null;
+    	if (((String)r.getField(0)).equals(appName)) {
+    		return (String)r.getField(1);
+    	} else {
+    		String res = null;
+    		for(int i=0; i<m_asTable.getSize(); i++){
+    			Row row = m_asTable.getRow(i);
+    			String v = (String) row.getField(0);
+    			if(appName.toLowerCase(Locale.ENGLISH).equals(v.toLowerCase(Locale.ENGLISH))){
+    				res = (String) row.getField(1);
+    				break;
+    			}
+    		}
+    		return res;
+    	}
     }
 
     /**
