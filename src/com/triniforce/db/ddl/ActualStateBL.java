@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.Lock;
 
 import com.triniforce.db.ddl.DBTables.DBOperation;
 import com.triniforce.db.ddl.TableDef.FieldDef;
@@ -50,6 +52,10 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 
     public static final String VERSION = "version"; //$NON-NLS-1$
     
+    private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+    private final Lock r = rwl.readLock();
+    private final Lock w = rwl.writeLock();
+        
     public static class TIndexNames extends TableDef{    	
     	public static final FieldDef appName = FieldDef.createStringField("app_name", ColumnType.VARCHAR, 250, true, null);
     	public static final FieldDef dbName  = FieldDef.createStringField("db_name", ColumnType.VARCHAR, 64, true, null);
@@ -237,21 +243,12 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
      *             something wrong in SQL
      */
     public String getDBName(String appName){
-    	Row r  = m_state.get(appName);
-    	if (r == null) return null;
-    	if (((String)r.getField(0)).equals(appName)) {
-    		return (String)r.getField(1);
-    	} else {
-    		String res = null;
-    		for(int i=0; i<m_asTable.getSize(); i++){
-    			Row row = m_asTable.getRow(i);
-    			String v = (String) row.getField(0);
-    			if(appName.toLowerCase(Locale.ENGLISH).equals(v.toLowerCase(Locale.ENGLISH))){
-    				res = (String) row.getField(1);
-    				break;
-    			}
-    		}
-    		return res;
+        r.lock();
+    	try {
+    		Row r  = m_state.get(appName);
+            return null == r ? null : (String)r.getField(1);
+    	} finally {
+    		r.unlock();
     	}
     }
 
@@ -264,8 +261,13 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
      * @throws SQLException
      */
     public int getVersion(String appName){
-        Row r  = m_state.get(appName);
-        return null == r ? 0 : ((Number)r.getField(2)).intValue();
+        r.lock();
+    	try {
+    		Row r  = m_state.get(appName);
+            return null == r ? 0 : ((Number)r.getField(2)).intValue();
+    	} finally {
+    		r.unlock();
+    	}
     }
 
     /**
@@ -282,8 +284,13 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
                 + getLocalTabName(appTabName).toLowerCase(Locale.ENGLISH);
         String tabName = tabLocName;
         int i=1;
-        while(m_dbNames.contains(tabName)){
-            tabName = tabLocName + Integer.toString(i++);
+        r.lock();
+        try {
+        	while(m_dbNames.contains(tabName)){
+                tabName = tabLocName + Integer.toString(i++);
+            }
+        } finally {
+        	r.unlock();
         }
         return tabName;
     }
@@ -318,12 +325,17 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
      * @throws SQLException
      */
     public void addTable(String dbName, String tabName, int v){
-        Row r = m_asTable.newRow();
-        r.setField(0, tabName);
-        r.setField(1, dbName);
-        r.setField(2, v);
-        m_state.put(tabName, r);
-        m_dbNames.add(dbName);
+        w.lock();
+    	try {
+    		Row r = m_asTable.newRow();
+            r.setField(0, tabName);
+            r.setField(1, dbName);
+            r.setField(2, v);
+            m_state.put(tabName, r);
+            m_dbNames.add(dbName);
+    	} finally {
+    		w.unlock();
+    	}
     }
 
     /**
@@ -334,10 +346,15 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
      * @throws SQLException
      */
     public void removeTable(String tabName){
-        Row row = m_state.remove(tabName);
-        if(null != row){
-            m_dbNames.remove(row.getField(1));
-            row.delete();
+        w.lock();
+        try {
+        	Row row = m_state.remove(tabName);
+            if(null != row){
+                m_dbNames.remove(row.getField(1));
+                row.delete();
+            }
+        } finally {
+        	w.unlock();
         }
     }
 
@@ -351,12 +368,17 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
      * @throws SQLException
      */
     public void changeVersion(String tabName, int dv){
-        if (dv != 0) {
-            Row row = m_state.get(tabName);
-            if(null != row){ 
-            	int prev = ((Number)row.getField(2)).intValue();
-            	row.setField(2, prev+dv);
+        w.lock();
+        try {
+        	if (dv != 0) {
+                Row row = m_state.get(tabName);
+                if(null != row){ 
+                	int prev = ((Number)row.getField(2)).intValue();
+                	row.setField(2, prev+dv);
+                }
             }
+        } finally {
+        	w.unlock();
         }
     }
 
@@ -379,25 +401,34 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 
     public String getAppName(String dbName) throws SQLException {
     	String res = null;
-		for(int i=0; i<m_asTable.getSize(); i++){
-			Row row = m_asTable.getRow(i);
-			String v = (String) row.getField(1);
-			if(dbName.toLowerCase(Locale.ENGLISH).equals(v.toLowerCase(Locale.ENGLISH))){
-				res = (String) row.getField(0);
-				break;
+		r.lock();
+    	try {
+			for(int i=0; i<m_asTable.getSize(); i++){
+				Row row = m_asTable.getRow(i);
+				String v = (String) row.getField(1);
+				if(dbName.toLowerCase(Locale.ENGLISH).equals(v.toLowerCase(Locale.ENGLISH))){
+					res = (String) row.getField(0);
+					break;
+				}
 			}
+		} finally {
+			r.unlock();
 		}
-        return res;
+    	return res;
     }
 
 	public void addIndexName(String appName, String dbName) {
-		TFUtils.assertTrue(null == m_appIndexNames.put(appName, dbName), appName);
-		TFUtils.assertTrue(null == m_dbIndexNames.put(dbName, appName), dbName);
-		Row row = m_asIndexTable.newRow();
-		row.setField(0, appName);
-		row.setField(1, dbName);
+		w.lock();
+		try {
+			TFUtils.assertTrue(null == m_appIndexNames.put(appName, dbName), appName);
+			TFUtils.assertTrue(null == m_dbIndexNames.put(dbName, appName), dbName);
+			Row row = m_asIndexTable.newRow();
+			row.setField(0, appName);
+			row.setField(1, dbName);
+		} finally {
+			w.unlock();
+		}
 		ApiAlgs.getLog(this).info("ADD NAME: "+appName + "("+dbName+")");
-		
 	}
 
 	public String generateIndexName(String appName) {
@@ -408,9 +439,14 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 			while(true){
 				String num = i==0 ? "" : Integer.toString(i);
 				String dbName = appName.substring(0, m_maxIndexLength-num.length()).toUpperCase(Locale.ENGLISH)+num;
-				if(!m_dbIndexNames.containsKey(dbName)){
-					res = dbName;
-					break;
+				r.lock();
+				try {
+					if(!m_dbIndexNames.containsKey(dbName)){
+						res = dbName;
+						break;
+					}
+				} finally {
+					r.unlock();
 				}
 				i++;
 			}
@@ -422,50 +458,73 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 	}
 
 	public String getIndexDbName(String appName) {
-		String res = m_appIndexNames.get(appName);
-		if(null == res && !m_appIndexNames.containsKey(appName))
-			res = appName;
-		return res;
-		
+		r.lock();
+		try {
+			String res = m_appIndexNames.get(appName);
+			if(null == res && !m_appIndexNames.containsKey(appName))
+				res = appName;
+			return res;
+		} finally {
+			r.unlock();
+		}
 	}
 
 	public void deleteIndexName(String appName) {
 		String upperName = appName.toUpperCase(Locale.ENGLISH);
-		for(int i=0; i<m_asIndexTable.getSize(); i++){
-			Row row = m_asIndexTable.getRow(i);
-			String appVal = (String) row.getField(0);
-			if(		!EnumSet.of(State.DELETED, State.CANCELED).contains(row.getState()) 
-					&& 
-					upperName.equals(appVal.toUpperCase(Locale.ENGLISH))){
-				
-				ApiAlgs.getLog(this).info("DROP NAME: "+appVal);
-				String dbVal = (String) row.getField(1);
-				TFUtils.assertNotNull(m_appIndexNames.remove(appVal), appVal);
-				TFUtils.assertNotNull(m_dbIndexNames.remove(dbVal), dbVal);
-				row.delete();
+		w.lock();
+		try {
+			for(int i=0; i<m_asIndexTable.getSize(); i++){
+				Row row = m_asIndexTable.getRow(i);
+				String appVal = (String) row.getField(0);
+				if(		!EnumSet.of(State.DELETED, State.CANCELED).contains(row.getState()) 
+						&& 
+						upperName.equals(appVal.toUpperCase(Locale.ENGLISH))){
+					
+					ApiAlgs.getLog(this).info("DROP NAME: "+appVal);
+					String dbVal = (String) row.getField(1);
+					TFUtils.assertNotNull(m_appIndexNames.remove(appVal), appVal);
+					TFUtils.assertNotNull(m_dbIndexNames.remove(dbVal), dbVal);
+					row.delete();
+				}
 			}
+		} finally {
+			w.unlock();
 		}
 	}
 	
-
 	public void flush(Connection con) throws SQLException {
-		TableAdapter ta = new TableAdapter();
-		ta.flush(con, m_asTable, m_asDef, ACT_STATE_TABLE);
-		ta.flush(con, m_asIndexTable, m_asIndexDef, getDBName(TIndexNames.class.getName()));
-		
-		// Reload rows because references became invalid
-		for(int i=0; i<m_asTable.getSize(); i++){
-			Row row = m_asTable.getRow(i);
-            m_state.put((String)row.getField(0), row);
+		w.lock();
+		try {
+			TableAdapter ta = new TableAdapter();
+			ta.flush(con, m_asTable, m_asDef, ACT_STATE_TABLE);
+			ta.flush(con, m_asIndexTable, m_asIndexDef, getDBName(TIndexNames.class.getName()));
+			
+			// Reload rows because references became invalid
+			for(int i=0; i<m_asTable.getSize(); i++){
+				Row row = m_asTable.getRow(i);
+	            m_state.put((String)row.getField(0), row);
+			}
+		} finally {
+			w.unlock();
 		}
 	}
 	
 	public Set<String> getDbTableNames(){
-		return Collections.unmodifiableSet(m_dbNames);
+		r.lock();
+		try {
+			return Collections.unmodifiableSet(m_dbNames);
+		} finally {
+			r.unlock();
+		}
 	}
 
 	public String queryIndexName(String dbTabName) {
-		return m_dbIndexNames.get(dbTabName);
+		r.lock();
+		try {
+			return m_dbIndexNames.get(dbTabName);
+		} finally {
+			r.unlock();
+		}
 	}
 
 }
