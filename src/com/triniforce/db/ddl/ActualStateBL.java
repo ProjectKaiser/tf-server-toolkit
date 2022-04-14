@@ -52,9 +52,9 @@ public class ActualStateBL implements UpgradeRunner.IActualState{
 
     public static final String VERSION = "version"; //$NON-NLS-1$
     
-    private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
-    private final Lock r = rwl.readLock();
-    private final Lock w = rwl.writeLock();
+    private static final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+    private static final Lock r = rwl.readLock();
+    private static final Lock w = rwl.writeLock();
         
     public static class TIndexNames extends TableDef{    	
     	public static final FieldDef appName = FieldDef.createStringField("app_name", ColumnType.VARCHAR, 250, true, null);
