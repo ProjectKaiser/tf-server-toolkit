@@ -325,7 +325,7 @@ query{repository(owner:"${GITHUB_OWNER}", name:"${GITHUB_REPOSITORY}"){
 String getNextVersion(String registryVersion){
 	def matcher = registryVersion =~ /^(\d+\.\d+)\.(\d{1,4})$/
 
-	def nextVersion = version + '.0'
+	def nextVersion = version.trim() + '.0'
 	if (matcher.find()) {
 		def major = matcher[0][1]
 		def minor = matcher[0][2]
