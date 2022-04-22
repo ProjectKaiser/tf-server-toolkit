@@ -6,7 +6,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = file('version').text
+version = file('version').text.trim()
 ext.tf_vendor = 'Triniforce.com'
 
 // Project configuration is used for Maven deploy:
@@ -325,7 +325,7 @@ query{repository(owner:"${GITHUB_OWNER}", name:"${GITHUB_REPOSITORY}"){
 String getNextVersion(String registryVersion){
 	def matcher = registryVersion =~ /^(\d+\.\d+)\.(\d{1,4})$/
 
-	def nextVersion = version.trim() + '.0'
+	def nextVersion = version + '.0'
 	if (matcher.find()) {
 		def major = matcher[0][1]
 		def minor = matcher[0][2]
