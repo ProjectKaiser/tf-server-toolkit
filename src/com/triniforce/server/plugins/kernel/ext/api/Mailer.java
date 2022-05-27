@@ -13,6 +13,7 @@ import java.util.Properties;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.activation.FileTypeMap;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
@@ -238,6 +239,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
             }
 
             public String getContentType() {
+            	FileTypeMap.getDefaultFileTypeMap().getContentType(filename);
                 return contentType;
             }
 
@@ -333,6 +335,113 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 		
 	}
 
+	public static class Attachment implements Serializable {
+		private static final long serialVersionUID = 1L;
+		private String fileName;
+		private String contentType;
+		private byte[] data;
+		private String description;
+
+		public Attachment(String fileName, String contentType, byte[] data, String description) {
+			this.fileName = fileName;
+			this.contentType = contentType;
+			this.data = data;
+			this.description = description;
+		}
+
+		public String getFileName() {
+			return fileName;
+		}
+
+		public String getContentType() {
+			return contentType;
+		}
+
+		public byte[] getData() {
+			return data;
+		}
+
+		public String getDescription() {
+			return description;
+		}
+	}
+
+	public synchronized boolean send(String from, String to, final String subject, final String bodyType,
+			final String body, final Attachment[] attachments, final IMailerSettings customMailerSettings)
+			throws EMailerConfigurationError {
+		final IMailerSettings mailerSettings = customMailerSettings != null ? customMailerSettings
+				: ApiStack.queryInterface(IMailerSettings.class);
+
+		if (!isMailerConfigured(mailerSettings)) {
+			ApiAlgs.getLog(this).warn("Message is skipped: " + body); //$NON-NLS-1$
+			throw new EMailerConfigurationError();
+		}
+
+        IThrdWatcherRegistrator twr = ApiStack
+                .getInterface(IThrdWatcherRegistrator.class);
+
+        twr.registerLongTermOp(Thread.currentThread());
+
+        try {
+
+        	List<Object> oldSessionKey = m_sessionKey; 
+        	Session session = getActiveSession(mailerSettings);
+        	final boolean bSessionRecreated = !TFUtils.equals(oldSessionKey, m_sessionKey) || oldSessionKey.equals(SESSION_FACTORY_KEY);
+
+        	MimeMessage msg;
+        	final InternetAddress fromAddr;
+        	final InternetAddress[] toAddr;
+        	final MimeBodyPart attach;
+            try {
+            	if(null == from){
+            		from = mailerSettings.getDefaultSender();
+            	}
+            	fromAddr = new InternetAddress(from);
+            	toAddr = InternetAddress.parse(to);
+//           		attach = (null != attachment) ? settAttachment(attachFile, attachType, attachment, "") : null;
+            	attach = null; // XXX !!!!
+            	msg = createMessage(session, fromAddr, toAddr, subject, bodyType, body, attach);
+            } catch (Throwable t) {
+            	ApiAlgs.getLog(this).error("Error preparing mail, mail is skipped",t);//$NON-NLS-1$
+                return false;
+            }
+            ApiAlgs.getLog(this).info("Sending email:"+ body);//$NON-NLS-1$
+            final MimeMessage finalMsg = msg; 
+            try{
+            	IRunnable  r = new IRunnable(){
+                    public void run() throws Exception{
+                    	try{
+                    		Transport.send(finalMsg);
+                    	}catch(Exception e){
+                    		if(!bSessionRecreated){
+	                    		ApiAlgs.getLog(this).warn("Session invalidated", e);
+	                    		Session session = reopenSession(mailerSettings);
+	                    		MimeMessage msg2 = createMessage(session, fromAddr, toAddr, subject, bodyType, body, attach);
+	                    		Transport.send(msg2);
+                    		}
+                    		else{
+                    			throw e;
+                    		}
+                    	}
+                    }
+
+					
+                };
+                InSeparateThreadExecutor ex = new InSeparateThreadExecutor();
+                ex.execute("Send mail", r, outerTimeout);
+                ApiAlgs.getLog(this).info("Mail sent");
+                return true;
+            } catch(RethrownException e){
+                ApiAlgs.getLog(this).error("Error sending mail, mail is skipped", e.getCause());
+    			m_session = null;
+    			m_sessionKey = null;
+                return false;
+            }
+        }finally{
+        	twr.unregisterLongTermOp(Thread.currentThread());
+        }
+
+	}
 
 	private MimeMessage createMessage(Session session, InternetAddress from, InternetAddress[] to, 
 			String subject, String bodyType, String body, MimeBodyPart attachment) throws MessagingException{
@@ -450,9 +559,11 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 
 
 	public boolean isMailerConfigured() {
-		final IMailerSettings mailerSettings  = ApiStack.queryInterface(IMailerSettings.class);
-		
-		
+		final IMailerSettings mailerSettings = ApiStack.queryInterface(IMailerSettings.class);
+		return isMailerConfigured(mailerSettings);
+	}
+
+	public boolean isMailerConfigured(final IMailerSettings mailerSettings) {
 		if (mailerSettings == null) {
 			ApiAlgs.getLog(this).warn("Mailer settings is null"); //$NON-NLS-1$
 			return false;
