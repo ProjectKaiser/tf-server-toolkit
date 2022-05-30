@@ -270,7 +270,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 		return send(from, to, subject, null, body, null, null, null);
 	}
 
-	public synchronized boolean send(String from, String to, final String subject, 
+	public boolean send(String from, String to, final String subject, 
 			final String bodyType, final String body,
 			String attachFile, String attachType, byte[] attachment) throws EMailerConfigurationError {
 		return send(from, to, subject, bodyType, body,
