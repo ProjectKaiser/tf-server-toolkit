@@ -223,35 +223,46 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 		}
 	}
 
-	private MimeBodyPart settAttachment(final String filename, 
-			final String contentType, final byte[] attachment, String description) throws MessagingException {
+	private MimeBodyPart[] settAttachments(final Attachment[] attachments) throws MessagingException {
 
-		MimeBodyPart binaryPart = new MimeBodyPart();
-        DataSource ds = new DataSource() {
-            public InputStream getInputStream() throws IOException {
-                return new ByteArrayInputStream(attachment);
-            }
+		if (attachments == null)
+			return null;
 
-            public OutputStream getOutputStream() throws IOException {
-                ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                byteStream.write(attachment);
-                return byteStream;
-            }
+		MimeBodyPart[] binaryParts = new MimeBodyPart[attachments.length];
 
-            public String getContentType() {
-            	FileTypeMap.getDefaultFileTypeMap().getContentType(filename);
-                return contentType;
-            }
+		for (int i = 0; i < attachments.length; i++) {
 
-            public String getName() {
-                return filename;
-            }
-        };
-        binaryPart.setDataHandler(new DataHandler(ds));
-        binaryPart.setFileName(filename);
-        binaryPart.setDescription(description);
+			final byte[] attachment = attachments[i].getData();
+			final String contentType = attachments[i].getContentType();
+			final String filename = attachments[i].getFileName();
 
-        return binaryPart;		
+			DataSource ds = new DataSource() {
+	            public InputStream getInputStream() throws IOException {
+	                return new ByteArrayInputStream(attachment);
+	            }
+	
+	            public OutputStream getOutputStream() throws IOException {
+	                ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+	                byteStream.write(attachment);
+	                return byteStream;
+	            }
+	
+	            public String getContentType() {
+	            	FileTypeMap.getDefaultFileTypeMap().getContentType(filename);
+	                return contentType;
+	            }
+	
+	            public String getName() {
+	                return filename;
+	            }
+	        };
+	        binaryParts[i].setDataHandler(new DataHandler(ds));
+	        binaryParts[i].setFileName(filename);
+	        binaryParts[i].setDescription(attachments[i].getDescription());
+
+		}
+
+        return binaryParts;		
 	}
 
 
@@ -259,114 +270,15 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 		return send(from, to, subject, null, body, null, null, null);
 	}
 
-
 	public synchronized boolean send(String from, String to, final String subject, 
 			final String bodyType, final String body,
 			String attachFile, String attachType, byte[] attachment) throws EMailerConfigurationError {
-		final IMailerSettings mailerSettings  = ApiStack.queryInterface(IMailerSettings.class);
-		
-		if(!isMailerConfigured()){
-			ApiAlgs.getLog(this).warn("Message is skipped: " + body); //$NON-NLS-1$
-			throw new EMailerConfigurationError();
-		}
-		
-        IThrdWatcherRegistrator twr = ApiStack
-                .getInterface(IThrdWatcherRegistrator.class);
-
-        twr.registerLongTermOp(Thread.currentThread());
-        
-        try{
-        	
-        	List<Object> oldSessionKey = m_sessionKey; 
-        	Session session = getActiveSession(mailerSettings);
-        	final boolean bSessionRecreated = !TFUtils.equals(oldSessionKey, m_sessionKey) || oldSessionKey.equals(SESSION_FACTORY_KEY);
-            
-        	MimeMessage msg;
-        	final InternetAddress fromAddr;
-        	final InternetAddress[] toAddr;
-        	final MimeBodyPart attach;
-            try {
-            	if(null == from){
-            		from = mailerSettings.getDefaultSender();
-            	}
-            	fromAddr = new InternetAddress(from);
-            	toAddr = InternetAddress.parse(to);
-           		attach = (null != attachment) ? settAttachment(attachFile, attachType, attachment, "") : null;
-            	msg = createMessage(session, fromAddr, toAddr, subject, bodyType, body, attach);
-            } catch (Throwable t) {
-            	ApiAlgs.getLog(this).error("Error preparing mail, mail is skipped",t);//$NON-NLS-1$
-                return false;
-            }
-            ApiAlgs.getLog(this).info("Sending email:"+ body);//$NON-NLS-1$
-            final MimeMessage finalMsg = msg; 
-            try{
-            	IRunnable  r = new IRunnable(){
-                    public void run() throws Exception{
-                    	try{
-                    		Transport.send(finalMsg);
-                    	}catch(Exception e){
-                    		if(!bSessionRecreated){
-	                    		ApiAlgs.getLog(this).warn("Session invalidated", e);
-	                    		Session session = reopenSession(mailerSettings);
-	                    		MimeMessage msg2 = createMessage(session, fromAddr, toAddr, subject, bodyType, body, attach);
-	                    		Transport.send(msg2);
-                    		}
-                    		else{
-                    			throw e;
-                    		}
-                    	}
-                    }
-
-					
-                };
-                InSeparateThreadExecutor ex = new InSeparateThreadExecutor();
-                ex.execute("Send mail", r, outerTimeout);
-                ApiAlgs.getLog(this).info("Mail sent");
-                return true;
-            } catch(RethrownException e){
-                ApiAlgs.getLog(this).error("Error sending mail, mail is skipped", e.getCause());
-    			m_session = null;
-    			m_sessionKey = null;
-                return false;
-            }
-        }finally{
-        	twr.unregisterLongTermOp(Thread.currentThread());
-        }
-		
+		return send(from, to, subject, bodyType, body,
+				attachment == null ? null : new Attachment[] { new Attachment(attachFile, attachType, attachment, "") },
+				null);
 	}
 
-	public static class Attachment implements Serializable {
-		private static final long serialVersionUID = 1L;
-		private String fileName;
-		private String contentType;
-		private byte[] data;
-		private String description;
-
-		public Attachment(String fileName, String contentType, byte[] data, String description) {
-			this.fileName = fileName;
-			this.contentType = contentType;
-			this.data = data;
-			this.description = description;
-		}
-
-		public String getFileName() {
-			return fileName;
-		}
-
-		public String getContentType() {
-			return contentType;
-		}
-
-		public byte[] getData() {
-			return data;
-		}
-
-		public String getDescription() {
-			return description;
-		}
-	}
-
-	public synchronized boolean send(String from, String to, final String subject, final String bodyType,
+	public synchronized boolean send(String from, final String to, final String subject, final String bodyType,
 			final String body, final Attachment[] attachments, final IMailerSettings customMailerSettings)
 			throws EMailerConfigurationError {
 		final IMailerSettings mailerSettings = customMailerSettings != null ? customMailerSettings
@@ -391,15 +303,14 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
         	MimeMessage msg;
         	final InternetAddress fromAddr;
         	final InternetAddress[] toAddr;
-        	final MimeBodyPart attach;
+        	final MimeBodyPart[] attach;
             try {
             	if(null == from){
             		from = mailerSettings.getDefaultSender();
             	}
             	fromAddr = new InternetAddress(from);
             	toAddr = InternetAddress.parse(to);
-//           		attach = (null != attachment) ? settAttachment(attachFile, attachType, attachment, "") : null;
-            	attach = null; // XXX !!!!
+            	attach = settAttachments(attachments);
             	msg = createMessage(session, fromAddr, toAddr, subject, bodyType, body, attach);
             } catch (Throwable t) {
             	ApiAlgs.getLog(this).error("Error preparing mail, mail is skipped",t);//$NON-NLS-1$
@@ -443,39 +354,36 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 
 	}
 
-	private MimeMessage createMessage(Session session, InternetAddress from, InternetAddress[] to, 
-			String subject, String bodyType, String body, MimeBodyPart attachment) throws MessagingException{
+	private MimeMessage createMessage(Session session, InternetAddress from, InternetAddress[] to, String subject,
+			String bodyType, String body, MimeBodyPart[] attachments) throws MessagingException {
 		MimeMessage msg = new MimeMessage(session);
-        msg.setFrom(from);
-        msg.addRecipients(RecipientType.TO, to);
-        msg.setSubject(subject, emailCharset);
-        
-        if(null == attachment){
-            if(null != bodyType && (bodyType.contains("text/html"))){
-            	msg.setContent(body, bodyType);
-            }
-            else{
-                msg.setText(body, emailCharset, bodyType);            	
-            }
-        }
-        else{
-        	MimeMultipart multiPart = new MimeMultipart();
+		msg.setFrom(from);
+		msg.addRecipients(RecipientType.TO, to);
+		msg.setSubject(subject, emailCharset);
 
-            MimeBodyPart textPart = new MimeBodyPart();
-            multiPart.addBodyPart(textPart);
-            if(null != bodyType && (bodyType.contains("text/html"))){
-                textPart.setContent(body, bodyType);            	
-            }
-            else{
-                textPart.setText(body, emailCharset, bodyType);            	
-            }
-            
+		if (attachments == null || attachments.length == 0) {
+			if (null != bodyType && (bodyType.contains("text/html"))) {
+				msg.setContent(body, bodyType);
+			} else {
+				msg.setText(body, emailCharset, bodyType);
+			}
+		} else {
+			MimeMultipart multiPart = new MimeMultipart();
 
-        	multiPart.addBodyPart(attachment);
-            
-            msg.setContent(multiPart);
-        }
-        return msg;
+			MimeBodyPart textPart = new MimeBodyPart();
+			multiPart.addBodyPart(textPart);
+			if (bodyType != null && (bodyType.contains("text/html"))) {
+				textPart.setContent(body, bodyType);
+			} else {
+				textPart.setText(body, emailCharset, bodyType);
+			}
+
+			for (MimeBodyPart attachment : attachments)
+				multiPart.addBodyPart(attachment);
+
+			msg.setContent(multiPart);
+		}
+		return msg;
 	}
 
 	private Session reopenSession(final IMailerSettings mailerSettings) {
