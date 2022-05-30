@@ -235,6 +235,7 @@ public class Mailer extends PKEPAPIPeriodicalTask implements IMailer, IPKEPAPI {
 			final byte[] attachment = attachments[i].getData();
 			final String contentType = attachments[i].getContentType();
 			final String filename = attachments[i].getFileName();
+			binaryParts[i] = new MimeBodyPart();
 
 			DataSource ds = new DataSource() {
 	            public InputStream getInputStream() throws IOException {
