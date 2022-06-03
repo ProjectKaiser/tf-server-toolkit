@@ -552,6 +552,11 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 		m_desiredTables.add(tableDef);
 		registerEntity(tableDef);
 	}
+	
+	public void unregisterTableDef(TableDef tableDef) {
+	    m_desiredTables.remove(tableDef.getEntityName());
+	    m_entities.remove(tableDef.getEntityName());
+	}
 
 	/*
 	 * (non-Javadoc)
