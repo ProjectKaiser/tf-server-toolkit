@@ -79,7 +79,7 @@ dependencies {
 	implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
 	compile 'org.apache.poi:poi:3.10.1'
 
-	compile 'org.apache.httpcomponents:httpclient:4.3.6'
+	compile 'org.apache.httpcomponents:httpclient:4.5.13'
 	compile 'org.apache.commons:commons-text:1.8'
 	compile 'commons-io:commons-io:2.4'
 
