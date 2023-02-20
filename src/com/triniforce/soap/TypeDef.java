@@ -5,9 +5,6 @@
  */ 
 package com.triniforce.soap;
 
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.MethodDescriptor;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -333,67 +330,34 @@ public class TypeDef extends SimpleName{
             }
         }
         
-        static class CDGetSet implements PropDef.IGetSet, Serializable{
-            private static final long serialVersionUID = -7156241105779724042L;
-            private String m_getterName;
-            private String m_setterName;
-            private String m_getterRawType;
-            private String m_setterRawType;
+        static class CDGetSet implements PropDef.IGetSet{
+			private Method m_getter;
+            private Method m_setter;
 
-            public CDGetSet(String rawType, String getterName, String setterName) {
-                m_getterRawType = rawType;
-                m_setterRawType = rawType;
-                m_getterName = getterName;
-                m_setterName = setterName;
+            public CDGetSet(Method getter, Method setter) {
+            	m_getter = getter;
+            	m_setter = setter;
             }
-            public CDGetSet(String getterRawType, String getterName, String setterRawType, String setterName) {
-                m_getterRawType = getterRawType;
-                m_setterRawType = setterRawType;
-                m_getterName = getterName;
-                m_setterName = setterName;
-            }
-            
+
             public Object get(Object obj) {
-                Method getter = getMethod(m_getterRawType, m_getterName);
                 try {
-                    return getter.invoke(obj, (Object[]) null);
+                    return m_getter.invoke(obj, (Object[]) null);
                 } catch (Exception e) {
                     ApiAlgs.rethrowException(e);
                     return null;
                 }
             }
 
-            private Method getMethod(String rawType, String name) {
-                Method res = null;
-                try {
-                    Class<?> cls = Class.forName(rawType);
-                    BeanInfo info = Introspector.getBeanInfo(cls);
-                    for (MethodDescriptor mDesc : info.getMethodDescriptors()) {
-                        if(mDesc.getName().equals(name)){
-                        	res = mDesc.getMethod();
-                  			break;
-                        }
-                    }
-                } catch (Exception e) {
-                    ApiAlgs.rethrowException(e);
-                }
-                if(null == res)
-                    throw new EMethodNotFound(rawType + "." +name);
-                return res;
-            }
-
             public void set(Object obj, Object value) {
-                Method setter = getMethod(m_setterRawType, m_setterName);
                 try {
-                    setter.invoke(obj, new Object[]{value});
+                    m_setter.invoke(obj, new Object[]{value});
                 } catch(IllegalArgumentException e){
-                	ApiAlgs.getLog(this).trace(obj.toString() + "."+m_setterName + "."+value);
+                	ApiAlgs.getLog(this).trace(obj.toString() + "."+m_setter.getName() + "."+value);
                 	throw e;
                 } catch (Exception e) {
                     ApiAlgs.rethrowException(e);
                 }
-            }
-            
+            }        	
         }
         
         List<PropDef> m_props = new ArrayList<PropDef>();
@@ -451,6 +415,13 @@ public class TypeDef extends SimpleName{
         public ClassDef getParentDef(){
             return m_parentDef;
         }
+
+		public void copyTransient(ClassDef csDef) {
+			for (PropDef propDef : m_props) {
+				propDef.copyTransient(csDef.getProp(propDef.getName()));
+			}
+			
+		}
     }
     
     static class MapDef extends ArrayDef{

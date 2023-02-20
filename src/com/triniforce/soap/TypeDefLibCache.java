@@ -5,9 +5,13 @@
  */ 
 package com.triniforce.soap;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.MethodDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -234,8 +238,26 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
                 }
             }
             
+            private Method getMethod(Class cls, String name) {
+                Method res = null;
+                try {                    
+                    BeanInfo info = Introspector.getBeanInfo(cls);
+                    for (MethodDescriptor mDesc : info.getMethodDescriptors()) {
+                        if(mDesc.getName().equals(name)){
+                        	res = mDesc.getMethod();
+                  			break;
+                        }
+                    }
+                } catch (Exception e) {
+                    ApiAlgs.rethrowException(e);
+                }
+                if(null == res)
+                    throw new EMethodNotFound(cls.getName() + "." +name);
+                return res;
+            }
+            
             private PropDef.IGetSet createGetSet(String getter, String setter, CustomSerializer<?, ?> customSrz) {
-            	PropDef.IGetSet res = new ClassDef.CDGetSet(Map.Entry.class.getName(), getter, MapEntry.class.getName(), setter);
+            	PropDef.IGetSet res = new ClassDef.CDGetSet(getMethod(Map.Entry.class, getter), getMethod(MapEntry.class, setter));
             	if(null != customSrz)
             		res = customSrz.getGetSet(res);
             	return res;
@@ -369,7 +391,7 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
         private static final long serialVersionUID = -2146710337654704756L;
         private TypeDef m_type;
         private String m_rawTypeName;
-        private IGetSet m_getSet;
+        private transient IGetSet m_getSet;
 		private boolean m_bIgnoreNull = false;
         
         interface IGetSet{
@@ -452,6 +474,15 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
 
 		public boolean isIgnoreNull() {
 			return m_bIgnoreNull;
+		}
+
+		public void copyTransient(PropDef prop) {
+			if(null == m_getSet){
+				m_getSet = prop.m_getSet;
+				if(m_type instanceof ClassDef){
+					((ClassDef)m_type).copyTransient((ClassDef) prop.m_type);
+				}
+			}
 		}
     }
     

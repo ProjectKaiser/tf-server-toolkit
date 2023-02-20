@@ -100,7 +100,7 @@ public class ClassParser {
                 		propType = customSrz.getTargetType();
                 	}
                 	else{
-                		getset = new ClassDef.CDGetSet(cls.getName(), getter.getName(), setter.getName());
+                		getset = new ClassDef.CDGetSet(getter, setter);
                 	}
                     Class propCls = TypeDefLibCache.toClass(propType);
                     TypeDef td = lib.add(propType);

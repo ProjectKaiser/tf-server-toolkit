@@ -204,9 +204,10 @@ public class InterfaceDescription implements Serializable{
 		ObjectOutputStream oout = new ObjectOutputStream(bout);
 		oout.writeObject(csDef);
 		oout.close();
-		return (ClassDef) new ObjectInputStream(new ByteArrayInputStream(bout.toByteArray())).readObject();
+		ClassDef res = (ClassDef) new ObjectInputStream(new ByteArrayInputStream(bout.toByteArray())).readObject();
+		res.copyTransient(csDef);
+		return res;
 	}
-
 	public boolean isAvoidDoubleQuotesEscaping() {
 		return avoidDoubleQuotesEscaping;
 	}
