@@ -40,6 +40,7 @@ import org.apache.commons.text.translate.NumericEntityEscaper;
 import org.apache.commons.text.translate.UnicodeUnpairedSurrogateRemover;
 
 import com.triniforce.soap.TypeDefLibCache.MapDefLib.MapComponentDef;
+import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiAlgs.SimpleName;
@@ -317,6 +318,13 @@ public class TypeDef extends SimpleName{
         public PropDef getPropDef() {
             return m_propDef;
         } 
+        
+        @Override
+        public void copyTransient(TypeDef csDef) {
+        	ArrayDef other = (ArrayDef) csDef;
+        	m_propDef.copyTransient(other.m_propDef);
+        	super.copyTransient(csDef);
+        }
     }
     
     public static class ClassDef extends TypeDef  implements Serializable{
@@ -416,11 +424,15 @@ public class TypeDef extends SimpleName{
             return m_parentDef;
         }
 
-		public void copyTransient(ClassDef csDef) {
+        @Override
+		public void copyTransient(TypeDef csDef) {
+        	ClassDef src = (ClassDef) csDef;
 			for (PropDef propDef : m_props) {
-				propDef.copyTransient(csDef.getProp(propDef.getName()));
+				propDef.copyTransient(src.getProp(propDef.getName()));
 			}
-			
+			if(null != m_parentDef)
+				m_parentDef.copyTransient(src.m_parentDef);
+			super.copyTransient(csDef);
 		}
     }
     
@@ -504,5 +516,9 @@ public class TypeDef extends SimpleName{
 
     boolean isNullable(){
         return true;
+    }
+    
+    public void copyTransient(TypeDef csDef){
+    	
     }
 }

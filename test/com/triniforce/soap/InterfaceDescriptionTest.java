@@ -288,6 +288,43 @@ public class InterfaceDescriptionTest extends TFTestCase {
             ApiAlgs.rethrowException(e);
         }
     }
+    
+    static class CS0{
+    	List<Integer> m_list;
+    	String m_ign001;
+		public List<Integer> getList() {
+			return m_list;
+		}
+		public void setList(List<Integer> list) {
+			m_list = list;
+		}
+		public String getIgn001() {
+			return m_ign001;
+		}
+		public void setIgn001(String ign001) {
+			m_ign001 = ign001;
+		}    	
+    }
 
+    interface IFieldIgnore{
+    	CS0 method__001();
+    }
+    
+    public void testIgnoreField() throws ClassNotFoundException, IOException{
+    	InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+        InterfaceDescription desc = gen.parse(null, IFieldIgnore.class);
+        desc.ignoreProperty("method__001", false, "method__001Result", "ign001");
+        
+        SOAPDocument doc = new SOAPDocument();
+        doc.m_method = "method__001";
+        doc.m_args = new Object[]{
+        		new CS0(){{
+        			setList(Arrays.asList(1,2,3));
+        			setIgn001("ignored");
+        		}}
+        };
+        Document res = gen.serialize(desc, doc);
+        print(res);
+    }
 
 }

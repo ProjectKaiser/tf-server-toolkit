@@ -28,6 +28,7 @@ import com.triniforce.soap.TypeDef.ArrayDef;
 import com.triniforce.soap.TypeDef.ClassDef;
 import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
+import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiAlgs.SimpleName;
 import com.triniforce.utils.TFUtils;
@@ -479,9 +480,7 @@ public class TypeDefLibCache implements IDefLibrary, ITypeNameGenerator{
 		public void copyTransient(PropDef prop) {
 			if(null == m_getSet){
 				m_getSet = prop.m_getSet;
-				if(m_type instanceof ClassDef){
-					((ClassDef)m_type).copyTransient((ClassDef) prop.m_type);
-				}
+				m_type.copyTransient(prop.getType());
 			}
 		}
     }
