@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.triniforce.db.ddl.TableDef.EMetadataException;
+import com.triniforce.utils.TFUtils;
 
 public class CreateTableOperation extends TableOperation {
 	
@@ -51,6 +52,20 @@ public class CreateTableOperation extends TableOperation {
 
 	public void setDbName(String dbName) {
 		m_dbName = dbName;
+	}
+	
+	@Override
+	public String toString() {		
+		return String.format("%s (%s)", m_dbName, m_elements);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof CreateTableOperation))
+			return false;
+		CreateTableOperation other = (CreateTableOperation) obj;
+		
+		return TFUtils.equals(m_dbName, other.m_dbName) && m_elements.equals(other.m_elements);
 	}
 
 }

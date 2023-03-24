@@ -53,7 +53,7 @@ public class ConvertForeignKeys  extends UpgradeProcedure {
             IActualState as = ((BasicServer) ApiStack
                     .getInterface(IBasicServer.class)).getActualDbState();
             UpgradeRunner pl = new UpgradeRunner(con, as);
-            DBMetadata md = new Delta.DBMetadata(con.getMetaData());
+            DBMetadata md = new Delta.DBMetadata(con.getMetaData(), Delta.DEFAULT_FIELD_FACTORY);
             Statement st = con.createStatement();
             for (String dbName : dbInfo.getDbTableNames()) {
                 List<IndexDef> fks = md.getForeignKeys(dbInfo2DbNames(dbInfo),

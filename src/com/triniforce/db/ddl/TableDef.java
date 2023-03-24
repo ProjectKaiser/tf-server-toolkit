@@ -274,6 +274,11 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
         }
         
         @Override
+        public String toString() {
+        	return String.format("%s %s(%d,%d) %s %s", m_name, m_type.name(), m_size, m_scale, m_bNotNull?"notnull":"nullable",m_defaultValue);
+        }
+        
+        @Override
         public boolean equals(Object arg0) {
             if(arg0==null) return false;
             FieldDef f = (FieldDef)arg0;
@@ -611,6 +616,11 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
 
         public String getName() {
             return m_name;
+        }
+        
+        @Override
+        public String toString() {        	
+        	return String.format("%s (%s)", m_type.name(), m_columns);
         }
 
         @Override

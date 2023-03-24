@@ -8,6 +8,7 @@ package com.triniforce.db.ddl;
 
 import com.triniforce.db.ddl.TableDef.EMetadataException;
 import com.triniforce.db.ddl.TableDef.FieldDef;
+import com.triniforce.utils.TFUtils;
 
 /**
  * Adding column to database table
@@ -51,5 +52,20 @@ public class AddColumnOperation extends TableUpdateOperation<FieldDef> {
 	public TableUpdateOperation getReverseOperation() {
 		return new DeleteColumnOperation(m_field);
 	}
+	
+	@Override
+	public String toString() {		
+		return String.format("%s", m_field.toString());
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof AddColumnOperation))
+			return false;
+		AddColumnOperation other = (AddColumnOperation) obj;
+		
+		return m_field.equals(other.m_field);
+	}
+
 
 }
