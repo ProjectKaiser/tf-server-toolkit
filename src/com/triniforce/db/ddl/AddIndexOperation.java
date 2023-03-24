@@ -63,4 +63,18 @@ public class AddIndexOperation extends TableUpdateOperation {
 	public boolean isClustered() {
 		return m_index.m_bClustered;
 	}
+	
+	@Override
+	public String toString() {		
+		return String.format("%s", m_index.toString());
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof AddIndexOperation))
+			return false;
+		AddIndexOperation other = (AddIndexOperation) obj;
+		
+		return m_index.equals(other.m_index);
+	}
 }

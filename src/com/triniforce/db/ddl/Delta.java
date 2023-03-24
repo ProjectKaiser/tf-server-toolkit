@@ -67,9 +67,11 @@ public class Delta {
 		
 		private DatabaseMetaData m_md;
 		String CATALOG=null, SCHEME=null;
+		private IFieldFactory m_fieldFactory;
 
-		public DBMetadata(DatabaseMetaData md) {
+		public DBMetadata(DatabaseMetaData md, IFieldFactory ff) {
 			m_md = md;
+			m_fieldFactory = ff;
 		}
 		
 		public String getRealDbTableName(String aDbTableName){
@@ -344,17 +346,22 @@ public class Delta {
 //		}
 		
 		private FieldDef rs2FieldDef(ResultSet rs) throws SQLException {
-			String name = rs.getString("COLUMN_NAME");
-			ColumnType type = FieldDef.ddlType(rs.getInt("DATA_TYPE"));
+			return m_fieldFactory.createField(rs.getString("COLUMN_NAME"), rs.getInt("DATA_TYPE"), rs.getString("COLUMN_DEF"),
+					rs.getInt("NULLABLE")== DatabaseMetaData.columnNoNulls, rs.getInt("COLUMN_SIZE"), rs.getInt("CHAR_OCTET_LENGTH"), rs.getInt("DECIMAL_DIGITS"));
+
+		}
+	}
+	
+	public static final IFieldFactory DEFAULT_FIELD_FACTORY = new IFieldFactory(){
+
+		@Override
+		public FieldDef createField(String name, int sqlType, String defVal, boolean bNotNull, int size, int charOctetLength, int decDigits) {
+			ColumnType type = FieldDef.ddlType(sqlType);
 			
-			String defVal = rs.getString("COLUMN_DEF");
-			boolean bNotNull = rs.getInt("NULLABLE") == DatabaseMetaData.columnNoNulls;
 			FieldDef res;
 			if (FieldDef.isScalarType(type))
 				res = FieldDef.createScalarField(name, type, bNotNull, defVal);
 			else if (FieldDef.isStringType(type)) {
-				int size = rs.getInt("COLUMN_SIZE");
-				int charOctetLength = rs.getInt("CHAR_OCTET_LENGTH");
 				if (size * 2 <= charOctetLength) {// Unicode
 					if (type.equals(ColumnType.CHAR))
 						type = ColumnType.NCHAR;
@@ -364,20 +371,18 @@ public class Delta {
 				res = FieldDef.createStringField(name, type, size, bNotNull,
 						defVal);
 			} else if (FieldDef.isDecimalType(type)) {
-				res = FieldDef.createDecimalField(name, rs
-						.getInt("COLUMN_SIZE"), rs.getInt("DECIMAL_DIGITS"),
-						bNotNull, defVal);
+				res = FieldDef.createDecimalField(name, size, decDigits, bNotNull, defVal);
 			} else {
 				TFUtils.assertTrue(false, "");
 				return null;
 			}
-
-			return res;
+			return res;			
 		}
-	}
+	};
 
 	public static class DeltaSchemaLoader {
 		
+
 		final String CATALOG = null;
 
 		final String SCHEMA = null;
@@ -386,6 +391,10 @@ public class Delta {
 //		private Map<String, Set<String>> m_exclusions = new HashMap<String, Set<String>>();
 
 		private IIndexLocNames m_indexLocNames;
+
+private IFieldFactory m_fieldFactory;
+
+private String m_schema;
 
 		public static class OlapIndexLocNames implements IIndexLocNames{
 			
@@ -403,10 +412,16 @@ public class Delta {
 			
 			
 		}
-
+		
 		public DeltaSchemaLoader(List<String> tabs, IIndexLocNames indexLocNames) {
+			this(tabs, indexLocNames, DEFAULT_FIELD_FACTORY, null);
+		}
+
+		public DeltaSchemaLoader(List<String> tabs, IIndexLocNames indexLocNames, IFieldFactory fieldFactory, String schema) {
 			m_tabs = tabs;
 			m_indexLocNames = indexLocNames;
+			m_fieldFactory = fieldFactory == null ? DEFAULT_FIELD_FACTORY : fieldFactory;
+			m_schema = schema;
 		}
 
 		public DeltaSchema loadSchema(Connection con, IDBNames dbNames) {
@@ -415,10 +430,12 @@ public class Delta {
 			DatabaseMetaData md;
 			try {
 				md = con.getMetaData();
-				DBMetadata md2 = new DBMetadata(md);
+				DBMetadata md2 = new DBMetadata(md, m_fieldFactory);
 				if(DbType.MSSQL.equals(UpgradeRunner.getDbType(con))){
 					md2.SCHEME = "dbo";
 				}
+				else
+					md2.SCHEME = m_schema;
 				Map<String, Collection<FieldDef>> fields;
 				fields = md2.getFields(new HashSet<String>(m_tabs), dbNames);
 				IndexOperationObjectFactory indexFactory = new IndexOperationObjectFactory();
@@ -858,6 +875,11 @@ public class Delta {
 		}
 
 	}
+	
+	public interface IFieldFactory{
+		 
+		 FieldDef createField(String name, int type, String defaultVal, boolean bNotNull, int size, int charOctetLen, int decDigits);
+	}
 
 	public List<DBOperation> calculateDelta(Map<String, TableDef> src, Map<String, TableDef> dst) {
 		ArrayList<DBOperation> res = new ArrayList<DBOperation>();
@@ -903,7 +925,11 @@ public class Delta {
 		Collections.sort(res, new Comparator<DBOperation>(){
 
 			public int compare(DBOperation arg0, DBOperation arg1) {
-				return getOpOrder(arg0) - getOpOrder(arg1);
+				int res = getOpOrder(arg0) - getOpOrder(arg1);
+				if(res == 0){
+					res = arg0.m_dbObject.compareTo(arg1.getDBOName());
+				}			
+				return res;
 			}
 			
 			int getOpOrder(DBOperation dbOp){

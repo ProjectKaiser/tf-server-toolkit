@@ -24,6 +24,7 @@ import com.triniforce.db.ddl.Delta.DeltaSchema;
 import com.triniforce.db.ddl.Delta.DeltaSchemaLoader;
 import com.triniforce.db.ddl.Delta.EditTabCmd;
 import com.triniforce.db.ddl.Delta.IDBNames;
+import com.triniforce.db.ddl.Delta.IFieldFactory;
 import com.triniforce.db.ddl.TableDef.ElementVerStored;
 import com.triniforce.db.ddl.TableDef.FieldDef;
 import com.triniforce.db.ddl.TableDef.FieldDef.ColumnType;
@@ -299,13 +300,74 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 		}
 	}
 
-private boolean existTable(String tabName) throws SQLException, Exception {
-	ResultSet rs = getConnection().getMetaData().getTables(null, null, tabName.toUpperCase(Locale.ENGLISH), null);
-	try{
-		return rs.next();
-	}finally{
-		rs.close();
+	private boolean existTable(String tabName) throws SQLException, Exception {
+		ResultSet rs = getConnection().getMetaData().getTables(null, null, tabName.toUpperCase(Locale.ENGLISH), null);
+		try{
+			return rs.next();
+		}finally{
+			rs.close();
+		}
 	}
-}
+	
+	static class TestFieldFactory implements IFieldFactory{
+		@Override
+		public FieldDef createField(String name, int type, String defaultVal, boolean bNotNull, int size, int charOctetLen, int decDigits) {
+			return FieldDef.createStringField(name, ColumnType.NVARCHAR, 10, bNotNull, null);
+		}
+		
+	}
+		
+	public void testFieldMapper() throws Exception{
+		DeltaSchemaLoader loader = new Delta.DeltaSchemaLoader(
+				Arrays.asList("DeltaSchemaLoaderTest1","DeltaSchemaLoaderTest2", "UnkTable1","DeltaSchemaLoaderTest3", "SETTINGS"),
+				new IIndexLocNames(){
+					public String getShortName(String dbTabName,
+							String dbFullName) {
+						if(dbFullName.startsWith(dbTabName.toUpperCase(Locale.ENGLISH)+"_")){
+							return dbFullName.substring(dbTabName.length()+1);
+						}
+						return dbFullName;
+					}
+
+					@Override
+					public boolean bUseOriginalIndexNames() {
+						return false;
+					}
+					
+				}, new TestFieldFactory(), "PUBLIC");
+		DeltaSchema sch = loader.loadSchema(getConnection(), dbInfoFromAS(m_as));
+		TableDef t2 = sch.getTables().get("DeltaSchemaLoaderTest2");
+		assertNotNull(t2);
+		FieldDef f2 = t2.getFields().findElement("FIELD4").getElement();
+		assertEquals(ColumnType.NVARCHAR, f2.getType());
+		
+		TableDef tset = sch.getTables().get("SETTINGS");
+		assertNull(tset);
+				
+	} 
+	
+	public void testIndexes() throws Exception{
+		DeltaSchemaLoader loader = new Delta.DeltaSchemaLoader(
+				Arrays.asList("DeltaSchemaLoaderTest1","DeltaSchemaLoaderTest2", "UnkTable1","DeltaSchemaLoaderTest3", "SETTINGS"),
+				new IIndexLocNames(){
+					public String getShortName(String dbTabName,
+							String dbFullName) {
+						if(dbFullName.startsWith(dbTabName.toUpperCase(Locale.ENGLISH)+"_")){
+							return dbFullName.substring(dbTabName.length()+1);
+						}
+						return dbFullName;
+					}
+
+					@Override
+					public boolean bUseOriginalIndexNames() {
+						return false;
+					}
+					
+				}, new TestFieldFactory(), "PUBLIC");
+		DeltaSchema sch = loader.loadSchema(getConnection(), dbInfoFromAS(m_as));
+		TableDef t1 = sch.getTables().get("DeltaSchemaLoaderTest1");
+		
+		assertEquals(3,  t1.getIndices().size());
+	}
 	
 }
