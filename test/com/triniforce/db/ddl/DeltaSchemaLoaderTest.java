@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import com.triniforce.db.ddl.Delta.DBMetadata.IIndexLocNames;
 import com.triniforce.db.ddl.Delta.DeltaSchema;
 import com.triniforce.db.ddl.Delta.DeltaSchemaLoader;
+import com.triniforce.db.ddl.Delta.DeltaSchemaLoader.TemplateIndexLocNames;
 import com.triniforce.db.ddl.Delta.EditTabCmd;
 import com.triniforce.db.ddl.Delta.IDBNames;
 import com.triniforce.db.ddl.Delta.IFieldFactory;
@@ -36,6 +36,7 @@ import com.triniforce.utils.ApiAlgs;
 public class DeltaSchemaLoaderTest extends DBTestCase {
 
 	private ActualStateBL m_as;
+	private TemplateIndexLocNames indexName;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -79,6 +80,8 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
         UpgradeRunner pl = new UpgradeRunner(getConnection(), m_as);
         pl.run(ts.getCommandList());
         con.commit();
+        
+        indexName = new Delta.DeltaSchemaLoader.TemplateIndexLocNames(UpgradeRunner.getDbType(con), true);
 	}
 	
 	public void test() throws Exception{
@@ -86,22 +89,7 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 //			return;
 		
 		DeltaSchemaLoader loader = new Delta.DeltaSchemaLoader(
-				Arrays.asList("DeltaSchemaLoaderTest1","DeltaSchemaLoaderTest2", "UnkTable1","DeltaSchemaLoaderTest3"),
-				new IIndexLocNames(){
-					public String getShortName(String dbTabName,
-							String dbFullName) {
-						if(dbFullName.startsWith(dbTabName.toUpperCase(Locale.ENGLISH)+"_")){
-							return dbFullName.substring(dbTabName.length()+1);
-						}
-						return dbFullName;
-					}
-
-					@Override
-					public boolean bUseOriginalIndexNames() {
-						return false;
-					}
-					
-				});
+				Arrays.asList("DeltaSchemaLoaderTest1","DeltaSchemaLoaderTest2", "UnkTable1","DeltaSchemaLoaderTest3"), indexName);
 		//DeltaSchema sch = loader.loadSchema(getConnection());
 		//assertNotNull(sch);
 		
@@ -319,22 +307,7 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 		
 	public void testFieldMapper() throws Exception{
 		DeltaSchemaLoader loader = new Delta.DeltaSchemaLoader(
-				Arrays.asList("DeltaSchemaLoaderTest1","DeltaSchemaLoaderTest2", "UnkTable1","DeltaSchemaLoaderTest3", "SETTINGS"),
-				new IIndexLocNames(){
-					public String getShortName(String dbTabName,
-							String dbFullName) {
-						if(dbFullName.startsWith(dbTabName.toUpperCase(Locale.ENGLISH)+"_")){
-							return dbFullName.substring(dbTabName.length()+1);
-						}
-						return dbFullName;
-					}
-
-					@Override
-					public boolean bUseOriginalIndexNames() {
-						return false;
-					}
-					
-				}, new TestFieldFactory(), "PUBLIC");
+				Arrays.asList("DeltaSchemaLoaderTest1","DeltaSchemaLoaderTest2", "UnkTable1","DeltaSchemaLoaderTest3", "SETTINGS"), indexName, new TestFieldFactory(), "PUBLIC");
 		DeltaSchema sch = loader.loadSchema(getConnection(), dbInfoFromAS(m_as));
 		TableDef t2 = sch.getTables().get("DeltaSchemaLoaderTest2");
 		assertNotNull(t2);
@@ -349,21 +322,7 @@ public class DeltaSchemaLoaderTest extends DBTestCase {
 	public void testIndexes() throws Exception{
 		DeltaSchemaLoader loader = new Delta.DeltaSchemaLoader(
 				Arrays.asList("DeltaSchemaLoaderTest1","DeltaSchemaLoaderTest2", "UnkTable1","DeltaSchemaLoaderTest3", "SETTINGS"),
-				new IIndexLocNames(){
-					public String getShortName(String dbTabName,
-							String dbFullName) {
-						if(dbFullName.startsWith(dbTabName.toUpperCase(Locale.ENGLISH)+"_")){
-							return dbFullName.substring(dbTabName.length()+1);
-						}
-						return dbFullName;
-					}
-
-					@Override
-					public boolean bUseOriginalIndexNames() {
-						return false;
-					}
-					
-				}, new TestFieldFactory(), "PUBLIC");
+				indexName, new TestFieldFactory(), "PUBLIC");
 		DeltaSchema sch = loader.loadSchema(getConnection(), dbInfoFromAS(m_as));
 		TableDef t1 = sch.getTables().get("DeltaSchemaLoaderTest1");
 		

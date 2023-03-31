@@ -56,18 +56,7 @@ public class ConvertForeignKeys  extends UpgradeProcedure {
             DBMetadata md = new Delta.DBMetadata(con.getMetaData(), Delta.DEFAULT_FIELD_FACTORY);
             Statement st = con.createStatement();
             for (String dbName : dbInfo.getDbTableNames()) {
-                List<IndexDef> fks = md.getForeignKeys(dbInfo2DbNames(dbInfo),
-                        new IIndexLocNames() {
-                            public String getShortName(String dbTabName,
-                                    String dbFullName) {
-                                return dbFullName;
-                            }
-
-							@Override
-							public boolean bUseOriginalIndexNames() {
-								return false;
-							}
-                        }, dbName);
+                List<IndexDef> fks = md.getForeignKeys(dbInfo2DbNames(dbInfo), new Delta.DeltaSchemaLoader.TemplateIndexLocNames(UpgradeRunner.getDbType(con), false), dbName);
                 for (IndexDef fk : fks) {
                     exec(st, getDelForeignKeyString(pl, dbName, fk.getName()));
                     if(!DbType.MYSQL.equals(UpgradeRunner.getDbType(con)) || 

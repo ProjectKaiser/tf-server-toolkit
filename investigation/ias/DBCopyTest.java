@@ -64,18 +64,7 @@ public class DBCopyTest extends TFTestCase {
 	        	dstCon = DriverManager.getConnection(dstUrl);
 	        }
 			try{
-				loader = new Delta.DeltaSchemaLoader(getTabList(dstCon), new IIndexLocNames(){
-					public String getShortName(String dbTabName,
-							String dbFullName) {
-						return dbFullName;
-					}
-
-					@Override
-					public boolean bUseOriginalIndexNames() {
-						return false;
-					}
-					
-				});
+				loader = new Delta.DeltaSchemaLoader(getTabList(dstCon), new Delta.DeltaSchemaLoader.TemplateIndexLocNames(UpgradeRunner.getDbType(dstCon)));
 //				loader = new Delta.DeltaSchemaLoader(Arrays.asList("purchase_order"));
 				dst = loader.loadSchema(dstCon, getDstDbInfo());
 			} finally{
@@ -157,7 +146,8 @@ public class DBCopyTest extends TFTestCase {
 		DeltaSchema dst;
 		{
 			Class.forName("org.firebirdsql.jdbc.FBDriver");
-			String dstUrl = "jdbc:firebirdsql:localhost/3050:D:\\workspace\\UBL\\build\\test\\regression.fdb";
+			//String dstUrl = "jdbc:firebirdsql:localhost/3050:D:\\workspace\\UBL\\build\\test\\regression.fdb";
+			String dstUrl = "jdbc:firebirdsql://localhost/D:/workspace/tf_settings/regression.fdb?encoding=UNICODE_FSS";
 			Connection dstCon;
 	        String dbUserName = getTestProperty("userName");
 	        if(null != dbUserName){
@@ -168,19 +158,8 @@ public class DBCopyTest extends TFTestCase {
 	        	dstCon = DriverManager.getConnection(dstUrl);
 	        }
 			try{
-				loader = new Delta.DeltaSchemaLoader(getTabList(dstCon), new IIndexLocNames(){
-					public String getShortName(String dbTabName,
-							String dbFullName) {
-						return dbFullName;
-					}
-
-					@Override
-					public boolean bUseOriginalIndexNames() {
-						// TODO Auto-generated method stub
-						return false;
-					}
-					
-				});
+				loader = new Delta.DeltaSchemaLoader(getTabList(dstCon), 
+						new Delta.DeltaSchemaLoader.TemplateIndexLocNames(UpgradeRunner.getDbType(dstCon)));
 //				loader = new Delta.DeltaSchemaLoader(Arrays.asList("purchase_order"));
 				dst = loader.loadSchema(dstCon, getDstDbInfo());
 			} finally{
