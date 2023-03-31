@@ -620,7 +620,7 @@ public class TableDef extends com.triniforce.utils.Entity implements Cloneable{
         
         @Override
         public String toString() {        	
-        	return String.format("%s (%s)", m_type.name(), m_columns);
+        	return String.format("%s %s (%s)", m_type.name(), m_name, m_columns);
         }
 
         @Override

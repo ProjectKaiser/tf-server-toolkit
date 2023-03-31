@@ -25,12 +25,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.InvalidPropertiesFormatException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import com.triniforce.db.ddl.DBTables.DBOperation;
+import com.triniforce.db.ddl.Delta.DeltaSchema;
+import com.triniforce.db.ddl.Delta.DeltaSchemaLoader;
 import com.triniforce.db.ddl.TableDef.EReferenceError;
 import com.triniforce.db.ddl.TableDef.FieldDef;
 import com.triniforce.db.ddl.TableDef.IElementDef;
@@ -43,6 +47,7 @@ import com.triniforce.db.qbuilder.QSelect;
 import com.triniforce.db.qbuilder.QTable;
 import com.triniforce.db.qbuilder.WhereClause;
 import com.triniforce.server.srvapi.IDatabaseInfo;
+import com.triniforce.server.srvapi.ISOQuery.EServerObjectNotFound;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 
@@ -1282,5 +1287,132 @@ public class UpgradeRunnerTest extends DDLTestCase {
        	DBTables db = new DBTables(m_as, desired);
     	m_player.run(db.getCommandList());
     	
+	}
+	
+	static class TestCreatePK2 extends TableDef{
+		public TestCreatePK2() {
+			setDbName("TestCreatePK2");
+			addScalarField(1, "ID2", ColumnType.LONG, true, null);
+			addPrimaryKey(2, "pk", new String[]{"ID2"});
+			
+		}
+	}
+	
+	static class TestCreatePK1 extends TableDef{
+		public TestCreatePK1() {
+			setDbName("PRIMARY_KEY_8");
+			setSupportForeignKeys(true);
+			addScalarField(1, "ID", ColumnType.LONG, true, null);
+			addScalarField(2, "ID2", ColumnType.LONG, true, null);
+			addIndex(3, "INDEX_9996", new String[]{"ID2"}, true, true);
+			addIndex(4, "INDEX_9997", new String[]{"ID2"}, false, true);
+			addForeignKey(5, "FK", new String[]{"ID2"}, TestCreatePK2.class.getName(), "pk", false);
+			addScalarField(6, "ID3", ColumnType.LONG, true, null);
+			addIndex(7, "PRIMARY_KEY_8", new String[]{"ID3"}, true, true);
+			
+			addScalarField(8, "ID4", ColumnType.LONG, true, null);
+			addForeignKey(9, "FK2", new String[]{"ID4"}, TestCreatePK2.class.getName(), "pk", false);
+			
+			addScalarField(10, "ID5", ColumnType.LONG, true, null);
+			
+			
+		}
+	}
+	
+	public void testCreatePK() throws Exception{
+		HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
+		TestCreatePK1 def1 = new TestCreatePK1();
+   		desired.put(def1.getEntityName(), def1);
+   		desired.put(new TestCreatePK2().getEntityName(), new TestCreatePK2());
+       	DBTables db = new DBTables(m_as, desired);
+    	m_player.run(db.getCommandList());
+    	
+    	Connection c = getConnection();
+    	execsql(c, "create index PRIMARY_KEY_8_FK3 on PRIMARY_KEY_8 (ID5)");
+		
+    	def1.addPrimaryKey(11, "PK1", new String[]{"ID"});
+    	def1.addForeignKey(12, "FK3", new String[]{"ID5"}, TestCreatePK2.class.getName(), "pk", false);
+    	m_player.run(db.getCommandList());
+    	c.commit();
+//    	
+    	DatabaseMetaData md = c.getMetaData();
+		ResultSet rs = md.getIndexInfo(null, "PUBLIC", "PRIMARY_KEY_8", false, false);
+		while(rs.next()){
+			trace("index : " + rs.getString("INDEX_NAME"));
+		}
+		
+		rs = md.getImportedKeys(null, "PUBLIC", "PRIMARY_KEY_8");
+		assertTrue(rs.next());
+		
+		TableDef t = load(c, TestCreatePK1.class.getName());
+		assertNotNull(t);
+		for(int i=0; i<t.getIndices().size(); i++){
+			trace("idx:" + t.getIndices().getElement(i));
+		}
+		assertEquals(7, t.getIndices().size());
+
+	}
+	
+	private void execsql(Connection c, String string) throws SQLException {
+    	trace(string);
+    	c.createStatement().execute(string);
+    	c.commit();
+	}
+
+	public static class TestCreateUnique extends TableDef{
+		public TestCreateUnique() {			
+			addScalarField(1, "ID_001", ColumnType.LONG, true, null);
+			addScalarField(2, "ID_006", ColumnType.LONG, true, null);
+			addPrimaryKey(3, "PK_9996", new String[]{"ID_006"});
+			
+		}
+	}
+	
+	public void testUniqueConstraints() throws Exception{
+		HashMap<String, TableDef> desired = new HashMap<String, TableDef>();
+		TestCreateUnique def1 = new TestCreateUnique();
+   		desired.put(def1.getEntityName(), def1);
+   		desired.put(new TestCreatePK2().getEntityName(), new TestCreatePK2());
+       	DBTables db = new DBTables(m_as, desired);
+    	m_player.run(db.getCommandList());
+    	    	
+    	Connection c = getConnection();
+    	execsql(c, "create unique index T_TESTCREATEUNIQUE_UNIQ_9888 on T_TESTCREATEUNIQUE (ID_001)");
+//    	def1.addIndex(4, "UNIQ_9888", new String[]{"ID_001"}, true, true);
+//    	m_player.run(db.getCommandList());
+    	
+    	
+    	TableDef res = load(c, TestCreateUnique.class.getName());
+    	
+    	DatabaseMetaData md = c.getMetaData();
+		ResultSet rs = md.getPrimaryKeys(null, "PUBLIC", "T_TESTCREATEUNIQUE");
+		while(rs.next()){
+			trace(rs.getString("PK_NAME"));
+		}
+    	
+    	assertEquals(new HashSet<String>(Arrays.asList("T_TESTCREATEUNIQUE_UNIQ_9888", "T_TESTCREATEUNIQUE_PK_9996")), res.getIndices().getAddedElements().stream().map(v->v.getElement().getName()).collect(Collectors.toSet()));
+	}
+
+	private TableDef load(Connection c, String name) {
+		DeltaSchemaLoader l = new Delta.DeltaSchemaLoader(Arrays.asList(name), 
+				new com.triniforce.db.ddl.Delta.DeltaSchemaLoader.TemplateIndexLocNames(UpgradeRunner.getDbType(c)), null, "PUBLIC");
+		
+		DeltaSchema sch = l.loadSchema(c, new Delta.IDBNames(){
+
+			public String getDbName(String entityName) throws EServerObjectNotFound {
+				return m_as.getDBName(entityName);
+			}
+
+			public String getAppName(String dbName) {
+				try {
+					return m_as.getAppName(dbName);
+				} catch (SQLException e) {
+					ApiAlgs.rethrowException(e);
+				}
+				return dbName;
+			}
+			
+		});
+		return sch.getTables().get(name);
 	}
 }
