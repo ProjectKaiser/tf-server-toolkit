@@ -220,7 +220,7 @@ public class Delta {
 				added.add(index.getName());
 			}
 			rs.close();
-		
+			
 			rs = m_md.getIndexInfo(CATALOG, SCHEME, realDbTableName.toUpperCase(Locale.ENGLISH), false, false);
 			walker = new ResultSetWalker<IndexTemporary>(
 					new IndexObjectFactory(IndexDef.TYPE.INDEX, "INDEX_NAME", realDbTableName, "TABLE_NAME", dbNames, indexLocNames),
@@ -233,6 +233,13 @@ public class Delta {
 				}
 			}
 			rs.close();
+			Collections.sort(res, new Comparator<IndexDef>() {
+				@Override
+				public int compare(IndexDef o1, IndexDef o2) {
+					int cres = o1.getType().compareTo(o2.getType());						
+					return cres == 0 ? o1.getName().compareTo(o2.getName()) : cres;
+				}
+			});
 		
 			return res;
 		}
@@ -973,9 +980,9 @@ private String m_schema;
 		orderNo.put(CreateTableOperation.class, 0);
 		orderNo.put(AddColumnOperation.class, 1);
 		orderNo.put(AlterColumnOperation.class, 2);
-		orderNo.put(AddIndexOperation.class, 2);
-		orderNo.put(AddPrimaryKeyOperation.class, 3);
-		orderNo.put(AddForeignKeyOperation.class, 4);
+		orderNo.put(AddIndexOperation.class, 3);
+		orderNo.put(AddPrimaryKeyOperation.class, 4);
+		orderNo.put(AddForeignKeyOperation.class, 5);
 		
 
 		Collections.sort(res, new Comparator<DBOperation>(){
@@ -984,6 +991,9 @@ private String m_schema;
 				int res = getOpOrder(arg0) - getOpOrder(arg1);
 				if(res == 0){
 					res = arg0.m_dbObject.compareTo(arg1.getDBOName());
+					if(res == 0){
+						res = arg0.getOperation().getName().compareTo(arg1.getOperation().getName());
+					}
 				}			
 				return res;
 			}
