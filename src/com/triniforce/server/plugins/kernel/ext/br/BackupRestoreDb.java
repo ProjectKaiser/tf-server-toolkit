@@ -66,6 +66,8 @@ public class BackupRestoreDb extends PKEPBackupRestoreEntry{
             	String scheme = null;
             	if(DbType.MSSQL.equals(UpgradeRunner.getDbType(con)))
             		scheme = "dbo";
+            	if(DbType.H2.equals(UpgradeRunner.getDbType(con)))
+            		scheme = "PUBLIC";
                 IDatabaseConnection srcConnection = new DatabaseConnection(con, scheme);
                 config(srcConnection);
                 IDataSet fullDataSet = srcConnection.createDataSet();

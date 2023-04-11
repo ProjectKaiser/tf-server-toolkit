@@ -64,7 +64,7 @@ dependencies {
 
 	compile(group: 'log4j', name: 'log4j', version: '1.2.16')
 	compile(group: 'org.beanshell', name: 'bsh', version: '2.0b4')
-	compile(group: 'org.dbunit', name: 'dbunit', version: '2.4.9'){
+	compile(group: 'org.dbunit', name: 'dbunit', version: '2.7.3'){
 		 exclude group: 'junit', module: 'junit'
 	}
 	compile(group: 'org.slf4j', name: 'slf4j-api', version: '1.6.1')
