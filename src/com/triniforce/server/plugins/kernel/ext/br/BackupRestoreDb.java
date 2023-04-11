@@ -53,6 +53,7 @@ public class BackupRestoreDb extends PKEPBackupRestoreEntry{
         IDatabaseInfo di = ApiStack.getInterface(IDatabaseInfo.class);
         String pattern = di.getIdentifierQuoteString() + "?" + di.getIdentifierQuoteString();
         cfg.setProperty("http://www.dbunit.org/properties/escapePattern", pattern);
+        cfg.setProperty(DatabaseConfig.FEATURE_ALLOW_EMPTY_FIELDS, true);
     }
     
     @Override
