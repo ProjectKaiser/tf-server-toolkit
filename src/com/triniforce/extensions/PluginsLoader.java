@@ -83,10 +83,12 @@ public class PluginsLoader {
         try {
             JarFile jf = new JarFile(jar);
             try{
-                res = jf.getManifest().getMainAttributes().getValue("Main-Class");
-                if(null == res){
-                    res = jf.getManifest().getMainAttributes().getValue("Pk-Plugin-Main-Class");
-                }
+            	if(null != jf.getManifest()){
+	                res = jf.getManifest().getMainAttributes().getValue("Main-Class");
+	                if(null == res){
+	                    res = jf.getManifest().getMainAttributes().getValue("Pk-Plugin-Main-Class");
+	                }
+            	}
             }finally{
                 jf.close();
             }

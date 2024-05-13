@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.List;
 
 import com.triniforce.db.test.TFTestCase;
@@ -55,6 +56,13 @@ public class PluginsLoaderTest extends TFTestCase {
         }
         List<IPlugin> plugins = pl.loadPlugins();
         assertEquals(2, plugins.size());
+    }
+    
+    public void testLoadJarWithoutManifest(){
+    	File tmpFolder = getTmpFolder(this, "testLoadJarWithoutManifest");
+    	TFUtils.copyStream(getClass().getResourceAsStream("javax.inject-1.jar"), new File(tmpFolder, "javax.inject-1.jar"));
+        PluginsLoader pl = new PluginsLoader(tmpFolder);
+        assertEquals(Collections.emptyList(), pl.loadClasses());    	
     }
     
 }
