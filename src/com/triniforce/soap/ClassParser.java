@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.triniforce.soap.TypeDef.ClassDef;
+import com.triniforce.soap.TypeDefLibCache.ClassDefLib;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
 import com.triniforce.soap.TypeDefLibCache.PropDef.IGetSet;
 import com.triniforce.utils.TFUtils;
@@ -34,17 +35,22 @@ public class ClassParser {
 	private Package m_pkg;
 	private HashMap<Class, List<String> > m_nonParsedParents;
 	private List<CustomSerializer<?,?>> m_customSrzs;
+	private HashMap<Class, ClassDef> m_operationDefs;
 
     public ClassParser(Package pkg, List<CustomSerializer<?,?>> customSrzs) {
         m_pkg = pkg;
         m_nonParsedParents = new HashMap<Class, List<String> >();
         addNonParsedParent(Exception.class);
         m_customSrzs = customSrzs;
+        m_operationDefs = new HashMap<Class, ClassDef>();
     }
 
     public ClassDef parse(Class key, IDefLibrary lib, String typeName) {
         
         Class<?> cls = (Class) key;
+        ClassDef res = m_operationDefs.get(key);
+        if(null != res)
+        	return res; // recursion
         
         ClassDef parentDef = null;
         Class superclass = key.getSuperclass(); 
@@ -72,7 +78,8 @@ public class ClassParser {
 	        }
         }
         
-        ClassDef res = new TypeDef.ClassDef(typeName, key, parentDef);
+        res = new TypeDef.ClassDef(typeName, key, parentDef);
+        m_operationDefs.put(key, res);
         
         Iterator<Method> setters = getSetters(cls);
         
@@ -135,7 +142,7 @@ public class ClassParser {
 //        	if(Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers))
 //        		lib.add(innerCls);
 //		}
-        
+        m_operationDefs.remove(key);
         return res;
     }   
 

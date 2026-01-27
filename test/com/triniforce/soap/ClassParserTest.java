@@ -25,6 +25,7 @@ import com.triniforce.soap.TypeDef.MapDef;
 import com.triniforce.soap.TypeDef.ScalarDef;
 import com.triniforce.soap.TypeDefLibCache.ClassDefLib;
 import com.triniforce.soap.TypeDefLibCache.PropDef;
+import com.triniforce.soap.TypeDefLibCacheTest.CRec;
 import com.triniforce.soap.testpkg_01.CChild1;
 import com.triniforce.soap.testpkg_01.CParent;
 import com.triniforce.soap.testpkg_02.CChild2;
@@ -636,6 +637,41 @@ public class ClassParserTest extends TFTestCase {
         cp.parse(O01.class, lib, "typeName-1");
         
     	
+    }
+    
+    static class CRecInner{
+    	private CRec rec;
+
+		public CRec getRec() {
+			return rec;
+		}
+
+		public void setRec(CRec rec) {
+			this.rec = rec;
+		}     	
+    }
+    
+    public static class CRec{
+    	private CRecInner recInn;
+
+		public CRecInner getRecInn() {
+			return recInn;
+		}
+
+		public void setRecInn(CRecInner recInn) {
+			this.recInn = recInn;
+		}
+    }
+    
+    public void testRecursionClasses() {
+        ClassParser cp = new ClassParser(ClassParserTest.class.getPackage(), Collections.emptyList());
+        TypeDefLibCache lib = new TypeDefLibCache(cp, Collections.EMPTY_LIST);
+        ClassDef res = cp.parse(CRec.class, lib, "typerec");
+
+        TypeDef cdInn = lib.get(CRecInner.class);
+        PropDef pinn = res.getProp("recInn");
+        
+        assertSame(cdInn, pinn.getType());
     }
     
     

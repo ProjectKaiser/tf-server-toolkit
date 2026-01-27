@@ -160,6 +160,18 @@ public class TypeDefLibCacheTest extends TFTestCase {
 		}
     }
     
+    public static class CRec{
+    	private CRec rec;
+
+		public CRec getRec() {
+			return rec;
+		}
+
+		public void setRec(CRec rec) {
+			this.rec = rec;
+		} 
+    }
+    
     public void testClassDefLib(){
         HashMap<Type, TypeDef> clss = new HashMap<Type, TypeDef>();
         ClassDefLib cLib = new TypeDefLibCache.ClassDefLib(m_parser, m_lib, clss, m_lib);        
@@ -181,6 +193,9 @@ public class TypeDefLibCacheTest extends TFTestCase {
         	
         	assertEquals(0, res.getProps().size());
 
+        }
+        {
+        	ClassDef rec = (ClassDef) cLib.add(CRec.class);
         }
     }
     
@@ -331,6 +346,19 @@ public class TypeDefLibCacheTest extends TFTestCase {
 	public void testUnsupportedType(){
     	m_lib.add(LinkedHashMap.class);
     }
+	
+	public static class ArrayInArray{
+		private List<ArrayInArray> arr;
+
+		public List<ArrayInArray> getArr() {
+			return arr;
+		}
+
+		public void setArr(List<ArrayInArray> arr) {
+			this.arr = arr;
+		}
+		
+	}
     
     public void testArrayDefLib() throws SecurityException, NoSuchMethodException{
     	
@@ -370,6 +398,9 @@ public class TypeDefLibCacheTest extends TFTestCase {
 	        
 	        assertEquals("arraYoFfloaT", m_lib.add(arraYoFfloaT.class).getName());
 	        assertEquals("ArrayOfFloat1", m_lib.add(float[].class).getName());
+	        
+	        ad = arrLib.add(ArrayInArray[].class);
+	        
     	}
         
         
@@ -409,4 +440,8 @@ public class TypeDefLibCacheTest extends TFTestCase {
     	m_lib.addExternalDef(C01.class, c1, false);    	
     	assertSame(c1, m_lib.get(C01.class));
     }
+    
+
+    
+
 }
