@@ -21,7 +21,7 @@ public class TFPooledConnection implements IPooledConnection{
 	
 
 	
-	interface IStackTraceInfo{
+	public interface IStackTraceInfo{
 		String getInfo();
 		
 	}
