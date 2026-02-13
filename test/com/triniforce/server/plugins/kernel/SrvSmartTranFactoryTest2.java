@@ -87,54 +87,60 @@ public class SrvSmartTranFactoryTest2 extends TFTestCase {
     }
     
 	boolean DOTHROW = false;
-    public void testPushError() {
-    		BasicDataSource ds = new BasicDataSource() {
-    			public Connection getConnection() throws SQLException {
-    				if(DOTHROW)
-    					throw new SQLException("testthrow");
-    				return getDataSource().getConnection();				
-    			};
-    		};
-    	TFPooledConnection pool = new TFPooledConnection(ds, 10);
-    	
-		ApiStack.pushInterface(IStackTraceInfo.class, new IStackTraceInfo() {
-			@Override
-			public String getInfo() {
-				return "t000";
-			}
-			
-		});
-		try {
+    public void testPushError() throws SQLException {
+    	Connection c = getDataSource().getConnection();
+    	try {
+	    		
+	    	BasicDataSource ds = new BasicDataSource() {
+	    		public Connection getConnection() throws SQLException {
+	    			if(DOTHROW)
+	    				throw new SQLException("testthrow");
+	    			return c;				
+	    		};
+	    	};
+	    	TFPooledConnection pool = new TFPooledConnection(ds, 10);
 	    	
-	    	Mockery context = new Mockery();
-	        final Connection con = context.mock(Connection.class);
-	        ISrvPrepSqlGetter getter = context.mock(ISrvPrepSqlGetter.class); 
-	        Api api = new Api();
-	        api.setIntfImplementor(IPooledConnection.class, pool);
-	        api.setIntfImplementor(ISrvPrepSqlGetter.class, getter);
-	        api.setIntfImplementor(ISrvSmartTranFactory.class, m_factory);
-	        ApiStack.pushApi(api);
-	
-	        try{
-	
-	    		m_factory.push();
-	        	DOTHROW = true;
-		    	try {
+			ApiStack.pushInterface(IStackTraceInfo.class, new IStackTraceInfo() {
+				@Override
+				public String getInfo() {
+					return "t000";
+				}
+				
+			});
+			try {
+		    	
+		    	Mockery context = new Mockery();
+		        final Connection con = context.mock(Connection.class);
+		        ISrvPrepSqlGetter getter = context.mock(ISrvPrepSqlGetter.class); 
+		        Api api = new Api();
+		        api.setIntfImplementor(IPooledConnection.class, pool);
+		        api.setIntfImplementor(ISrvPrepSqlGetter.class, getter);
+		        api.setIntfImplementor(ISrvSmartTranFactory.class, m_factory);
+		        ApiStack.pushApi(api);
+		
+		        try{
+		
 		    		m_factory.push();
-		    		fail();
-		    	}catch(EPoolConnectionError e) {
-		    		assertEquals(1, e.getPoints().size());
-		    		assertEquals("t000", e.getPoints().iterator().next().getInfo());
-		    	}
-		    	finally{
-		    		ApiStack.popApi();
-		    	}
-	        } finally{
-	            ApiStack.popApi();
-	        }
-		}finally{
-			ApiStack.popInterface(1);
-		}
+		        	DOTHROW = true;
+			    	try {
+			    		m_factory.push();
+			    		fail();
+			    	}catch(EPoolConnectionError e) {
+			    		assertEquals(1, e.getPoints().size());
+			    		assertEquals("t000", e.getPoints().iterator().next().getInfo());
+			    	}
+			    	finally{
+			    		ApiStack.popApi();
+			    	}
+		        } finally{
+		            ApiStack.popApi();
+		        }
+			}finally{
+				ApiStack.popInterface(1);
+			}
+    	}finally {
+    		c.close();
+    	}
     } 
 
 }
