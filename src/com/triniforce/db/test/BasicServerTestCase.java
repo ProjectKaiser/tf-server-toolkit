@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -166,6 +167,11 @@ public static class DPPProcPlugin extends PKPlugin{
 		public String getInfo() {
 			// TODO Auto-generated method stub
 			return null;
+		}
+
+		@Override
+		public Collection<StackTraceRec> getTakenConnectionPoints() {
+			return Collections.emptyList();
 		}
     }
     

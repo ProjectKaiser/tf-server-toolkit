@@ -8,9 +8,11 @@ package com.triniforce.server.plugins.kernel;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.triniforce.server.srvapi.IPooledConnection;
+import com.triniforce.server.srvapi.IPooledConnection.StackTraceRec;
 import com.triniforce.server.srvapi.ISrvPrepSqlGetter;
 import com.triniforce.server.srvapi.ISrvSmartTran;
 import com.triniforce.server.srvapi.ISrvSmartTranFactory;
@@ -20,6 +22,22 @@ import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.ApiStack;
 
 public class SrvSmartTranFactory implements ISrvSmartTranFactory {
+	
+	public static class EPoolConnectionError extends RuntimeException {
+		private Collection<StackTraceRec> m_points;
+
+		public EPoolConnectionError(SQLException e, String info, Collection<StackTraceRec> takenConnectionPoints) {
+			super(info, e);
+			m_points = takenConnectionPoints;
+		}
+		
+		public Collection<StackTraceRec> getPoints(){
+			return m_points;
+		}
+
+		private static final long serialVersionUID = 943914984027051866L;
+		
+	}
 
     private List<ITranExtender> m_outterExtenders = new ArrayList<ITranExtender>();
     private List<ITranExtender> m_innerExtenders = new ArrayList<ITranExtender>();
@@ -58,7 +76,7 @@ public class SrvSmartTranFactory implements ISrvSmartTranFactory {
             ApiStack.pushApi(api);
             api.setIntfImplementor(ISrvSmartTran.class, new SrvSmartTran(con, sqlGetter)); 
         } catch (SQLException e) {
-        	ApiAlgs.rethrowException(pool.getInfo(), e);
+        	throw new EPoolConnectionError(e, pool.getInfo(), pool.getTakenConnectionPoints());        	
         }
     }
 

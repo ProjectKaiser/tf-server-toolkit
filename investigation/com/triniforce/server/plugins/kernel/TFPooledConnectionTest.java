@@ -7,8 +7,14 @@ package com.triniforce.server.plugins.kernel;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
+
+import org.apache.commons.dbcp2.BasicDataSource;
 
 import com.triniforce.db.test.TFTestCase;
+import com.triniforce.server.plugins.kernel.TFPooledConnection.IStackTraceInfo;
+import com.triniforce.server.srvapi.IPooledConnection.StackTraceRec;
+import com.triniforce.utils.ApiStack;
 
 public class TFPooledConnectionTest extends TFTestCase {
 
@@ -54,5 +60,39 @@ public class TFPooledConnectionTest extends TFTestCase {
 		t2.join();
 		
 		con1.close();
+	}
+	
+	boolean DOTHROW = false;
+	public void testGetConnection() throws SQLException {
+		BasicDataSource ds = new BasicDataSource() {
+			public Connection getConnection() throws SQLException {
+				if(DOTHROW)
+					throw new SQLException("testthrow");
+				return getDataSource().getConnection();				
+			};
+		};
+		TFPooledConnection pool = new TFPooledConnection(ds, 10);
+		ApiStack.pushInterface(IStackTraceInfo.class, new IStackTraceInfo() {
+
+			@Override
+			public String getInfo() {
+				return "TEST_INFO0044";
+			}
+			
+		});
+		try {
+			Connection c = pool.getPooledConnection();
+			try{
+				Collection<StackTraceRec> res = pool.getTakenConnectionPoints();
+				assertEquals(1, res.size());
+				StackTraceRec v0 = res.iterator().next();
+				assertEquals("TEST_INFO0044", v0.getInfo());
+			}finally {
+				pool.returnConnection(c);
+			}
+		}finally {
+			ApiStack.popInterface(1);
+		}
+			
 	}
 }

@@ -7,6 +7,7 @@ package com.triniforce.server.plugins.kernel;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,10 +15,18 @@ import org.apache.commons.dbcp2.BasicDataSource;
 
 import com.triniforce.server.srvapi.IPooledConnection;
 import com.triniforce.utils.ApiAlgs;
+import com.triniforce.utils.ApiStack;
 
 public class TFPooledConnection implements IPooledConnection{
+	
 
-    Map<Connection, StackTraceElement[]> m_conStack = new HashMap<Connection, StackTraceElement[]>();
+	
+	interface IStackTraceInfo{
+		String getInfo();
+		
+	}
+
+    Map<Connection, IPooledConnection.StackTraceRec> m_conStack = new HashMap<Connection, IPooledConnection.StackTraceRec>();
 
     public BasicDataSource m_ds = null;
 
@@ -27,11 +36,13 @@ public class TFPooledConnection implements IPooledConnection{
     }
 
     public Connection getPooledConnection() throws SQLException {
+    	IStackTraceInfo traceInfo = ApiStack.queryInterface(IStackTraceInfo.class);
+    	String info = null == traceInfo ? "" : traceInfo.getInfo();
     	synchronized (this){
 	        if( m_ds.getNumActive()  >= m_ds.getMaxTotal() - 2 ){
-	            for (StackTraceElement[] trace : m_conStack.values()) {
+	            for (IPooledConnection.StackTraceRec traceRec : m_conStack.values()) {
 	                String s = "Pooled Connection Exhausted: ";
-	                for (StackTraceElement tr : trace) {
+	                for (StackTraceElement tr : traceRec.getTrace()) {
 	                    s = s + tr.toString() + "\n";
 	                }
 	                ApiAlgs.getLog(this).info(s);
@@ -41,7 +52,7 @@ public class TFPooledConnection implements IPooledConnection{
         Connection con = m_ds.getConnection();
         con.setAutoCommit(false);
         synchronized (this) {
-        	m_conStack.put(con, Thread.currentThread().getStackTrace());            	
+        	m_conStack.put(con, new IPooledConnection.StackTraceRec(info, Thread.currentThread().getStackTrace()));            	
 		}
         return con;
     }
@@ -79,10 +90,10 @@ public class TFPooledConnection implements IPooledConnection{
 		
 		String s = "";
 		int i = 0;
-		for (StackTraceElement[] trace : m_conStack.values()) {
+		for (IPooledConnection.StackTraceRec traceRec : m_conStack.values()) {
             i =i + 1;
             s = s + "---- " + i + " ----" + "\n";
-            for (StackTraceElement tr : trace) {
+            for (StackTraceElement tr : traceRec.getTrace()) {
                 s = s + tr.toString() + "\n";
             }
         }
@@ -92,6 +103,11 @@ public class TFPooledConnection implements IPooledConnection{
             "Total in conStack: " + i +  "\n" + s + "----" + "\n"; 
 		
 		return s;
+	}
+
+	@Override
+	public Collection<StackTraceRec> getTakenConnectionPoints() {
+		return m_conStack.values();
 	}	
     
 }

@@ -7,6 +7,7 @@ package com.triniforce.server.plugins.kernel;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 
 import com.triniforce.db.ddl.TableDef;
 import com.triniforce.db.ddl.TableDef.EDBObjectException;
@@ -73,6 +74,12 @@ public class ServerTest extends DBTestCase {
 
 		@Override
 		public String getInfo() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Collection<StackTraceRec> getTakenConnectionPoints() {
 			// TODO Auto-generated method stub
 			return null;
 		}        
