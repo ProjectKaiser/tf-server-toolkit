@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.dbcp2.BasicDataSource;
+
 import com.triniforce.server.srvapi.IPooledConnection;
 import com.triniforce.server.srvapi.IPooledConnection.StackTraceRec;
 import com.triniforce.server.srvapi.ISrvPrepSqlGetter;
@@ -25,10 +27,15 @@ public class SrvSmartTranFactory implements ISrvSmartTranFactory {
 	
 	public static class EPoolConnectionError extends RuntimeException {
 		private Collection<StackTraceRec> m_points;
+		int MaxActive, NumActive;
+		long MaxWaitMillis;
 
-		public EPoolConnectionError(SQLException e, String info, Collection<StackTraceRec> takenConnectionPoints) {
+		public EPoolConnectionError(SQLException e, String info, Collection<StackTraceRec> takenConnectionPoints, int MaxActive, int NumActive, long MaxWaitMillis) {
 			super(info, e);
 			m_points = takenConnectionPoints;
+			this.MaxActive = MaxActive;
+			this.NumActive = NumActive;
+			this.MaxWaitMillis = MaxWaitMillis;
 		}
 		
 		public Collection<StackTraceRec> getPoints(){
@@ -37,6 +44,17 @@ public class SrvSmartTranFactory implements ISrvSmartTranFactory {
 
 		private static final long serialVersionUID = 943914984027051866L;
 		
+		public int getMaxActive() {
+			return MaxActive;
+		}
+		
+		public int getNumActive() {
+			return NumActive;
+		}
+		
+		public long getMaxWaitMillis() {
+			return MaxWaitMillis;
+		}
 	}
 
     private List<ITranExtender> m_outterExtenders = new ArrayList<ITranExtender>();
@@ -76,7 +94,18 @@ public class SrvSmartTranFactory implements ISrvSmartTranFactory {
             ApiStack.pushApi(api);
             api.setIntfImplementor(ISrvSmartTran.class, new SrvSmartTran(con, sqlGetter)); 
         } catch (SQLException e) {
-        	throw new EPoolConnectionError(e, pool.getInfo(), pool.getTakenConnectionPoints());        	
+        	int MaxActive=0;
+        	int NumActive=0; 
+        	long MaxWaitMillis=0;
+        	if(pool instanceof TFPooledConnection) {
+        		BasicDataSource ds = ((TFPooledConnection)pool).m_ds;
+        		MaxActive = ds.getMaxTotal(); 
+        		NumActive = ds.getNumActive();
+        		MaxWaitMillis = ds.getMaxWaitMillis();
+        		
+        	}
+        	
+        	throw new EPoolConnectionError(e, pool.getInfo(), pool.getTakenConnectionPoints(), MaxActive, NumActive, MaxWaitMillis);        	
         }
     }
 
