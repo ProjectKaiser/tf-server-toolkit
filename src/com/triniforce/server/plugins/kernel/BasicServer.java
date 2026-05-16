@@ -45,8 +45,12 @@ import com.triniforce.dbo.DBOUpgProcedure;
 import com.triniforce.dbo.IDBObject;
 import com.triniforce.dbo.PKEPDBOActualizers;
 import com.triniforce.dbo.PKEPDBObjects;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
 import com.triniforce.extensions.IPKExtension;
 import com.triniforce.extensions.IPKExtensionPoint;
+import com.triniforce.server.plugins.kernel.ep.external_classes.ClassesFolder;
+import com.triniforce.server.plugins.kernel.ep.external_classes.PKEPExternalClasses;
 import com.triniforce.extensions.PKPlugin;
 import com.triniforce.extensions.PKRootExtensionPoint;
 import com.triniforce.server.plugins.kernel.PeriodicalTasksExecutor.BasicPeriodicalTask;
@@ -1230,6 +1234,42 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 			finit();
 		}catch(Throwable t){
 			ApiAlgs.logError(this, "Finit server error", t);
+		}
+		try{
+			closeExternalClassLoaders();
+		}catch(Throwable t){
+			ApiAlgs.logError(this, "Close external classloaders error", t);
+		}
+		awaitGC(2000);
+	}
+
+	private static void awaitGC(long timeoutMs){
+		WeakReference<Object> ref = new WeakReference<>(new Object());
+		long deadline = System.currentTimeMillis() + timeoutMs;
+		while(ref.get() != null && System.currentTimeMillis() < deadline){
+			System.gc();
+			try{
+				Thread.sleep(10);
+			}catch(InterruptedException e){
+				Thread.currentThread().interrupt();
+				break;
+			}
+		}
+		System.runFinalization();
+	}
+
+	private void closeExternalClassLoaders(){
+		PKEPExternalClasses ep = (PKEPExternalClasses) getExtensionPoint(PKEPExternalClasses.class);
+		if(ep == null) return;
+		for(IPKExtension ext : ep.getExtensions().values()){
+			Object instance = ext.getInstance();
+			if(instance instanceof ClassesFolder){
+				try{
+					((ClassesFolder) instance).close();
+				}catch(IOException e){
+					ApiAlgs.logError(this, "Error closing ClassesFolder", e);
+				}
+			}
 		}
 	}
 

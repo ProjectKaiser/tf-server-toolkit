@@ -5,7 +5,9 @@
  */ 
 package com.triniforce.extensions;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -19,7 +21,7 @@ import com.triniforce.server.srvapi.IPlugin;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.TFUtils;
 
-public class PluginsLoader {
+public class PluginsLoader implements Closeable {
 	   
     public static String trimVersion(String name){
         Pattern pattern = Pattern.compile("-\\d.*");
@@ -34,6 +36,8 @@ public class PluginsLoader {
     private final File m_folder;
     
     private ClassLoader m_parentClassLoader;
+    
+    private URLClassLoader m_classLoader;
     
     public static final URLClassLoader filteredUrlClassLoader(Class cls, String[] prefixes) {
 		URLClassLoader cl = (URLClassLoader) cls.getClassLoader();
@@ -121,11 +125,10 @@ public class PluginsLoader {
             }            
         }
         
-		@SuppressWarnings("resource")
-		URLClassLoader ucl = new URLClassLoader(urls.toArray(new URL[urls.size()]), m_parentClassLoader);
+		m_classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), m_parentClassLoader);
         for(String mainClass: mainClasses){
             try {
-                Class cls = ucl.loadClass(mainClass);
+                Class cls = m_classLoader.loadClass(mainClass);
                 res.add(cls);
             } catch (Exception e) {
                 ApiAlgs.rethrowException(e);
@@ -134,6 +137,13 @@ public class PluginsLoader {
         return res;        
     }
     
+    @Override
+    public void close() throws IOException {
+        if (m_classLoader != null) {
+            m_classLoader.close();
+            m_classLoader = null;
+        }
+    }
     
     public List<IPlugin> loadPlugins(){
         List<IPlugin> res = new ArrayList<IPlugin>();
