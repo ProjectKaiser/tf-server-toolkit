@@ -39,7 +39,16 @@ public abstract class PackagesFolder extends ClassesFolder{
     
     @Override
     synchronized Collection<Class> loadClasses(){
-        
+
+        for (PluginsLoader pl : m_loaders) {
+            try {
+                pl.close();
+            } catch (IOException e) {
+                ApiAlgs.getLog(this).error("Error closing previous PluginsLoader", e);
+            }
+        }
+        m_loaders.clear();
+
         Collection<Class> res = new ArrayList<Class>();
         File parent = getFolder();
         if(null == parent){

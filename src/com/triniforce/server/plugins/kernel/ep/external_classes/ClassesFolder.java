@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import com.triniforce.extensions.PluginsLoader;
+import com.triniforce.utils.ApiAlgs;
 
 /**
  * Location folder where jars should be loaded from
@@ -27,6 +28,13 @@ public abstract class ClassesFolder implements Closeable{
     public abstract File getFolder();
     
     synchronized Collection<Class> loadClasses(){
+        if (m_loader != null) {
+            try {
+                m_loader.close();
+            } catch (IOException e) {
+                ApiAlgs.getLog(this).error("Error closing previous PluginsLoader", e);
+            }
+        }
         m_loader = new PluginsLoader(getFolder());
         return m_loader.loadClasses();
     }

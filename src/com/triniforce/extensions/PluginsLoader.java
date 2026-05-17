@@ -125,6 +125,13 @@ public class PluginsLoader implements Closeable {
             }            
         }
         
+		if (m_classLoader != null) {
+			try {
+				m_classLoader.close();
+			} catch (IOException e) {
+				ApiAlgs.getLog(this).error("Error closing previous classloader", e);
+			}
+		}
 		m_classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), m_parentClassLoader);
         for(String mainClass: mainClasses){
             try {
