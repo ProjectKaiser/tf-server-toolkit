@@ -107,7 +107,7 @@ public class PluginsLoader implements Closeable {
     }
     
     
-    public Collection<Class> loadClasses(){
+    public synchronized Collection<Class> loadClasses(){
         List<Class> res = new ArrayList<Class>();
         
         List<URL> urls = new ArrayList<URL>();
@@ -145,7 +145,7 @@ public class PluginsLoader implements Closeable {
     }
     
     @Override
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         if (m_classLoader != null) {
             m_classLoader.close();
             m_classLoader = null;
