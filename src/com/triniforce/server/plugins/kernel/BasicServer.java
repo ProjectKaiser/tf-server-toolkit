@@ -1243,7 +1243,13 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 		awaitGC(2000);
 	}
 
-	private static void awaitGC(long timeoutMs){
+	// Native libraries loaded via System.loadLibrary are bound to the ClassLoader
+	// that loaded them and are unloaded only when that ClassLoader is garbage
+	// collected. URLClassLoader.close() releases JAR file handles but does not
+	// unload native libraries; on Windows this leaves the DLL files locked and
+	// blocks updates of the driver folder. The loop forces GC until a WeakReference
+	// sentinel is cleared, proving a collection actually ran.
+	private void awaitGC(long timeoutMs){
 		WeakReference<Object> ref = new WeakReference<>(new Object());
 		long deadline = System.currentTimeMillis() + timeoutMs;
 		while(ref.get() != null && System.currentTimeMillis() < deadline){
@@ -1254,6 +1260,10 @@ public class BasicServer extends PKRootExtensionPoint implements IBasicServer, I
 				Thread.currentThread().interrupt();
 				break;
 			}
+		}
+		if(ref.get() != null){
+			ApiAlgs.getLog(this).warn("awaitGC: GC did not run within " + timeoutMs
+					+ "ms; native libraries may remain loaded (possible leaked references to external classloaders)");
 		}
 		System.runFinalization();
 	}
