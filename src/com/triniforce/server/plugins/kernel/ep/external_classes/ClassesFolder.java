@@ -5,27 +5,38 @@
  */ 
 package com.triniforce.server.plugins.kernel.ep.external_classes;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import com.triniforce.extensions.PluginsLoader;
+import com.triniforce.utils.ApiAlgs;
 
 /**
  * Location folder where jars should be loaded from
  */
-public abstract class ClassesFolder{
+public abstract class ClassesFolder implements Closeable{
     
     public ClassesFolder() {
     }
     
     Collection<Class> m_classes = null;
+    PluginsLoader m_loader = null;
 
     public abstract File getFolder();
     
     synchronized Collection<Class> loadClasses(){
-        PluginsLoader pl =  new PluginsLoader(getFolder());
-        return pl.loadClasses();
+        if (m_loader != null) {
+            try {
+                m_loader.close();
+            } catch (IOException e) {
+                ApiAlgs.getLog(this).error("Error closing previous PluginsLoader", e);
+            }
+        }
+        m_loader = new PluginsLoader(getFolder());
+        return m_loader.loadClasses();
     }
     
     Collection<Class> listClassesOfType(Class superClass){
@@ -43,6 +54,16 @@ public abstract class ClassesFolder{
             }
         }
         return res;
+    }
+
+
+    @Override
+    public synchronized void close() throws IOException {
+        if (m_loader != null) {
+            m_loader.close();
+            m_loader = null;
+        }
+        m_classes = null;
     }
 
 }

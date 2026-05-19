@@ -6,12 +6,49 @@
 package com.triniforce.server.plugins.kernel.ep.external_classes;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
 import com.triniforce.db.test.TFTestCase;
 
 public class PackagesFolderTest extends TFTestCase {
+
+    public void testClassLoaderClosedAfterClose() throws Exception {
+        final File t = new File(getTempTestFolder(), "testCLClose");
+        t.mkdirs();
+        final File p1 = new File(t, "class1-21.1.923");
+        p1.mkdirs();
+        copyTestResources(new String[] { "class1.jar", "class3_1.jar" }, p1);
+
+        PackagesFolder pf = new PackagesFolder() {
+            @Override
+            public File getFolder() {
+                return t;
+            }
+        };
+
+        Collection<Class> classes = pf.listClassesOfType(Object.class);
+        assertEquals(1, classes.size());
+        Class c = classes.iterator().next();
+        ClassLoader cl = c.getClassLoader();
+        WeakReference<ClassLoader> ref = new WeakReference<>(cl);
+
+        // Release all strong references to the classloader
+        classes = null;
+        c = null;
+        cl = null;
+        pf.close();
+        pf = null;
+
+        // Verify the classloader is GC'd
+        long deadline = System.currentTimeMillis() + 5000;
+        while (ref.get() != null && System.currentTimeMillis() < deadline) {
+            System.gc();
+            Thread.sleep(10);
+        }
+        assertNull("ClassLoader should have been garbage collected after close()", ref.get());
+    }
 
     @Override
     public void test() throws Exception {
