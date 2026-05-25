@@ -26,6 +26,7 @@ import com.triniforce.db.test.TFTestCase;
 import com.triniforce.soap.InterfaceDescriptionGenerator.JsonResult;
 import com.triniforce.soap.InterfaceDescriptionGenerator.SOAPDocument;
 import com.triniforce.soap.InterfaceOperationDescription.NamedArg;
+import com.triniforce.soap.JSONSerializerTest.Service001.CParams;
 import com.triniforce.soap.JSONSerializerTest.Service001.ObjWEnum;
 import com.triniforce.soap.JSONSerializerTest.Service001.ObjWEnum2;
 import com.triniforce.soap.JSONSerializerTest.Service001.Outter01;
@@ -159,6 +160,19 @@ public class JSONSerializerTest extends TFTestCase {
 		}
 
 		public void method_list(List<C1> l){}
+		
+		public  static class CParams{
+			private int params;
+
+			public int getParams() {
+				return params;
+			}
+
+			public void setParams(int params) {
+				this.params = params;
+			}
+		}
+		public void method_params(CParams v) {}
 	}
 	
 	static class Prop01{
@@ -448,8 +462,15 @@ public class JSONSerializerTest extends TFTestCase {
 		String str = "{\"jsonrpc\":\"2.0\",\"method\":\"method_list\",\"params\":[[{\"param\":1},{\"param\":2}]]}";
 		List l1 = (List) srz.deserialize(desc, source(str)).m_args[0];
 		assertNotNull(l1);
-
-		
+	}
+	
+	public void testDeserializeParams() throws UnsupportedEncodingException, IOException, ParseException {
+		JSONSerializer srz = new JSONSerializer();
+		InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
+		InterfaceDescription desc = gen.parse(null, Service001.class);
+		String str = "{\"jsonrpc\":\"2.0\",\"method\":\"method_params\",\"params\":[{\"params\":532632}]}";
+		com.triniforce.soap.JSONSerializerTest.Service001.CParams res= (CParams) srz.deserialize(desc, source(str)).m_args[0];
+		assertEquals(532632, res.getParams());
 	}
 
 	public static InputStream source(String string) throws UnsupportedEncodingException {

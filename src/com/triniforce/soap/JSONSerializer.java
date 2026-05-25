@@ -340,7 +340,7 @@ public class JSONSerializer {
 		public boolean startObjectEntry(String arg0) throws ParseException,
 				IOException {
 			if(null != m_method){
-				if(PARAMS.m_name.equals(arg0)){
+				if(PARAMS.m_name.equals(arg0) && m_stk.size()==1){
 					m_handler.startElement(m_method, false, null);
 					m_state = State.Arguments;
 					m_argNames = getArgumentNames(m_desc, m_method);
@@ -412,7 +412,7 @@ public class JSONSerializer {
 					}
 					else{
 						m_handler.endElement();
-						if(tag.equals(PARAMS)){
+						if(tag.equals(PARAMS) && m_stk.size()==1){
 							m_state = State.Finit;
 						}
 					}
