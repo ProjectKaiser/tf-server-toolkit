@@ -427,7 +427,7 @@ public class JSONSerializer {
 		public boolean startArray() throws ParseException, IOException {
 			Element top = m_stk.peek();
 			String arrName = "value";
-			if(top.equals(PARAMS))
+			if(top.equals(PARAMS) && m_stk.size()==2)
 				arrName = "arg";
 			
 			startStackElement(new Element(Element.Type.Array,arrName));

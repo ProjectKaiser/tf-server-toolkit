@@ -162,17 +162,17 @@ public class JSONSerializerTest extends TFTestCase {
 		public void method_list(List<C1> l){}
 		
 		public  static class CParams{
-			private int params;
+			private Map<String, String> params;
 
-			public int getParams() {
+			public Map<String, String> getParams() {
 				return params;
 			}
 
-			public void setParams(int params) {
+			public void setParams(Map<String, String> params) {
 				this.params = params;
 			}
 		}
-		public void method_params(CParams v) {}
+		public void method_params(CParams v, int v2) {}
 	}
 	
 	static class Prop01{
@@ -468,9 +468,15 @@ public class JSONSerializerTest extends TFTestCase {
 		JSONSerializer srz = new JSONSerializer();
 		InterfaceDescriptionGenerator gen = new InterfaceDescriptionGenerator();
 		InterfaceDescription desc = gen.parse(null, Service001.class);
-		String str = "{\"jsonrpc\":\"2.0\",\"method\":\"method_params\",\"params\":[{\"params\":532632}]}";
-		com.triniforce.soap.JSONSerializerTest.Service001.CParams res= (CParams) srz.deserialize(desc, source(str)).m_args[0];
-		assertEquals(532632, res.getParams());
+		
+		String str = "{\"jsonrpc\":\"2.0\",\"method\":\"method_params\",\"params\":[{\"params\":[{\"key\":\"2321\", \"value\":\"\"}, {\"key\":\"2322\", \"value\":\"333\"}]}, 1251]}";
+		SOAPDocument req = srz.deserialize(desc, source(str));
+		assertEquals(1251, req.m_args[1]);
+		com.triniforce.soap.JSONSerializerTest.Service001.CParams res= (CParams) req.m_args[0];
+		HashMap<String, String> resm = new HashMap<String, String>();
+		resm.put("2321", "");
+		resm.put("2322", "333");
+		assertEquals(resm, res.getParams());
 	}
 
 	public static InputStream source(String string) throws UnsupportedEncodingException {
