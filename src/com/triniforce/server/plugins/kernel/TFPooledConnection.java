@@ -7,6 +7,7 @@ package com.triniforce.server.plugins.kernel;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,27 +88,29 @@ public class TFPooledConnection implements IPooledConnection{
 	
 	@Override
 	public String getInfo() {
-		
-		String s = "";
-		int i = 0;
-		for (IPooledConnection.StackTraceRec traceRec : m_conStack.values()) {
-            i =i + 1;
+        Collection<StackTraceRec> takenConnectionPoints = getTakenConnectionPoints();
+        String s = "";
+        int i = 0;
+        for (IPooledConnection.StackTraceRec traceRec : takenConnectionPoints) {
+            i = i + 1;
             s = s + "---- " + i + " ----" + "\n";
             for (StackTraceElement tr : traceRec.getTrace()) {
                 s = s + tr.toString() + "\n";
             }
         }
-		s = "MaxActive = " + m_ds.getMaxTotal() + "\n" + 
+        s = "MaxActive = " + m_ds.getMaxTotal() + "\n" +
             "NumActive = " + m_ds.getNumActive() + "\n" +
-            "MaxWaitMillis = "   + m_ds.getMaxWaitMillis()   + "\n" +	
-            "Total in conStack: " + i +  "\n" + s + "----" + "\n"; 
-		
-		return s;
+            "MaxWaitMillis = "   + m_ds.getMaxWaitMillis()   + "\n" +
+            "Total in conStack: " + i +  "\n" + s + "----" + "\n";
+
+        return s;
 	}
 
 	@Override
 	public Collection<StackTraceRec> getTakenConnectionPoints() {
-		return m_conStack.values();
-	}	
+        synchronized (this) {
+            return new ArrayList<StackTraceRec>(m_conStack.values());
+        }
+	}
     
 }
