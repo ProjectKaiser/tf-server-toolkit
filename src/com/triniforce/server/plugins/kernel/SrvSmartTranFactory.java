@@ -63,19 +63,20 @@ public class SrvSmartTranFactory implements ISrvSmartTranFactory {
 	public void pop() {
         try {
             ISrvSmartTran trn = SrvApiAlgs2.getIServerTran();
-
-            trn.close();
-            
             IPooledConnection pool = ApiStack.getApi().getIntfImplementor(
                     IPooledConnection.class);
             Connection con = ApiStack.getApi().getIntfImplementor(
                     Connection.class);
             try {
-                pool.returnConnection(con);
-            } catch (Throwable t) {
-                ApiAlgs.getLog(this).error("Error returning connection", t);
+                trn.close();
+            } finally {
+                try {
+                    pool.returnConnection(con);
+                } catch (Throwable t) {
+                    ApiAlgs.getLog(this).error("Error returning connection", t);
+                }
             }
-            
+
         } finally {
             ApiStack.popApi();
         }
