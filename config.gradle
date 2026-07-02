@@ -1,5 +1,5 @@
 adjustProperty('untillGithubRegistryUsername', null)
-adjustProperty('untillGithubRegistryToken', null, true)
+adjustProperty('untillGithubRegistryToken', null)
 
 
   /////////////////////
@@ -8,8 +8,8 @@ adjustProperty('untillGithubRegistryToken', null, true)
 
 void adjustProperty(String propertyName, String defaultValue, boolean required = false) {
 	if (!hasProperty(propertyName)) {
-		def sysPropName = propertyName.replaceAll('([A-Z])([A-Z][a-z])|([a-z0-9])([A-Z])', '$1$3.$2$4').toLowerCase()
-		def sysEnvName = propertyName.replaceAll('([A-Z])([A-Z][a-z])|([a-z0-9])([A-Z])', '$1$3_$2$4').toUpperCase()
+		def sysPropName = propertyName.replaceAll('([A-Z])([A-Z][a-z])|([a-z0-9])([A-Z])', '$1$3.$2$4').toLowerCase(Locale.ROOT)
+		def sysEnvName = propertyName.replaceAll('([A-Z])([A-Z][a-z])|([a-z0-9])([A-Z])', '$1$3_$2$4').toUpperCase(Locale.ROOT)
 		def value = System.properties[sysPropName]
 		if (value == null) value = System.env[sysEnvName]
 		if (value == null && required)
