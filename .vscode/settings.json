@@ -2,5 +2,13 @@
     // Ask before reimporting Gradle/Java project settings when build files change.
     "java.configuration.updateBuildConfiguration": "interactive",
     // Project-local Eclipse/JDT compiler preferences for VS Code Java diagnostics.
-    "java.settings.url": ".vscode/org.eclipse.jdt.core.prefs"
+    "java.settings.url": ".vscode/org.eclipse.jdt.core.prefs",
+    "java.test.config": {
+        // We have no idea how it is used, but we beleive it is required
+        // https://code.visualstudio.com/docs/java/java-testing#_customize-test-configurations
+        "name": "myTestConfiguration",
+        "env": {
+            "TF_SERVER_TOOLKIT_TEST_FOLDER": "${workspaceFolder}/build/test"
+        }
+    }
 }
