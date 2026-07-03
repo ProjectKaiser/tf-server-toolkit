@@ -2,18 +2,26 @@ package com.triniforce.server.plugins.kernel.ext.api;
 
 import javax.mail.Session;
 
+import com.triniforce.db.test.BasicServerTestCase;
+import com.triniforce.extensions.PKPlugin;
 import com.triniforce.server.plugins.kernel.ext.api.IMailer.EMailerConfigurationError;
 import com.triniforce.server.plugins.kernel.ext.api.Mailer.MailData;
-import com.triniforce.server.plugins.kernel.services.ServicesTestCase;
+import com.triniforce.server.plugins.kernel.services.EP_ServiceManager;
+import com.triniforce.server.plugins.kernel.services.PKEPServices;
+import com.triniforce.server.plugins.kernel.services.ThrdWatcher;
+import com.triniforce.server.srvapi.IBasicServer.Mode;
 import com.triniforce.server.srvapi.IDbQueue;
 import com.triniforce.server.srvapi.IDbQueueFactory;
 import com.triniforce.server.srvapi.INamedDbId;
+import com.triniforce.server.srvapi.IThrdWatcherRegistrator;
 import com.triniforce.utils.Api;
 import com.triniforce.utils.ApiStack;
 
 
-public class MailerTest extends ServicesTestCase {
-	
+public class MailerTest extends BasicServerTestCase {
+
+	static final long SM_ID = 900L;
+
 	//It is necessary to set your own e-mail addresses, user names, passwords, hosts and ports for testing
 		
 	private static final String TO = "Belaynsky@rambler.ru";
@@ -30,8 +38,34 @@ public class MailerTest extends ServicesTestCase {
 	private static final String SMTP_HOST2 = "smtp.gmail.com";
 	private static final String SMTP_USER2 = "BelyanskyAA";
 	private static final String SMTP_PASSWORD2 = "****";
-		
-	
+
+	@Override
+	protected void setUp() throws Exception {
+		addPlugin(new PKPlugin() {
+			@Override
+			public void doRegistration() {
+				PKEPServices ss = (PKEPServices) getRootExtensionPoint().getExtensionPoint(PKEPServices.class);
+				EP_ServiceManager sm = new EP_ServiceManager(SM_ID);
+				ss.putExtension(sm.getName(), sm);
+				ss.putExtension(ThrdWatcher.class);
+			}
+
+			@Override
+			public void doExtensionPointsRegistration() {}
+		});
+		super.setUp();
+		getServer().enterMode(Mode.Running);
+
+		IThrdWatcherRegistrator twr = ApiStack.getInterface(IThrdWatcherRegistrator.class);
+		twr.registerThread(Thread.currentThread(), null);
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		getServer().leaveMode();
+		super.tearDown();
+	}
+
 	public static class MailerSettingsTest implements IMailerSettings {
 		
 		private String m_smtpHost;
