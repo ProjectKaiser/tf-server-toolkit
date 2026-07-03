@@ -1,0 +1,4 @@
+{
+    // Ask before reimporting Gradle/Java project settings when build files change.
+    "java.configuration.updateBuildConfiguration": "interactive"
+}

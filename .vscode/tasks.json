@@ -1,0 +1,39 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Gradle: test current class",
+			"type": "process",
+			"command": "${workspaceFolder}/gradlew.bat",
+			"args": [
+				"test",
+				"--tests",
+				"*.${fileBasenameNoExtension}",
+			],
+			"group": "test",
+			"problemMatcher": "$gradle",
+			"options": {
+				"env": {
+					"JAVA_HOME": "${env:JDK17}"
+				}
+			}
+		},
+		{
+			"label": "Gradle: test selected pattern",
+			"type": "process",
+			"command": "${workspaceFolder}/gradlew.bat",
+			"args": [
+				"test",
+				"--tests",
+				"*${selectedText}",
+			],
+			"group": "test",
+			"problemMatcher": "$gradle",
+			"options": {
+				"env": {
+					"JAVA_HOME": "${env:JDK17}"
+				}
+			}
+		}
+	]
+}
