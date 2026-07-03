@@ -167,7 +167,15 @@ java {
 	withSourcesJar()
 }
 
+task changeVersion {
+	doFirst {
+		project.version = getNextVersion(requestLastRegistryVersion())
+		println 'version: ' + project.version
+	}
+}
+
 publish.dependsOn check
+publish.dependsOn changeVersion
 
 publishing{
 
@@ -190,10 +198,6 @@ publishing{
 			from(components.java)
 		}
 	}
-}
-
-generatePomFileForGprPublication.doFirst {
-	publishing.publications.gpr.version = getNextVersion(requestLastRegistryVersion())
 }
 
 //task jar_lib(type: Copy, dependsOn:[jar]){
