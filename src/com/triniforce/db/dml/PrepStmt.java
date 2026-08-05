@@ -12,7 +12,7 @@ import com.triniforce.db.ddl.TableDef.FieldDef;
 import com.triniforce.utils.ApiAlgs;
 import com.triniforce.utils.IProfilerStack.PSI;
 
-public class PrepStmt extends Stmt {
+public class PrepStmt extends Stmt implements AutoCloseable {
     private String m_profItem;
     private final String m_sql;
 
