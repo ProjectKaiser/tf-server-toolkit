@@ -162,7 +162,21 @@ public class SmartTranTest extends DBTestCase {
             fail();
         } catch(RuntimeException e){}
     }
-    
+
+    public void testPrepStmtAutoCloseable() throws Exception {
+        PrepStmt ps = m_tr.prepareStatement("insert into "+m_tabName+" (i) values (?)");
+        assertEquals(1, m_tr.countStmt());
+
+        try (PrepStmt autoClosed = ps) {
+            autoClosed.setLong(1, 6352);
+            autoClosed.execute();
+            assertFalse(autoClosed.isClosed());
+        }
+
+        assertTrue(ps.isClosed());
+        assertEquals(0, m_tr.countStmt());
+    }
+
     public void testDoNotCommit() throws Exception{
         Stmt st = m_tr.getStatement();
         st.execute("insert into "+m_tabName+" (i) values (6352)", "test");
